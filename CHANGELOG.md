@@ -2,6 +2,35 @@
 
 All notable public changes are recorded here.
 
+## Unreleased
+
+### Client hooks: the broker opens the turn registration right after admission
+
+- **Faster turns.** The model's broker now opens the turn registration over
+  its already admitted connection, before it returns the admission. The
+  owning hook no longer starts a separate client for that, so it skips the
+  launcher checks, the new SSH session and the cold server start. On the
+  owner's Windows machine the median admission went from 45 s to 15 s, and
+  the turn close from 2.25 s to 0.7 s; the open itself takes 0.03–0.09 s.
+- **Same ownership rules.** The open goes through the broker's normal owning
+  lifecycle path: the same identity checks, dispatch journal and
+  unknown-outcome bookkeeping. The identity comes from the hook's private
+  turn envelope and the owning state, never from the model. The broker opens
+  only when the hook asked for it for this exact intent, and only on the warm
+  connection, with a 4 s limit.
+- **The hook checks the hand-off like its own open.** It accepts the receipt
+  only for the exact turn, generation and open arguments, and only if the
+  receipt id is the content digest. The file is removed whenever it is read.
+  Without a valid hand-off the hook opens the registration itself, as before.
+  If the broker's send has an unknown outcome, the Codex brokers' dispatch
+  journal turns the hook's attempt into a recorded coverage gap rather than a
+  second send. The server would replay an identical open anyway.
+- **Warm-first lifecycle for Claude Native.** Its lifecycle calls now use the
+  admitted connection first and fall back to a new connection only when
+  nothing was sent.
+- Covered: Codex on Windows and Linux (owning hooks), Claude Native. The
+  Windows remote broker and the seats hooks are unchanged.
+
 ## 7.0.0-beta.4 -- 2026-11-06
 
 The first release in this repository, tagged as the GitHub pre-release

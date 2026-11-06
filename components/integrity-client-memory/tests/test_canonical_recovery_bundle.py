@@ -49,9 +49,9 @@ def test_codex_native_uses_resume_capable_canonical_envelope():
 
 def test_other_platform_families_remain_distinct():
     expected = {
-        "linux/integrity-client-turn-broker.py": "ce620d0237e593634c7d3ba82672afd9961497a5976ea1c4d0e9d8f6df482e96",
+        "linux/integrity-client-turn-broker.py": "02d7aa9edc370e2173b02088a2ac0fa6aa0c8205196970e9ab0dcdd698a8f551",
         "windows-remote/integrity-client-turn-broker.py": "b43dabb79fe7b31be3a458ec80f213102b75fea9e5b83e060b5443c927a4b0ca",
-        "claude-native/integrity-client-turn-broker.py": "f66d1b722f52df4fd3f9b44f02f52dc0ebc2a0550331af18ab4081f04ba9d9bf",
+        "claude-native/integrity-client-turn-broker.py": "753c585320971bac34fcf982b3026d34987d3db9c6aa3a75b2298ecaf5b34f72",
         "antigravity/turn_broker_core.py": "0c7ebec0f1c5001a56cd57aedbf553ff656385782887d37851d4c304e43d3438"}
     for name, digest in expected.items():
         assert hashlib.sha256((native_install.RESOURCES / name).read_bytes()).hexdigest() == digest

@@ -799,6 +799,46 @@ def detach_turn_memory(state: dict[str, Any], reason: object) -> None:
     clear_turn_memory_registration(state)
     state.update({'admission_status': 'detached', 'model_mcp_admission_status': 'invalid', 'turn_memory_status': 'detached', 'turn_memory_lease': 'expired', 'turn_memory_queue': 'recovery', 'turn_memory_lease_updated_utc': utc_now(), 'turn_memory_failure': str(reason)[:300], 'coordination_stop_required': False, 'route_disposition': 'detached', 'write_plane_status': 'unavailable'})
 
+TURN_REGISTRATION_HANDOFF_PROTOCOL = 'integrity-client/broker-turn-registration-handoff/v1'
+
+def take_broker_registration_handoff(identity: str, state: dict[str, Any], arguments: dict[str, Any]) -> dict[str, Any] | None:
+    """Option 4: use the registration the model's broker opened right after admission.
+
+    The file is removed whenever it is read. It is accepted only for this exact
+    turn envelope, generation and open arguments, and only if the receipt id is
+    the recomputed content digest; the caller then applies its usual receipt
+    checks. Anything else is ignored and the hook opens the registration itself.
+    """
+    path = state_root() / f'turn-registration-handoff-{sha256_text(identity)}.json'
+    try:
+        if path.is_symlink() or not path.is_file():
+            return None
+        raw = path.read_bytes()
+    except OSError:
+        return None
+    finally:
+        try:
+            if path.is_file() or path.is_symlink():
+                path.unlink()
+        except OSError:
+            pass
+    try:
+        value = json.loads(raw)
+        receipt = value['receipt']
+        unsigned = {k: v for k, v in receipt.items() if k not in {'signature', 'receipt_id'}}
+        canonical = json.dumps(unsigned, ensure_ascii=False, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()
+        digest = 'sha256:' + hashlib.sha256(b'turn-memory-registration-v1\x00' + canonical).hexdigest()
+    except (ValueError, KeyError, TypeError, AttributeError, RecursionError):
+        return None
+    if (not isinstance(value, dict) or value.get('protocol') != TURN_REGISTRATION_HANDOFF_PROTOCOL
+            or value.get('turn_ref_digest') != state.get('turn_ref_digest')
+            or value.get('generation') != state.get('turn_memory_generation')
+            or value.get('intent_id') != arguments.get('intent_id') or value.get('arguments') != arguments
+            or receipt.get('receipt_id') != digest):
+        return None
+    return {'receipt': receipt}
+
+
 def open_admitted_turn_memory(identity: str, state: dict[str, Any]) -> dict[str, Any]:
     global LIFECYCLE_DEADLINE
     current_turn = state.get('turn_id')
@@ -812,17 +852,19 @@ def open_admitted_turn_memory(identity: str, state: dict[str, Any]) -> dict[str,
         raise HookError('turn_registration_prompt_missing')
     machine = re.sub('[^a-z0-9._-]', '-', socket.gethostname().lower())
     arguments = {'machine_id': f'machine:{machine}', 'thread_id': identity, 'turn_id': current_turn, 'intent_id': intent_id, 'prompt_sha256': prompt_sha256}
-    state['turn_memory_unresolved_handle'] = {**arguments, 'generation': state.get('turn_memory_generation')}
-    save_state(identity, state)
-    LIFECYCLE_DEADLINE = time.monotonic() + LIFECYCLE_BUDGET_SECONDS
-    try:
+    opened = take_broker_registration_handoff(identity, state, arguments)
+    if opened is None:
+        state['turn_memory_unresolved_handle'] = {**arguments, 'generation': state.get('turn_memory_generation')}
+        save_state(identity, state)
+        LIFECYCLE_DEADLINE = time.monotonic() + LIFECYCLE_BUDGET_SECONDS
         try:
-            opened = lifecycle_call('integrity_turn_memory_open', arguments, owning_state=state, owning_identity=identity)
-        except HookTransportError:
-            remaining_lifecycle_seconds(1)
-            opened = lifecycle_call('integrity_turn_memory_open', arguments, owning_state=state, owning_identity=identity)
-    finally:
-        LIFECYCLE_DEADLINE = None
+            try:
+                opened = lifecycle_call('integrity_turn_memory_open', arguments, owning_state=state, owning_identity=identity)
+            except HookTransportError:
+                remaining_lifecycle_seconds(1)
+                opened = lifecycle_call('integrity_turn_memory_open', arguments, owning_state=state, owning_identity=identity)
+        finally:
+            LIFECYCLE_DEADLINE = None
     receipt = opened.get('receipt')
     if not isinstance(receipt, dict):
         raise HookError('turn_registration_receipt_missing')
@@ -846,7 +888,7 @@ def handle_prompt(event: str, payload: dict[str, Any], identity: str) -> None:
     envelope = turn_envelope.stage(intent, machine_id=machine_id(), thread_id=identity, turn_id=current_turn, generation=generation)
     preserve_turn_memory_recovery_handle(state)
     clear_turn_memory_registration(state)
-    state.update({'admission_status': 'provisional', 'turn_id': current_turn, 'turn_memory_intent_id': 'intent:' + envelope['turn_ref_digest'][7:], 'prompt_sha256': sha256_text(intent), 'prompt_bytes': envelope['prompt_bytes'], 'prompt_segment_count': envelope['segment_count'], 'prompt_coverage': envelope['prompt_coverage'], 'prompt_truncation': False, 'turn_ref': envelope['turn_ref'], 'turn_ref_digest': envelope['turn_ref_digest'], 'turn_ref_expires_utc': envelope['expires_utc'], 'coordination_stop_required': False, 'route_disposition': 'pending', 'write_plane_status': 'pending', 'model_mcp_admission_status': 'required', 'model_mcp_admission_attempted': False, 'model_mcp_read_seal_retry_count': 0, 'model_mcp_transport_retry_count': 0, 'production_authority': False, 'home_record_count': 0, 'turn_memory_generation': generation, 'turn_memory_status': 'provisional', 'turn_memory_lease': 'provisional', 'turn_memory_queue': 'current', 'turn_memory_lease_updated_utc': utc_now()})
+    state.update({'admission_status': 'provisional', 'turn_id': current_turn, 'turn_memory_intent_id': 'intent:' + envelope['turn_ref_digest'][7:], 'turn_memory_registration_handoff': {'protocol': TURN_REGISTRATION_HANDOFF_PROTOCOL, 'intent_id': 'intent:' + envelope['turn_ref_digest'][7:]}, 'prompt_sha256': sha256_text(intent), 'prompt_bytes': envelope['prompt_bytes'], 'prompt_segment_count': envelope['segment_count'], 'prompt_coverage': envelope['prompt_coverage'], 'prompt_truncation': False, 'turn_ref': envelope['turn_ref'], 'turn_ref_digest': envelope['turn_ref_digest'], 'turn_ref_expires_utc': envelope['expires_utc'], 'coordination_stop_required': False, 'route_disposition': 'pending', 'write_plane_status': 'pending', 'model_mcp_admission_status': 'required', 'model_mcp_admission_attempted': False, 'model_mcp_read_seal_retry_count': 0, 'model_mcp_transport_retry_count': 0, 'production_authority': False, 'home_record_count': 0, 'turn_memory_generation': generation, 'turn_memory_status': 'provisional', 'turn_memory_lease': 'provisional', 'turn_memory_queue': 'current', 'turn_memory_lease_updated_utc': utc_now()})
     state.pop('model_mcp_expected_context_protocol', None)
     state.pop('model_mcp_selection_receipt_id', None)
     state.pop('retry_disposition', None)
