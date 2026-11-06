@@ -1562,6 +1562,10 @@ def initialize_observed_native_intent(*, identity: str, current_turn: str,
             # The native turn can contain several owner intents (steering).
             # The staged/authenticated envelope pins retries to this exact intent.
             "turn_memory_intent_id": "intent:" + envelope["turn_ref_digest"][7:],
+            # This hook has no harness-notification route: every new Native intent is an
+            # owner turn, as the Stop guard already assumes. The admission-first gate
+            # needs it explicitly (clean-VM finding: Linux Claude Native ran tools first).
+            "turn_kind": "owner",
             # Option 4: this hook takes the broker's registration hand-off for this intent.
             "turn_memory_registration_handoff": {
                 "protocol": TURN_REGISTRATION_HANDOFF_PROTOCOL,

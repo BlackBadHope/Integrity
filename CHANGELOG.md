@@ -18,6 +18,17 @@ The first stable release in this repository, tagged as the GitHub release
 - Security reports go through an issue titled "Security contact" until private
   vulnerability reporting is enabled.
 
+### Admission-first gate: Claude Code Native on Linux now blocks
+
+- A clean Debian VM showed that the gate let a tool run before admission in a
+  Linux Claude Code Native profile, although `turn-guard.json` said `block`.
+  The Native hook never marked the turn as an owner turn, and the gate only
+  acts in owner turns. The hook now marks every new Native intent as an owner
+  turn, as the `Stop` guard already assumed. The same applies to Codex Native
+  hooks, where the gate is opt-in.
+- `docs/linux-native-clients.md` now creates `~/.config/integrity/clients`
+  before the profile build, which needs an existing parent directory.
+
 ### Versions
 
 - client-memory 1.13.0 (the broker-side turn registration below).

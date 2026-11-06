@@ -87,6 +87,7 @@ Profiles without `codex_executable` are refused on Linux.
 
 ```bash
 PY=~/.local/share/integrity/venv/bin/python
+mkdir -p ~/.config/integrity/clients     # the parent must exist
 OUT=~/.config/integrity/clients/codex-native   # must not exist yet
 $PY -m integrity_client_memory.native_install --vendor codex \
   --upstream-json ~/.config/integrity/upstream.json --bindings-json ~/.config/integrity/bindings.json \
@@ -128,6 +129,7 @@ publisher) are not used on Linux: one profile serves every session of that
 binary under your user. Generate the profile:
 
 ```bash
+mkdir -p ~/.config/integrity/clients     # the parent must exist
 OUT=~/.config/integrity/clients/claude-native   # must not exist yet
 $PY -m integrity_client_memory.native_install --vendor claude \
   --upstream-json ~/.config/integrity/upstream.json --bindings-json ~/.config/integrity/claude-bindings.json \

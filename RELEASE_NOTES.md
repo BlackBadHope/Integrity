@@ -21,6 +21,10 @@ deployment: no host is enrolled and no action authority is granted.
   This covers Codex on Windows and Linux and Claude Native; the Windows remote
   broker and the seats hooks are unchanged. Claude Native lifecycle calls now
   use the admitted connection first.
+- **The admission-first gate blocks in Linux Claude Code Native profiles.**
+  A clean-VM run of the release candidate showed a tool running before
+  admission: the Native hook never marked owner turns. Fixed; the Linux guide
+  also creates the profile's parent directory.
 - **Every README claim checked against evidence.** Claims that were not
   proven are narrowed or moved to [Known limitations](README.md#known-limitations):
   the admission-first gate is on by default for Claude Code profiles on Linux,
