@@ -21,6 +21,16 @@ Tagged as the GitHub release `v7.0.1` (client-memory 1.13.1). See
   document in place of the static blocks. The registration block keeps only
   the registration id and the close requirement. The broker validates the full
   admission and registration first.
+### Claude Code standalone hook takes the broker's registration hand-off
+
+- The standalone hook (`claude/admission.py`) now asks for and accepts the same
+  one-use registration hand-off as the Native hooks: consent for each intent,
+  then exact turn envelope, generation, intent and open arguments, and a receipt
+  id that is its content digest. Without a valid hand-off it opens the
+  registration itself, as before. The broker side for this hook is the one
+  registered by hand; a broker that writes the public hand-off saves the cold
+  open on every turn.
+
 - Not changed: Codex admissions were already file-backed and at most 8 KB;
   Claude Code Native admissions are still delivered in full.
 - `RELEASE_NOTES.md` now carries the clean-machine results for 7.0.0, which the
