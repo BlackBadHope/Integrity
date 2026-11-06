@@ -53,7 +53,7 @@ def verify(root: Path, directory: Path) -> dict:
                         installed_extra.add(str(base))
                 if installed_extra != {str(Requirement(raw)) for raw in requirements}:
                     raise ValueError("wheel extra dependencies differ from the catalog: " + name)
-            license_text = metadata.get("License-Expression", metadata.get("License", ""))
+            license_text = str(metadata.get("License-Expression") or metadata.get("License") or "")
             license_members = [n for n in names if ".dist-info/" in n
                                and PurePosixPath(n).name.upper().startswith("LICENSE")]
             if ("BUSL-1.1" not in license_text and "Business Source License" not in license_text) or not license_members:

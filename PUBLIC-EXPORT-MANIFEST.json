@@ -37,11 +37,11 @@
       "sha256": "88b59c3c54f31a341f680779c608835c97d70a2bd4956819a8f9d9ab4bdf4610"
     },
     {
-      "bytes": 5343,
+      "bytes": 5352,
       "mode": "0o644",
       "path": ".github/scripts/verify_wheels.py",
       "sanitization_edits": 0,
-      "sha256": "3f0d9bafb6480d55b733768316a22cae64c74c8d6d55b277ca3f448577df015e"
+      "sha256": "ca1e616f0064f8da6bf50010068bcede45918f3fe301e20898aa3f3217309c3e"
     },
     {
       "bytes": 1740,
@@ -7810,7 +7810,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:c573b6a72e82317613a590bcc9bb331f0ac32294ac2180f3608e9bc927c73c9f",
+  "projection_digest": "sha256:a604b7cd014e50c81d86c56a983302d9cf09514e1f00cfd06682375227ea4d2e",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
