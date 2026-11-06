@@ -9,13 +9,13 @@
     "path": "src/integrity_memory_plane/resources/action_log_tail_archive.py",
     "source": "memory-plane/action_log_tail_archive.py",
     "source_sha256": "132e6fad738847cb4c187e631dd63f052119183fccc5055b81ffae60d07a4ea2",
-    "sha256": "999c51a6d11c2576104bc23693c6927b93253c1d6a2040a45d01a872622d41e1"
+    "sha256": "a7d8a1e30396c86f0bd86789432b9dde372f353e68e696e85906fb25115b02fb"
   },
   {
     "path": "src/integrity_memory_plane/resources/build_seed_delta_release.py",
     "source": "memory-plane/build_seed_delta_release.py",
     "source_sha256": "c03b022e3078ad9068734699c47857b9a10f1878ce81cf8fcf5cf5022511bce6",
-    "sha256": "0f3c8c9753df871d60e331282f117d09660e84c1dd2b29d92c82438fadfd3744"
+    "sha256": "8ae456d49e84db0450f441a9d7c1f9545859a2acaddc732b3c5b86a08695b9c7"
   },
   {
     "path": "src/integrity_memory_plane/resources/capacity_guard.py",
@@ -27,49 +27,49 @@
     "path": "src/integrity_memory_plane/resources/memory_plane_common.py",
     "source": "memory-plane/memory_plane_common.py",
     "source_sha256": "b3aaf5d6f0055aa401d7d2ae3a1db97610a11bdb47f4e8cabb48ee0a2f987b06",
-    "sha256": "96b2b4313b4837948f204e9cf549f414b8444f0710e5218ed7e2ac86d1851b3d"
+    "sha256": "e7a598aef3c6fbd199780df2599dc2a1ebb9ecfbf4fd2fa755a8b3828258c648"
   },
   {
     "path": "src/integrity_memory_plane/resources/offhost_windows_replica.py",
     "source": "memory-plane/offhost_windows_replica.py",
     "source_sha256": "568fe94112c7a875d0703e4296fe9cea3759dd12cb1744a1b88a2a92b48c12d0",
-    "sha256": "442a557cca6e9e29c3cb2acff91fc1860511039355984cbe4545db86f41a5a2f"
+    "sha256": "728f31febcede22feb79f720f5cde64356062a6206b7351745f815467205d385"
   },
   {
     "path": "src/integrity_memory_plane/resources/p1_golden_eval.py",
     "source": "memory-plane/p1_golden_eval.py",
     "source_sha256": "77fb3deeb1692bb2736c052f3823ccf319052322c0492cbd584138c806b8d86d",
-    "sha256": "897dba9a99b62f3a9b922adfb333f055c9ace8c631df734b0c62d32f5e0cd8f8"
+    "sha256": "e7e3bdccfe0cc5bb0d23dd9127300254242b3e08ebb3a58863f9191a3175e7dc"
   },
   {
     "path": "src/integrity_memory_plane/resources/p1_projection.py",
     "source": "memory-plane/p1_projection.py",
     "source_sha256": "e9fc2c558f01695e14cfb51c9dd0127ca075d9e591939ee24ca58ca99a60dcd8",
-    "sha256": "cff3a76b60cf2b6b12ff2bf44a410629972d51bc84b34a5e1087a71ee36f3a8d"
+    "sha256": "6c6210d8e8131bf901c5a38335b602f01e6546ca88245b22da07c6636ec023f8"
   },
   {
     "path": "src/integrity_memory_plane/resources/p1_retrieval.py",
     "source": "memory-plane/p1_retrieval.py",
     "source_sha256": "50b24ced8a6464cf60207ce596b3f090dc03e7f757747f5025fa324b63fe22a2",
-    "sha256": "e953fa8b34a1e87e43d3581e174cc74fc9bd6c15a09d2b84b7dd4cc9c6e1bd3f"
+    "sha256": "bc823082f2d2ea65cd6826a859c05a6aa01f9a5a94068d876cb04ea11a503bd2"
   },
   {
     "path": "src/integrity_memory_plane/resources/p1_segment_verify.py",
     "source": "memory-plane/p1_segment_verify.py",
     "source_sha256": "63b407a2e929f002c545a3ff24005635f442a68f7169aabe6ce96aef79626740",
-    "sha256": "4939c30e2b637844d1f2f217576a049df81d765af3e274d3720896e36bad472e"
+    "sha256": "ab8d2d731ed3476d1b59334905a7cf130e215834e9b12b3a9d8383f4c10f5075"
   },
   {
     "path": "src/integrity_memory_plane/resources/p1_segment_witness.py",
     "source": "memory-plane/p1_segment_witness.py",
     "source_sha256": "2b962575b4bb1b79ad756c3d4ca30fdfadf2768071b213731258ede7156478af",
-    "sha256": "79356475c7b67027f09cf180b03f9711605304c5a04c2522b3135db74f5a7704"
+    "sha256": "9908af12aaaaf4a455c1648a2fa6746284b2e46fabfdb37c75806fa6878f6d75"
   },
   {
     "path": "src/integrity_memory_plane/resources/p1_transition_gate.py",
     "source": "memory-plane/p1_transition_gate.py",
     "source_sha256": "a36e89ca4a1ab3141d690a349a7e4643fcc6d2e1e37aeaf8b52f0a3bf5c22786",
-    "sha256": "aa39bcdb35774286a4da2bf63d915ef9ca6758f57694a1a67710755ca058e732"
+    "sha256": "2030b3d88392386210662b85eaf7063cdc15953a98c7b5d47671dca55c0e3e84"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2-postgres-init.sql",
@@ -87,319 +87,319 @@
     "path": "src/integrity_memory_plane/resources/p2_attachment_capacity.py",
     "source": "memory-plane/p2_attachment_capacity.py",
     "source_sha256": "32f4c0b60d0747257450404f49d263860c9dc47950d64e4bdeb019cdd16b896c",
-    "sha256": "2d02af70e37a4c3c8cf573ebbba1b88c9d7809b2c77d5151df6a4144f0c96f6a"
+    "sha256": "141deb7b5bc02d005c9ee2799268220c6c673fc6e5f27056f7fa3fd1237671c9"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_attachment_credentials.py",
     "source": "memory-plane/p2_attachment_credentials.py",
     "source_sha256": "1caa481ac828e33b2c65fdae262ec4a1b84253844979c275c9dd1eaeb7e33896",
-    "sha256": "47822900e72cfbeea855b19f9ebb92cc1f5d026e70edfe8dffcf5306816a0cf6"
+    "sha256": "09e6ceaac1209829a6544ddae2212b16e5d1f05cbb450217bf0796f5a18e4643"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_attachment_enforcement.py",
     "source": "memory-plane/p2_attachment_enforcement.py",
     "source_sha256": "e5a7a4e032a0cea089990e85cea942d1a907c633b5797430be2b54b00c1fee1f",
-    "sha256": "3202aaabaf34c111de5b52d31e3508641bf3c01885b9314589524163c8f22803"
+    "sha256": "e6f1d9682715f2797b64c3faedca0ed09cf2cd81a2955978dfcea0446c98550e"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_attachment_ingress.py",
     "source": "memory-plane/p2_attachment_ingress.py",
     "source_sha256": "9cc7c96ea4a762959c7de87ff260a0a1426c388da1fc5cb995a449b472879482",
-    "sha256": "31d30c360a09087d7116cf169fd51c15d45ac236183031e48241e7fe4389110b"
+    "sha256": "3255dddcfaaf013e40ee2b80f39379e6655dcc62a480af815c804a9627ab56c5"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_billion_capacity.py",
     "source": "memory-plane/p2_billion_capacity.py",
     "source_sha256": "ff96795221c23307e463739b920a75c4f22199e7b13e1c29a9ea21001962433a",
-    "sha256": "bb02787a2fcb319279b6ae4572dc1727708454c8136d555c76eda8cb3ae039ee"
+    "sha256": "ee3f30afc822c831ffb493b8a3b5959244cf4ba309b09b0ad2ad6d96f52ee297"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_capacity_supplement.py",
     "source": "memory-plane/p2_capacity_supplement.py",
     "source_sha256": "b9523ece1a6745eb4f1d40f68a83d18b45035a6d15f77adbe54115aa44ee0515",
-    "sha256": "7a26df6604dd86ecd3357e5cb5a2acec27b530900ca5c11f1518e06c9ba10f11"
+    "sha256": "8490f5b155529a96ba77c238d73b783632c7b251cc152f6c7d43ec9c1caf1f30"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_client_canary_bootstrap.py",
     "source": "memory-plane/p2_client_canary_bootstrap.py",
     "source_sha256": "17c04a217fac5f0812c4c0a845f7cdbbf784640f4084e2bbaffae6322ebc5353",
-    "sha256": "af9ee61faf71dc58df67d90654eddb9565b0b504729d5c8cbbc564a438165d2b"
+    "sha256": "0080a1a318d12380407c51b403837792a2525b9fbea111cd4d9bbcb09004fc46"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_compact_billion_gate.py",
     "source": "memory-plane/p2_compact_billion_gate.py",
     "source_sha256": "23461c46d0e75ffcd71e060a97326453cfe566da8dea67c2c2f0944a4a4abc60",
-    "sha256": "e7accac021e4d5f76d26cd1b572acbfb2418b88d68a87f64931bf0a77d1dbd76"
+    "sha256": "ca145ea60766276dd01f1d47e84fa6b8b98623fe56b00ce206565391309e8305"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_compact_catalog.py",
     "source": "memory-plane/p2_compact_catalog.py",
     "source_sha256": "8330746b162ef24ec5da23f62decec12631399b3996d2ed26ab6aa3ccaad62bd",
-    "sha256": "474b1edb6e8d1b3edf151f1ebb98110b1e56e201f7bde1e25e5bb7cc93c886d9"
+    "sha256": "c0cfaec1ef30cd97d0d19cdf420138506e83cbc97977e770d1f1730a1a09de24"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_compact_dual_golden_eval.py",
     "source": "memory-plane/p2_compact_dual_golden_eval.py",
     "source_sha256": "a4b630279a8e7aefe83ca54275f0848462fd1993de1151e09a99110812ea6ae7",
-    "sha256": "f747f64017f7e6a06857496c4b3c00600f5c6ae401bc740c4df4593120a1234e"
+    "sha256": "2929f537e12721cc1b4de809d8c163284df250cf5b3abd1869d3a8b5e89f3c97"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_compact_index.py",
     "source": "memory-plane/p2_compact_index.py",
     "source_sha256": "0477e180d2fbe7bc7015481f2da8b0843d518e791e1236cef5f891e022198b0e",
-    "sha256": "fcbbb271bacd83aa8df4920b03ccbb08555cd0729740ccb6265016890eaa7716"
+    "sha256": "93913df7e51c68681a929ccd3cbfbb460b4c852d42e91b3a64de3cc1474d5560"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_compact_offhost.py",
     "source": "memory-plane/p2_compact_offhost.py",
     "source_sha256": "95d6bc675b03a0b3f621b77b93d11eefa18b7fe6c757b64ba5ee017cb99150c2",
-    "sha256": "0e3d30b6eaa5e8c858b2dfbc6d7e0d803fc0dc1bf4337f171503958163fabc05"
+    "sha256": "a3d83eb4fbd50cd876440ab64390390ee3b77d15d38d96684d7bbe96a97ebf97"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_compact_offhost_dispatch.py",
     "source": "memory-plane/p2_compact_offhost_dispatch.py",
     "source_sha256": "f98a8d575cb8a0fb6d5351c4f8bbd7525d059b34ad655b71264192673e6541dd",
-    "sha256": "947762abaeadecbf5f2e74b9442f14228fc78c684c20b863eb371042729e0611"
+    "sha256": "85b425e37d2e08e649d42d72e0f8250ee821ea0e9ec40e34e19566d75d3a5635"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_compact_offhost_export.py",
     "source": "memory-plane/p2_compact_offhost_export.py",
     "source_sha256": "f835b5a41db565621b3d74edf23eea4986509a2790c57b5d2a0079b8f9ce417e",
-    "sha256": "0ca1b5202c3b798097d55a37adf12a53160fe1ff45a63323e6a7ec3666d7ebb2"
+    "sha256": "d57c01eb97d2252ee438bb6b3d46b3e5ae6c131509b4b61de028f8817b48d8ff"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_compact_retrieval.py",
     "source": "memory-plane/p2_compact_retrieval.py",
     "source_sha256": "7ef971581da9d93549fd9c4e21373887aeed1c0d3a9d594579e1196ddb9364b4",
-    "sha256": "e91ecb9c15e81b0a14f692cfd92c9b3c6128396a4ec1db6c89649e8ac0d6ca70"
+    "sha256": "c1b80d00d15315289b48612ea0b35f3d796eb29400e1f2530f1bbc08e2ce518c"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_compact_runtime.py",
     "source": "memory-plane/p2_compact_runtime.py",
     "source_sha256": "e11cf25f0c31740f0b3e834602ee8f448d4304c80f2617e28136ea44d8f57f9f",
-    "sha256": "d34832aa26f797a8bd9f9f8025908829016fd2d5385f3a8bb36762aaed26b361"
+    "sha256": "fbe2dc801aef1bf3f7c5f9bf2cc02c642b8d82d9c9e6bce1ce043553c7c09a35"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_contract.py",
     "source": "memory-plane/p2_contract.py",
     "source_sha256": "e00ef644e97ccd911181e54d4d2db6264b74e1c0dcdfd14201fa8879629e5d00",
-    "sha256": "971890a0704efc2d802d23d700484f2e30fdb9c6b79ed7f34e7b82c8c2727222"
+    "sha256": "18cab5e575b1a87e2b5c052ed94dd15503a4df86929ed6d5805bbd35fe635002"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_dlq.py",
     "source": "memory-plane/p2_dlq.py",
     "source_sha256": "96e22bc7470f941c8198bcf1bed5941128de85fdf3ab91a6c9955bb22be62013",
-    "sha256": "c168748de730a290119dcdaa9e18afc2a500841a4ba47233b54484e2037cf7d7"
+    "sha256": "27e0fa53b5e0553afa1eef3d564bc04bdc17698c5483f8a2626a36e6064e095b"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_dual_golden_eval.py",
     "source": "memory-plane/p2_dual_golden_eval.py",
     "source_sha256": "a3006c6a026dcaaf9acf64cf5dde96e97ca92cb9c923f24e971d25754e9f83cb",
-    "sha256": "6b7278c5b8019eb5d357e7a674bfd79b1a30db5e51d30366fc49eaa9a4e1903b"
+    "sha256": "a6adc6536420edca239f56d77ec1ad7996c9a4daabc68713335b6ce4033028af"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_dual_read.py",
     "source": "memory-plane/p2_dual_read.py",
     "source_sha256": "106c6a6adb8857d67eba003a223b91ef0dd322088ed4c56b4a1d019f4f5dce22",
-    "sha256": "08f55eb7a96c0042dfff5d20f9d48c3d5711e741f49f900f5a1c1f6e7eddf01e"
+    "sha256": "9a53a9211ec4b64bdb9ac96be9aa13ab5cb4a3914f1a1393307e755903947603"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_dual_reader_bootstrap.py",
     "source": "memory-plane/p2_dual_reader_bootstrap.py",
     "source_sha256": "88eb52415b30ae808fe7fba27d3fa148e629aa8da04562a63085ac2a155c75c0",
-    "sha256": "2c8746613ffcf5e6872f2ca82b489c4aba6843a712d8555341352766bfea0324"
+    "sha256": "1a50826c6dccdb0ddcb1770e7c9229204ceb58fd45c411de09d85143740c7df9"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_dual_reader_verify.py",
     "source": "memory-plane/p2_dual_reader_verify.py",
     "source_sha256": "068e4cc91a8065e81fd35d15df8dfec20aaa7dd628d8e05d480475f55bd12ec6",
-    "sha256": "a7deeb43a56e501c0b13e32e373d82d07bbb82ebfbc17c6f63cb31f3661fc36d"
+    "sha256": "0b0885744f745d57660775b337d2657970e6125d3cea47e42d8c48d14a1a7b8d"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_edge_relay.py",
     "source": "memory-plane/p2_edge_relay.py",
     "source_sha256": "f5cd21daedfd37e84555805d3739ed28a1144e8537cae32c2bab84f12e07a429",
-    "sha256": "73559d42e67ada3807a7085c793cd1cdbf43af61026a26aee9df66c301d62ffc"
+    "sha256": "53edada6558e3301222ecea4073bd43c5bb0e66a8ff8cbb7ed98d176fbfa6c8f"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_fault_lab.py",
     "source": "memory-plane/p2_fault_lab.py",
     "source_sha256": "830d44d38947f118e94d41b7ad4aae1a1dd07c479eb4b82080d5952ec08fe714",
-    "sha256": "3c7abf9b2ab7d064df3b71a2920cdc0ffdd89838e7523f96ac1dacf0d63bc89b"
+    "sha256": "360aac737c674dc30909811ec24751a80418b390e585c503df90afecf74a7bd5"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_fault_lab_verify.py",
     "source": "memory-plane/p2_fault_lab_verify.py",
     "source_sha256": "274277cf4f720def27d786c97d0a954fb60e22465e2cbe887714b75721680bab",
-    "sha256": "4a889800f63b5a486e309ff707e6b2f52cf1231b81f002a692cbe3dd8b6a99b4"
+    "sha256": "854498cd7df05f7ab1e3037e6360faf5496c5c681997150aed5670c2c27a5d0f"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_gap_guard.py",
     "source": "memory-plane/p2_gap_guard.py",
     "source_sha256": "5f6a1452d8dd2085123a5ab83323dfb526bd496306f80495bf6b218a323ad197",
-    "sha256": "63fe8cebb033a9f915847fdb195109b4e361916b00b93d37e850a8ad8a52e837"
+    "sha256": "9b7a5b3c4f88fb5236443583c4ebfa7bcb70fc608528ae1abfd2b4204095c690"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_guard_bootstrap.py",
     "source": "memory-plane/p2_guard_bootstrap.py",
     "source_sha256": "a525ead00dace1e1fa74c168a866526ba72fd97af7f2d8a55915195af9fe4a16",
-    "sha256": "9e4499e2c41f5f288132a291c9bbd3de59a9238d8474773b62b9367321db6428"
+    "sha256": "9c4ed87b97817dc5ac3c8198eb18374fa8ea98b62bfcf37b7d83eda7eb07c5c3"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_guard_verify.py",
     "source": "memory-plane/p2_guard_verify.py",
     "source_sha256": "329a91317ae90068f6e8821a6e41b95da0d26365366ad2b054dff71780c8fd0d",
-    "sha256": "6b4773d24368830c4f26273c7138574f9bb8c6ad3fb9f0b9f6eeca02ff7b6152"
+    "sha256": "050eedcead29ec1628d4c584ff70cabcc99471d21542689a76693be9d469fc28"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_hot_cold_dual.py",
     "source": "memory-plane/p2_hot_cold_dual.py",
     "source_sha256": "719b13bda16c694a952705263eea460fb290e6b3dc0c585ab0493d542b234209",
-    "sha256": "bb8ab796e46d09ee578b7c933c4639dd3d84b0372a22e95e4861224e7e1914d0"
+    "sha256": "df66d45b3b6eb7d2dc6842f9c2d76c1b6d223ee32954947252abf4a9adb3da46"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_least_privilege_verify.py",
     "source": "memory-plane/p2_least_privilege_verify.py",
     "source_sha256": "f021daea0c1e57a66149d1375c49758dd19d084a4ab710c60fa41e0663f5853b",
-    "sha256": "e0b76646c0bd924e51bbe3b7f992d14be6f8a5eefe6dd312cb251dfeba8e8a14"
+    "sha256": "3e9423ee3781e39ae262d97ec10625d27748898ea356faf4a9f828666fe5297f"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_nats_bootstrap.py",
     "source": "memory-plane/p2_nats_bootstrap.py",
     "source_sha256": "362f10b9e86f0e6b6169ffe90681cb2780d1c644f95d72b09e13eba610f1d115",
-    "sha256": "c92614ea4959b28e960dc349da784a552165c25b09b12ceba401fa4f15f155b6"
+    "sha256": "b3aff6174a8bb597754e361d5502b5703de71c95de4e80fb09c3ad2f50868160"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_nats_capacity_reconcile.py",
     "source": "memory-plane/p2_nats_capacity_reconcile.py",
     "source_sha256": "8611177b95e3cb463def5e0118bb1108617698da83e42018c3721dc8f6b3e56c",
-    "sha256": "4b8cd02112796047700e819fa4ee47bfcdbb2cd72c37437e399be5097adcbd62"
+    "sha256": "642f98ba14e908a8b40171b6206a8138ebedad9996ede459fb5535c4218558b7"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_offhost_bootstrap.py",
     "source": "memory-plane/p2_offhost_bootstrap.py",
     "source_sha256": "de417057a5136df4a11be01f4aa6dedbae5dc1d32de5f5d9d05628cb62646bcf",
-    "sha256": "b8122f8e7012c86d2d20635737a4cb0804ed5398e8f4bff51b2dee636d27822f"
+    "sha256": "2b2fbb37dc0f795896430785c26ad2445a3f350cfea281e68281e4e2a6a78e36"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_offhost_dispatch.py",
     "source": "memory-plane/p2_offhost_dispatch.py",
     "source_sha256": "69731a86aff583bfe3bd503cdca8ef9924eca1725fa81a820641d9410b26bde7",
-    "sha256": "8e4b37033d860fc1acd784daf3dcdcea310f4916c3606c32b5769ae24064a506"
+    "sha256": "de1734e9483da0bb38243511490f79b2e06ee78115689cc708d67eb80791964a"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_offhost_export.py",
     "source": "memory-plane/p2_offhost_export.py",
     "source_sha256": "21960f2f7bf5e2b2e099c1b16935c0c065cc5d7337378a8b94b5a294241bed0c",
-    "sha256": "6637458dd8cfce1ba1eb5cdd0f9527bb53db298bdfd65ba8b3c5f6e7f5b3a85d"
+    "sha256": "93da46711fe39f960d7e411298b4507c62b2abdd433037b483aaa04d561d9662"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_offhost_restore_drill.py",
     "source": "memory-plane/p2_offhost_restore_drill.py",
     "source_sha256": "b0f76cf0d60368c7947ee50b8ba26dcd4e1490335ae6efb30acd60579e769ad8",
-    "sha256": "2fea12dac211131b94b8e6bdc7aa83a61b8442189930ae17192db51bc5b2d0a9"
+    "sha256": "7861cfa59896c450cb082062f1ac8c9529cd01397341a4968616e8ce1207d12b"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_offhost_verify.py",
     "source": "memory-plane/p2_offhost_verify.py",
     "source_sha256": "15226cec9ebdffb4934e53846209c723fce4f916193079755899380d06084c28",
-    "sha256": "3fab7d828bde5f6c9e38eacd4e43fe655aedbde4f682f54252b63a32eeaa2892"
+    "sha256": "b66a9ae92493045df80dd6f4e660efceba56d1e18a85c538db2f74d97cb5acbc"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_physical_history_lab.py",
     "source": "memory-plane/p2_physical_history_lab.py",
     "source_sha256": "a9c5da18743d01bb93c2dec87a7b8f1c2a7e99558770b194afe24bbfc7252a82",
-    "sha256": "0ee777dd35f6f1c8762679e98df72d071f8815a2ad34c6a8850b6ea6b446f7b7"
+    "sha256": "6671f7640caf906b253bc9bf117d83a83dab1773bc784069900281078ef7f283"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_physical_retrieval_replay.py",
     "source": "memory-plane/p2_physical_retrieval_replay.py",
     "source_sha256": "10159667211c91e6bf422d47a4ded376720eebdd929de4bcbe10f1b52601257a",
-    "sha256": "fa4bda6f51bb2f55699daf79af87c774c0598badfa0d7b8d99e21db5c192c921"
+    "sha256": "3d9f633cdb1f455e329a182bc151fdedc671b6a788f7f6e80af90f0f16525fe8"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_physical_stage_admission.py",
     "source": "memory-plane/p2_physical_stage_admission.py",
     "source_sha256": "b6224215fe6aa2c520c5e92c42535bfc4e813e37c3d5d14d0d06195944f68bc5",
-    "sha256": "37a1232bbd95274ea0c25cb0b7467400c98dd895c05c9bfa59b744bbbffb71e4"
+    "sha256": "09cc0b1d4204535ebd405689e2d4c26ef6522d0859438d3f6a0f72dac341e417"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_physical_verify_replay.py",
     "source": "memory-plane/p2_physical_verify_replay.py",
     "source_sha256": "91502a6dedaca850e33ada4ed35fa3b55c6195814f1c0a62efb165d545d0849a",
-    "sha256": "82c339f195b1807bfb97e477df6a4b650e77569461023de380a341f1ef63e591"
+    "sha256": "26b23ee551d91ab541f210cad4bf3683d42a24b841604de75fff15e690793776"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_projection.py",
     "source": "memory-plane/p2_projection.py",
     "source_sha256": "ea7fa6b8e3e9dce1fe259b009963ba66b0f530d642ef280e95bc49afc9dfbfe2",
-    "sha256": "a3083ea945b4fafb949c6019956b8069aa99390c6935f768f0ee6c04e383f8c2"
+    "sha256": "a0f486ad8cfa7df84ad77a8e654815d02ac7a7cb4a448afc7bef850a4e161343"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_projection_bootstrap.py",
     "source": "memory-plane/p2_projection_bootstrap.py",
     "source_sha256": "60b8b41a90667bee6a8cfc36a1b5d0dd21d8995f3ba13fbba262172dea6d2087",
-    "sha256": "c0899fb95602022f8fc7dde73d5b59ce5028eed2303582cdf6ee6c9a542d211f"
+    "sha256": "0431e53b8bedf3c89f68adfbf07e204cf2cea8845e35227257a13856fad5ef5f"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_quarantine_bus_message.py",
     "source": "memory-plane/p2_quarantine_bus_message.py",
     "source_sha256": "59457e85def25b8bae0b83a6a303641f235138673c7e871c4024a65924ef4f5d",
-    "sha256": "30ba35792b3c233a688f8a6a453f0886f83e9188aeca410b51373436a505d56f"
+    "sha256": "99b500cffdecfd0c1d023156f25d83742ecc3866cf4aca0a37d2d6813ec79210"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_receipt_catalog.py",
     "source": "memory-plane/p2_receipt_catalog.py",
     "source_sha256": "50a4c59c99e486faf8afa96ec3bb1106d693b7ca8c474df9c371cc3dedf904e9",
-    "sha256": "b2def203295c4dc0b29442547fa5204ffcbf66926714140b6da7bd4b36995539"
+    "sha256": "396aca83c95962f9371c6c653f7dcbba4a7e137bd8ee9bb84ad9192f90d92b47"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_regional_canary_verify.py",
     "source": "memory-plane/p2_regional_canary_verify.py",
     "source_sha256": "313834aa2d1c679b0b8305405ce8e463aa9719a0a018e7384a75cd787e2fbe71",
-    "sha256": "afe10cb76e9882462f6eaade11b41e227712bbe073761f4613f65ef7bdfec502"
+    "sha256": "77e2d22ed67158ef9a958a5c7ee6192aba55258e37ffb94599a649dba41fb977"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_regional_gate.py",
     "source": "memory-plane/p2_regional_gate.py",
     "source_sha256": "f01a6878e181fa7b329f11ab148779a3320efde617ebfa64f4f2b3af056875d9",
-    "sha256": "496b46aa16254ea11a5595fa5160f95283ce491bbef73a24bd9598ca112fe371"
+    "sha256": "63fd6233c7fc3511a2ce164ca29a31a8424f879854042b074d9590e483eb7860"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_retrieval.py",
     "source": "memory-plane/p2_retrieval.py",
     "source_sha256": "8d57b93f3ebfdc603861f586cc871735162c38e35a3ea1fc274e5107f0d4d690",
-    "sha256": "bd20c45b9ad2c70fa2f2266ea510a6f4e250a24a30ee9009f1b7f73f6376e49c"
+    "sha256": "96caf107bef2c7f1b417359f16d6f444c4f4a054be42814a4df2023674cde045"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_s3_bootstrap.py",
     "source": "memory-plane/p2_s3_bootstrap.py",
     "source_sha256": "74ced5b36ef07e999a36db54265a8529753d569149c1bffa40baea1887c34b4b",
-    "sha256": "116cf174c572038bff3efe46bbe418ca010f6bf4ff0f7d7f72422c1549270b26"
+    "sha256": "de4558f334fc737065b667976d632cf55c91a0b5b372debd2d9b47da77286465"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_scoped_credentials.py",
     "source": "memory-plane/p2_scoped_credentials.py",
     "source_sha256": "c8b94177bce72baeb3f4439ab939b0509ebfb691ab4e5afdf74af945f341d220",
-    "sha256": "3cbddbdc0629d5573d4717b4e9a27d767d383d9d6435d482069b828f97d4656d"
+    "sha256": "56896edfa5cb7644683a9c8e5feac576d150ee66f4695cc5d47fb03f12eec70b"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_shadow_bootstrap.py",
     "source": "memory-plane/p2_shadow_bootstrap.py",
     "source_sha256": "f5fe65e2ae10ab4f010b26e4431d4efa618f565ae01f47d4e2f9cd552d57660d",
-    "sha256": "8c5c574dca1ef8ea03edfdec54514739d94d03aeb87bbf641cc82f30427197ea"
+    "sha256": "fe8c3bc84f35fd784b6f3deabb33927832a6f2f291e8db0a4f16a3065f3c3038"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_socket_proxy_target.py",
     "source": "memory-plane/p2_socket_proxy_target.py",
     "source_sha256": "231b3241262d6a17a5157b90f2baf9d7fd124c589b28d45886d44ac8326b175c",
-    "sha256": "ee3e71f55fd01435cd4a0315b30707fdcb34a787b671dc488798d393270a6534"
+    "sha256": "d2db5021517d9f47a135e1208b2a0cbd301134e6f139813bff77361e5f2708d2"
   },
   {
     "path": "src/integrity_memory_plane/resources/p2_stage_capacity_preflight.py",
     "source": "memory-plane/p2_stage_capacity_preflight.py",
     "source_sha256": "662f673da78429b964300f5c4892ca3e32d46cf7178e9b26a8fe56c078c04e03",
-    "sha256": "c34daa8610ac7aa4e97232878b56e573b0951a26dd5071c2cb0f8a58723fab86"
+    "sha256": "7455ef9f42bfdb06bbebdf3b32c4009646ef7fc5de47cd047cf758cd21e5c53e"
   },
   {
     "path": "src/integrity_memory_plane/resources/requirements-nats.txt",
@@ -411,31 +411,31 @@
     "path": "src/integrity_memory_plane/resources/restore_drill.py",
     "source": "memory-plane/restore_drill.py",
     "source_sha256": "3c73eda820c32f0a384ab573df465081c8c32861573670309ea598a61b3de38f",
-    "sha256": "c402ce15870cc14582bff93d168fbbaccdf049e780816824dfdd9c663362f0a7"
+    "sha256": "2f2479eb443adfb3edac9475e95d018a90ae4db918deb14e8646e492da97e8f5"
   },
   {
     "path": "src/integrity_memory_plane/resources/seed_catalog_read_seal.py",
     "source": "memory-plane/seed_catalog_read_seal.py",
     "source_sha256": "51802f50d8ea99080546edcdf98b8d291c3544180fb3e6b7de84bc5c14f6db76",
-    "sha256": "56cd8f91f36f305f8eaa5eef254f6c934aa7d9a1e719d52baa730b225f2ae4d4"
+    "sha256": "74bcff36fc2609c0db8082eb10285ab655e060c30f1458adf839643e9b3d6595"
   },
   {
     "path": "src/integrity_memory_plane/resources/seed_delta_runtime.py",
     "source": "memory-plane/seed_delta_runtime.py",
     "source_sha256": "2877198079e655bac844371cc6d2dff3634ab4ebb4c4744c306a0e1240793b9c",
-    "sha256": "86570f3082f26092b0617ea0c2b6a88f788f5ad7b52371b72297dce6afa771b6"
+    "sha256": "1a4a35984f49da7e3639a7f43195e14ec09470dae596ee104a17c1649a609502"
   },
   {
     "path": "src/integrity_memory_plane/resources/seed_delta_sync.py",
     "source": "memory-plane/seed_delta_sync.py",
     "source_sha256": "c739ef718efcd5cda91ca08ff8936d7ffb2044a6bf35a50f050e5c315c3571b6",
-    "sha256": "e37a9d79b8966ae0be82318509156f0f1536896539a240e4f8b5d9eedbd43ccd"
+    "sha256": "778c84013a9005e13940bb6ba6cdbb8803eaf97575ff039af132bb681d0df974"
   },
   {
     "path": "src/integrity_memory_plane/resources/seed_run_retention.py",
     "source": "memory-plane/seed_run_retention.py",
     "source_sha256": "61a1df4f3776a3f52511ad30df9175b16598cccabdf28e1f0bc5a2c650b80853",
-    "sha256": "7db4bad485b0f323b56ead2d3dc31a8fcb1540bf5246c80e16beed65fe27ce24"
+    "sha256": "51ba8cdd438c5637da6973420d1b164ebb7a522dc181dc4404804d78025978d6"
   },
   {
     "path": "legacy-tests/test_capacity_guard.py",
@@ -717,12 +717,12 @@
     "path": "src/integrity_memory_plane/resources/verify_restore_receipt.py",
     "source": "memory-plane/verify_restore_receipt.py",
     "source_sha256": "736bf8cd8828a223695c19dec07f99848e24b25f313946b8ebac2279ebc2827f",
-    "sha256": "6bfbf2751847009acd3585a39041e79dc8a427cf68d3393d04bd4115e5532f42"
+    "sha256": "d752c2897f9bca076909350b26f4579d8ffe4a1c14eda2b5c39b4e2458a9cf5b"
   },
   {
     "path": "src/integrity_memory_plane/resources/verify_seed_delta_release.py",
     "source": "memory-plane/verify_seed_delta_release.py",
     "source_sha256": "465f080e281c79e154d554b581eb6ae63026d8d44570b4fd23fd8189b79bcb75",
-    "sha256": "ad18f145bbc8af3db63b290080c6800b5b7f31185b53ac7a0753eb33c65a3981"
+    "sha256": "29bc7c95aff15d594e7a599086f3e4956bd32d89b8d964b836867e9ffd98302d"
   }
 ]

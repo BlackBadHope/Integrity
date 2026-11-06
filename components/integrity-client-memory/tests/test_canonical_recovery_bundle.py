@@ -49,10 +49,10 @@ def test_codex_native_uses_resume_capable_canonical_envelope():
 
 def test_other_platform_families_remain_distinct():
     expected = {
-        "linux/integrity-client-turn-broker.py": "5b2508e668318d4face6e669f48b6595c002098cb0415ef787d65490966b8351",
-        "windows-remote/integrity-client-turn-broker.py": "c5a15c2f91e5034dac17325ef77335678f2f27620b1fd1a12c26259a3dc578c5",
-        "claude-native/integrity-client-turn-broker.py": "f1023580d3541ddc473534640f2674f2f55e4e41fe381ad9f504b3fa3a66bde2",
-        "antigravity/turn_broker_core.py": "711378f5d574cad03a535059349d343c7551afb88f797bd268e9417ee3a194cf"}
+        "linux/integrity-client-turn-broker.py": "ce620d0237e593634c7d3ba82672afd9961497a5976ea1c4d0e9d8f6df482e96",
+        "windows-remote/integrity-client-turn-broker.py": "b43dabb79fe7b31be3a458ec80f213102b75fea9e5b83e060b5443c927a4b0ca",
+        "claude-native/integrity-client-turn-broker.py": "f66d1b722f52df4fd3f9b44f02f52dc0ebc2a0550331af18ab4081f04ba9d9bf",
+        "antigravity/turn_broker_core.py": "0c7ebec0f1c5001a56cd57aedbf553ff656385782887d37851d4c304e43d3438"}
     for name, digest in expected.items():
         assert hashlib.sha256((native_install.RESOURCES / name).read_bytes()).hexdigest() == digest
 

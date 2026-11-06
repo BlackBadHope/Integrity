@@ -15,6 +15,6 @@
     "path": "src/integrity_action_log/read_session.py",
     "source": "action-log/read_session.py",
     "source_sha256": "f905e4c899ac3d3def37b3935e63846d442cdc5277bea7045365507a482c6bda",
-    "sha256": "a540529448b3833ca74bff2cd9fd6cb4ed50b928d07955ce697061d534b4814f"
+    "sha256": "213d214d8e4f9fc5940409b0428019bc591ce497cf7feb8a6a0deb475d892ebe"
   }
 ]
