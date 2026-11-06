@@ -7,7 +7,8 @@ Older snapshots are unsupported.
 
 ## Report a vulnerability
 
-Use **Security → Advisories → Report a vulnerability** in this repository. Do
+Open an issue titled "Security contact" with no details. The maintainer then
+opens a private security advisory with you. Do
 not open a public issue containing credentials, customer data, private
 topology or working exploit details.
 

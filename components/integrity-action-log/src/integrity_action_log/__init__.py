@@ -1,2 +1,2 @@
 """Isolated integrity-action-log distribution; import starts no service."""
-__version__ = '2.10.0'
+__version__ = '2.11.0'

@@ -1,13 +1,41 @@
-# Integrity Seats 7.0.0-beta.4
+# Integrity Seats 7.0.0
 
-Public source beta of Integrity Guardian 7.0.0 with Integrity Seats, under the
-[Business Source License 1.1](LICENSE). It is tagged as the GitHub pre-release
-`v7.0.0-beta.4`, the first release in this repository; the package source
-version is 7.0.0. Earlier versions were published under Apache-2.0 in a
-previous repository, and pull request numbers below refer to it. Do not treat a
-passing install as production readiness.
+Integrity Guardian 7.0.0 with Integrity Seats, under the
+[Business Source License 1.1](LICENSE). It is tagged as the GitHub release
+`v7.0.0`, the first stable release in this repository; the previous
+pre-release is `v7.0.0-beta.4`. Earlier versions were published under
+Apache-2.0 in a previous repository, and pull request numbers before this
+repository's #1 refer to it. A stable source release is not a production
+deployment: no host is enrolled and no action authority is granted.
 
-## New since 7.0.0-beta.3
+## New since 7.0.0-beta.4
+
+- **The broker opens the turn registration** (Client Memory 1.13.0; PR #1).
+  The model's broker opens the registration over its admitted connection right
+  after admission, through the same owning lifecycle checks and dispatch
+  journal as before, and hands the receipt to the hook. The hook no longer
+  starts a separate client for it. On the owner's Windows machine the median
+  admission went from 45 s to 15 s and the turn close from 2.25 s to 0.7 s.
+  This covers Codex on Windows and Linux and Claude Native; the Windows remote
+  broker and the seats hooks are unchanged. Claude Native lifecycle calls now
+  use the admitted connection first.
+- **Every README claim checked against evidence.** Claims that were not
+  proven are narrowed or moved to [Known limitations](README.md#known-limitations):
+  the admission-first gate is on by default for Claude Code profiles on Linux,
+  and the Claude Code Native route on Windows has no gate; Antigravity is in
+  live tests, not daily use; the team quickstart is CI-tested with synthetic
+  seats; known Antigravity limits are listed.
+- **Action Log 2.11.0.** Version bump for the known-routes work that shipped in
+  beta.4 (PR #53 of the previous repository).
+- **Security reports.** Until private vulnerability reporting is enabled, open
+  an issue titled "Security contact" with no details; see [SECURITY.md](SECURITY.md).
+
+## Clean-machine acceptance
+
+PENDING: filled from the release-candidate run on clean Linux and Windows
+virtual machines before the tag.
+
+## New in 7.0.0-beta.4
 
 - **License: Business Source License 1.1.** Production use is free for
   individuals, academic and research use, non-profits, and organizations whose
@@ -131,8 +159,7 @@ Existing search and fetch handlers are unchanged.
   failures in Linux `/proc` custody (Toolzs authority ledger, Seed runtime
   recovery).
 - Codex and Antigravity have no live acceptance of the admission-first gate.
-- 7.0.0-beta.4 is a pre-release (`v7.0.0-beta.4`), not a stable release.
-  Installed packages report version 7.0.0.
+- Installed packages report version 7.0.0.
 
 ## Install
 
@@ -143,7 +170,7 @@ seats.
 
 ## Rollback
 
-This repository starts at 7.0.0-beta.4, so it has no earlier tag to roll back
-to. Keep your existing install, and a copy of any seat registry or Action Log
-you created, until the new install passes your checks. This beta does not
-migrate those files backward.
+The previous pre-release in this repository is `v7.0.0-beta.4`
+(`git checkout v7.0.0-beta.4`). Keep your existing install, and a copy of any
+seat registry or Action Log you created, until the new install passes your
+checks. This release does not migrate those files backward.

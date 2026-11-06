@@ -2,7 +2,26 @@
 
 All notable public changes are recorded here.
 
-## Unreleased
+## 7.0.0 -- 2026-11-06
+
+The first stable release in this repository, tagged as the GitHub release
+`v7.0.0` (client-memory 1.13.0, Action Log 2.11.0). See
+[RELEASE_NOTES.md](RELEASE_NOTES.md). Everything below is new since
+`v7.0.0-beta.4`.
+
+### README: every claim checked against evidence
+
+- Claims that were not proven are narrowed or moved to a new "Known
+  limitations" section, and known Antigravity limits are listed.
+- The admission-first gate is described as on by default for Claude Code
+  profiles on Linux; the Claude Code Native route on Windows has no gate.
+- Security reports go through an issue titled "Security contact" until private
+  vulnerability reporting is enabled.
+
+### Versions
+
+- client-memory 1.13.0 (the broker-side turn registration below).
+- Action Log 2.11.0, for the known-routes work that shipped in beta.4.
 
 ### Client hooks: the broker opens the turn registration right after admission
 
