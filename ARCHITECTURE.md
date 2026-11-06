@@ -10,7 +10,7 @@ authorized, what changed, and whether an independent observer can verify the
 outcome. This page maps the package onto those questions and states which
 guarantees the public test suite actually exercises.
 
-The source version is Guardian **7.0.0**, published as the pre-release tag `v7.0.0-beta.4`; there is no stable release in this repository yet. Seats, the shared bus, and host enrollment are described in [docs/QUICKSTART_TEAM.md](docs/QUICKSTART_TEAM.md). The memory MCP facade API is
+The source version is Guardian **7.0.0**, published as the release tag `v7.0.0`; the previous pre-release is `v7.0.0-beta.4`. Seats, the shared bus, and host enrollment are described in [docs/QUICKSTART_TEAM.md](docs/QUICKSTART_TEAM.md). The memory MCP facade API is
 **2.11.0**; optional distributions have independent versions recorded in
 [COMPONENTS.json](COMPONENTS.json). These numbers identify separate contracts.
 

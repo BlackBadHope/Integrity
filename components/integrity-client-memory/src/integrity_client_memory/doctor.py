@@ -387,7 +387,8 @@ def render(report: dict[str, Any]) -> str:
     for entry in report["probes"]:
         if entry.get("answered"):
             server = entry.get("server") or {}
-            out.append(f"  OK {entry['transport_file']}: {server.get('name')} {server.get('version')}, "
+            # serverInfo carries the broker protocol version, not the package version.
+            out.append(f"  OK {entry['transport_file']}: {server.get('name')} (broker protocol {server.get('version')}), "
                        f"{entry['tool_count']} tools, {entry['latency_seconds']}s")
             cov = entry.get("coverage")
             if cov and "error" not in cov:

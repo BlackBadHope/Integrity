@@ -11,9 +11,9 @@ receipt or a signed coverage gap; turns that skip admission leave no record, and
 `integrity-doctor` shows how many. Reading memory never grants authority, so a
 plan or a remembered note can never stand in for permission.
 
-**Pre-release:** [`v7.0.0-beta.4`](https://github.com/BlackBadHope/Integrity/releases/tag/v7.0.0-beta.4), Guardian 7.0.0 with memory MCP
-facade API 2.11.0. There is no stable release in this repository yet.
-Earlier versions were published in a previous repository. Integrity Seats lets each
+**Stable:** [`v7.0.0`](https://github.com/BlackBadHope/Integrity/releases/tag/v7.0.0), Guardian 7.0.0 with memory MCP facade API
+2.11.0, the first stable release in this repository. The previous pre-release
+is `v7.0.0-beta.4`. Earlier versions were published in a previous repository. Integrity Seats lets each
 person use their own model account against one shared core.
 
 **License: [BSL 1.1](LICENSE).** From v7.0.0-beta.4 on, Integrity is under the
@@ -38,8 +38,9 @@ Each point below is something the repository ships, unless it is marked
    admission, appends and a signed close. How strictly a client enforces this
    depends on the client; see [the enforcement table](#hooks-where-they-apply-and-what-they-enforce).
    - **Admission-first gate.** It denies other tools until admission. It is on by
-     default in generated Claude Code profiles and opt-in elsewhere
-     (`"admission_first": "block"` in `turn-guard.json`). Without the gate, a model
+     default in generated Claude Code profiles on Linux and opt-in elsewhere
+     (`"admission_first": "block"` in `turn-guard.json`). The Claude Code Native
+     route on Windows has no gate. Without the gate, a model
      can skip admission.
    - **Unclosed turns.** Where the client can block, a turn that changed state
      without closing its record is blocked once, then recorded as coverage debt.
@@ -62,8 +63,7 @@ Each point below is something the repository ships, unless it is marked
    [team quickstart](docs/QUICKSTART_TEAM.md) and
    [`integrity-llm-bus`](components/integrity-llm-bus/README.md).
 6. **Procedural memory (Uroboros).** Verified work becomes a reusable
-   route. At admission an up-to-date Action Log (from the release after
-   beta.3) offers up to three matching routes in the capsule, as hints that are
+   route. At admission an Action Log from beta.4 or later offers up to three matching routes in the capsule, as hints that are
    never authority. This works server-side for any client and Seed, including
    routes observed in existing history; we have checked it live with Claude Code
    ([Uroboros](docs/UROBOROS.md)). The signed Toolzs protocol
@@ -101,10 +101,14 @@ complements them with what one vendor's memory does not try to do:
 
 ## What's new
 
-[`v7.0.0-beta.4`](https://github.com/BlackBadHope/Integrity/releases/tag/v7.0.0-beta.4) is the first release in this repository. It adds
-the admission-first gate (on by default for Claude Code profiles), Antigravity
-fixes from live use, known runbook routes at admission, and the Business Source
-License 1.1; see [RELEASE_NOTES.md](RELEASE_NOTES.md). The items below came in
+[`v7.0.0`](https://github.com/BlackBadHope/Integrity/releases/tag/v7.0.0) is the first stable release in this repository. Since
+beta.4, the model's broker opens the turn registration itself, right after
+admission (in the owner's Windows deployment of the same change, the median
+admission went from 45 s to 15 s), and every claim on this page was checked against evidence.
+[`v7.0.0-beta.4`](https://github.com/BlackBadHope/Integrity/releases/tag/v7.0.0-beta.4) added the admission-first gate (on by default for
+Claude Code profiles on Linux), Antigravity fixes from live use, known runbook
+routes at admission, and the Business Source License 1.1. See
+[RELEASE_NOTES.md](RELEASE_NOTES.md). The items below came in
 beta.2 and beta.3, which were developed in a previous repository; pull request
 numbers refer to it.
 
@@ -112,13 +116,19 @@ numbers refer to it.
   (PR #49, beta.3). The
   `Stop` hook blocks, once, a turn that changed state without closing its
   memory record. The next stop records a coverage gap, so a turn cannot loop.
-- **Honest status messages** (PR #49, beta.3).
+  A live test of beta.3 found gaps, for example a notification inside a turn
+  could drop the guard. beta.4 fixes them.
+- **Honest status messages** (PR #49, beta.3; completed in beta.4). In beta.3 a
+  cold broker start could still time out the probe and show a false
+  `MEMORY UNREACHABLE`. beta.4 waits up to 50 s and treats a timeout as
+  inconclusive.
   `MEMORY UNREACHABLE` appears only when a probe or the broker start really
   failed. `ADMISSION SKIPPED` means the server answered and the model did not
   call it. Together they replace the old "memory offline" guess.
 - **`integrity-doctor`** (PR #49, beta.3).
   A read-only check: where hooks are installed and their scope, whether the
-  memory server answers, and recent close coverage. See
+  memory server answers, and recent close coverage. beta.4 fixes its
+  "blocked once" count and reads settings files that start with a UTF-8 BOM. See
   [hooks troubleshooting](docs/hooks-troubleshooting.md).
 - **Cloud-agent journal** (`integrity-cloud`,
   PR #40, beta.2).
@@ -153,7 +163,9 @@ Each case is marked with how far it has been checked:
 
 ### Windows desktop: Claude Code, Codex, Antigravity
 
-*Claude Code and Codex: daily use. Antigravity lifecycle hooks: CI-tested.*
+*Claude Code: daily use, through the standalone hook. Codex: in regular use; on
+Windows through managed hooks that have no turn guard. Antigravity lifecycle
+hooks: CI-tested, and tested live with a Claude model.*
 `integrity-native-profile` generates the MCP registration and lifecycle hooks
 for each client. The [native onboarding guide](docs/native-onboarding.md)
 walks through install, connection, expected hook behavior and rollback.
@@ -165,7 +177,9 @@ Before you start, know what a new installation needs:
   A source checkout is not one. See the onboarding prerequisites. The
   read-only walkthrough below needs no server.
 - **Codex and Antigravity** profiles build on a fresh Windows checkout.
-  `native_runtime verify` and `probe` pass on the generated Codex profile.
+  `native_runtime verify` and `probe` pass on the generated Codex profile. This
+  was checked on a fresh clone on a development machine; the clean-VM result for
+  7.0.0 is in [RELEASE_NOTES.md](RELEASE_NOTES.md).
 - **Claude Code** Native profiles on Windows work only through the enrolled
   publisher route. A plain Claude Code install is refused with "requires its
   actual enrolled session ID". Our own Claude Code sessions use the standalone
@@ -174,12 +188,12 @@ Before you start, know what a new installation needs:
 - **Hooks are project-scoped.** A session started in another folder runs
   without memory. `integrity-doctor` reports this. To try
 memory first without hooks, use the read-only
-[local-memory walkthrough](examples/local-memory/README.md). On a fresh clone
-of beta.3 it printed PASS for all three clients.
+[local-memory walkthrough](examples/local-memory/README.md). CI runs it
+on Linux and Windows, and it prints PASS for all three clients.
 
 ### Linux workstations and servers
 
-*CI-tested. Also run on a clean Debian VM.* Codex and Claude Code Native
+*CI-tested. Also run on a clean Debian VM (beta.3).* Codex and Claude Code Native
 profiles run under user custody. See
 [Linux native clients](docs/linux-native-clients.md):
 
@@ -232,8 +246,8 @@ clients. See the [two-machine quickstart](docs/CROSS_MACHINE_QUICKSTART.md).
 
 ### A multi-vendor team on one infrastructure
 
-*Daily use.* This is our own setup: one operator, and agents from Claude Code,
-Codex and Antigravity working on the same ISP infrastructure. In daily use the
+*Daily use.* This is our own setup: one operator, and agents from Claude Code
+and Codex, with Antigravity in live tests, working on the same ISP infrastructure. In daily use the
 agents hand tasks to each other through a local bus. When one vendor hit a
 quota, another continued from the same log. See the
 [team quickstart](docs/QUICKSTART_TEAM.md).
@@ -317,16 +331,15 @@ the public core; supply your own route catalogue when needed.
 
 ## Public beta quickstart
 
-Integrity Seats **7.0.0-beta.4** is a source beta under the
-[Business Source License 1.1](LICENSE), tagged as the GitHub pre-release
-`v7.0.0-beta.4`. It is not a stable release and it is not a
-production deployment. Mode B tunnels are unverified, and macOS has known
+Integrity Seats **7.0.0** is a source release under the
+[Business Source License 1.1](LICENSE), tagged as the GitHub release `v7.0.0`.
+It is not a production deployment. Mode B tunnels are unverified, and macOS has known
 failures (see [Platform support](#platform-support)). Cross-machine memory
 (core on machine A, clients on machine B) runs over an OpenSSH forced command:
 see the [two-machine quickstart](docs/CROSS_MACHINE_QUICKSTART.md) for what is
-tested and what is not. This repository has no earlier release to roll back
-to: keep your existing install until the new one passes your checks. Details
-are in [RELEASE_NOTES.md](RELEASE_NOTES.md).
+tested and what is not. To roll back, check out the pre-release
+`v7.0.0-beta.4`, and keep your existing install until the new one passes your
+checks. Details are in [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
 From a new clone, create a virtualenv, install Guardian, then install the
 seats console from `integrity-home`:
@@ -337,8 +350,8 @@ cd Integrity
 python -m venv ../integrity-venv
 ```
 
-To build exactly the pre-release instead of current `main`, run
-`git checkout v7.0.0-beta.4` after `cd Integrity`.
+To build exactly this release instead of current `main`, run
+`git checkout v7.0.0` after `cd Integrity`.
 
 Activate it (Linux/macOS: `. ../integrity-venv/bin/activate`, Windows
 PowerShell: `..\integrity-venv\Scripts\Activate.ps1`), then:
@@ -363,7 +376,8 @@ python -B examples/local-memory/setup.py --catalog "$CASE/private/catalog.sqlite
 python -B examples/local-memory/verify_connection.py "$CLIENTS/codex.config.toml" "$CLIENTS/claude.mcp.json" "$CLIENTS/antigravity.mcp.json"
 ```
 
-Then follow the [team quickstart](docs/QUICKSTART_TEAM.md). `integrity-seats`
+Then follow the [team quickstart](docs/QUICKSTART_TEAM.md) (CI-tested with
+synthetic seats). `integrity-seats`
 comes from the `integrity-home` install above. Global options belong before
 the subcommand.
 
@@ -380,9 +394,10 @@ a session:
 
 - **Scope.** `integrity-native-profile` generates project-scoped hook files
   (`.claude/settings.json`, `.codex/hooks.json`) and prints that scope. A
-  session started in any other folder runs without Integrity memory. Merge the
-  hooks into `~/.claude/settings.json` or `$CODEX_HOME/hooks.json` to cover
-  every folder.
+  session started in any other folder runs without Integrity memory. To cover
+  every folder, merge the hooks into `~/.claude/settings.json` or
+  `$CODEX_HOME/hooks.json` by hand. This is tested on Linux; there is no command
+  for it yet.
 - **Enforcement.** Where a client can block, the `Stop` hook blocks a turn
   once if it changed state (edits, shell, MCP writes) without calling
   `integrity_turn_memory_close`. The next stop always ends the turn and records
@@ -410,11 +425,29 @@ a session:
     gate.
   - `integrity-native-profile --admission-first block|off` chooses the gate at
     build time.
+- **Known Antigravity limits.** Gemini Flash models may ignore MCP tool calls,
+  so their turns get no memory. With the gate on, their other tools stay denied.
+  Through `agentapi`, `new-conversation` creates owner turns for any local
+  process that holds the hub CSRF token.
 - **Diagnosis.** `integrity-doctor` shows where hooks are installed, whether
   the memory server answers, and the admission/close coverage of the last turns.
 
 [Hooks troubleshooting](docs/hooks-troubleshooting.md) explains each mode and
 the difference between "memory unreachable" and "admission skipped".
+
+## Known limitations
+
+- Live acceptance with a model on a fresh install is not yet published for any
+  vendor.
+- macOS is not supported yet: the informational CI job has known failures.
+- Mode B tunnels are unverified.
+- Hooks are project-scoped unless you merge them into user settings by hand.
+- The Claude Code Native route on Windows has no turn guard and no
+  admission-first gate. Antigravity's `Stop` cannot block. On Linux the guard
+  only advises.
+- Gemini Flash models in Antigravity may skip memory entirely (see above).
+- Cloud agents do not share memory live. Their signed journals are imported as
+  reported evidence.
 
 ## Who should try it
 
@@ -428,8 +461,9 @@ agent stacks and external targets are the main purpose of this public project.
 
 To connect a first local memory catalog to Codex, Claude Code or Antigravity,
 use the [read-only MCP walkthrough](examples/local-memory/README.md). It includes
-complete configuration generation, an independent protocol check, and a measured
-configuration-recall example with a plain-note control. Native lifecycle hooks
+complete configuration generation, an independent protocol check and, as a
+manual step that needs a model, a configuration-recall example with a plain-note
+control. Native lifecycle hooks
 remain a separate deployment.
 
 Install the current `main` source. Record the checked-out commit when reporting
@@ -528,9 +562,9 @@ different interfaces and deliberately do not all match the Guardian version.
 | [`integrity-active-inquiry`](components/integrity-active-inquiry/README.md) | 0.1.0rc2 | Bounded active inquiry |
 | [`integrity-experience-adapters`](components/integrity-experience-adapters/README.md) | 0.1.0rc3 | Experience adapter interfaces |
 | [`integrity-resource-advisor`](components/integrity-resource-advisor/README.md) | 0.1.0rc6 | Local resource and usage projections |
-| [`integrity-action-log`](components/integrity-action-log/README.md) | 2.10.0 | Action Log HTTP service and read-session evidence |
+| [`integrity-action-log`](components/integrity-action-log/README.md) | 2.11.0 | Action Log HTTP service and read-session evidence |
 | [`integrity-memory-plane`](components/integrity-memory-plane/README.md) | 1.0.0 | Catalog synchronization, retention and storage tools |
-| [`integrity-client-memory`](components/integrity-client-memory/README.md) | 1.12.0 | Codex, Claude and Antigravity hook/broker profiles |
+| [`integrity-client-memory`](components/integrity-client-memory/README.md) | 1.13.0 | Codex, Claude and Antigravity hook/broker profiles |
 | [`integrity-home`](components/integrity-home/README.md) | 0.2.0a1 | Home archive and Chronicle projections |
 | [`integrity-space`](components/integrity-space/README.md) | 0.2.0 | Read-only MCP Apps lab and workbench UI |
 | [`integrity-claude-code`](components/integrity-claude-code/README.md) | 0.1.0rc3 | Separately guarded Windows CLI executor |
@@ -548,7 +582,7 @@ source-profile metadata is documented in the
 ## Run the test suite
 
 Public CI (`.github/workflows/public-surface.yml`) runs these checks on Ubuntu
-and Windows with Python 3.12. Linux CI also installs `bubblewrap`. Reproduce
+and Windows with Python 3.11 and 3.12, plus an informational macOS job. Linux CI also installs `bubblewrap`. Reproduce
 them from the root of a clean clone: a source install (`pip install .` or
 `./components/...`) leaves `*.egg-info` build files that the surface check
 rejects, so check a fresh `git clone` of your commit as CI does. Use a new
@@ -687,8 +721,9 @@ that host binding, credentials or production actions are configured.
 - [Changelog](CHANGELOG.md)
 - [Public export boundary](PUBLIC-EXPORT-NOTICE.md)
 
-Security-sensitive reports should use **Security → Advisories → Report a
-vulnerability** in this repository, not a public issue.
+Report security issues privately, not in a public issue: open an issue titled
+"Security contact" with no details, and the maintainer opens a private security
+advisory with you.
 
 Questions, use-case proposals and first-user feedback are welcome in
 the repository's **Discussions** tab.

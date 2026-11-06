@@ -1,6 +1,6 @@
 # integrity-action-log
 
-Action Log HTTP server, bounded recall and read-session evidence. Service version 2.10.0 is independent from Guardian 6.1.0. The canonical read-session implementation is also used by the Antigravity client profile.
+Action Log HTTP server, bounded recall and read-session evidence. Service version 2.11.0 is independent from Guardian 6.1.0. The canonical read-session implementation is also used by the Antigravity client profile.
 
 ## Installation and configuration
 

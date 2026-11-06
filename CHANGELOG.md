@@ -2,16 +2,58 @@
 
 All notable public changes are recorded here.
 
-## Unreleased
+## 7.0.0 -- 2026-11-06
+
+The first stable release in this repository, tagged as the GitHub release
+`v7.0.0` (client-memory 1.13.0, Action Log 2.11.0). See
+[RELEASE_NOTES.md](RELEASE_NOTES.md). Everything below is new since
+`v7.0.0-beta.4`.
+
+### README: every claim checked against evidence
+
+- Claims that were not proven are narrowed or moved to a new "Known
+  limitations" section, and known Antigravity limits are listed.
+- The admission-first gate is described as on by default for Claude Code
+  profiles on Linux; the Claude Code Native route on Windows has no gate.
+- Security reports go through an issue titled "Security contact" until private
+  vulnerability reporting is enabled.
+
+### Admission-first gate: Claude Code Native on Linux now blocks
+
+- A clean Debian VM showed that the gate let a tool run before admission in a
+  Linux Claude Code Native profile, although `turn-guard.json` said `block`.
+  The Native hook never marked the turn as an owner turn, and the gate only
+  acts in owner turns. Each new intent is now marked by its prompt, with the
+  same signal as the Claude Code standalone hook (`turn_guard.prompt_turn_kind`):
+  an owner prompt is an owner turn, and a prompt that starts with a harness tag
+  (a task notification, a peer message) is a notification turn, which the gate
+  leaves alone. This covers the Native hook (Claude Code on Linux, Codex), the
+  Linux hook and the Windows seats hook; the gate is opt-in on the last two and
+  for Codex.
+- The gate's message now reaches the model in Native profiles. The Native
+  runner captured the hook's stderr and dropped it, so the model saw only "No
+  stderr output" for a blocked tool. A blocking hook's reason (exit code 2) is
+  now passed through; other stderr stays private.
+- `integrity-doctor` labels the broker's protocol version as such
+  ("broker protocol 1.6.0"), so it is not read as the package version.
+- `docs/linux-native-clients.md` now creates `~/.config/integrity/clients`
+  before the profile build, which needs an existing parent directory.
+
+### Versions
+
+- client-memory 1.13.0 (the broker-side turn registration below).
+- Action Log 2.11.0, for the known-routes work that shipped in beta.4.
 
 ### Client hooks: the broker opens the turn registration right after admission
 
 - **Faster turns.** The model's broker now opens the turn registration over
   its already admitted connection, before it returns the admission. The
   owning hook no longer starts a separate client for that, so it skips the
-  launcher checks, the new SSH session and the cold server start. On the
-  owner's Windows machine the median admission went from 45 s to 15 s, and
-  the turn close from 2.25 s to 0.7 s; the open itself takes 0.03–0.09 s.
+  launcher checks, the new SSH session and the cold server start. In the
+  owner's Windows deployment of the same change (a Claude Code hook
+  generation outside this repository), the median admission went from 45 s
+  to 15 s and the turn close from 2.25 s to 0.7 s; the open itself took
+  0.03–0.09 s. This build was not timed separately.
 - **Same ownership rules.** The open goes through the broker's normal owning
   lifecycle path: the same identity checks, dispatch journal and
   unknown-outcome bookkeeping. The identity comes from the hook's private
