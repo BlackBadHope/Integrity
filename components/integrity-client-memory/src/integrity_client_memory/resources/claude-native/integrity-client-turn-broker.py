@@ -221,19 +221,31 @@ class UpstreamFacade:
         except (BrokenPipeError, OSError) as exc:
             raise BrokerError('upstream request transport failed', layer='broker-upstream', request_sent=written_total > 0, retryable=True) from exc
 
+    MAX_LATE_RESPONSES = 8
+
     def _receive(self, request_id: Any, *, timeout: int, request_sent: bool) -> dict[str, Any]:
-        try:
-            raw = self._responses.get(timeout=timeout)
-        except queue.Empty as exc:
-            raise BrokerError('upstream response timed out', layer='broker-upstream', request_sent=request_sent, retryable=True) from exc
-        if raw is None:
-            raise BrokerError('upstream closed its response stream', layer='broker-upstream', request_sent=request_sent, retryable=True)
-        if len(raw) > MAX_MESSAGE_BYTES:
-            raise BrokerError('upstream response exceeds limit', layer='broker-upstream', request_sent=request_sent, retryable=True)
-        try:
-            response = json.loads(raw)
-        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-            raise BrokerError('upstream returned invalid JSON', layer='broker-upstream', request_sent=request_sent, retryable=True) from exc
+        import time
+        deadline = time.monotonic() + timeout
+        while True:
+            try:
+                raw = self._responses.get(timeout=max(0.0, deadline - time.monotonic()))
+            except queue.Empty as exc:
+                raise BrokerError('upstream response timed out', layer='broker-upstream', request_sent=request_sent, retryable=True) from exc
+            if raw is None:
+                raise BrokerError('upstream closed its response stream', layer='broker-upstream', request_sent=request_sent, retryable=True)
+            if len(raw) > MAX_MESSAGE_BYTES:
+                raise BrokerError('upstream response exceeds limit', layer='broker-upstream', request_sent=request_sent, retryable=True)
+            try:
+                response = json.loads(raw)
+            except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                raise BrokerError('upstream returned invalid JSON', layer='broker-upstream', request_sent=request_sent, retryable=True) from exc
+            late = getattr(self, '_late_request_ids', set())
+            if isinstance(response, dict) and response.get('id') != request_id and response.get('id') in late:
+                # The reply to an earlier request that timed out after it was sent
+                # (option 4 warm lifecycle). Drop it; the admitted stream stays usable.
+                late.discard(response.get('id'))
+                continue
+            break
         if not isinstance(response, dict) or response.get('id') != request_id:
             raise BrokerError('upstream response id mismatch', layer='broker-upstream', request_sent=request_sent, retryable=True)
         if response.get('error') is not None:
@@ -247,7 +259,15 @@ class UpstreamFacade:
         request_id = self._next_id
         self._next_id += 1
         self._write({'jsonrpc': '2.0', 'id': request_id, 'method': method, 'params': params})
-        return self._receive(request_id, timeout=timeout, request_sent=True)
+        try:
+            return self._receive(request_id, timeout=timeout, request_sent=True)
+        except BrokerError as error:
+            if str(error) == 'upstream response timed out':
+                late = getattr(self, '_late_request_ids', set())
+                if len(late) < self.MAX_LATE_RESPONSES:
+                    late.add(request_id)
+                    self._late_request_ids = late
+            raise
 
     def call_tool(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         return self.request('tools/call', {'name': name, 'arguments': arguments}, timeout=UPSTREAM_CONTEXT_ADMISSION_TIMEOUT_SECONDS if name == 'integrity_context_admission' else UPSTREAM_TOOL_TIMEOUT_SECONDS)
@@ -547,13 +567,22 @@ class TurnBroker:
             # the request was sent is reported, not resent here.
             try:
                 self._ack_pending_context_replays()
-                if getattr(self, '_post_admission_open_active', False):
-                    return self.upstream.request('tools/call', {'name': name, 'arguments': arguments},
-                                                 timeout=self.POST_ADMISSION_OPEN_TIMEOUT_SECONDS)
-                return self.upstream.call_tool(name, arguments)
             except BrokerError as exc:
-                if exc.request_sent or getattr(self, '_post_admission_open_active', False):
-                    raise
+                # As below: an ACK fault desynchronizes only the admitted stream.
+                try:
+                    self.close()
+                except Exception as cleanup_error:
+                    self._last_cleanup_failure_type = type(cleanup_error).__name__
+                    exc.add_note(f'secondary cleanup failed: {type(cleanup_error).__name__}')
+            else:
+                try:
+                    if getattr(self, '_post_admission_open_active', False):
+                        return self.upstream.request('tools/call', {'name': name, 'arguments': arguments},
+                                                     timeout=self.POST_ADMISSION_OPEN_TIMEOUT_SECONDS)
+                    return self.upstream.call_tool(name, arguments)
+                except BrokerError as exc:
+                    if exc.request_sent or getattr(self, '_post_admission_open_active', False):
+                        raise
         if getattr(self, '_post_admission_open_active', False):
             raise BrokerError('post-admission open requires the admitted warm stream',
                               layer='broker-post-admission-open', request_sent=False, retryable=False)

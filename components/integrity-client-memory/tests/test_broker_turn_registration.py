@@ -485,3 +485,41 @@ def test_failed_or_read_seal_admission_never_opens(path):
     inner = [node for node in ast.walk(guarded[-1]) if isinstance(node, ast.If)
              and ast.unparse(node.test) == "name == CURRENT_TURN_CONTEXT_TOOL"]
     assert any(call in ast.walk(node) for node in inner for call in calls)
+
+
+def native_upstream():
+    import queue
+    source = (RESOURCES / NATIVE_BROKER).read_text(encoding="utf-8")
+    facade = next(n for n in ast.parse(source).body if isinstance(n, ast.ClassDef) and n.name == "UpstreamFacade")
+    body = [n for n in facade.body if (isinstance(n, ast.FunctionDef) and n.name in {"_receive", "request"})
+            or (isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "MAX_LATE_RESPONSES"
+                                                  for t in n.targets))]
+    module = ast.fix_missing_locations(ast.Module(
+        body=[ast.ClassDef(name="Facade", bases=[], keywords=[], body=body, decorator_list=[], type_params=[])],
+        type_ignores=[]))
+    namespace = {"json": json, "queue": queue, "BrokerError": BrokerError, "MAX_MESSAGE_BYTES": 1 << 20,
+                 "Any": object}
+    exec(compile(module, NATIVE_BROKER, "exec"), namespace)
+    facade = namespace["Facade"]()
+    facade._responses, facade._next_id, facade.sent = queue.Queue(), 1, []
+    facade._write = facade.sent.append
+    return facade
+
+
+def test_native_late_reply_after_a_timeout_keeps_the_stream_usable():
+    facade = native_upstream()
+    with pytest.raises(BrokerError, match="timed out") as raised:
+        facade.request("tools/call", {"name": "integrity_turn_memory_open"}, timeout=0.05)
+    assert raised.value.request_sent is True and facade._late_request_ids == {1}
+    # The late reply to request 1 arrives first, then the reply to the next call.
+    facade._responses.put(json.dumps({"jsonrpc": "2.0", "id": 1, "result": {"late": True}}))
+    facade._responses.put(json.dumps({"jsonrpc": "2.0", "id": 2, "result": {"content": []}}))
+    assert facade.request("tools/call", {"name": "integrity_read_events"}, timeout=1) == {"content": []}
+    assert facade._late_request_ids == set()
+
+
+def test_native_unknown_reply_id_is_still_refused():
+    facade = native_upstream()
+    facade._responses.put(json.dumps({"jsonrpc": "2.0", "id": 99, "result": {}}))
+    with pytest.raises(BrokerError, match="id mismatch"):
+        facade.request("tools/call", {"name": "integrity_read_events"}, timeout=1)
