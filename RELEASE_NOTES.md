@@ -30,6 +30,10 @@ deployment: no host is enrolled and no action authority is granted.
   - **Measured on the stand:** a CI test on the disposable Memory stand (Linux
     Native profiles for Codex and Claude Code) checks that the model sees at most
     8 KB per admission and 1 KB per append.
+  - **Not covered by the stand:** the Windows Claude Code Native path with an
+    enrolled publisher is unit-tested only (the broker's compact admission and
+    the hook's resolution of it); it was not run against a live or disposable
+    Memory server.
 
 ## New in 7.0.0
 

@@ -7656,11 +7656,11 @@
       "sha256": "a54cf8c0d42bed11a47fa18dc72251187a194d7ba7cb9eb7f5bf92e88293508d"
     },
     {
-      "bytes": 13212,
+      "bytes": 13466,
       "mode": "0o644",
       "path": "RELEASE_NOTES.md",
       "sanitization_edits": 0,
-      "sha256": "3c1e655c6ff9fac2caf265419b10be58d84a3bbe38f652534df517427c6deb93"
+      "sha256": "2ed237cf9e315ce7c2123dc242287d59c7e9cc16a474da1afeac50ebb00e8383"
     },
     {
       "bytes": 1240,
@@ -7824,7 +7824,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:ae1dfdd5781af506aafe3b61479bfa4849a254d9b1cbae2cf33b13b78db804d0",
+  "projection_digest": "sha256:68bde1032595e6faeec6df565522055cd639acc7a1a6e7d61ca9c9262734375c",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
