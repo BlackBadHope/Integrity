@@ -7247,11 +7247,11 @@
       "sha256": "3af81ce3549f91c60ceccfdad8e7f1f237c8bf054b9737be97fe9986354a7c98"
     },
     {
-      "bytes": 9296,
+      "bytes": 9585,
       "mode": "0o644",
       "path": "tests/test_linux_native_lifecycle.py",
       "sanitization_edits": 0,
-      "sha256": "9e3841f104966c10d5d83b387f7988155a6de20b7d4f320e2fcf264a46d8ba5c"
+      "sha256": "cf5213b135142a33e80ce394a2a9c804b9ca41643d78eb9ffa715b660d7d8bd1"
     },
     {
       "bytes": 17192,
@@ -7824,7 +7824,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:5d4b8cc73c0d1df111c4187563cfd016fff1556b726e002e83afc2fb9b0fd475",
+  "projection_digest": "sha256:ae1dfdd5781af506aafe3b61479bfa4849a254d9b1cbae2cf33b13b78db804d0",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

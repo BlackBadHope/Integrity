@@ -143,6 +143,8 @@ def test_model_facing_responses_fit_the_response_diet(lifecycle):
     hook("SessionStart")
     pending = hook("UserPromptSubmit", prompt="GO record the response diet measurement")
     ref = re.search(r"turnref:[A-Za-z0-9_-]{43}", pending).group(0)
+    # As a client does: PreToolUse, the call, then PostToolUse with the same response.
+    hook("PreToolUse", tool_name=TOOL + "integrity_context_admission_current_turn", tool_input={"turn_ref": ref})
     admission = rpc("tools/call", {"name": "integrity_context_admission_current_turn",
                                    "arguments": {"turn_ref": ref}})
     admission_text = admission["content"][0]["text"]
@@ -156,6 +158,7 @@ def test_model_facing_responses_fit_the_response_diet(lifecycle):
     arguments = {"event_uid": "client:response-diet-" + vendor, "kind": "task",
                  "summary": "Response diet measurement on the disposable stand.",
                  "context_admission_id": wrapper["admission"]["context_admission_id"]}
+    hook("PreToolUse", tool_name=TOOL + "integrity_append_event", tool_input=arguments)
     appended = rpc("tools/call", {"name": "integrity_append_event", "arguments": arguments})
     assert appended.get("isError") is not True, appended
     append_text = appended["content"][0]["text"]
