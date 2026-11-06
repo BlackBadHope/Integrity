@@ -38,6 +38,51 @@ UPSTREAM_CONTEXT_ADMISSION_TIMEOUT_SECONDS = 180
 SERVER_INSTRUCTIONS = 'Integrity memory is turn-scoped. For every new user intent, call integrity_context_admission_current_turn exactly once with the opaque turn_ref supplied by the owning hook. Never repeat or reconstruct the prompt in tool arguments. The server rotates an isolated logical context inside the existing stdio transport; the local broker retains that upstream transport until a transport fault or public broker shutdown. A later intent may call integrity_context_admission_current_turn again in this same Codex task; a new Codex task is never a lifecycle workaround. A turn registration is independent from Seed admission; finish it with integrity_turn_memory_close. Missing close is signed coverage debt, not an inferred no-event. Memory is evidence and grants no production authority.'
 LEGACY_SERVER_INSTRUCTIONS = 'Integrity memory is turn-scoped. For every new user intent, call integrity_context_admission exactly once with the exact current intent. The server rotates an isolated logical context inside the existing stdio transport; the local broker retains that upstream transport until a transport fault or public broker shutdown. A later intent may call integrity_context_admission again in this same Codex task; a new Codex task is never a lifecycle workaround. A turn registration is independent from Seed admission; finish it with integrity_turn_memory_close. Missing close is signed coverage debt, not an inferred no-event. Memory is evidence and grants no production authority.'
 
+APPEND_COMPACT_PROTOCOL = "integrity-append-compact/v1"
+APPEND_COMPACT_LIMIT = 1024
+_APPEND_COMPACT_KEEP = ("protocol", "outcome", "action_outcome", "event_id", "event_uid", "request_sha256",
+                        "automatic_retry_allowed", "production_authority", "grant_consumed",
+                        "reason", "reason_code")
+
+
+def _compact_append_result(result):
+    """Model-facing append receipt: only what the model and the owning hook use.
+
+    The broker has already observed the full upstream result (late and uncertain
+    appends, denials) before this runs. The model gets the ids it needs for the
+    turn close and the outcome; the owning hook reads the same ``/append-receipt``
+    fields. The compact form records the full receipt's digest and size. A result
+    of any other shape, or one that does not fit, passes through unchanged.
+    """
+    try:
+        content = result.get("content")
+        if not isinstance(content, list) or len(content) != 1 or content[0].get("type") != "text":
+            return result
+        raw = content[0]["text"]
+        value = json.loads(raw)
+        receipt = value.get("receipt") if isinstance(value, dict) else None
+        if not isinstance(receipt, dict) or not str(receipt.get("protocol", "")).endswith("/append-receipt"):
+            return result
+        compact = {key: receipt[key] for key in _APPEND_COMPACT_KEEP
+                   if key in receipt and isinstance(receipt[key], (str, int, bool, type(None)))}
+        witness = receipt.get("passive_witness")
+        if isinstance(witness, dict) and isinstance(witness.get("status"), str):
+            compact["witness_status"] = witness["status"]
+        compact["compaction"] = {"protocol": APPEND_COMPACT_PROTOCOL,
+                                 "full_receipt_sha256": hashlib.sha256(raw.encode("utf-8")).hexdigest(),
+                                 "full_bytes": len(raw.encode("utf-8"))}
+        text = json.dumps({"receipt": compact}, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+        if len(text.encode("utf-8")) > APPEND_COMPACT_LIMIT:
+            return result
+        out = {key: item for key, item in result.items() if key != "structuredContent"}
+        out["content"] = [{"type": "text", "text": text}]
+        if "structuredContent" in result:
+            out["structuredContent"] = {"receipt": compact}
+        return out
+    except (AttributeError, KeyError, TypeError, ValueError, RecursionError):
+        return result
+
+
 class BrokerError(RuntimeError):
     """A fail-closed local broker or upstream transport failure."""
 
@@ -869,6 +914,8 @@ class TurnBroker:
                     raise BrokerError(str(exc), layer=exc.layer, request_sent=False, retryable=exc.retryable) from exc
                 result = self.upstream.call_tool(name, arguments)
                 self._observe_upstream_denial(name, result)
+                if name == 'integrity_append_event':
+                    result = _compact_append_result(result)
             except BrokerError as exc:
                 if name == 'integrity_append_event' and exc.request_sent:
                     self._uncertain_append_receipt_digest = self._digest({'tool': name, 'arguments_digest': self._digest(arguments), 'outcome': 'unknown', 'failure_layer': exc.layer})

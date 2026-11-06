@@ -2,6 +2,30 @@
 
 All notable public changes are recorded here.
 
+## 7.0.1 -- 2026-11-06
+
+Tagged as the GitHub release `v7.0.1` (client-memory 1.13.1). See
+[RELEASE_NOTES.md](RELEASE_NOTES.md).
+
+### Smaller memory responses for models
+
+- **Append receipts** reach the model as a compact `/append-receipt`: outcome,
+  `event_id`, `event_uid`, `request_sha256`, automatic-retry flag, witness
+  status and the digest and size of the full receipt, at most 1 KB. This
+  applies in the Windows and Linux Codex brokers, the Claude Native broker and
+  the Antigravity broker, after each broker has observed the full result. Other
+  results, and a receipt that would not fit, pass through unchanged.
+- **Antigravity admissions** reach the model as a projection of at most 8 KB:
+  ids, capsule text, recalled memory (summaries shortened to 400 characters),
+  invariants, delivery health, snapshot, receipts, and the digest of the full
+  document in place of the static blocks. The registration block keeps only
+  the registration id and the close requirement. The broker validates the full
+  admission and registration first.
+- Not changed: Codex admissions were already file-backed and at most 8 KB;
+  Claude Code Native admissions are still delivered in full.
+- `RELEASE_NOTES.md` now carries the clean-machine results for 7.0.0, which the
+  7.0.0 tag still marked as pending.
+
 ## 7.0.0 -- 2026-11-06
 
 The first stable release in this repository, tagged as the GitHub release

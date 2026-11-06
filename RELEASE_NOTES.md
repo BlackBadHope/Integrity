@@ -1,14 +1,33 @@
-# Integrity Seats 7.0.0
+# Integrity Seats 7.0.1
 
 Integrity Guardian 7.0.0 with Integrity Seats, under the
 [Business Source License 1.1](LICENSE). It is tagged as the GitHub release
-`v7.0.0`, the first stable release in this repository; the previous
-pre-release is `v7.0.0-beta.4`. Earlier versions were published under
+`v7.0.1`; the first stable release in this repository was `v7.0.0`, and the
+previous pre-release is `v7.0.0-beta.4`. Earlier versions were published under
 Apache-2.0 in a previous repository, and pull request numbers before this
 repository's #1 refer to it. A stable source release is not a production
 deployment: no host is enrolled and no action authority is granted.
 
-## New since 7.0.0-beta.4
+## New in 7.0.1
+
+- **Smaller memory responses for models** (Client Memory 1.13.1). Every turn
+  pays for what a memory tool returns, so the brokers now give the model only
+  what it uses. Brokers and hooks still validate the full upstream results; only
+  the model-facing copy is shorter.
+  - **Append:** the model gets the outcome, `event_id`, `event_uid`,
+    `request_sha256`, the witness status and a digest of the full receipt. In
+    the Codex, Claude Native and Antigravity brokers a receipt of about 4.4 KB
+    becomes about 0.5 KB, and one of 116 KB also stays under 1 KB. The owning
+    hooks read the same fields as before.
+  - **Admission through Antigravity:** the model gets the ids, the capsule text,
+    the recalled memory (shortened), the delivery health, the snapshot and the
+    digest of the static blocks, within 8 KB. On 50 recorded admissions of the
+    owner's deployment this went from 22.7–24.6 KB to 4.2–5.6 KB.
+  - **Admission through the Codex brokers** was already file-backed and at most
+    8 KB. **Claude Code Native** admissions are not shortened yet, because its
+    hook validates the admission from the tool response.
+
+## New in 7.0.0
 
 - **The broker opens the turn registration** (Client Memory 1.13.0; PR #1).
   The model's broker opens the registration over its admitted connection right
@@ -38,8 +57,26 @@ deployment: no host is enrolled and no action authority is granted.
 
 ## Clean-machine acceptance
 
-PENDING: filled from the release-candidate run on clean Linux and Windows
-virtual machines before the tag.
+Run on the 7.0.0 release candidates on 06.11.2026 (fresh virtual machines;
+the model in the hook run was scripted, not a live model):
+
+- **Linux** (Debian 12, Python 3.11): install by the README PASS (first result
+  in 21 s); read-only walkthrough PASS for all three clients; Claude Code
+  2.1.318 with the Linux Native profile against a disposable Memory stand:
+  admission → append → close PASS with a verified terminal receipt; the
+  admission-first gate denies a tool before admission and its message reaches
+  the model; a task-notification turn is not gated; `integrity-doctor` shows
+  hooks, memory and 1/1 coverage.
+- **Windows** (Server 2025, Windows PowerShell 5.1, Python 3.12): install by
+  the README PASS (68 s); walkthrough PASS for all three clients; JSON written
+  with a UTF-8 byte-order mark is accepted; Codex and Antigravity profiles
+  build, and Codex `verify` and `probe` pass; the Claude Code Native profile is
+  refused without an enrolled publisher, as documented. No hook run with a
+  model was made on Windows.
+- Not run: a live model on a fresh install (any vendor), live Codex.
+
+7.0.1 was not re-run on clean machines; its change is limited to the
+model-facing copy of memory responses and is covered by CI.
 
 ## New in 7.0.0-beta.4
 
@@ -181,7 +218,7 @@ seats.
 
 ## Rollback
 
-The previous pre-release in this repository is `v7.0.0-beta.4`
-(`git checkout v7.0.0-beta.4`). Keep your existing install, and a copy of any
+The previous release in this repository is `v7.0.0`
+(`git checkout v7.0.0`). Keep your existing install, and a copy of any
 seat registry or Action Log you created, until the new install passes your
 checks. This release does not migrate those files backward.
