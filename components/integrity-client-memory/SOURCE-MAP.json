@@ -151,14 +151,14 @@
     "path": "src/integrity_client_memory/resources/claude-native/integrity-client-admission.py",
     "source": "clients/claude-native/integrity-client-admission.py",
     "source_sha256": "1a8670ca29c7cff7781b7b76aeabc88a6daea260845b2bd0b64fca6458293cdb",
-    "sha256": "d6bab18a2071327faeaeae9cbc624d7b22ab64ed9c50928db2e1472abaeaae69",
+    "sha256": "b697a53a2699fef1f9d95f56c823863dca00d57f851a66ba18aade29cbc5d2c7",
     "projection": "Code-only Native CLI profile; publisher/session bindings become owner configuration. No owner data or enrollment."
   },
   {
     "path": "src/integrity_client_memory/resources/claude-native/integrity-client-turn-broker.py",
     "source": "clients/claude-native/integrity-client-turn-broker.py",
     "source_sha256": "48f9eea8967f765670df960cf542f81440b8932cc798177a986f4cbec7af2e86",
-    "sha256": "d306f4a454a47a4584ec909e6ca51fb16da79e3fb430832b8adda6f682f4a31d",
+    "sha256": "e88587da596b6d6fe086197263afaf9b5ecce61066d6023fbe58d0564896cf52",
     "projection": "Code-only Native CLI profile; publisher/session bindings become owner configuration. No owner data or enrollment."
   },
   {

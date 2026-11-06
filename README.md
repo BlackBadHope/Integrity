@@ -102,8 +102,8 @@ complements them with what one vendor's memory does not try to do:
 ## What's new
 
 [`v7.0.1`](https://github.com/BlackBadHope/Integrity/releases/tag/v7.0.1) gives models smaller memory responses: an admission
-through the Antigravity broker shrinks from about 24 KB to 4–6 KB, and an append
-receipt from 4–116 KB to about 0.5 KB in every broker (see
+reaches the model as at most 8 KB in every broker (Antigravity: from about 24 KB
+to 4–6 KB), and an append receipt shrinks from 4–116 KB to about 0.5 KB (see
 [RELEASE_NOTES.md](RELEASE_NOTES.md)). [`v7.0.0`](https://github.com/BlackBadHope/Integrity/releases/tag/v7.0.0) was the first stable
 release in this repository. Since beta.4, the model's broker opens the turn registration itself, right after
 admission (in the owner's Windows deployment of the same change, the median

@@ -51,7 +51,7 @@ def test_other_platform_families_remain_distinct():
     expected = {
         "linux/integrity-client-turn-broker.py": "509240627542fe72a1e3310c0024eac0bb045233f76fd681cdff3e35712a5dec",
         "windows-remote/integrity-client-turn-broker.py": "b43dabb79fe7b31be3a458ec80f213102b75fea9e5b83e060b5443c927a4b0ca",
-        "claude-native/integrity-client-turn-broker.py": "d306f4a454a47a4584ec909e6ca51fb16da79e3fb430832b8adda6f682f4a31d",
+        "claude-native/integrity-client-turn-broker.py": "e88587da596b6d6fe086197263afaf9b5ecce61066d6023fbe58d0564896cf52",
         "antigravity/turn_broker_core.py": "0c7ebec0f1c5001a56cd57aedbf553ff656385782887d37851d4c304e43d3438"}
     for name, digest in expected.items():
         assert hashlib.sha256((native_install.RESOURCES / name).read_bytes()).hexdigest() == digest

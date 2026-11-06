@@ -130,3 +130,39 @@ def test_hook_admission_registration_and_signed_gap_run_on_linux(lifecycle):
     for path in [root, *root.rglob("*")]:
         if not path.is_symlink() and not path.is_socket():
             assert stat.S_IMODE(path.lstat().st_mode) & 0o077 == 0, path
+
+
+def test_model_facing_responses_fit_the_response_diet(lifecycle):
+    """7.0.1: on the stand, the model sees at most 8 KB per admission and 1 KB per append.
+
+    The full documents stay with the broker and the hook: the admission is
+    file-backed and resolved by the hook, and the compact append receipt names
+    the full receipt's digest and size.
+    """
+    hook, rpc, vendor = lifecycle["hook"], lifecycle["rpc"], lifecycle["vendor"]
+    hook("SessionStart")
+    pending = hook("UserPromptSubmit", prompt="GO record the response diet measurement")
+    ref = re.search(r"turnref:[A-Za-z0-9_-]{43}", pending).group(0)
+    admission = rpc("tools/call", {"name": "integrity_context_admission_current_turn",
+                                   "arguments": {"turn_ref": ref}})
+    admission_text = admission["content"][0]["text"]
+    wrapper = json.loads(admission_text)
+    assert len(admission_text.encode()) <= 8192
+    full_admission = wrapper["full_admission"]["bytes"]
+    opened = hook("PostToolUse", tool_name=TOOL + "integrity_context_admission_current_turn",
+                  tool_input={"turn_ref": ref}, tool_response=admission)
+    assert "CANONICAL READ PLANE READY" in opened, opened
+    arguments = {"event_uid": "client:response-diet-" + vendor, "kind": "task",
+                 "summary": "Response diet measurement on the disposable stand.",
+                 "context_admission_id": wrapper["admission"]["context_admission_id"]}
+    appended = rpc("tools/call", {"name": "integrity_append_event", "arguments": arguments})
+    assert appended.get("isError") is not True, appended
+    append_text = appended["content"][0]["text"]
+    receipt = json.loads(append_text)["receipt"]
+    assert len(append_text.encode()) <= 1024
+    assert receipt["outcome"] == "created" and receipt["protocol"].endswith("/append-receipt")
+    witnessed = hook("PostToolUse", tool_name=TOOL + "integrity_append_event", tool_input=arguments,
+                     tool_response=appended)
+    assert "APPEND PASSIVE WITNESS: outcome=created" in witnessed, witnessed
+    print(f"RESPONSE DIET {vendor}: admission {full_admission} -> {len(admission_text.encode())} bytes; "
+          f"append {receipt['compaction']['full_bytes']} -> {len(append_text.encode())} bytes")

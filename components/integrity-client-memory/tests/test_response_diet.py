@@ -179,3 +179,52 @@ def test_antigravity_compacts_only_after_its_own_validation():
     compact = source.index("response={**response,'result':compact_admission_result(result)}")
     assert validate < compact
     assert ag_namespace()["_compact_append_result"](full_append_receipt())["content"][0]["text"].startswith('{"receipt"')
+
+
+NATIVE_BROKER = "claude-native/integrity-client-turn-broker.py"
+NATIVE_HOOK = "claude-native/integrity-client-admission.py"
+
+
+def embedded_compact_module(path):
+    import types
+    tree = ast.parse((RESOURCES / path).read_text(encoding="utf-8"))
+    source = next(n.value.args[0].args[0].value for n in tree.body
+                  if isinstance(n, ast.Expr) and isinstance(n.value, ast.Call)
+                  and getattr(n.value.func, "id", "") == "exec" and isinstance(n.value.args[0], ast.Call)
+                  and isinstance(n.value.args[0].args[0], ast.Constant)
+                  and "File-backed admission presentation" in n.value.args[0].args[0].value)
+    module = types.ModuleType("compact_under_test")
+    exec(compile(source, path, "exec"), module.__dict__)
+    return module
+
+
+def test_claude_native_admission_is_file_backed_and_the_hook_resolves_it(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
+    broker_module = embedded_compact_module(NATIVE_BROKER)
+    hook_module = embedded_compact_module(NATIVE_HOOK)
+    doc = synthetic_admission()
+    result = {"content": [{"type": "text", "text": json.dumps(doc)}]}
+    before = len(result["content"][0]["text"].encode())
+    public = broker_module.Presenter().present(result, context_key="thread-hash")
+    text = public["content"][0]["text"]
+    assert before > 20_000 and len(text.encode()) <= 8192
+    tree = ast.parse((RESOURCES / NATIVE_HOOK).read_text(encoding="utf-8"))
+    body = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "find_document"]
+
+    class HookError(RuntimeError):
+        pass
+
+    namespace = {"json": json, "Any": object, "_compact_admission": hook_module, "HookError": HookError}
+    exec(compile(ast.Module(body=body, type_ignores=[]), NATIVE_HOOK, "exec"), namespace)
+    found = namespace["find_document"](public["content"], lambda item: str(item.get("protocol", "")).endswith(
+        "/context-admission/v2"))
+    assert found == doc
+
+
+def test_claude_native_broker_presents_only_the_current_turn_admission():
+    source = (RESOURCES / NATIVE_BROKER).read_text(encoding="utf-8")
+    present = source.index("presenter.present(result, context_key=context_key)")
+    branch = source.rindex("if name in {'integrity_context_admission', CURRENT_TURN_CONTEXT_TOOL}", 0, present)
+    assert source.count("presenter.present(") == 1 and branch < present
+    assert source.index("self._adopt_admitted_own_binding(result)", branch) < present

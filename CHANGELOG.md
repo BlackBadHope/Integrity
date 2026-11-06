@@ -31,8 +31,15 @@ Tagged as the GitHub release `v7.0.1` (client-memory 1.13.1). See
   registered by hand; a broker that writes the public hand-off saves the cold
   open on every turn.
 
-- Not changed: Codex admissions were already file-backed and at most 8 KB;
-  Claude Code Native admissions are still delivered in full.
+- **Claude Code Native admissions** are now file-backed like the Codex ones:
+  the broker stores the full admission in the private admission-artifact store
+  and gives the model a wrapper of at most 8 KB (ids, status, door, snapshot,
+  delivery health, capsule text, capabilities digest). The Native hook resolves
+  the wrapper to the full document before its usual validation.
+- On the disposable Memory stand (Linux Native profiles, CI), a new test
+  measures what the model sees per turn: admission at most 8 KB, append at most
+  1 KB.
+- Codex admissions were already file-backed and at most 8 KB.
 - `RELEASE_NOTES.md` now carries the clean-machine results for 7.0.0, which the
   7.0.0 tag still marked as pending.
 

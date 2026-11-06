@@ -23,9 +23,13 @@ deployment: no host is enrolled and no action authority is granted.
     the recalled memory (shortened), the delivery health, the snapshot and the
     digest of the static blocks, within 8 KB. On 50 recorded admissions of the
     owner's deployment this went from 22.7–24.6 KB to 4.2–5.6 KB.
-  - **Admission through the Codex brokers** was already file-backed and at most
-    8 KB. **Claude Code Native** admissions are not shortened yet, because its
-    hook validates the admission from the tool response.
+  - **Admission through Claude Code Native** is now file-backed, as it already
+    was for Codex: the model gets a wrapper of at most 8 KB, and the hook
+    resolves the full admission from the private artifact store before it
+    validates it. A synthetic 24 KB admission becomes a wrapper under 8 KB.
+  - **Measured on the stand:** a CI test on the disposable Memory stand (Linux
+    Native profiles for Codex and Claude Code) checks that the model sees at most
+    8 KB per admission and 1 KB per append.
 
 ## New in 7.0.0
 
