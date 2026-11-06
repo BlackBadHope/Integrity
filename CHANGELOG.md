@@ -23,10 +23,13 @@ The first stable release in this repository, tagged as the GitHub release
 - A clean Debian VM showed that the gate let a tool run before admission in a
   Linux Claude Code Native profile, although `turn-guard.json` said `block`.
   The Native hook never marked the turn as an owner turn, and the gate only
-  acts in owner turns. The hook now marks every new Native intent as an owner
-  turn, as the `Stop` guard already assumed. The same applies to the Codex
-  Native hooks and the Windows seats hook, where the gate is opt-in. Only the
-  Claude Code standalone hook had set it before.
+  acts in owner turns. Each new intent is now marked by its prompt, with the
+  same signal as the Claude Code standalone hook (`turn_guard.prompt_turn_kind`):
+  an owner prompt is an owner turn, and a prompt that starts with a harness tag
+  (a task notification, a peer message) is a notification turn, which the gate
+  leaves alone. This covers the Native hook (Claude Code on Linux, Codex), the
+  Linux hook and the Windows seats hook; the gate is opt-in on the last two and
+  for Codex.
 - `docs/linux-native-clients.md` now creates `~/.config/integrity/clients`
   before the profile build, which needs an existing parent directory.
 

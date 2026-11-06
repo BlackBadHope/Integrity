@@ -526,21 +526,34 @@ def test_native_unknown_reply_id_is_still_refused():
 
 
 @pytest.mark.parametrize("family", sorted(HOOKS) + ["seats-windows"])
-def test_new_native_intent_is_an_owner_turn_for_the_admission_gate(family):
-    """Clean-VM finding: without turn_kind the admission-first gate let tools run first."""
+@pytest.mark.parametrize("prompt, gated", [
+    ("fix the failing test", True),
+    ("<task-notification>\n<task-id>b1</task-id>\n</task-notification>", False),
+    ("<system-reminder>x</system-reminder>\n<cross-session-message from=\"a\">hi</cross-session-message>", False),
+    ("[SYSTEM NOTIFICATION - NOT USER INPUT]\nbackground task done", False),
+])
+def test_admission_gate_in_each_hook_variant(family, prompt, gated):
+    """Clean-VM finding: without turn_kind the admission-first gate let tools run first.
+
+    Each hook variant marks a new intent by its prompt: owner turns are gated until
+    admission, relayed notifications and peer messages are not.
+    """
     import importlib.util
 
     path = "windows/admission.py" if family == "seats-windows" else HOOKS[family]
     tree = ast.parse((RESOURCES / path).read_text(encoding="utf-8"))
     updates = [node for node in ast.walk(tree) if isinstance(node, ast.Dict)
                and any(isinstance(k, ast.Constant) and k.value == "turn_memory_intent_id" for k in node.keys)]
-    assert any(isinstance(k, ast.Constant) and k.value == "turn_kind"
-               and isinstance(v, ast.Constant) and v.value == "owner"
-               for node in updates for k, v in zip(node.keys, node.values))
+    kinds = [ast.unparse(v) for node in updates for k, v in zip(node.keys, node.values)
+             if isinstance(k, ast.Constant) and k.value == "turn_kind"]
+    assert kinds == ["_turn_guard.prompt_turn_kind(intent)"]
     spec = importlib.util.spec_from_file_location(
         "turn_guard_for_gate_test", Path(__file__).resolve().parents[1] / "src/integrity_client_memory/turn_guard.py")
     guard = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(guard)
-    state = {"turn_kind": "owner", "turn_ref": "turnref:abc", "model_mcp_admission_attempted": False}
-    assert guard.admission_gate(state, "Bash", {"mode": "block"}) is not None
-    assert guard.admission_gate({**state, "turn_kind": None}, "Bash", {"mode": "block"}) is None
+    state = {"turn_kind": guard.prompt_turn_kind(prompt), "turn_ref": "turnref:abc",
+             "model_mcp_admission_attempted": False}
+    policy = {"mode": "block"}
+    assert (guard.admission_gate(state, "Bash", policy) is not None) is gated
+    # After the admission call the gate is open in every turn.
+    assert guard.admission_gate({**state, "model_mcp_admission_attempted": True}, "Bash", policy) is None

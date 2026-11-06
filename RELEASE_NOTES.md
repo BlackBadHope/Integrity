@@ -43,6 +43,11 @@ virtual machines before the tag.
 
 ## New in 7.0.0-beta.4
 
+**Known issue in beta.4, fixed in 7.0.0:** the admission-first gate was
+inactive in the Native and seats hook profiles (Claude Code on Linux, Codex,
+the `integrity-seats` plugin). Only the Claude Code standalone hook and
+Antigravity enforced it.
+
 - **License: Business Source License 1.1.** Production use is free for
   individuals, academic and research use, non-profits, and organizations whose
   group revenue is below USD 1M; everyone may evaluate, develop and test. Other

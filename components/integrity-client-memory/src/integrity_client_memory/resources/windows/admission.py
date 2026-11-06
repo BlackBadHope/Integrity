@@ -1383,9 +1383,10 @@ def handle_prompt(event: str, payload: dict[str, Any], identity: str) -> None:
             # The native turn can contain several owner intents (steering).
             # The staged/authenticated envelope pins retries to this exact intent.
             "turn_memory_intent_id": "intent:" + envelope["turn_ref_digest"][7:],
-            # No harness-notification route here: every new intent is an owner turn,
-            # which the opt-in admission-first gate needs to act at all.
-            "turn_kind": "owner",
+            # Owner or relayed notification, by the prompt's leading harness tag. The
+            # admission-first gate acts only in owner turns (clean-VM finding: without
+            # this key a Linux Claude Native profile ran tools before admission).
+            "turn_kind": _turn_guard.prompt_turn_kind(intent),
             "prompt_sha256": sha256_text(intent),
             "prompt_bytes": envelope["prompt_bytes"],
             "prompt_segment_count": envelope["segment_count"],

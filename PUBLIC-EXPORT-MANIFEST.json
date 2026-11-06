@@ -1304,11 +1304,11 @@
       "sha256": "c2c7edac7e0eeaab9b4d71413969def6fd7d4eff3027e24ead731bb0e8f5ea59"
     },
     {
-      "bytes": 109376,
+      "bytes": 109394,
       "mode": "0o644",
       "path": "components/integrity-client-memory/src/integrity_client_memory/resources/linux/admission.py",
       "sanitization_edits": 0,
-      "sha256": "bb7899cd58bfa625d1983cb450df49bb2f6745bffd7a6d86b83cbe2ca0bf0c95"
+      "sha256": "933a0772e6fcb8c250ec958f6b944f0be5f4ed790cdfa89a1432abad9cf3bc19"
     },
     {
       "bytes": 235425,
@@ -1444,11 +1444,11 @@
       "sha256": "db75d484ea1f54a3d5636f22c87f6e53ca9d42cb7c740fcfafc07013dcc2a753"
     },
     {
-      "bytes": 102760,
+      "bytes": 102886,
       "mode": "0o644",
       "path": "components/integrity-client-memory/src/integrity_client_memory/resources/windows/admission.py",
       "sanitization_edits": 0,
-      "sha256": "05479fd4eaf2c113f2d57bd8e2b13741af6fbfd10df98514ab9809d4a86f4541"
+      "sha256": "04f757e43de587c25982a7143ee79636b7d24ea80824b0c9e30a4bf454eada18"
     },
     {
       "bytes": 232178,
@@ -1472,11 +1472,11 @@
       "sha256": "40d3d4f438478eff8944e0142bac046076b0f1953d0eb2c188f1ab7c3c86e02b"
     },
     {
-      "bytes": 104479,
+      "bytes": 104497,
       "mode": "0o644",
       "path": "components/integrity-client-memory/src/integrity_client_memory/resources/windows/native/integrity-client-admission.py",
       "sanitization_edits": 0,
-      "sha256": "f747f5a2832b40b0b4d47d5aa20638ccb74cc7de1226afb2787ce81adf495cee"
+      "sha256": "405bd161b16685b132e5461708dc580fe45452b3934e9e46f50445963fbbfe06"
     },
     {
       "bytes": 5601,
@@ -1549,11 +1549,11 @@
       "sha256": "54cdff9f843057311ffcd3812091ebe8d25300a289d061bcbbd8164d2508f266"
     },
     {
-      "bytes": 36559,
+      "bytes": 37467,
       "mode": "0o644",
       "path": "components/integrity-client-memory/src/integrity_client_memory/turn_guard.py",
       "sanitization_edits": 0,
-      "sha256": "00c09d0cd0b641d5fcd623f9a9e3047535ca6e20a0eb102715bb23a53fe01302"
+      "sha256": "b7f1004e5a98ae69ec2fc5563d554132862266f07e71a545fbe7e648825eb11c"
     },
     {
       "bytes": 6647,
@@ -1570,11 +1570,11 @@
       "sha256": "56cc3646e6593126e6da3d4a0f01f5d9c337861452118d30aeced8349962e3c1"
     },
     {
-      "bytes": 29553,
+      "bytes": 30200,
       "mode": "0o644",
       "path": "components/integrity-client-memory/tests/test_broker_turn_registration.py",
       "sanitization_edits": 0,
-      "sha256": "dca5e5dad9ae32222b5c95eb9709aaad74325c9f2d9c6a6e2635f0060123cf5a"
+      "sha256": "5cfa1edfca29df06e8dd6df5d4b7d93cb350fa4eba25710ff3044d1ab63b0a44"
     },
     {
       "bytes": 19269,
@@ -7600,11 +7600,11 @@
       "sha256": "6a035fa7fe0d28a1f1477db42895e008b0235d23b35f7a0fec3f0f98163f0908"
     },
     {
-      "bytes": 34365,
+      "bytes": 34575,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "50f2d423e181481bf72ad801ca8d70bbcabb3680be46216fd1315e35a7e207d8"
+      "sha256": "cda0888a9637429de686d5612382dab8d470a6f111cfca548e6ffb8875ab02cc"
     },
     {
       "bytes": 775,
@@ -7649,11 +7649,11 @@
       "sha256": "133635bea1a4a474cd06e29a3e4708346aa76e54fa94e4bd5370572ca575e8f7"
     },
     {
-      "bytes": 10388,
+      "bytes": 10635,
       "mode": "0o644",
       "path": "RELEASE_NOTES.md",
       "sanitization_edits": 0,
-      "sha256": "4de317414a21490b147811df44637ed5cecfb0b1c1c9ebfd946747e8f3935928"
+      "sha256": "dc31d6de5653ab9ca0db961698da81c3e41ddf5dd60068c9720661c1168f758a"
     },
     {
       "bytes": 1240,
@@ -7817,7 +7817,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:348e31423e47ec5157de2cbe1bee65033fc4803da3e5ec44470cf4196586c45f",
+  "projection_digest": "sha256:380188492f07256fe79d3d804401c5f8df95aceebd73c1cf4c6f0e72f2963878",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

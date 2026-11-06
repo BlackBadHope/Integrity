@@ -85,6 +85,28 @@ HARNESS_UI_RE = re.compile(
     r"|session_mgmt__(?:set_session_title|get_|list_|search_))"
 )
 NOTIFICATION_TURN_KIND = "harness-notification-probable"
+# A prompt that starts with a harness tag or banner is a relayed notification or a
+# peer message, not the owner (same signal as the Claude Code standalone hook).
+HARNESS_PROMPT_TAG_RE = re.compile(
+    r"\A(?:\s*<system-reminder>.*?</system-reminder>)*\s*"
+    r"(?:<(?:cross-session-message|side-sessions-event|task-notification)[\s>]"
+    r"|\[SYSTEM NOTIFICATION - NOT USER INPUT\]"
+    r"|\[Cross-session (?:idle|delivery) notice\])",
+    re.DOTALL,
+)
+
+
+def prompt_turn_kind(intent: object) -> str:
+    """``owner`` for an owner prompt, the notification kind for a harness relay.
+
+    Hooks without their own notification route mark each new intent with this,
+    so the admission-first gate acts in owner turns and stays out of
+    notification turns.
+    """
+    if isinstance(intent, str) and HARNESS_PROMPT_TAG_RE.match(intent) is not None:
+        return NOTIFICATION_TURN_KIND
+    return "owner"
+
 
 
 def utc_now() -> dt.datetime:
