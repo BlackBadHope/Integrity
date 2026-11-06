@@ -2,6 +2,47 @@
 
 All notable public changes are recorded here.
 
+## 7.0.1 -- 2026-11-06
+
+Tagged as the GitHub release `v7.0.1` (client-memory 1.13.1). See
+[RELEASE_NOTES.md](RELEASE_NOTES.md).
+
+### Smaller memory responses for models
+
+- **Append receipts** reach the model as a compact `/append-receipt`: outcome,
+  `event_id`, `event_uid`, `request_sha256`, automatic-retry flag, witness
+  status and the digest and size of the full receipt, at most 1 KB. This
+  applies in the Windows and Linux Codex brokers, the Claude Native broker and
+  the Antigravity broker, after each broker has observed the full result. Other
+  results, and a receipt that would not fit, pass through unchanged.
+- **Antigravity admissions** reach the model as a projection of at most 8 KB:
+  ids, capsule text, recalled memory (summaries shortened to 400 characters),
+  invariants, delivery health, snapshot, receipts, and the digest of the full
+  document in place of the static blocks. The registration block keeps only
+  the registration id and the close requirement. The broker validates the full
+  admission and registration first.
+### Claude Code standalone hook takes the broker's registration hand-off
+
+- The standalone hook (`claude/admission.py`) now asks for and accepts the same
+  one-use registration hand-off as the Native hooks: consent for each intent,
+  then exact turn envelope, generation, intent and open arguments, and a receipt
+  id that is its content digest. Without a valid hand-off it opens the
+  registration itself, as before. The broker side for this hook is the one
+  registered by hand; a broker that writes the public hand-off saves the cold
+  open on every turn.
+
+- **Claude Code Native admissions** are now file-backed like the Codex ones:
+  the broker stores the full admission in the private admission-artifact store
+  and gives the model a wrapper of at most 8 KB (ids, status, door, snapshot,
+  delivery health, capsule text, capabilities digest). The Native hook resolves
+  the wrapper to the full document before its usual validation.
+- On the disposable Memory stand (Linux Native profiles, CI), a new test
+  measures what the model sees per turn: admission at most 8 KB, append at most
+  1 KB.
+- Codex admissions were already file-backed and at most 8 KB.
+- `RELEASE_NOTES.md` now carries the clean-machine results for 7.0.0, which the
+  7.0.0 tag still marked as pending.
+
 ## 7.0.0 -- 2026-11-06
 
 The first stable release in this repository, tagged as the GitHub release

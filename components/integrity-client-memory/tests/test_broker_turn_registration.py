@@ -574,3 +574,101 @@ def test_native_runtime_forwards_only_a_blocking_reason(capsys):
     source = Path(native_runtime.__file__).read_text(encoding="utf-8")
     hook = source[source.index("def hook(profile, root, event, raw):"):]
     assert hook.index("forward_block_reason(done)") < hook.index("if done.returncode or blocked(result):")
+
+
+# ---------------------------------------------------------------- Claude Code standalone hook
+
+STANDALONE_HOOK = "claude/admission.py"
+INTENT = "intent:" + DIGEST[7:]
+
+
+def standalone_arguments():
+    return {"machine_id": MACHINE, "thread_id": THREAD, "turn_id": INTENT, "prompt_sha256": PROMPT}
+
+
+def standalone_receipt(arguments):
+    receipt = {"protocol": "integrity-guardian/turn-memory-registration/v1",
+               "identity": {k: arguments[k] for k in ("machine_id", "thread_id", "turn_id")},
+               "prompt_sha256": arguments["prompt_sha256"], "terminal_required": True,
+               "production_authority": False, "namespace_fingerprint": "sha256:" + "d" * 64,
+               "signature": {"algorithm": "ed25519", "value": "sig"}}
+    unsigned = {k: v for k, v in receipt.items() if k not in {"signature", "receipt_id"}}
+    raw = json.dumps(unsigned, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    receipt["receipt_id"] = "sha256:" + hashlib.sha256(b"turn-memory-registration-v1\0" + raw).hexdigest()
+    return receipt
+
+
+def standalone_hook(tmp_path, lifecycle):
+    source = (RESOURCES / STANDALONE_HOOK).read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    wanted = {"take_broker_registration_handoff", "open_admitted_turn_memory"}
+    body = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in wanted]
+    body += [n for n in tree.body if isinstance(n, ast.Assign) and any(
+        isinstance(t, ast.Name) and t.id == "TURN_REGISTRATION_HANDOFF_PROTOCOL" for t in n.targets)]
+    socket = type("Socket", (), {"gethostname": staticmethod(lambda: "unit-host")})
+    namespace = {"json": json, "re": re, "hashlib": hashlib, "time": __import__("time"), "socket": socket,
+                 "Any": object, "HookError": HookError, "HookTransportError": HookTransportError,
+                 "state_root": lambda: tmp_path, "sha256_text": sha, "lifecycle_call": lifecycle,
+                 "remaining_lifecycle_seconds": lambda seconds: None, "LIFECYCLE_BUDGET_SECONDS": 30,
+                 "LIFECYCLE_DEADLINE": None,
+                 "_is_digest": lambda v: isinstance(v, str) and re.fullmatch(r"sha256:[a-f0-9]{64}", v) is not None}
+    exec(compile(ast.Module(body=body, type_ignores=[]), STANDALONE_HOOK, "exec"), namespace)
+    return namespace["open_admitted_turn_memory"]
+
+
+def standalone_state():
+    return {"turn_id": TURN, "turn_memory_intent_id": INTENT, "prompt_sha256": PROMPT,
+            "turn_memory_generation": 3, "turn_ref_digest": DIGEST}
+
+
+def write_standalone_handoff(tmp_path, **changes):
+    record = {"protocol": "integrity-client/broker-turn-registration-handoff/v1", "turn_ref_digest": DIGEST,
+              "generation": 3, "intent_id": INTENT, "arguments": standalone_arguments(),
+              "receipt": standalone_receipt(standalone_arguments()), **changes}
+    handoff_path(tmp_path).write_text(json.dumps(record), encoding="utf-8")
+
+
+def test_standalone_hook_writes_consent_for_each_intent():
+    tree = ast.parse((RESOURCES / STANDALONE_HOOK).read_text(encoding="utf-8"))
+    consents = [ast.unparse(v) for node in ast.walk(tree) if isinstance(node, ast.Dict)
+                for k, v in zip(node.keys, node.values)
+                if isinstance(k, ast.Constant) and k.value == "turn_memory_registration_handoff"]
+    assert consents == ["{'protocol': TURN_REGISTRATION_HANDOFF_PROTOCOL, 'intent_id': 'intent:' + "
+                        "envelope['turn_ref_digest'][7:]}"]
+
+
+def test_standalone_hook_uses_the_broker_receipt_without_a_cold_open(tmp_path):
+    calls = []
+    open_turn = standalone_hook(tmp_path, lambda *a, **k: calls.append(a) or {})
+    write_standalone_handoff(tmp_path)
+    state = standalone_state()
+    assert open_turn(THREAD, state) == standalone_receipt(standalone_arguments())
+    assert calls == [] and "turn_memory_unresolved_handle" not in state and not handoff_path(tmp_path).exists()
+
+
+@pytest.mark.parametrize("change", [
+    {"turn_ref_digest": "sha256:" + "f" * 64}, {"generation": 2}, {"intent_id": "intent:" + "9" * 64},
+    {"arguments": {**standalone_arguments(), "thread_id": "other"}}, {"protocol": "other"},
+    {"receipt": {**standalone_receipt(standalone_arguments()), "namespace_fingerprint": "sha256:" + "0" * 64}},
+])
+def test_standalone_hook_ignores_a_foreign_stale_or_forged_handoff(change, tmp_path):
+    calls = []
+
+    def lifecycle(name, arguments):
+        calls.append(name)
+        return {"receipt": standalone_receipt(arguments)}
+
+    open_turn = standalone_hook(tmp_path, lifecycle)
+    write_standalone_handoff(tmp_path, **change)
+    state = standalone_state()
+    assert open_turn(THREAD, state) == standalone_receipt(standalone_arguments())
+    assert calls == ["integrity_turn_memory_open"] and not handoff_path(tmp_path).exists()
+
+
+def test_standalone_hook_without_handoff_opens_as_before(tmp_path):
+    calls = []
+    open_turn = standalone_hook(tmp_path, lambda name, arguments: calls.append(name)
+                                or {"receipt": standalone_receipt(arguments)})
+    state = standalone_state()
+    assert open_turn(THREAD, state) == standalone_receipt(standalone_arguments())
+    assert calls == ["integrity_turn_memory_open"]

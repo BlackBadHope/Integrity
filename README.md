@@ -11,9 +11,9 @@ receipt or a signed coverage gap; turns that skip admission leave no record, and
 `integrity-doctor` shows how many. Reading memory never grants authority, so a
 plan or a remembered note can never stand in for permission.
 
-**Stable:** [`v7.0.0`](https://github.com/BlackBadHope/Integrity/releases/tag/v7.0.0), Guardian 7.0.0 with memory MCP facade API
-2.11.0, the first stable release in this repository. The previous pre-release
-is `v7.0.0-beta.4`. Earlier versions were published in a previous repository. Integrity Seats lets each
+**Stable:** [`v7.0.1`](https://github.com/BlackBadHope/Integrity/releases/tag/v7.0.1), Guardian 7.0.0 with memory MCP facade API
+2.11.0. The first stable release in this repository was `v7.0.0`; the previous
+pre-release is `v7.0.0-beta.4`. Earlier versions were published in a previous repository. Integrity Seats lets each
 person use their own model account against one shared core.
 
 **License: [BSL 1.1](LICENSE).** From v7.0.0-beta.4 on, Integrity is under the
@@ -101,8 +101,11 @@ complements them with what one vendor's memory does not try to do:
 
 ## What's new
 
-[`v7.0.0`](https://github.com/BlackBadHope/Integrity/releases/tag/v7.0.0) is the first stable release in this repository. Since
-beta.4, the model's broker opens the turn registration itself, right after
+[`v7.0.1`](https://github.com/BlackBadHope/Integrity/releases/tag/v7.0.1) gives models smaller memory responses: an admission
+reaches the model as at most 8 KB in every broker (Antigravity: from about 24 KB
+to 4–6 KB), and an append receipt shrinks from 4–116 KB to about 0.5 KB (see
+[RELEASE_NOTES.md](RELEASE_NOTES.md)). [`v7.0.0`](https://github.com/BlackBadHope/Integrity/releases/tag/v7.0.0) was the first stable
+release in this repository. Since beta.4, the model's broker opens the turn registration itself, right after
 admission (in the owner's Windows deployment of the same change, the median
 admission went from 45 s to 15 s), and every claim on this page was checked against evidence.
 [`v7.0.0-beta.4`](https://github.com/BlackBadHope/Integrity/releases/tag/v7.0.0-beta.4) added the admission-first gate (on by default for
@@ -331,14 +334,13 @@ the public core; supply your own route catalogue when needed.
 
 ## Public beta quickstart
 
-Integrity Seats **7.0.0** is a source release under the
-[Business Source License 1.1](LICENSE), tagged as the GitHub release `v7.0.0`.
+Integrity Seats **7.0.1** is a source release under the
+[Business Source License 1.1](LICENSE), tagged as the GitHub release `v7.0.1`.
 It is not a production deployment. Mode B tunnels are unverified, and macOS has known
 failures (see [Platform support](#platform-support)). Cross-machine memory
 (core on machine A, clients on machine B) runs over an OpenSSH forced command:
 see the [two-machine quickstart](docs/CROSS_MACHINE_QUICKSTART.md) for what is
-tested and what is not. To roll back, check out the pre-release
-`v7.0.0-beta.4`, and keep your existing install until the new one passes your
+tested and what is not. To roll back, check out `v7.0.0`, and keep your existing install until the new one passes your
 checks. Details are in [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
 From a new clone, create a virtualenv, install Guardian, then install the
@@ -351,7 +353,7 @@ python -m venv ../integrity-venv
 ```
 
 To build exactly this release instead of current `main`, run
-`git checkout v7.0.0` after `cd Integrity`.
+`git checkout v7.0.1` after `cd Integrity`.
 
 Activate it (Linux/macOS: `. ../integrity-venv/bin/activate`, Windows
 PowerShell: `..\integrity-venv\Scripts\Activate.ps1`), then:
@@ -564,7 +566,7 @@ different interfaces and deliberately do not all match the Guardian version.
 | [`integrity-resource-advisor`](components/integrity-resource-advisor/README.md) | 0.1.0rc6 | Local resource and usage projections |
 | [`integrity-action-log`](components/integrity-action-log/README.md) | 2.11.0 | Action Log HTTP service and read-session evidence |
 | [`integrity-memory-plane`](components/integrity-memory-plane/README.md) | 1.0.0 | Catalog synchronization, retention and storage tools |
-| [`integrity-client-memory`](components/integrity-client-memory/README.md) | 1.13.0 | Codex, Claude and Antigravity hook/broker profiles |
+| [`integrity-client-memory`](components/integrity-client-memory/README.md) | 1.13.1 | Codex, Claude and Antigravity hook/broker profiles |
 | [`integrity-home`](components/integrity-home/README.md) | 0.2.0a1 | Home archive and Chronicle projections |
 | [`integrity-space`](components/integrity-space/README.md) | 0.2.0 | Read-only MCP Apps lab and workbench UI |
 | [`integrity-claude-code`](components/integrity-claude-code/README.md) | 0.1.0rc3 | Separately guarded Windows CLI executor |
