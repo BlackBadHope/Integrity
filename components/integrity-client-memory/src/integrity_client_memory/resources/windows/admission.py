@@ -1383,6 +1383,9 @@ def handle_prompt(event: str, payload: dict[str, Any], identity: str) -> None:
             # The native turn can contain several owner intents (steering).
             # The staged/authenticated envelope pins retries to this exact intent.
             "turn_memory_intent_id": "intent:" + envelope["turn_ref_digest"][7:],
+            # No harness-notification route here: every new intent is an owner turn,
+            # which the opt-in admission-first gate needs to act at all.
+            "turn_kind": "owner",
             "prompt_sha256": sha256_text(intent),
             "prompt_bytes": envelope["prompt_bytes"],
             "prompt_segment_count": envelope["segment_count"],

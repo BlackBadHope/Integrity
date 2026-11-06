@@ -24,8 +24,9 @@ The first stable release in this repository, tagged as the GitHub release
   Linux Claude Code Native profile, although `turn-guard.json` said `block`.
   The Native hook never marked the turn as an owner turn, and the gate only
   acts in owner turns. The hook now marks every new Native intent as an owner
-  turn, as the `Stop` guard already assumed. The same applies to Codex Native
-  hooks, where the gate is opt-in.
+  turn, as the `Stop` guard already assumed. The same applies to the Codex
+  Native hooks and the Windows seats hook, where the gate is opt-in. Only the
+  Claude Code standalone hook had set it before.
 - `docs/linux-native-clients.md` now creates `~/.config/integrity/clients`
   before the profile build, which needs an existing parent directory.
 
