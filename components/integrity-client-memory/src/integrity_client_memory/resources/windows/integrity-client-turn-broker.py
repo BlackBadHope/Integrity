@@ -1927,7 +1927,7 @@ class TurnBroker:
             raise BrokerError('lifecycle dispatch journal unavailable; no send',
                 layer='broker-lifecycle-journal',request_sent=False,retryable=False) from None
 
-    def _validate_current_open(self, arguments):
+    def _validate_current_open(self, arguments, *, admitted_now=False):
         # Fresh owning state AND Native head, repeated immediately before send.
         # A model cannot use an older admitted binding after user steering.
         try:
@@ -1941,7 +1941,9 @@ class TurnBroker:
                     or state.get('turn_memory_generation') != binding['generation']
                     or state.get('turn_memory_intent_id') != arguments['intent_id']
                     or state.get('prompt_sha256') != arguments['prompt_sha256']
-                    or state.get('model_mcp_context_admission_id') != binding['context_admission_id']
+                    # Post-admission open: the hook records the admission only after delivery.
+                    or (state.get('model_mcp_context_admission_id') != binding['context_admission_id']
+                        and not (admitted_now and 'model_mcp_context_admission_id' not in state))
                     or not isinstance(head,dict) or head.get('id') != arguments['turn_id']
                     or head.get('status') != 'inProgress'):
                 raise ValueError('owning source superseded')
@@ -2039,6 +2041,11 @@ class TurnBroker:
         # Reuse only an already admitted live facade, after the same current
         # ownership check and replay ACK. Cold hook callers retain their
         # existing isolated transport and all pre-send claim checks.
+        # Option 4: the post-admission open uses the admitted warm stream only;
+        # it must never add a cold transport start to the admission it follows.
+        if getattr(self, "_post_admission_open_active", False) and (self.upstream is None or not self.bound):
+            raise BrokerError("post-admission open requires the admitted warm stream",
+                              layer="broker-post-admission-open", request_sent=False, retryable=False)
         pending = getattr(self, "_uncertain_lifecycle_registrations", set())
         if name == "integrity_turn_memory_close" and arguments.get("registration_id") in pending:
             raise BrokerError("prior lifecycle close outcome requires canonical readback",
@@ -2057,9 +2064,14 @@ class TurnBroker:
                     layer="broker-lifecycle-uncertain", request_sent=False, retryable=False)
             try:
                 if name == "integrity_turn_memory_open" and claims is None:
-                    self._validate_current_open(arguments)
+                    self._validate_current_open(
+                        arguments, admitted_now=getattr(self, "_post_admission_open_active", False))
                 self._begin_lifecycle_dispatch(name, arguments)
-                result = self.upstream.call_tool(name, arguments)
+                result = (self.upstream.request(
+                    "tools/call", {"name": name, "arguments": arguments},
+                    timeout=self.POST_ADMISSION_OPEN_TIMEOUT_SECONDS)
+                    if getattr(self, "_post_admission_open_active", False)
+                    else self.upstream.call_tool(name, arguments))
             except BrokerError as error:
                 self._remember_uncertain_lifecycle(name, arguments, error)
                 if error.request_sent and name == "integrity_turn_memory_close":
@@ -2097,7 +2109,8 @@ class TurnBroker:
                         raise BrokerError('owning_hook_lifecycle_superseded_before_send',
                             layer='broker-owning-lifecycle',request_sent=False,retryable=False) from None
                 if name == "integrity_turn_memory_open" and claims is None:
-                    self._validate_current_open(arguments)
+                    self._validate_current_open(
+                        arguments, admitted_now=getattr(self, "_post_admission_open_active", False))
                 self._begin_lifecycle_dispatch(name, arguments)
                 lifecycle_call_started = True
                 return target.call_tool(name, arguments)
@@ -2279,6 +2292,116 @@ class TurnBroker:
         except BrokerError:
             self.close();self.bound=False;self._own_turn_binding=None
             raise
+
+    POST_ADMISSION_OPEN_TIMEOUT_SECONDS = 4.0
+    TURN_REGISTRATION_HANDOFF_PROTOCOL = "integrity-client/broker-turn-registration-handoff/v1"
+
+    @staticmethod
+    def _registration_receipt(result, arguments):
+        """Return the signed registration receipt for exactly ``arguments``, else None."""
+        try:
+            if not isinstance(result, dict) or result.get("isError") is True:
+                return None
+            value = result.get("structuredContent")
+            if value is None:
+                content = result["content"]
+                if len(content) != 1 or content[0].get("type") != "text":
+                    return None
+                value = json.loads(content[0]["text"])
+            receipt = value["receipt"]
+            unsigned = {k: v for k, v in receipt.items() if k not in {"signature", "receipt_id"}}
+            raw = json.dumps(unsigned, ensure_ascii=False, sort_keys=True,
+                             separators=(",", ":"), allow_nan=False).encode()
+            expected = "sha256:" + hashlib.sha256(b"turn-memory-registration-v1\0" + raw).hexdigest()
+            identity = {key: arguments[key] for key in ("machine_id", "thread_id", "turn_id", "intent_id")}
+            if (receipt.get("protocol") != "integrity-guardian/turn-memory-registration/v1"
+                    or receipt.get("receipt_id") != expected
+                    or receipt.get("identity") != identity
+                    or receipt.get("prompt_sha256") != arguments["prompt_sha256"]
+                    or receipt.get("terminal_required") is not True
+                    or receipt.get("production_authority") is not False
+                    or re.fullmatch(r"sha256:[a-f0-9]{64}", str(receipt.get("namespace_fingerprint"))) is None
+                    or receipt.get("signature", {}).get("algorithm") != "ed25519"):
+                return None
+            return receipt
+        except (KeyError, TypeError, ValueError, AttributeError, IndexError, RecursionError):
+            return None
+
+    def _open_own_registration_after_admission(self):
+        """Option 4: open this turn's registration over the admitted warm stream.
+
+        Runs before the admission response is delivered, so the owning hook's
+        PostToolUse finds the receipt instead of starting a cold client. The
+        identity comes from the hook's private envelope (the claim owner bound at
+        admission) and the owning state, never from model input, and the hook must
+        have asked for the hand-off for this intent. The send goes through
+        _standalone_turn_memory_call: the same ownership checks, dispatch journal
+        and uncertainty bookkeeping as every owning lifecycle call, on the warm
+        stream only and with a short timeout. Replay ACKs awaiting public delivery
+        stay deferred. The admission result is never changed. On any failure no
+        hand-off is written and the hook opens the registration itself; a send
+        whose outcome is unknown leaves the journal, so the hook records coverage
+        debt rather than a second send (the server would replay the same open).
+        """
+        name = "integrity_turn_memory_open"
+        self._post_admission_open_stage = "not-attempted"
+        binding = self._own_turn_binding
+        owner = getattr(turn_envelope, "_RESUME_CLAIM_OWNER", None)
+        try:
+            if (not self.bound or self.upstream is None or not isinstance(binding, dict)
+                    or binding.get("admitted") is not True or not isinstance(owner, tuple)
+                    or len(owner) != 3 or owner[1] != binding.get("generation")
+                    or owner[2] != binding.get("turn_ref_digest")):
+                self._post_admission_open_stage = "skipped-no-owning-binding"
+                return
+            hashes = binding["hashes"]
+            root = Path(os.environ.get("INTEGRITY_CLIENT_STATE_ROOT",
+                                       str(Path.home() / ".codex/integrity-memory/state")))
+            path = root / (hashes["thread_id"] + ".json")
+            if path.is_symlink() or not path.is_file():
+                raise ValueError("state unavailable")
+            state = json.loads(path.read_bytes())
+            arguments = {"machine_id": turn_envelope._machine_id(), "thread_id": owner[0],
+                         "turn_id": state.get("turn_id"), "intent_id": binding["intent_id"],
+                         "prompt_sha256": binding["prompt_sha256"]}
+            sha = lambda value: hashlib.sha256(value.encode("utf-8")).hexdigest()  # noqa: E731
+            consent = state.get("turn_memory_registration_handoff")
+            if (state.get("turn_memory_status") != "provisional"
+                    # Only a hook that takes the hand-off for this intent asked for it.
+                    or consent != {"protocol": self.TURN_REGISTRATION_HANDOFF_PROTOCOL,
+                                   "intent_id": binding["intent_id"]}
+                    or "turn_memory_registration_id" in state
+                    or "model_mcp_context_admission_id" in state
+                    or any(not isinstance(arguments[key], str) or sha(arguments[key]) != hashes.get(key)
+                           for key in ("machine_id", "thread_id", "turn_id"))):
+                self._post_admission_open_stage = "skipped-state-not-provisional"
+                return
+        except (OSError, ValueError, KeyError, TypeError, AttributeError):
+            self._post_admission_open_stage = "skipped-precheck-failed"
+            return
+        self._post_admission_open_active = True
+        try:
+            result = self._standalone_turn_memory_call(name, arguments)
+        except BrokerError as error:
+            self._post_admission_open_stage = ("send-outcome-unknown" if error.request_sent
+                                               else "skipped-" + error.layer)
+            return
+        finally:
+            self._post_admission_open_active = False
+        receipt = self._registration_receipt(result, arguments)
+        if receipt is None:
+            self._post_admission_open_stage = "receipt-invalid"
+            return
+        record = {"protocol": self.TURN_REGISTRATION_HANDOFF_PROTOCOL,
+                  "turn_ref_digest": binding["turn_ref_digest"], "generation": binding["generation"],
+                  "intent_id": binding["intent_id"], "arguments": arguments, "receipt": receipt}
+        try:
+            turn_envelope._write_atomic(root / ("turn-registration-handoff-" + hashes["thread_id"] + ".json"),
+                                        record)
+        except (OSError, ValueError, turn_envelope.TurnEnvelopeError):
+            self._post_admission_open_stage = "handoff-write-failed"
+            return
+        self._post_admission_open_stage = "handed-off"
 
     def _adopt_admitted_own_binding(self, result):
         binding = self._own_turn_binding
@@ -2574,7 +2697,8 @@ class TurnBroker:
                     or any(not isinstance(arguments.get(key), str) or sha(arguments[key]) != hashes.get(key)
                            for key in ('machine_id','thread_id','turn_id'))):
                 raise BrokerError('foreign_registration_open_denied', layer='broker-owning-lifecycle')
-            self._validate_current_open(arguments)
+            self._validate_current_open(
+                arguments, admitted_now=getattr(self, "_post_admission_open_active", False))
             return
         if name not in {'integrity_turn_memory_close','integrity_turn_memory_gap'}:
             raise BrokerError('owning_lifecycle_tool_invalid', layer='broker-owning-lifecycle')
@@ -2718,6 +2842,8 @@ class TurnBroker:
                         self._binding_loss_receipt_digest = None
                         self._adopt_admitted_own_binding(result)
                         self._save_delivered_context_resume(result)
+                        if name == CURRENT_TURN_CONTEXT_TOOL:
+                            self._open_own_registration_after_admission()
                     if turn_ref is not None and claim_id is not None:
                         if self._read_seal_retry(result):
                             try:

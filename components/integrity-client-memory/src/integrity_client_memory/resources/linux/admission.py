@@ -1423,6 +1423,54 @@ def detach_turn_memory(state: dict[str, Any], reason: object) -> None:
     )
 
 
+TURN_REGISTRATION_HANDOFF_PROTOCOL = "integrity-client/broker-turn-registration-handoff/v1"
+
+
+def take_broker_registration_handoff(identity: str, state: dict[str, Any],
+                                     arguments: dict[str, Any]) -> dict[str, Any] | None:
+    """Option 4: use the registration the model's broker opened right after admission.
+
+    The broker writes a one-use hand-off before it delivers the admission. The
+    file is removed whenever it is read. It is accepted only for this exact turn
+    envelope, generation and open arguments, and only if the receipt id is the
+    recomputed content digest; the caller then applies its usual receipt checks.
+    Anything else is ignored and the hook opens the registration itself.
+    """
+    path = state_root() / f"turn-registration-handoff-{sha256_text(identity)}.json"
+    try:
+        if path.is_symlink() or not path.is_file():
+            return None
+        raw = path.read_bytes()
+    except OSError:
+        return None
+    finally:
+        try:
+            if path.is_file() or path.is_symlink():
+                path.unlink()
+        except OSError:
+            pass
+    try:
+        value = json.loads(raw)
+        receipt = value["receipt"]
+        unsigned = {k: v for k, v in receipt.items() if k not in {"signature", "receipt_id"}}
+        canonical = json.dumps(unsigned, ensure_ascii=False, sort_keys=True,
+                               separators=(",", ":"), allow_nan=False).encode()
+        digest = "sha256:" + hashlib.sha256(b"turn-memory-registration-v1\0" + canonical).hexdigest()
+    except (ValueError, KeyError, TypeError, AttributeError, RecursionError):
+        return None
+    if (
+        not isinstance(value, dict)
+        or value.get("protocol") != TURN_REGISTRATION_HANDOFF_PROTOCOL
+        or value.get("turn_ref_digest") != state.get("turn_ref_digest")
+        or value.get("generation") != state.get("turn_memory_generation")
+        or value.get("intent_id") != arguments.get("intent_id")
+        or value.get("arguments") != arguments
+        or receipt.get("receipt_id") != digest
+    ):
+        return None
+    return {"receipt": receipt}
+
+
 def open_admitted_turn_memory(identity: str, state: dict[str, Any]) -> dict[str, Any]:
     global LIFECYCLE_DEADLINE
     current_turn = state.get("turn_id")
@@ -1442,20 +1490,22 @@ def open_admitted_turn_memory(identity: str, state: dict[str, Any]) -> dict[str,
         "intent_id": intent_id,
         "prompt_sha256": prompt_sha256,
     }
-    state["turn_memory_unresolved_handle"] = {
-        **arguments,
-        "generation": state.get("turn_memory_generation"),
-    }
-    save_state(identity,state)
-    LIFECYCLE_DEADLINE = time.monotonic() + LIFECYCLE_BUDGET_SECONDS
-    try:
+    opened = take_broker_registration_handoff(identity, state, arguments)
+    if opened is None:
+        state["turn_memory_unresolved_handle"] = {
+            **arguments,
+            "generation": state.get("turn_memory_generation"),
+        }
+        save_state(identity,state)
+        LIFECYCLE_DEADLINE = time.monotonic() + LIFECYCLE_BUDGET_SECONDS
         try:
-            opened = lifecycle_call("integrity_turn_memory_open", arguments,owning_state=state,owning_identity=identity)
-        except HookTransportError:
-            remaining_lifecycle_seconds(1)
-            opened = lifecycle_call("integrity_turn_memory_open", arguments,owning_state=state,owning_identity=identity)
-    finally:
-        LIFECYCLE_DEADLINE = None
+            try:
+                opened = lifecycle_call("integrity_turn_memory_open", arguments,owning_state=state,owning_identity=identity)
+            except HookTransportError:
+                remaining_lifecycle_seconds(1)
+                opened = lifecycle_call("integrity_turn_memory_open", arguments,owning_state=state,owning_identity=identity)
+        finally:
+            LIFECYCLE_DEADLINE = None
     receipt = opened.get("receipt")
     if not isinstance(receipt, dict):
         raise HookError("turn_registration_receipt_missing")
@@ -1512,6 +1562,11 @@ def initialize_observed_native_intent(*, identity: str, current_turn: str,
             # The native turn can contain several owner intents (steering).
             # The staged/authenticated envelope pins retries to this exact intent.
             "turn_memory_intent_id": "intent:" + envelope["turn_ref_digest"][7:],
+            # Option 4: this hook takes the broker's registration hand-off for this intent.
+            "turn_memory_registration_handoff": {
+                "protocol": TURN_REGISTRATION_HANDOFF_PROTOCOL,
+                "intent_id": "intent:" + envelope["turn_ref_digest"][7:],
+            },
             "prompt_sha256": sha256_text(intent),
             "prompt_bytes": envelope["prompt_bytes"],
             "prompt_segment_count": envelope["segment_count"],
