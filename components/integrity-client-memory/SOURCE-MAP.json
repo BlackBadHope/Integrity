@@ -1,0 +1,500 @@
+[
+  {
+    "path": "docs/COHORT_ROOTS.md",
+    "source": "canonical-package-docs/COHORT_ROOTS.md",
+    "source_sha256": "f802820199e695d34515383107e4cf1a8c8ac907679b31e09aee051ba97e3b61",
+    "sha256": "e5c73381ad5f02e15e5d8d20d4d62d69149645780d6516f6ee196f1df89cdd87"
+  },
+  {
+    "path": "src/integrity_client_memory/broker_adapter.py",
+    "source": "canonical-package/broker_adapter.py",
+    "source_sha256": "7178dd94ec1314c88e42bc65d4232867643fb756900530c8ed2599909624922a",
+    "sha256": "a9dd257a8e52391b329977af3d9a6f70f8084f20cbb405bd767548d94c49e4ef",
+    "derivation_note": "live-sync-20261021: root-close managed source merged with CLOSE54 8a6b792 and CLOSE55 pending own close; original source_sha256 preserved"
+  },
+  {
+    "path": "src/integrity_client_memory/broker_bundle.py",
+    "source": "canonical-package/broker_bundle.py",
+    "source_sha256": "2575ce35c8653c634f97cf6a8c969db26a132de0f0f198d700a48d2a75254ded",
+    "sha256": "65739932c937bf6afd5124f127b090dd3e1c46752acfff274f166075be789b3f",
+    "derivation_note": "root-close-package-20261021 reviewed source/compiler transform; original source digest retained"
+  },
+  {
+    "path": "src/integrity_client_memory/core_delivery.py",
+    "source": "canonical-package/core_delivery.py",
+    "source_sha256": "92d8b52cab94aa8ca3fe0cc8ca6f44230e8bc40d244f59378bf6a2b978782d2a",
+    "sha256": "d04d15116da328ce332278fa0b6923a9ee4009461ebafc42a3ff972ab4d73d71",
+    "derivation_note": "canonical-package-source; Windows recovery cohort compiled by broker_bundle"
+  },
+  {
+    "path": "src/integrity_client_memory/data/tools-current.json",
+    "source": "clients/windows/integrity-client-tools.json",
+    "source_sha256": "09b70292b3b5238755741095fda74107baa2d2d1d1a5e8867c51ee09a17b7fa5",
+    "sha256": "5d1664dd9701e31caf8e6ba90a82482e7f6cb029a4af8b439672085fba7087cb",
+    "disposition": "superseded-by-canonical-memory-api-2.11-tools",
+    "derivation_note": "root-close-package-20261021 explicit managed source transform; original source_sha256 preserved"
+  },
+  {
+    "path": "src/integrity_client_memory/generation_navigation.py",
+    "source": "managed-source/generation_navigation.py",
+    "source_sha256": "dddfbd10d72aba2b040e78eeeab8aba675fbc9efefbf7f9ce637cf731415a1b0",
+    "sha256": "6e42c14dccc37ef591dfcff53a43636e6cd052daf327df8c2e0696ac89dbd35b",
+    "projection": "Pure owner-parameterized renderer; deployment paths and pins omitted."
+  },
+  {
+    "path": "src/integrity_client_memory/native_install.py",
+    "source": "canonical-package/native_install.py",
+    "source_sha256": "43ffe843f81271a9cb34ce23e2e2ed0a17d4926f5db47a54ad9e3ec550025aaa",
+    "sha256": "835f0e8ce28eaae2c516776d5c2291544563154391e90c33a354c923ba6a6d8a",
+    "derivation_note": "root-close-package-20261021 explicit managed source transform; original source_sha256 preserved; linux-native-20261104: Linux user-custody Native profile (public source change); original source_sha256 preserved; linux-native-20261104: Linux Claude Code Native profile (public source change)"
+  },
+  {
+    "path": "src/integrity_client_memory/native_receipts.py",
+    "source": "canonical-package/native_receipts.py",
+    "source_sha256": "c41a092293ece65cf2bf1b3c692ecdb9f66affd9d19cd8453a0415de910feb92",
+    "sha256": "c41a092293ece65cf2bf1b3c692ecdb9f66affd9d19cd8453a0415de910feb92",
+    "derivation_note": "canonical-package-source; Windows recovery cohort compiled by broker_bundle"
+  },
+  {
+    "path": "src/integrity_client_memory/native_runtime.py",
+    "source": "canonical-package/native_runtime.py",
+    "source_sha256": "83d096f13d08d232c5e47bcb7eca0104fa138e6cb3433e0e447c77827729cb53",
+    "sha256": "e6e040b396d8174b4f77304f21777226315e9a14c5e689eb0685aa30bbcda723",
+    "derivation_note": "canonical-package-source; Windows recovery cohort compiled by broker_bundle; linux-native-20261104: Linux user-custody Native profile (public source change); original source_sha256 preserved; linux-native-20261104: Linux Claude Code Native profile (public source change)"
+  },
+  {
+    "path": "src/integrity_client_memory/operation_ledger.py",
+    "source": "canonical-package/operation_ledger.py",
+    "source_sha256": "e6bb9b461e2689c6ae830f57ec2be509494fbc279b412ce991cd4819e5793ffa",
+    "sha256": "e6bb9b461e2689c6ae830f57ec2be509494fbc279b412ce991cd4819e5793ffa",
+    "derivation_note": "canonical-package-source; Windows recovery cohort compiled by broker_bundle"
+  },
+  {
+    "path": "src/integrity_client_memory/owning_native.py",
+    "source": "native-source/integrity_owning_native.py",
+    "source_sha256": "e9e84502e5ac2e7d305d1c04830f1e38784bc650bd172878e6e27ab5109b642c",
+    "sha256": "c210c50a3d80d726e70d0c52b338f17c2eb50463daccf48d1ac7815c4fdee402",
+    "derivation_note": "linux-native-20261104: Linux user-custody Native profile (public source change); original source_sha256 preserved"
+  },
+  {
+    "path": "src/integrity_client_memory/profile.py",
+    "source": "canonical-package/profile.py",
+    "source_sha256": "a0c0fbc079dcb0fc7171970f37168490f1d781bbdec4a6368ae04c116afe4132",
+    "sha256": "a0c0fbc079dcb0fc7171970f37168490f1d781bbdec4a6368ae04c116afe4132",
+    "derivation_note": "canonical-package-source; Windows recovery cohort compiled by broker_bundle"
+  },
+  {
+    "path": "src/integrity_client_memory/profile_roots.py",
+    "source": "canonical-package/profile_roots.py",
+    "source_sha256": "92ae9ca48a8b9e1fdd07d7e60527481534e554626b37c8799911b1b4ec99f4fb",
+    "sha256": "92ae9ca48a8b9e1fdd07d7e60527481534e554626b37c8799911b1b4ec99f4fb",
+    "derivation_note": "canonical-package-source; Windows recovery cohort compiled by broker_bundle"
+  },
+  {
+    "path": "src/integrity_client_memory/recovery_client.py",
+    "source": "canonical-package/recovery_client.py",
+    "source_sha256": "65205bacdabd9b8f1f21a77f2bb4bce0234c61d546bf00512e71fc604feff503",
+    "sha256": "65205bacdabd9b8f1f21a77f2bb4bce0234c61d546bf00512e71fc604feff503",
+    "derivation_note": "canonical-package-source; Windows recovery cohort compiled by broker_bundle"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/antigravity/antigravity_hook.py",
+    "source": "clients/antigravity/antigravity_hook.py",
+    "source_sha256": "c20dbae8dd5c91b3de49ea16c44d7787be7dad8494298436da153ae300c37a61",
+    "sha256": "645fb640674f265679c1b71f7af8559ba9c1f221cbb1a46ba36108df4bf6fe02"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/antigravity/antigravity_state.py",
+    "source": "clients/antigravity/antigravity_state.py",
+    "source_sha256": "705511ce5af826c4f5e215793ea6cd3702f866dcc3d9d8e143ccc0fc5475abba",
+    "sha256": "433197be6e8fe05756b12732fff15578f747fdc5e6388617db0012a7be02986d"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/antigravity/integrity_antigravity_broker.py",
+    "source": "clients/antigravity/integrity_antigravity_broker.py",
+    "source_sha256": "1883e593a4512e12bc5fda9761b6b0e2c05f6a411266d0060b2bf800da2a6a57",
+    "sha256": "db1b48ed1fff36d7912da9f1cea699b8566919ffed23d43928c88535c5dee65a"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/antigravity/integrity_antigravity_hook.py",
+    "source": "clients/antigravity/integrity_antigravity_hook.py",
+    "source_sha256": "cc51a1471071324fba27a24821b2923214d5c44eb5d81c191c8e05693f929bef",
+    "sha256": "973aa048233283aa5a56624439a09ff42ccc565fb73e39a87256e225bfc9dd8e"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/antigravity/integrity_client_turn_envelope.py",
+    "source": "clients/antigravity/integrity_client_turn_envelope.py",
+    "source_sha256": "f2d4e275a55e06dcedf3b04971db1506c586e536b6490c008a57d23b0571c703",
+    "sha256": "d05a8b9c71c3531a6e90a2348cf08cbd8b5378b1e26748afb0e1982fb65b3285"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/antigravity/turn_broker_core.py",
+    "source": "clients/antigravity/turn_broker_core.py",
+    "source_sha256": "2d90c8be9b6a3ecb20ef7c18f904d061356832ba81486a3a1bbc0f396e39edeb",
+    "sha256": "711378f5d574cad03a535059349d343c7551afb88f797bd268e9417ee3a194cf"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/claude-native/claude_owning_native.py",
+    "source": "clients/claude-native/claude_owning_native.py",
+    "source_sha256": "dfbad8c1ba9af37a0b2b6bad0f11f7cd8b71b5906812825253940f4af8acf33e",
+    "sha256": "12fa071b3a442bd3c05d33c5893e1060fd1544498a893efc98f1f12effdab037",
+    "projection": "Code-only Native CLI profile; publisher/session bindings become owner configuration. No owner data or enrollment."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/claude-native/claude_terminal_memory.py",
+    "source": "clients/claude-native/claude_terminal_memory.py",
+    "source_sha256": "bfc55aad691ef4b05591d90f946b000cd2cd3ba647ac060ce822875cda19478b",
+    "sha256": "96ff7247dcc7e96083c80b248b8483196b59cd047e4e6569e61b9f5ff9ce46b8",
+    "projection": "Code-only Native CLI profile; publisher/session bindings become owner configuration. No owner data or enrollment."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/claude-native/integrity-client-admission.py",
+    "source": "clients/claude-native/integrity-client-admission.py",
+    "source_sha256": "1a8670ca29c7cff7781b7b76aeabc88a6daea260845b2bd0b64fca6458293cdb",
+    "sha256": "f775d4c842e2f9131bbef95d1d39b54f3f466e258d617969fd5afe3e8427fdce",
+    "projection": "Code-only Native CLI profile; publisher/session bindings become owner configuration. No owner data or enrollment."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/claude-native/integrity-client-turn-broker.py",
+    "source": "clients/claude-native/integrity-client-turn-broker.py",
+    "source_sha256": "48f9eea8967f765670df960cf542f81440b8932cc798177a986f4cbec7af2e86",
+    "sha256": "f1023580d3541ddc473534640f2674f2f55e4e41fe381ad9f504b3fa3a66bde2",
+    "projection": "Code-only Native CLI profile; publisher/session bindings become owner configuration. No owner data or enrollment."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/claude-native/integrity_client_turn_envelope.py",
+    "source": "clients/claude-native/integrity_client_turn_envelope.py",
+    "source_sha256": "0327154121e7d2b12482f1d5a8c6d1e869566d866215ecff8e691de1ddbebaac",
+    "sha256": "3f019a9ca872ce146d83cd8cd61807bd57da94d4a7007bc7cf47fdb724166b1c",
+    "projection": "Code-only Native CLI profile; publisher/session bindings become owner configuration. No owner data or enrollment."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/claude/admission.py",
+    "source": "clients/claude/admission.py",
+    "source_sha256": "87972c08f3ce1cbe1bfd6a020de5af61eec534ad948252ba734b5510d3125816",
+    "sha256": "a13e906358be24b87d4dd4a38ba1507842ff248ea088f213a36b0cae14f7d4b2"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/common/generation_launcher.py",
+    "source": "guardian/plugins/integrity-memory/hooks/integrity-client-turn-launcher.py",
+    "source_sha256": "9269d20d7c8b47c907e34dba4a83a6016d94d80569b33f3f7e2cfd45107086a8",
+    "sha256": "1d52289f039792249d657d40387e87559bd51d52ab024090b94d4ddffefb5c40"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/common/integrity_client_turn_envelope.py",
+    "source": "clients/common/integrity_client_turn_envelope.py",
+    "source_sha256": "1eb54b7555972cd5699f36194531d0dcf0f4f4f0c1696b2eede5a934eccd8f3f",
+    "sha256": "ee71d2d678486936a40e90ac4090b7575e9075e440c5e3b1ebb0a0709cc994e8"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/common/integrity_scope_synapse.py",
+    "source": "guardian/plugins/integrity-memory/hooks/integrity_scope_synapse.py",
+    "source_sha256": "baf13ab6bb2f3c94886ab703b54a53efae16b302f890e61c6512d71823436c2f",
+    "sha256": "988529e3543c4864f7ff1474f7d3c62e3b3b6f633277c2e96fd0f740fdce850a"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/linux/admission.py",
+    "source": "clients/linux/admission.py",
+    "source_sha256": "a2f2e68665fb9a433cca8c99a6b3eb5069c62b0e283ccb785109bd948d9c805d",
+    "sha256": "b79fcc71075b187222d428a402dc149bca44bf631d932c90f631e7b1eca82ad8",
+    "derivation_note": "linux-hotfix-port-20261021: installed Linux hotfix chain broker 1.6.1-linux.2..7 / hook 1.7.4-linux.5 (public 1.8.0-linux.5); renders the installed linux.7 generation da20ffbf with owner values; original source_sha256 preserved"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/linux/integrity-client-turn-broker.py",
+    "source": "clients/linux/integrity-client-turn-broker.py",
+    "source_sha256": "34e1951905ce56a72257e42e23ad26cfc832a040f404ba90bf35e1207e8bd974",
+    "sha256": "5b2508e668318d4face6e669f48b6595c002098cb0415ef787d65490966b8351",
+    "derivation_note": "linux-hotfix-port-20261021: installed Linux hotfix chain broker 1.6.1-linux.2..7 / hook 1.7.4-linux.5 (public 1.8.0-linux.5); renders the installed linux.7 generation da20ffbf with owner values; original source_sha256 preserved"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/linux/integrity_client_turn_envelope.py",
+    "source": "clients/linux/integrity_client_turn_envelope.py",
+    "source_sha256": "97e44e8471d0fc11c16b32d7a1e77874ffb009d2dc4f09a07bccbb8b100834d9",
+    "sha256": "38a028de91d6b690b3038eac6a199272cf8e5c4f984bc58b3caf173b38de9857",
+    "projection": "Portable configuration preserved; verified lifecycle concurrency and typed diagnostics repair.",
+    "derivation_note": "linux-hotfix-port-20261021: installed Linux hotfix chain broker 1.6.1-linux.2..7 / hook 1.7.4-linux.5 (public 1.8.0-linux.5); renders the installed linux.7 generation da20ffbf with owner values; original source_sha256 preserved"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/linux/linux_runtime_factory.py",
+    "source": "clients/linux/linux_runtime_factory.py",
+    "source_sha256": "04fcd71e0c7de98569ff926bf40921794555f50a032364af6a10c212b7e9d88b",
+    "sha256": "c320779a883df2c95c7eff4f96a85ce6442a872a4e5d27619e7875becc2bdfc6",
+    "projection": "Portable configuration preserved; verified lifecycle concurrency and typed diagnostics repair."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/linux/native/integrity_delegation_codex.py",
+    "source": "native-source/integrity_delegation_codex.py",
+    "source_sha256": "278e9d807405b1c46bf883a8bf32d670720b137ddfe8f934f50e80bcf16417d9",
+    "sha256": "0178299baff3f317ead3d6384ed0ee19b7a92793feb9a73fdf8a21020e2305c0"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/linux/native/integrity_delegation_core.py",
+    "source": "native-source/integrity_delegation_core.py",
+    "source_sha256": "7290246e9600209e5aee7c055f0789560de10d60eaecab4a850a8a6f9ea87f35",
+    "sha256": "294f99862b5d08cef1430366c7ac7979f3ca557c4de8d7eca4a735c65094d52f"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/linux/native/integrity_scope_synapse.py",
+    "source": "native-source/integrity_scope_synapse.py",
+    "source_sha256": "402e57da05e4a36ac7ae5e70f19531a2829cfbd300a8209d02a448994000b625",
+    "sha256": "30a7f924e3cd7e8d7a03366f1048be19b99d6b846d6a092d4a02a80177bf5f87"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/linux/native/linux_admission_dispatcher.py",
+    "source": "native-source/linux_admission_dispatcher.py",
+    "source_sha256": "cfaa84cce1e940b2dcc6fdd935ec3e995bb8f2166c162daa7f9f37a252d2ef1a",
+    "sha256": "a7309618b4643f73bc8a848f918d2eeeee6e37c28cc3c3e44d56c397ccf96e3e",
+    "derivation_note": "linux-hotfix-port-20261021: installed Linux hotfix chain broker 1.6.1-linux.2..7 / hook 1.7.4-linux.5 (public 1.8.0-linux.5); renders the installed linux.7 generation da20ffbf with owner values; original source_sha256 preserved"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/linux/native/linux_admission_seam.py",
+    "source": "native-source/linux_admission_seam.py",
+    "source_sha256": "a5c4deae3051523d08a2abf361f3799ede7ca5c3e8cea962d9461f8466489bce",
+    "sha256": "1f54f842e5d27cfd8748c8de17f51e08252e35ad46defe9b60dea7ba4cd142c9"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/linux/native/linux_delegation_provider.py",
+    "source": "native-source/linux_delegation_provider.py",
+    "source_sha256": "8ad860a809b156107feaf3126cf9a4871010a195bcfdd8b12b3c3f38a1796fac",
+    "sha256": "0470eab654dfb6f4b4a7d33ad3b152c5e04c5a55c88f5d41693fedd6142fb5d5"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/linux/native/linux_native_peer_client.py",
+    "source": "native-source/linux_native_peer_client.py",
+    "source_sha256": "b94cc00a68235de5a50b1e6191ba5f659fd5ad44eb668c9e81943c91889a0462",
+    "sha256": "dbe293c4a98609c0ead89160d5dc865d5b4fd38ad288d7c9e28dce9c9275ef0b"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/linux/native/linux_scope_capture.py",
+    "source": "native-source/linux_scope_capture.py",
+    "source_sha256": "827df0911d592a6bf8070e80b51bc306518c4c0a19b10d00b324040276320227",
+    "sha256": "e6d012e104868f8203032a9e7bfc7f45ae4daf669275bcf4e8381b5b84170251"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/linux/native/linux_terminal_peer_bridge.py",
+    "source": "native-source/linux_terminal_peer_bridge.py",
+    "source_sha256": "be124d2df2ab7229f66cc8c9a117ad3dcda7ffd0572000a71b7c66178c15cdf7",
+    "sha256": "bfd74936399eb58f00c6f6616d1e4de8490ec1cc4a82738ce94c567c3d6717a2"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/linux/native/linux_terminal_worker.py",
+    "source": "native-source/linux_terminal_worker.py",
+    "source_sha256": "0cc57a7088f22526f9e3eb0187d69349c9f6b0d7a4d033d540bb0b5b1412af1d",
+    "sha256": "b892f85d116c79ed29bb583f46c366f5f72ccd58ed50c2aec2cb48da9707a357"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/linux/native/native_evidence_facade.py",
+    "source": "native-source/native_evidence_facade.py",
+    "source_sha256": "a6c157c47baf483b11c0e0f0ceea1b7a8f4c72635203e534ea8c2cc96c619bf2",
+    "sha256": "d6a5bca1b6916290a9d369eee62080e7ce79cac0dbd3588eae24ec7bf1b6e7f2"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/linux/native/native_evidence_peer_auth.py",
+    "source": "native-source/native_evidence_peer_auth.py",
+    "source_sha256": "5eb0a13595579cf75b5d424bdd435175eda6f670c5b92a9ae9fc55893e64d6d2",
+    "sha256": "7c2ec296f47a0f27f78ec0a4be8c99264ff1acef346ff87c7700a4bbb3fc4f40"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows-remote/integrity-client-turn-broker.py",
+    "source": "weekly-live-source/clients/windows-remote/integrity-client-turn-broker.py",
+    "source_sha256": "f52fdf529d64dae2853b57e87573e6745765fdfa78ce94a177a2dd2a182a3538",
+    "sha256": "c5a15c2f91e5034dac17325ef77335678f2f27620b1fd1a12c26259a3dc578c5",
+    "projection": "Existing privacy/configuration projection; no publisher enrollment or activation."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows-remote/integrity_client_turn_envelope.py",
+    "source": "weekly-live-source/clients/windows-remote/integrity_client_turn_envelope.py",
+    "source_sha256": "a0e9ef34ac434c18f1a5a8a76a3ce0e36723559f420496df8f43c197c931d708",
+    "sha256": "46b61657207aed4ce6099161cfb88f22129a6b68fe8f65c9753c560951e9a44c",
+    "projection": "Existing privacy/configuration projection; no publisher enrollment or activation."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows/admission-system.ps1",
+    "source": "clients/windows/admission-system.ps1",
+    "source_sha256": "5e881d2fb4c04e42023639fbab3836c0ded72cca4e2181cd30fbbd7178a37ce5",
+    "sha256": "d9215aa15f606b93e11f349254ac7cfadbdd34e8cfdb7bfa1ac79e54eecd4ef5"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows/admission.ps1",
+    "source": "clients/windows/admission.ps1",
+    "source_sha256": "9bb1a203e5c0219005fa062f4eec1391b8d8ad61d25fd5abf9af2acfe6830a6a",
+    "sha256": "d07c5956c86c9022d97c492e828720e16119f19beb129b766a454a5821bece84"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows/admission.py",
+    "source": "clients/windows/admission.py",
+    "source_sha256": "2ba97aabadc28f6c1d7e4f7561432d2b3efc89584dc0e1a1fb1191a1c6ec16a2",
+    "sha256": "6f92f123209fad11b4f73fa226289d99213b42609f7908c5118a7eb34b57c3b3"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows/integrity-client-turn-broker.py",
+    "source": "clients/windows/integrity-client-turn-broker.py",
+    "source_sha256": "6b02d3dc24946d20bad6fc81c1111003d58fcdff6a7a067f5880b082a04968ab",
+    "sha256": "06fb32fcbcf0ec5befc38abee3d7a68efcfcba9c94ee4021a72933c08af05c89",
+    "derivation_note": "root-close-package-20261021 explicit managed source transform; original source_sha256 preserved; linux-native-20261104: Linux user-custody Native profile (public source change); original source_sha256 preserved; linux-native-20261104: Linux Claude Code Native profile (public source change)"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows/integrity_client_turn_envelope.py",
+    "source": "clients/windows/integrity_client_turn_envelope.py",
+    "source_sha256": "dc5913693b24df47a1d5674b55a89dfa731c6fd1efca510a90cf672d9e0dc52e",
+    "sha256": "055ccfa6cbbcf1faa9aa6e4bbfbf3d8481ac727a3a0ae74627471372b1352d9c",
+    "derivation_note": "live-sync-20261021: root-close managed source merged with CLOSE54 8a6b792 and CLOSE55 pending own close; original source_sha256 preserved; linux-native-20261104: Linux user-custody Native profile (public source change); original source_sha256 preserved"
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows/native/delegation-native-reader.py",
+    "source": "weekly-live-source/clients/windows/native/delegation-native-reader.py",
+    "source_sha256": "0ca4a51368ad96fb5e1b4488dd42ce5b2c4648b187e99790ae6c39daa6c20c0c",
+    "sha256": "b5277ef1db377eb9fb9307cb9b19804eeab1b05019463bf4bd3451a6bfd42e23",
+    "projection": "Existing privacy/configuration projection; no publisher enrollment or activation."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows/native/integrity-client-admission.py",
+    "source": "weekly-live-source/clients/windows/native/integrity-client-admission.py",
+    "source_sha256": "d2bf15d2bb5898c479dc8a81abbfaaa2fe723f171f3273252d91507e91517e65",
+    "sha256": "43c7995640eae94016c9378c05b1bf7855db1c99badbe88cfd69a47fcbbcfa31",
+    "projection": "Existing privacy/configuration projection; no publisher enrollment or activation."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows/native/integrity_broker_contract.py",
+    "source": "weekly-live-source/clients/windows/native/integrity_broker_contract.py",
+    "source_sha256": "8faea695e81493ec666faa9861adb6d6f9977faed347c2efd945f623899b169e",
+    "sha256": "ceb291b553bff822776756f358d0cd1896604c49fb3e6cb9f869d9f4cab4c0d6",
+    "projection": "Existing privacy/configuration projection; no publisher enrollment or activation."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows/native/integrity_client_turn_envelope.py",
+    "source": "weekly-live-source/clients/windows/native/integrity_client_turn_envelope.py",
+    "source_sha256": "1cb334ab77eb0d59150e01e51dbde59a19d4c96b34f14efb8c4229c05c8e7d1e",
+    "sha256": "1965af1ca9b1476fe7396f577c6d198776c53f2c8a1b43102e66dce19afbc5c4",
+    "projection": "Existing privacy/configuration projection; no publisher enrollment or activation."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows/native/integrity_delegation_codex.py",
+    "source": "weekly-live-source/clients/windows/native/integrity_delegation_codex.py",
+    "source_sha256": "3688eae9ca34eca2c4b0e5e4796d48ffc12a9e66f6c7c266f1e5390f14851825",
+    "sha256": "cbfbb048cb1e0c1fad05fcbd1f2c9fbc2311cb11048302b46d66d219a20296e7",
+    "projection": "Existing privacy/configuration projection; no publisher enrollment or activation."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows/native/integrity_delegation_core.py",
+    "source": "weekly-live-source/clients/windows/native/integrity_delegation_core.py",
+    "source_sha256": "2154f6710e6c9b249a6d1dac2399a3c6b77b0bcc6b64eb8fd1aaac33ced67682",
+    "sha256": "294f99862b5d08cef1430366c7ac7979f3ca557c4de8d7eca4a735c65094d52f",
+    "projection": "Existing privacy/configuration projection; no publisher enrollment or activation."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows/native/integrity_delegation_scope.py",
+    "source": "weekly-live-source/clients/windows/native/integrity_delegation_scope.py",
+    "source_sha256": "4eba6afcba748721fd72f06a0b8b581bb585117b28860e6327a1f82fde6aba07",
+    "sha256": "50304198db7f799a2464f61edaf8be929c8ffe789600211fdb9b3063cc695f4f",
+    "projection": "Existing privacy/configuration projection; no publisher enrollment or activation."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows/native/integrity_delegation_terminal.py",
+    "source": "weekly-live-source/clients/windows/native/integrity_delegation_terminal.py",
+    "source_sha256": "8e7eac560a9e805c04062ecbe7ae937f1f08adc2d9ea70fdcecddaca865a4ba1",
+    "sha256": "0cc30be0b67deb44247402f541ba36aa3e40f9e813b7ea3ed9a7035a072dc9d6",
+    "projection": "Existing privacy/configuration projection; no publisher enrollment or activation."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows/native/integrity_memory_lts_hook.py",
+    "source": "weekly-live-source/clients/windows/native/integrity_memory_lts_hook.py",
+    "source_sha256": "30b0382f9620e8e4086d99d5789afe04c83b7fc05f595eb8e6643c31b51b7d44",
+    "sha256": "6faf45d846e738ccf2ba559007c8c368754f2bc76f270296b41b459b87e0eb4e",
+    "projection": "Existing privacy/configuration projection; no publisher enrollment or activation."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows/native/integrity_project_scope.py",
+    "source": "weekly-live-source/clients/windows/native/integrity_project_scope.py",
+    "source_sha256": "4a0cad6c24eb44b272950078086c8ff05e3e7b7ddb73da5a823fb98543d16ba5",
+    "sha256": "0a217a302913c3451255bd4e9017611ddafffd676d3f13ede0b0caa0af7756ad",
+    "projection": "Existing privacy/configuration projection; no publisher enrollment or activation."
+  },
+  {
+    "path": "src/integrity_client_memory/resources/windows/native/integrity_scope_synapse.py",
+    "source": "weekly-live-source/clients/windows/native/integrity_scope_synapse.py",
+    "source_sha256": "cf3138f240e0a40822da077a60a76d33c8c0b871f67ba61e15c0ce9bc0d7e13b",
+    "sha256": "f32a9e202a0ac603ed6f49f22da131d2a2e00be89adbff0705717f2a766a1bf0",
+    "projection": "Existing privacy/configuration projection; no publisher enrollment or activation."
+  },
+  {
+    "path": "src/integrity_client_memory/transport_policy.py",
+    "source": "canonical-package/transport_policy.py",
+    "source_sha256": "54cdff9f843057311ffcd3812091ebe8d25300a289d061bcbbd8164d2508f266",
+    "sha256": "54cdff9f843057311ffcd3812091ebe8d25300a289d061bcbbd8164d2508f266",
+    "derivation_note": "canonical-package-source; Windows recovery cohort compiled by broker_bundle"
+  },
+  {
+    "path": "tests/test_canonical_recovery_bundle.py",
+    "source": "canonical-package-tests/test_canonical_recovery_bundle.py",
+    "source_sha256": "736249ab44a0e2543aeb9c94a09357145464579eb33b0036b268a2d737d329d2",
+    "sha256": "da5c93121ca8d654b7edcc7406fe180c3ab7722361da14f10a11ed9f53fc18cb",
+    "derivation_note": "linux-hotfix-port-20261021: Linux broker linux.7 digest pin; live-sync-20261021: root-close managed source merged with CLOSE54 8a6b792 and CLOSE55 pending own close; original source_sha256 preserved; linux-native-20261104: Linux user-custody Native profile (public source change); original source_sha256 preserved"
+  },
+  {
+    "path": "tests/test_core_delivery_navigation.py",
+    "source": "canonical-package-tests/test_core_delivery_navigation.py",
+    "source_sha256": "5b11e837fb6e6d21ee919901876de9a66fab5d84724ddd3e18ab80b6badcdd92",
+    "sha256": "5b11e837fb6e6d21ee919901876de9a66fab5d84724ddd3e18ab80b6badcdd92"
+  },
+  {
+    "path": "tests/test_native_install.py",
+    "source": "canonical-package-tests/test_native_install.py",
+    "source_sha256": "bf03681680983767b9ebd4bfba06d09289d90811d24d51dfff820d5394bbc9f4",
+    "sha256": "e3081b088c3ce7299787be3079a385419d69d8c58a15d47a4762fb4013aeb2ab",
+    "derivation_note": "linux-native-20261104: Linux user-custody Native profile (public source change); original source_sha256 preserved; linux-native-20261104: Linux Claude Code Native profile (public source change)"
+  },
+  {
+    "path": "tests/test_native_receipts.py",
+    "source": "canonical-package-tests/test_native_receipts.py",
+    "source_sha256": "a9978dc9aa960ca9ef1a344cb6a260d09099de423df7b56be8bb83ef345b9868",
+    "sha256": "bcff1ad4f5ee3fee98ff263dce06d9345282ce21a33da940e5755c6b55afbfdb",
+    "derivation_note": "linux-native-20261104: Linux user-custody Native profile (public source change); original source_sha256 preserved"
+  },
+  {
+    "path": "tests/test_operation_ledger.py",
+    "source": "managed-recovery/test_operation_ledger.py",
+    "source_sha256": "202cc28f3accfd20062d296f7397f7dffb2c9be07551a0c0192767a30eae8ece",
+    "sha256": "a5510a8ee96b1522a851172352629dff8af4e574ce6716bd3055e5a145927da0",
+    "derivation_note": "Original ledger tests; only package import adapted"
+  },
+  {
+    "path": "tests/test_profile_roots.py",
+    "source": "canonical-package-tests/test_profile_roots.py",
+    "source_sha256": "524785d00dc2b7c42fafa6656656f51471935fff3defc60e53803d16c45a676d",
+    "sha256": "6abe32ec7c82a56d8512cecd9184f3c88429e9f4d3b312c7bbb849ced192170e",
+    "derivation_note": "linux-native-20261104: Linux user-custody Native profile (public source change); original source_sha256 preserved"
+  },
+  {
+    "path": "tests/test_server_version_binding.py",
+    "source": "canonical-package-tests/test_server_version_binding.py",
+    "source_sha256": "a201e244a82200f923d68823cd727480481f8a425a0f1b87f437731fca3be848",
+    "sha256": "0c2bd5beeb21a53599b3c085324ce7b4136ecf09b807a073a81845b771ee02ce",
+    "derivation_note": "linux-native-20261104: Linux user-custody Native profile (public source change); original source_sha256 preserved"
+  },
+  {
+    "path": "tests/test_transport_policy.py",
+    "source": "canonical-package-tests/test_transport_policy.py",
+    "source_sha256": "1ac834558eaf42a7e9b06da6a131fb5dd9822f37b4d520cccd2ce410b9fe2b90",
+    "sha256": "1ac834558eaf42a7e9b06da6a131fb5dd9822f37b4d520cccd2ce410b9fe2b90"
+  },
+  {
+    "path": "src/integrity_client_memory/model_delivery.py",
+    "source": "managed-model-delivery-lifecycle-20261021/model_delivery.py",
+    "source_sha256": "ffbe9a8ae1e7a19e1e025ae53207e4dc745ab74d164857398d2439a9a7569d56",
+    "sha256": "ffbe9a8ae1e7a19e1e025ae53207e4dc745ab74d164857398d2439a9a7569d56"
+  },
+  {
+    "path": "src/integrity_client_memory/model_delivery_broker.py",
+    "source": "managed-model-delivery-lifecycle-20261021/model_delivery_broker.py",
+    "source_sha256": "1c16f40f8c0db3e9bd797c1884b04117644b77b626a907e76bbfb30aa467efeb",
+    "sha256": "1c16f40f8c0db3e9bd797c1884b04117644b77b626a907e76bbfb30aa467efeb"
+  },
+  {
+    "path": "src/integrity_client_memory/linux_user_native.py",
+    "source": "canonical-package/linux_user_native.py",
+    "source_sha256": "87203b4c7881c72d6f9cbd970d2a789543a11627f21144cea4b54c036f9a5ff3",
+    "sha256": "87203b4c7881c72d6f9cbd970d2a789543a11627f21144cea4b54c036f9a5ff3",
+    "derivation_note": "linux-native-20261104: new public Linux user-custody Native head; linux-native-20261104: Linux Claude Code Native profile (public source change)"
+  }
+]

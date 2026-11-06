@@ -1,0 +1,56 @@
+{
+  "uroboros_routes": [
+    {
+      "format": "uroboros-route/v1",
+      "route_id": "example.tls-certificate-renewal",
+      "version": 1,
+      "status": "candidate",
+      "title": "Renew a TLS certificate on a reverse proxy without downtime",
+      "triggers": ["tls", "certificate", "renew", "expiry", "nginx"],
+      "preconditions": ["you know which proxy serves the name", "the DNS name resolves to that proxy"],
+      "steps": [
+        "read the current certificate expiry with openssl s_client",
+        "issue the new certificate through the existing ACME client",
+        "test the proxy configuration before reloading",
+        "reload the proxy, do not restart it"
+      ],
+      "postchecks": ["openssl s_client shows the new expiry date", "the health endpoint answers over HTTPS"],
+      "rollback": "restore the previous certificate files from the backup and reload the proxy",
+      "scope": "web proxy"
+    },
+    {
+      "format": "uroboros-route/v1",
+      "route_id": "example.database-restore-drill",
+      "version": 1,
+      "status": "candidate",
+      "title": "Prove a database backup restores, on a scratch instance",
+      "triggers": ["backup", "restore", "database", "drill", "postgres"],
+      "preconditions": ["a scratch instance that is not production"],
+      "steps": [
+        "pick the newest backup and record its checksum",
+        "restore it into the scratch instance",
+        "run row counts on the key tables and compare with the source"
+      ],
+      "postchecks": ["the row counts match within the backup window"],
+      "rollback": "drop the scratch instance",
+      "scope": "database"
+    },
+    {
+      "format": "uroboros-route/v1",
+      "route_id": "example.public-pr-green-ci",
+      "version": 1,
+      "status": "candidate",
+      "title": "Open a pull request to Integrity that passes the public surface CI",
+      "triggers": ["integrity", "pull", "manifest", "public-surface", "ci"],
+      "steps": [
+        "add new files with .github/scripts/update_manifest.py --add PATH (docs: --add-generated)",
+        "git add, then .github/scripts/component_catalog.py --write, then update_manifest.py again",
+        "run public_surface_check.py on a git checkout-index export, not on a worktree",
+        "run the root suite with every components/*/src on PYTHONPATH"
+      ],
+      "postchecks": ["the Public surface safety workflow is green on Linux and Windows"],
+      "rollback": "close the pull request",
+      "scope": "integrity"
+    }
+  ]
+}

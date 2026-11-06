@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "integrity-remote"
+version = "0.1.0b1"
+description = "Cross-machine Integrity over an OpenSSH forced command: immutable core releases, per-device keys and hardened client transports"
+requires-python = ">=3.11"
+license = "BUSL-1.1"
+license-files = ["LICENSE", "NOTICE"]
+readme = "README.md"
+dependencies = []
+
+[project.scripts]
+integrity-remote = "integrity_remote.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

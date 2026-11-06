@@ -1,0 +1,21 @@
+{
+  "name": "integrity-space",
+  "version": "0.2.0",
+  "description": "Частная панель Integrity: проекты, существующие задачи, источники и ограниченный контекст. Только изолированные тестовые проекты.",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Integrity · частная интеграция",
+        "shortDescription": "Проекты, задачи и контекст Integrity",
+        "developerName": "Integrity",
+        "category": "Productivity",
+        "capabilities": [
+          "Read"
+        ],
+        "defaultPrompt": [
+          "Открой тестовый проект Integrity и покажи актуальные задачи."
+        ]
+      }
+    }
+  }
+}

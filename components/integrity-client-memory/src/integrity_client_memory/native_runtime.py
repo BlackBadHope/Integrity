@@ -1,0 +1,482 @@
+"""Run exactly a generated Native profile, with source/config drift checks."""
+from __future__ import annotations
+
+import argparse
+import ast
+import hashlib
+import uuid
+import json
+import os
+from pathlib import Path
+import stat
+import subprocess
+import sys
+
+from .native_install import digest, executable_image, plain, read_json, LAUNCH_FILES
+
+MAX_HOOK = 1024 * 1024
+
+
+def verify(path):
+    path = plain(path)
+    profile = read_json(path)
+    root = path.parent
+    if (not isinstance(profile, dict) or profile.get("protocol") != "integrity/native-client-profile/v1"
+            or profile.get("root") != str(root) or profile.get("platform") != sys.platform
+            or profile.get("vendor") not in {"codex", "claude", "antigravity"}
+            or not isinstance(profile.get("files"), dict)
+            or not isinstance(profile.get("auxiliary_files", {}), dict)
+            or not isinstance(profile.get("support_files", {}), dict)
+            or not isinstance(profile.get("generated_launch_files", {}), dict)):
+        raise ValueError("Native profile identity/platform mismatch")
+    if os.name == "posix":
+        details = root.lstat()
+        if details.st_uid != os.geteuid() or stat.S_IMODE(details.st_mode) & 0o077:
+            raise ValueError("Native profile root custody invalid: owner-only 0700 required")
+    linux_native = profile.get("linux_native")
+    if linux_native is not None and (sys.platform != "linux" or not isinstance(linux_native, dict)
+            or set(linux_native) != {"mode", "executable", "executable_sha256", "head_root"}
+            or linux_native["mode"] != "user" or profile["vendor"] not in {"codex", "claude"}):
+        raise ValueError("Native Linux custody declaration invalid")
+    launch = Path(profile["python"])
+    if launch != Path(sys.executable):
+        raise ValueError("Native Python pin changed")
+    image = executable_image(launch)
+    if digest(image.read_bytes()) != profile["python_sha256"]:
+        raise ValueError("Native Python pin changed")
+    for key, name in (("component_sha256", "component.json"), ("upstream_sha256", "upstream.toml"),
+                      ("transport_sha256", "transport.json"),
+                      ("tools_sha256", "integrity-client-tools.json")):
+        if digest(plain(root / name).read_bytes()) != profile[key]:
+            raise ValueError("Native configuration pin changed")
+    from .profile_roots import validate_existing
+    preserved = validate_existing(profile)
+    component = read_json(root / "component.json")
+    server_name = profile.get("mcp_server_name", "integrity_native")
+    if (server_name not in {"integrity_native", "integrity_client_memory"}
+            or ("mcp_server_name" in component.get("values", {})
+                and component["values"]["mcp_server_name"] != server_name)):
+        raise ValueError("Native Memory server name binding changed")
+    for field, name, component_key in (("state_root", "state", "path_2dbd800b4e29"),
+                                       ("envelope_root", "envelopes", "path_f51de7de1b1c")):
+        expected = preserved.get(name, {}).get("path", str(root / ("state" if name == "state" else "turn-envelopes")))
+        values = component.get("values", {})
+        if profile.get(field, expected) != expected or (profile["vendor"] == "codex" and
+                (name in preserved or component_key in values) and values.get(component_key) != expected):
+            raise ValueError("Native preserved root binding changed")
+    for name, pin in profile["files"].items():
+        if Path(name).name != name or not name.endswith(".py") or digest(plain(root / "runtime" / name).read_bytes()) != pin:
+            raise ValueError("Native source pin changed")
+    for name, pin in profile.get("auxiliary_files", {}).items():
+        if Path(name).name != name or digest(plain(root / "runtime" / name).read_bytes()) != pin:
+            raise ValueError("Native auxiliary file pin changed")
+    if profile["hook"] not in profile["files"] or profile["broker"] not in profile["files"]:
+        raise ValueError("Native entrypoint missing")
+    for relative, pin in profile.get("support_files", {}).items():
+        member = Path(relative)
+        if member.is_absolute() or ".." in member.parts or str(member.as_posix()) != relative:
+            raise ValueError("Native support path invalid")
+        if digest(plain(root / "support" / member).read_bytes()) != pin:
+            raise ValueError("Native support source pin changed")
+    if profile.get("support_files"):
+        if digest(plain(root / "run-native-profile.py").read_bytes()) != profile["support_bootstrap_sha256"]:
+            raise ValueError("Native bootstrap pin changed")
+        for relative, pin in profile.get("generated_launch_files", {}).items():
+            member = Path(relative)
+            if member.is_absolute() or ".." in member.parts or str(member.as_posix()) != relative:
+                raise ValueError("Native launch path invalid")
+            if digest(plain(root / member).read_bytes()) != pin:
+                raise ValueError("Native launch configuration pin changed")
+    launch_files = profile.get("launch_files")
+    if not isinstance(launch_files, dict) or set(launch_files) != set(LAUNCH_FILES[profile["vendor"]]):
+        raise ValueError("Native launch configuration pins missing; regenerate this legacy profile")
+    for name, pin in launch_files.items():
+        if digest(plain(root / name).read_bytes()) != pin:
+            raise ValueError("Native vendor launch configuration pin changed")
+    return profile, root
+
+
+def environment(profile, root):
+    result = dict(os.environ)
+    result.update(INTEGRITY_CLIENT_MEMORY_CONFIG=str(root / "component.json"),
+                  INTEGRITY_CLIENT_STATE_ROOT=profile.get("state_root", str(root / "state")),
+                  INTEGRITY_CLIENT_ENVELOPE_ROOT=profile.get("envelope_root", str(root / "turn-envelopes")),
+                  INTEGRITY_CLIENT_MCP_TRANSPORT=str(root / "transport.json"),
+                  INTEGRITY_SCOPE_STATE_ROOT=str(root / "scope-state"),
+                  INTEGRITY_TURN_GUARD_CONFIG=str(root / "turn-guard.json"))
+    if profile["vendor"] == "claude" and profile.get("linux_native") is None:
+        # This is a selector, never evidence. The reader still verifies the
+        # actual CLI ancestor, publisher, delivery ledger and full transcript.
+        result["CLAUDE_SESSION_ID"] = read_json(root / "component.json")["values"]["claude_session_id"]
+    if profile.get("support_files"):
+        result["PYTHONPATH"] = str(root / "support") + os.pathsep + result.get("PYTHONPATH", "")
+    return result
+
+
+def broker_command(profile, root):
+    args = [profile["python"], "-B", str(root / "runtime" / profile["broker"]),
+            "--config", str(root / "upstream.toml"), "--tools-contract", str(root / "integrity-client-tools.json")]
+    if profile["vendor"] != "antigravity":
+        args += ["--upstream-server", "integrity-upstream"]
+    return args
+
+
+def validate_tools_contract(profile, root, selected):
+    """Bind a launcher-visible contract hint to the already pinned profile."""
+    if selected is None:
+        return
+    expected = root / "integrity-client-tools.json"
+    if Path(selected).absolute() != expected:
+        raise ValueError("Native tools contract selection changed")
+    if digest(plain(expected).read_bytes()) != profile["tools_sha256"]:
+        raise ValueError("Native tools contract pin changed")
+
+
+def merge_output(left, right):
+    """Compose context sequentially. A later handler cannot erase a denial."""
+    result = dict(left)
+    for key, value in right.items():
+        if key == "hookSpecificOutput":
+            if not isinstance(value, dict) or not isinstance(result.get(key, {}), dict):
+                raise ValueError("Native hook specific output shape invalid")
+            combined = dict(result.get(key, {}))
+            for field, item in value.items():
+                if field == "additionalContext" and combined.get(field):
+                    combined[field] += "\n" + item
+                elif field == "permissionDecision" and combined.get(field) == "deny":
+                    continue
+                else:
+                    combined[field] = item
+            result[key] = combined
+        elif key in {"additionalContext", "systemMessage"} and result.get(key):
+            result[key] += "\n" + value
+        elif key == "decision" and result.get(key) in {"block", "deny"}:
+            continue
+        elif key == "injectSteps":
+            result[key] = result.get(key, []) + value
+        else:
+            result[key] = value
+    return result
+
+
+def blocked(value):
+    return (value.get("decision") in {"block", "deny"}
+            or value.get("hookSpecificOutput", {}).get("permissionDecision") == "deny"
+            or value.get("continue") is False)
+
+
+def execution_receipt(profile, root, event):
+    """Safe execution metadata, not a Native identity or authority assertion."""
+    hook_path = root / "runtime" / profile["hook"]
+    tree = ast.parse(hook_path.read_text(encoding="utf-8"))
+    versions = [ast.literal_eval(n.value) for n in tree.body
+                if isinstance(n, ast.Assign) and len(n.targets) == 1
+                and isinstance(n.targets[0], ast.Name) and n.targets[0].id == "HOOK_VERSION"]
+    if len(versions) != 1 or not isinstance(versions[0], str):
+        raise ValueError("Native execution version anchor changed")
+    return {"protocol": "integrity/native-execution/v1", "event": event,
+            "vendor": profile["vendor"], "hook_version": versions[0],
+            "profile_path": str(root / "profile.json"),
+            "profile_sha256": digest(plain(root / "profile.json").read_bytes()),
+            "hook_path": str(hook_path), "hook_sha256": profile["files"][profile["hook"]],
+            "python_path": profile["python"], "python_sha256": profile["python_sha256"],
+            "runtime_sha256": digest(plain(__file__).read_bytes()),
+            "wrapper_pid": os.getpid(), "wrapper_parent_pid": os.getppid(),
+            "configuration_verified": True, "native_ownership_verified": False,
+            "external_action_authority": False}
+
+
+def receipt_context(payload, event):
+    if event in {"SessionStart", "UserPromptSubmit"}:
+        return True
+    if event != "PostToolUse":
+        return False
+    # Tool arguments may contain private text: inspect only, never export them.
+    return "integrity_context_admission" in json.dumps(payload, ensure_ascii=False)
+
+
+def memory_call(raw):
+    """A broken Memory route must not become an unrelated target-action veto."""
+    try:
+        payload = json.loads(raw or b"{}")
+        if not isinstance(payload, dict):
+            return None
+        if isinstance(payload.get("toolCall"), dict):
+            tool = payload["toolCall"]
+            if tool.get("name") != "call_mcp_tool":
+                return False
+            arguments = tool.get("args", {})
+            if not isinstance(arguments, dict):
+                return None
+            return arguments.get("ServerName") in {"integrity_native", "integrity_client_memory"}
+        name = payload.get("tool_name") or payload.get("toolName")
+        if not isinstance(name, str) or not name:
+            return None
+        if name.startswith(("mcp__integrity_native__", "mcp__integrity_client_memory__")):
+            return True
+        # Another Integrity product/server is a separate action boundary.
+        if "__" in name or "." in name:
+            return False
+        if not name.startswith("integrity_"):
+            return False
+        catalog = read_json(Path(__file__).with_name("data") / "tools-current.json")
+        tools = catalog.get("result", catalog).get("tools", [])
+        return name in {item["name"] for item in tools}
+    except (OSError, ValueError, UnicodeError, TypeError, KeyError, AttributeError):
+        return None
+
+
+HEAD_EVENTS = {"UserPromptSubmit": "inProgress", "Stop": "completed"}
+
+
+def publish_linux_head(profile, root, event, payload):
+    """Record the Native head the pinned vendor ancestor delivered on stdin.
+
+    Without a live pinned ancestor nothing is published; the owning reader then
+    fails closed. Neither the head nor its absence is an authority assertion.
+    """
+    from . import linux_user_native as native
+    declared = profile["linux_native"]
+    thread_id = payload.get("session_id")
+    turn_id = payload.get("turn_id") or payload.get("turnId")
+    caller = os.environ.get("CODEX_THREAD_ID")
+    if (not isinstance(thread_id, str) or not native.UUID.fullmatch(thread_id)
+            or not isinstance(turn_id, str) or not native.UUID.fullmatch(turn_id)
+            or caller not in (None, thread_id)):
+        return None
+    try:
+        pid, birth = native.find_vendor_ancestor(declared["executable"], declared["executable_sha256"])
+    except (OSError, ValueError):
+        return None
+    head_root = Path(declared["head_root"])
+    native.private_directory(head_root.parent)
+    return native.publish_head(head_root, thread_id=thread_id, turn_id=turn_id,
+                               status=HEAD_EVENTS[event], pid=pid, birth=birth,
+                               executable_sha256=declared["executable_sha256"])
+
+
+def claude_linux_turn(profile, event, payload):
+    """Claude Code delivers no turn ID; the pinned hook runner is its turn publisher.
+
+    UserPromptSubmit mints one random Native turn ID under the live pinned
+    Claude ancestor, as the Windows delivery publisher does in its ledger.
+    Every later event of that session must come from the same live process.
+    The model never supplies the ID, and a foreign process cannot reuse it.
+    """
+    from . import linux_user_native as native
+    declared = profile["linux_native"]
+    session = payload.get("session_id")
+    native.need(isinstance(session, str) and native.UUID.fullmatch(session) is not None,
+                "linux_native_subject_invalid")
+    native.claude_transcript_custody(payload.get("transcript_path"), session)
+    pid, birth = native.find_vendor_ancestor(declared["executable"], declared["executable_sha256"])
+    head_root = Path(declared["head_root"])
+    if event == "UserPromptSubmit":
+        prompt = payload.get("prompt")
+        native.need(isinstance(prompt, str) and bool(prompt), "linux_native_prompt_missing")
+        native.private_directory(head_root.parent)
+        head = native.publish_head(head_root, thread_id=session, turn_id=str(uuid.uuid4()),
+                                   status="inProgress", pid=pid, birth=birth,
+                                   executable_sha256=declared["executable_sha256"],
+                                   prompt_sha256=hashlib.sha256(prompt.encode("utf-8")).hexdigest())
+        return head["turn_id"]
+    head = native.read_head(head_root, session)
+    native.need((head["native_pid"], head["native_birth"]) == (pid, birth)
+                and head["native_executable_sha256"] == declared["executable_sha256"],
+                "linux_native_head_foreign_process")
+    if event == "Stop" and head["status"] == "inProgress":
+        native.publish_head(head_root, thread_id=session, turn_id=head["turn_id"], status="completed",
+                            pid=pid, birth=birth, executable_sha256=declared["executable_sha256"],
+                            prompt_sha256=head.get("prompt_sha256"))
+    return head["turn_id"]
+
+
+def guard_environment(env, linux_native):
+    """Linux user custody publishes the Native head as completed before Stop runs.
+
+    A blocked Stop would continue a turn whose ownership already ended, so the
+    turn-close guard only advises there.
+    """
+    from .turn_guard import ENV_MODE
+    if linux_native and env.get(ENV_MODE, "").strip().lower() not in {"off", "0", "false"}:
+        env[ENV_MODE] = "advise"
+    return env
+
+
+def claude_terminal_output(result):
+    """Claude re-runs a turn on a blocking Stop; terminal output only informs."""
+    value = {k: v for k, v in result.items() if k not in {"decision", "reason", "hookSpecificOutput"}}
+    value["continue"] = True
+    return value
+
+
+def hook(profile, root, event, raw):
+    if len(raw) > MAX_HOOK:
+        raise ValueError("Native hook input bound exceeded")
+    payload = json.loads(raw or b"{}")
+    if not isinstance(payload, dict):
+        raise ValueError("Native hook input must be an object")
+    vendor = profile["vendor"]
+    native_events = {"SessionStart", "PreInvocation", "PreToolUse", "PostToolUse", "Stop"} if vendor == "antigravity" else {
+        "SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "SubagentStart", "Stop", "SubagentStop"}
+    scope_events = {"SessionStart", "UserPromptSubmit", "PreToolUse", "PreCompact", "PostCompact"} if vendor != "antigravity" else set()
+    handlers = []
+    native = [profile["python"], "-B", str(root / "runtime" / profile["hook"]), "--event", event]
+    scope = [profile["python"], "-B", str(root / "runtime/integrity_scope_synapse.py"), "--harness", vendor,
+             "--state", str(root / "scope-state"), "--event", event]
+    # Reorientation denies an effect before any admission handoff is armed.
+    if event == "PreToolUse" and event in scope_events:
+        handlers.append(scope)
+    if event in native_events:
+        handlers.append(native)
+    if event != "PreToolUse" and event in scope_events:
+        handlers.append(scope)
+    if not handlers:
+        raise ValueError("unsupported Native event")
+    env = environment(profile, root)
+    claude_linux = vendor == "claude" and profile.get("linux_native") is not None
+    guard_environment(env, profile.get("linux_native") is not None)
+    if claude_linux:
+        from .linux_user_native import UUID as _uuid
+        try:
+            turn = None if event == "SessionStart" else claude_linux_turn(profile, event, payload)
+        except (OSError, ValueError) as error:
+            if event == "PreToolUse":
+                raise
+            code = str(error) if type(error).__name__ == "LinuxNativeError" else type(error).__name__
+            return {"continue": True, "systemMessage": "Integrity Native ownership unavailable for this "
+                    "Claude turn (" + code + "); no turn reference was issued and Memory admission is refused."}, 0
+        if turn is not None:
+            payload = {**payload, "turn_id": turn}
+            raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        session = payload.get("session_id")
+        if isinstance(session, str) and _uuid.fullmatch(session):
+            # The shared cohort keys its owning identity on this selector; the
+            # proof remains the live pinned ancestor and the published head.
+            env["CODEX_THREAD_ID"] = session
+    elif profile.get("linux_native") is not None and event in HEAD_EVENTS:
+        publish_linux_head(profile, root, event, payload)
+    result = {}
+    native_executed = False
+    for command in handlers:
+        done = subprocess.run(command, input=raw, capture_output=True, env=env,
+                              timeout=50, check=False, creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+        if len(done.stdout) > 4 * 1024 * 1024:
+            raise ValueError("Native hook output bound exceeded")
+        try:
+            value = json.loads(done.stdout or b"{}")
+        except (ValueError, UnicodeError):
+            raise ValueError("Native hook output invalid") from None
+        if not isinstance(value, dict):
+            raise ValueError("Native hook output shape invalid")
+        if command is native:
+            native_executed = True
+        result = merge_output(result, value)
+        if native_executed and vendor == "codex" and receipt_context(payload, event):
+            proof = execution_receipt(profile, root, event)
+            # This is emitted only after the pinned Native process actually ran.
+            # It proves which source executed; Native ownership is separately verified.
+            result = merge_output(result, {"systemMessage": "INTEGRITY NATIVE EXECUTION " +
+                                          json.dumps(proof, ensure_ascii=False, separators=(",", ":"))})
+            native_executed = False
+        if claude_linux and event in {"Stop", "SubagentStop"}:
+            result = claude_terminal_output(result)
+        if done.returncode or blocked(result):
+            return result, done.returncode
+    return result, 0
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--profile", type=Path, required=True)
+    parser.add_argument("--tools-contract", type=Path)
+    parser.add_argument("mode", choices=("verify", "probe", "mcp", "hook"))
+    parser.add_argument("event", nargs="?")
+    args = parser.parse_args(argv)
+    if os.name == "posix":
+        # Owner-only by construction for this runner and every hook, broker and
+        # upstream it starts; no state file can be created group/world-readable.
+        os.umask(0o077)
+    raw_input = None
+    try:
+        if args.mode == "hook":
+            raw_input = sys.stdin.buffer.read(MAX_HOOK + 1)
+        profile, root = verify(args.profile)
+        validate_tools_contract(profile, root, args.tools_contract)
+        if args.mode == "verify":
+            print(json.dumps({"status": "source-and-config-verified", "vendor": profile["vendor"],
+                              "upstream_started": False, "native_ownership_verified": False, "live_acceptance": "NOT_RUN"}))
+            return 0
+        if args.mode == "mcp":
+            return subprocess.call(broker_command(profile, root), env=environment(profile, root))
+        if args.mode == "probe":
+            probes = [broker_command(profile, root) + ["--help"],
+                      [profile["python"], "-B", str(root / "runtime" / profile["hook"]), "--help"]]
+            for command in probes:
+                value = subprocess.run(command, env=environment(profile, root), capture_output=True, timeout=15,
+                                       creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+                if value.returncode:
+                    # Import errors can contain local paths. Retain only safe type/code here.
+                    raise ValueError("Native entrypoint import/parser probe failed")
+            if profile["vendor"] != "antigravity":
+                # Exercise the REAL hook's control client, not a parallel schema
+                # checker. This starts only the lazy local broker, not upstream.
+                code = ('import runpy,sys;sys.path.insert(0,sys.argv[1]);'
+                        'm=runpy.run_path(sys.argv[2],run_name="native_wire_probe");'
+                        'c=m["McpClient"]();c.close()')
+                wire = subprocess.run([profile["python"], "-B", "-c", code, str(root / "runtime"),
+                                       str(root / "runtime" / profile["hook"])],
+                                      env=environment(profile, root), capture_output=True, timeout=25,
+                                      creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+                if wire.returncode:
+                    raise ValueError("Native hook/broker initialize-tools-list handshake failed")
+            else:
+                messages = [
+                    {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
+                        "protocolVersion": "2025-06-18", "capabilities": {},
+                        "clientInfo": {"name": "native-wire-probe", "version": "1"}}},
+                    {"jsonrpc": "2.0", "method": "notifications/initialized", "params": {}},
+                    {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+                ]
+                wire = subprocess.run(broker_command(profile, root),
+                    input="".join(json.dumps(m) + "\n" for m in messages).encode(),
+                    env=environment(profile, root), capture_output=True, timeout=25,
+                    creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+                if wire.returncode or len(wire.stdout) > 4 * 1024 * 1024:
+                    raise ValueError("Native broker control handshake failed")
+                replies = {m.get("id"): m for m in (json.loads(line) for line in wire.stdout.splitlines())}
+                info = replies.get(1, {}).get("result", {}).get("serverInfo", {})
+                names = [t["name"] for t in replies.get(2, {}).get("result", {}).get("tools", [])]
+                expected = [t["name"] for t in read_json(root / "integrity-client-tools.json")]
+                if info != {"name": "integrity-client-memory", "version": profile["broker_version"]} or names != expected:
+                    raise ValueError("Native broker identity/tools mismatch")
+            print(json.dumps({"status": "entrypoints-load", "vendor": profile["vendor"],
+                              "hook_broker_wire": "initialize-tools-list-PASS",
+                              "upstream_started": False, "model_calls": 0, "live_acceptance": "NOT_RUN"}))
+            return 0
+        result, code = hook(profile, root, args.event, raw_input)
+        print(json.dumps(result, ensure_ascii=False), flush=True)
+        return code
+    except (OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError) as exc:
+        if args.mode == "hook" and args.event == "PreToolUse":
+            try:
+                ag = read_json(args.profile).get("vendor") == "antigravity"
+            except Exception:
+                ag = False
+            notice = "Integrity Native infrastructure unavailable; report this Memory-route fault. It grants no target authority and does not revoke separately verified owner authorization for this unrelated tool."
+            if memory_call(raw_input) is False:
+                result = ({"injectSteps": [{"ephemeralMessage": notice}]} if ag else
+                          {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": notice}})
+                print(json.dumps(result), flush=True)
+                return 0
+            result = ({"decision": "deny", "reason": "Integrity Native infrastructure unavailable"} if ag else
+                      {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny",
+                                               "permissionDecisionReason": "Integrity Native infrastructure unavailable"}})
+            print(json.dumps(result), flush=True)
+            return 0
+        print("Native runtime refused: " + type(exc).__name__, file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

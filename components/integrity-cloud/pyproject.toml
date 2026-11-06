@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "integrity-cloud"
+version = "0.1.0b1"
+description = "Signed turn journals for cloud agents that cannot run local Integrity hooks: ephemeral per-task keys, read-only context capsules, offline verification and import plans"
+requires-python = ">=3.11"
+license = "BUSL-1.1"
+license-files = ["LICENSE", "NOTICE"]
+readme = "README.md"
+dependencies = ["cryptography>=50.0.0,<51"]
+
+[project.scripts]
+integrity-cloud = "integrity_cloud.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
