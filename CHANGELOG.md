@@ -30,6 +30,12 @@ The first stable release in this repository, tagged as the GitHub release
   leaves alone. This covers the Native hook (Claude Code on Linux, Codex), the
   Linux hook and the Windows seats hook; the gate is opt-in on the last two and
   for Codex.
+- The gate's message now reaches the model in Native profiles. The Native
+  runner captured the hook's stderr and dropped it, so the model saw only "No
+  stderr output" for a blocked tool. A blocking hook's reason (exit code 2) is
+  now passed through; other stderr stays private.
+- `integrity-doctor` labels the broker's protocol version as such
+  ("broker protocol 1.6.0"), so it is not read as the package version.
 - `docs/linux-native-clients.md` now creates `~/.config/integrity/clients`
   before the profile build, which needs an existing parent directory.
 

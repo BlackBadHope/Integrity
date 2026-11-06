@@ -310,6 +310,23 @@ def claude_terminal_output(result):
     return value
 
 
+BLOCK_REASON_LIMIT = 8192
+
+
+def forward_block_reason(done) -> None:
+    """Pass a blocking hook's reason through to the client.
+
+    A child hook blocks with exit code 2 and its reason on stderr (for example
+    the admission-first gate's "call integrity_context_admission_current_turn
+    first"). The client shows that stderr to the model, so this runner must
+    forward it; otherwise the model sees only "No stderr output". Other exit
+    codes keep their stderr private, since it may hold tracebacks or paths.
+    """
+    if done.returncode == 2 and done.stderr:
+        sys.stderr.write(bytes(done.stderr[:BLOCK_REASON_LIMIT]).decode("utf-8", "replace"))
+        sys.stderr.flush()
+
+
 def hook(profile, root, event, raw):
     if len(raw) > MAX_HOOK:
         raise ValueError("Native hook input bound exceeded")
@@ -381,6 +398,7 @@ def hook(profile, root, event, raw):
             native_executed = False
         if claude_linux and event in {"Stop", "SubagentStop"}:
             result = claude_terminal_output(result)
+        forward_block_reason(done)
         if done.returncode or blocked(result):
             return result, done.returncode
     return result, 0
