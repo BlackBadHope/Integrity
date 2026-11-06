@@ -7600,11 +7600,11 @@
       "sha256": "6a035fa7fe0d28a1f1477db42895e008b0235d23b35f7a0fec3f0f98163f0908"
     },
     {
-      "bytes": 33524,
+      "bytes": 33642,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "faeed42f62965da4970bee22a25b0cfd569aef1ba82d91747f28479798075b16"
+      "sha256": "fa32f7ac8a433bba5a6849b5cb576be4abe3d48954c397ed2ba0355086e57b7a"
     },
     {
       "bytes": 775,
@@ -7642,18 +7642,18 @@
       "sha256": "c773a85da94e9edf0b2b10e60fd43b00fe4f90e345ec0d958e6c5b4d0d405e8e"
     },
     {
-      "bytes": 38298,
+      "bytes": 38321,
       "mode": "0o644",
       "path": "README.md",
       "sanitization_edits": 0,
-      "sha256": "fc98b5289ebf7fe449da79e0cdff72665cbaa64552caa209b676201170fd709a"
+      "sha256": "133635bea1a4a474cd06e29a3e4708346aa76e54fa94e4bd5370572ca575e8f7"
     },
     {
-      "bytes": 9996,
+      "bytes": 10116,
       "mode": "0o644",
       "path": "RELEASE_NOTES.md",
       "sanitization_edits": 0,
-      "sha256": "e13a5f40adf2cf1a731c5308451ac003c0ae697ca79a1a2a85282245fff2aa22"
+      "sha256": "e0f9fecf0227597ffbbe1729d50885f7a1447f24ef8fe6c8da9618fbb5ac9f0c"
     },
     {
       "bytes": 1240,
@@ -7817,7 +7817,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:ecb469d026942036bfca6bda37b53f32f4cacc5973d6b6356faa95820d5f3462",
+  "projection_digest": "sha256:99c78dca52b87ba0964d3b7240be820dc1d16422f521a4770eac8e773b156a10",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

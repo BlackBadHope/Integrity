@@ -28,9 +28,11 @@ The first stable release in this repository, tagged as the GitHub release
 - **Faster turns.** The model's broker now opens the turn registration over
   its already admitted connection, before it returns the admission. The
   owning hook no longer starts a separate client for that, so it skips the
-  launcher checks, the new SSH session and the cold server start. On the
-  owner's Windows machine the median admission went from 45 s to 15 s, and
-  the turn close from 2.25 s to 0.7 s; the open itself takes 0.03–0.09 s.
+  launcher checks, the new SSH session and the cold server start. In the
+  owner's Windows deployment of the same change (a Claude Code hook
+  generation outside this repository), the median admission went from 45 s
+  to 15 s and the turn close from 2.25 s to 0.7 s; the open itself took
+  0.03–0.09 s. This build was not timed separately.
 - **Same ownership rules.** The open goes through the broker's normal owning
   lifecycle path: the same identity checks, dispatch journal and
   unknown-outcome bookkeeping. The identity comes from the hook's private

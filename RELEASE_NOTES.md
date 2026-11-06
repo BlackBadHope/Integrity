@@ -14,8 +14,10 @@ deployment: no host is enrolled and no action authority is granted.
   The model's broker opens the registration over its admitted connection right
   after admission, through the same owning lifecycle checks and dispatch
   journal as before, and hands the receipt to the hook. The hook no longer
-  starts a separate client for it. On the owner's Windows machine the median
-  admission went from 45 s to 15 s and the turn close from 2.25 s to 0.7 s.
+  starts a separate client for it. In the owner's Windows deployment of the
+  same change (a Claude Code hook generation outside this repository), the
+  median admission went from 45 s to 15 s and the turn close from 2.25 s to
+  0.7 s; this build was not timed separately.
   This covers Codex on Windows and Linux and Claude Native; the Windows remote
   broker and the seats hooks are unchanged. Claude Native lifecycle calls now
   use the admitted connection first.

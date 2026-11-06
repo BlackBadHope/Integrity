@@ -103,8 +103,8 @@ complements them with what one vendor's memory does not try to do:
 
 [`v7.0.0`](https://github.com/BlackBadHope/Integrity/releases/tag/v7.0.0) is the first stable release in this repository. Since
 beta.4, the model's broker opens the turn registration itself, right after
-admission (on the owner's Windows machine the median admission went from 45 s
-to 15 s), and every claim on this page was checked against evidence.
+admission (in the owner's Windows deployment of the same change, the median
+admission went from 45 s to 15 s), and every claim on this page was checked against evidence.
 [`v7.0.0-beta.4`](https://github.com/BlackBadHope/Integrity/releases/tag/v7.0.0-beta.4) added the admission-first gate (on by default for
 Claude Code profiles on Linux), Antigravity fixes from live use, known runbook
 routes at admission, and the Business Source License 1.1. See
