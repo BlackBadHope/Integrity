@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Replicate the verified Action Log recovery chain to a physical Windows host.
 
 The Windows host pulls one immutable capsule through an already authenticated

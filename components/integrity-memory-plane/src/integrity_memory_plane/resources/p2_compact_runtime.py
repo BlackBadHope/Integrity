@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Run the non-authoritative compact cold-index pipeline and emit one receipt."""
 
 from __future__ import annotations

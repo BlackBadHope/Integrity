@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Linux owning Native head, never Windows.
 
 Two custody modes; the generated profile selects one, the model never does.

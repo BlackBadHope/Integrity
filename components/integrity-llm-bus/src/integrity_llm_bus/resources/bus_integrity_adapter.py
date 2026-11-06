@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """bus_integrity_adapter.py - LLM bus <-> Integrity canonical memory (design v1, no direct writes).
 
 Why no direct writes: integrity_append_event requires a context_admission_id bound to the CURRENT OWNER

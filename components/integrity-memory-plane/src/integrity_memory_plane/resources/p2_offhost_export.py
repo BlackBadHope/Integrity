@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Build a deterministic P2 raw recovery capsule from committed WORM versions."""
 
 from __future__ import annotations

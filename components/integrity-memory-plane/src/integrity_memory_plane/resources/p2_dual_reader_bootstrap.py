@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Provision read-only PostgreSQL and MinIO identities for P2 dual-read."""
 
 from __future__ import annotations

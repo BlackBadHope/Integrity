@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Shared, dependency-free primitives for the Integrity memory-plane P0."""
 
 from __future__ import annotations

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Create and independently verify the Integrity P2 WORM shadow buckets."""
 
 from __future__ import annotations

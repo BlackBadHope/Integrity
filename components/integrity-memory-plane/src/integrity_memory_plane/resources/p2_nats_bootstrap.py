@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Create and verify the non-authoritative Integrity P2 JetStream contract."""
 
 from __future__ import annotations

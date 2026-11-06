@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Compare canonical P1 and shadow P2 retrieval without creating two authorities."""
 
 from __future__ import annotations

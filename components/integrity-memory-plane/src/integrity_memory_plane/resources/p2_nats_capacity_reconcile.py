@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Safely reconcile the non-authoritative P2 JetStream capacity limit.
 
 The capacity supplement is evidence, not authority.  This tool validates its

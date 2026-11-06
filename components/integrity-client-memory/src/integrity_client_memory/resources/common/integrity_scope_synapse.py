@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Integrity scope synapse: turn a context compaction into a scope update the model must take.
 
 A model does not poll anything after its context is compacted. It continues from

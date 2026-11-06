@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Optional project labels. No authority, database, namespace or state relocation."""
 
 from __future__ import annotations

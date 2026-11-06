@@ -1,5 +1,6 @@
 Integrity Adapter SDK
-Copyright 2026 Integrity Project contributors
+Copyright 2026 Ilia Pikalov and Integrity Project contributors
 
-The included project source is licensed under Apache-2.0. External
+The included project source is licensed under the Business Source License 1.1
+from v7.0.0-beta.4 on; earlier releases remain under the Apache License 2.0. External
 dependencies retain their respective licenses.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Disposable O(log N) cursor and event_uid catalogs for compact buckets."""
 
 from __future__ import annotations

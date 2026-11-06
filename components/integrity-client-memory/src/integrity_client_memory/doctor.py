@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """integrity-doctor: where Integrity hooks are installed, whether memory answers, and coverage.
 
 Read-only. It reads vendor settings files, starts the registered MCP transport

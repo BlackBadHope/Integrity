@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Disposable compact cold indexes over committed P2 WORM events.
 
 The index is deliberately not an authority.  It contains bounded locators and

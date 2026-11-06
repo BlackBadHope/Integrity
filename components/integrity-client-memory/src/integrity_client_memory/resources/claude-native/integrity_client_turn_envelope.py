@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Private, short-lived full-prompt envelopes shared by Integrity hooks and broker.
 
 The public model sees only an opaque ``turn_ref``.  The exact prompt remains on

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Session-bound Claude bus pointers. Never ACK, execute bodies, or open memory."""
 
 from integrity_llm_bus.configuration import value as _integrity_value, require_config as _integrity_require_config

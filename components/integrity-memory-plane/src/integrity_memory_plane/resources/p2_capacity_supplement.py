@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Measure capacity dimensions absent from the physical history lab.
 
 This collector is read-only with respect to NATS, PostgreSQL and MinIO.  Its

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Linux provider candidate: own SDK reads plus existing authenticated peer data.
 
 Runtime assembly supplies protected RPC clients/config and pinned common modules.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Golden recall and authority-boundary gate for hot+cold compact retrieval."""
 
 from __future__ import annotations

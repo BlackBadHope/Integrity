@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Hidden Windows host node and outgoing SSH forward, supervised as one task."""
 from __future__ import annotations
 

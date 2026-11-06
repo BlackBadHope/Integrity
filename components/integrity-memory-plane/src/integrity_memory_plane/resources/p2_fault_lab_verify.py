@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Verify an isolated P2 fault/load receipt without rerunning the lab."""
 
 from __future__ import annotations

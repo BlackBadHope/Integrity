@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """JSONL adapter to an existing Codex owner's local Unix WebSocket."""
 
 from integrity_bridges.configuration import value as _integrity_value, require_config as _integrity_require_config

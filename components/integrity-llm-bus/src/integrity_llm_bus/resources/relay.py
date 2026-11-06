@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """One durable notification worker for the primary SQLite bus.
 
 Only notifies an explicitly named existing Codex thread and the owner's Grok webhook.

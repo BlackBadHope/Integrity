@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Launch the owner's relay without inheriting terminal pipe handles."""
 from __future__ import annotations
 

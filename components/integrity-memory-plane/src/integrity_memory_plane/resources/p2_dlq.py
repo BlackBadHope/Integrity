@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Inspect and resolve P2 dead letters without silently replaying uncertain data."""
 
 from __future__ import annotations

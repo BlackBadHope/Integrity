@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Create P2 shadow credentials once and emit a content-free receipt."""
 
 from __future__ import annotations

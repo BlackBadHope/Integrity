@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Disposable O(log N) locator catalog for committed P2 relay receipts.
 
 The catalog is candidate infrastructure only.  A lookup is usable solely after

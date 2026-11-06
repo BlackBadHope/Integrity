@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Prove a two-host P2 JetStream canary without calling it a regional quorum."""
 
 from __future__ import annotations

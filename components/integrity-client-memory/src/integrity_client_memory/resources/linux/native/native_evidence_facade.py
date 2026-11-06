@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Private peer read facade candidate. No process, shell, files, claims or grants.
 
 The caller must wire envelope_after_verified_peer ONLY after the existing Node

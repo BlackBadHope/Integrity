@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Bootstrap a loopback-only client NATS canary without claiming a quorum gate."""
 
 from __future__ import annotations

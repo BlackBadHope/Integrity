@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Mutual private read authentication with the existing peer key, never a bearer.
 
 Transport nonce is unrelated to delegation operation/frame identity. No Native

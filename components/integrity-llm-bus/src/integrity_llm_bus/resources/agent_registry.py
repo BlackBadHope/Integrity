@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Native thread self-registration: state/agents-registry.json (address -> Codex thread).
 
 Built-in addresses (codex, claude, grok, codexfc) always exist and never change here.

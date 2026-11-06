@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Bounded host adapter; stdio locally, authenticated loopback through SSH remotely."""
 from __future__ import annotations
 

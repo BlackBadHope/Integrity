@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Claim-bound full-task capture through a pinned actual Linux Scope baseline.
 
 The pending fence is written before task capture. No epoch/lease/barrier reset,

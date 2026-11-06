@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Restrict the dedicated bus state directory using Windows built-in APIs."""
 
 from __future__ import annotations

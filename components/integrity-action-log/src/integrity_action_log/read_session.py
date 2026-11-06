@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Request-local, read-only AL admission. No canonical writes or ambient identity.
 
 The admitted local broker is the identity authority within the existing reader

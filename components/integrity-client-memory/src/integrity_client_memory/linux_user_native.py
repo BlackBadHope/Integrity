@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Linux user-custody Native head: same-uid, pinned vendor ancestor, 0700/0600.
 
 The pinned hook runner publishes the current Native turn head that the vendor

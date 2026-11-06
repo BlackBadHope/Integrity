@@ -1,5 +1,5 @@
 #!/opt/integrity/current/venv/bin/python
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """P0 candidate: bounded Seed delta import with an append-only event MMR."""
 
 from __future__ import annotations

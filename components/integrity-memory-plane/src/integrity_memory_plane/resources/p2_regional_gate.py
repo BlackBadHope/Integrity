@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Fail closed until P2 has real multi-domain and billion-history evidence."""
 
 from __future__ import annotations

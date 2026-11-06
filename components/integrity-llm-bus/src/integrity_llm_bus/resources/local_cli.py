@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Same-owner local CLI for the durable bus; no HTTP credentials required."""
 from __future__ import annotations
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Capture a verified delegated goal through the installed original Scope engine.
 
 The isolated selector and its special signed target stay intact. This helper

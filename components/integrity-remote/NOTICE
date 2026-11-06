@@ -1,5 +1,5 @@
 Integrity integrity-remote
-Copyright Integrity Project contributors.
+Copyright 2026 Ilia Pikalov and Integrity Project contributors.
 Distributed under the Business Source License 1.1 by owner authorization,
 from v7.0.0-beta.4 on; earlier releases remain under the Apache License 2.0.
 No third-party implementation is vendored. OpenSSH is used as an external program.

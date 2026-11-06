@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Run a resumable live attachment ingress enforcement canary.
 
 The canary intentionally writes retained non-authoritative WORM objects and a

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Fail-closed local capacity preflight for the next physical P2 stage.
 
 The preflight never treats a projection as a completed physical run.  It

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Uroboros known-route retrieval: pure, bounded, authority-free.
 
 A *route* is a path to a result that already worked once. The next agent

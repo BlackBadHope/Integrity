@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Pull only missing compact digest objects to physical client and read them back."""
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Bidirectional mirror: file bus (work\\llm-bus\\messages) <-> SQLite bus (this dir).
 
 Canonical store = SQLite (bus.py / local_cli.py, Codex). The file bus (Claude's

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Live deny/allow verification for the P2 dual-read identity."""
 
 from __future__ import annotations

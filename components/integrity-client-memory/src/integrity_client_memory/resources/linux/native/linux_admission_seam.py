@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Source-only seam for actual Linux admission2392. Runtime factory is mandatory.
 
 Receiver and Scope sync are pinned assembly callbacks, not JSON input/proof. No

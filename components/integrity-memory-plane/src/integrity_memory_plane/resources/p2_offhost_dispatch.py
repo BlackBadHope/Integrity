@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Dispatch one verified P2 raw capsule to client and require independent readback."""
 
 from __future__ import annotations

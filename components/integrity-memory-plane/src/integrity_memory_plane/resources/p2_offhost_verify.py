@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Verify the live off-host exporter cannot mutate raw storage or read dispatch authority."""
 
 from __future__ import annotations

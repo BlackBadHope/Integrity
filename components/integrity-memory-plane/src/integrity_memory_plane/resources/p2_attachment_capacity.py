@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Fail-closed operational attachment-storage admission.
 
 Per-event ingress limits are safety bounds, never a claim that every Action Log

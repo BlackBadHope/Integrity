@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Observe explicitly marked bus replies in one configured Grok desktop cache.
 
 This is an app-cache adapter, not an official Grok result API. Other conversation

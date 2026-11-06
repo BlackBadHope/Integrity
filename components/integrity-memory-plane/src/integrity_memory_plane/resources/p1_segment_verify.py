@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Verify P1 immutable segments, exact source parity, and segment-only restore."""
 
 from __future__ import annotations

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Codex Native evidence adapter for an owning receiving hook.
 
 Only pinned installed code and the existing owner Desktop Native tool host are

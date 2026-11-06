@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Generated isolated Scope selection. Identity is supplied by the native hook.
 
 This does not authenticate delegation, mint capture/ref/admission, or bypass an

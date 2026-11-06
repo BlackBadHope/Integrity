@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Content-addressed, quota-bounded P2 attachment ingress.
 
 This component stages immutable attachment objects before an Action Log event

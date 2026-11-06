@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Codex PostToolUse hook: hand staged bus pointers to the active turn.
 
 Fail-open by design: any problem prints nothing and exits 0, so a bus fault

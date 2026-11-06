@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Pure P2 ordering, partition, hash-chain, and ACK contracts."""
 
 from __future__ import annotations

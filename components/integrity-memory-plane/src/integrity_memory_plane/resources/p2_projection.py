@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Build independent disposable P2 projections from committed raw WORM batches."""
 
 from __future__ import annotations

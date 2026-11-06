@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Merge compact cold and PostgreSQL hot-tail evidence without a new authority."""
 
 from __future__ import annotations

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Build a digest-bound 5.5.2rc2 Seed delta cutover/rollback bundle."""
 
 from __future__ import annotations

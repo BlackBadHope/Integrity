@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Transfer deliberate final Codex message frames, not arbitrary chat text.
 
 This reads only the current configured chat's newly appended assistant final

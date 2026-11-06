@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Run destructive P2 fault/load evidence only in a disposable isolated lab."""
 
 from __future__ import annotations

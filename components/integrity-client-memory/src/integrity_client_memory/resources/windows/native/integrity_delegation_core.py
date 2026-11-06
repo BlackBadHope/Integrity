@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Portable delegated-task evidence and one-use operation state.
 
 The caller is a fixed receiving/sending adapter which obtains Native pages.

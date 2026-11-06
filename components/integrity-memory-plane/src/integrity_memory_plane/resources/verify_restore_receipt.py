@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Re-evaluate a durable restore receipt without repeating the restore drill."""
 
 from __future__ import annotations

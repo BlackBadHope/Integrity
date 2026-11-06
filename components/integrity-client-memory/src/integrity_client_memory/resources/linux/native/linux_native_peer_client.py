@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Private read client over the existing protected peer connection.
 
 Assembly supplies the existing key loader and bounded socket exchange. Neither

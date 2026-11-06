@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Provision the S3-read-only identity used by the P2 off-host exporter."""
 
 from __future__ import annotations

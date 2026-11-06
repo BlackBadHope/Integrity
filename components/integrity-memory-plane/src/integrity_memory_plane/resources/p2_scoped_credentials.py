@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Provision least-privilege credentials for the P2 edge relay.
 
 This is a root-only, idempotent bootstrap.  The relay never receives the

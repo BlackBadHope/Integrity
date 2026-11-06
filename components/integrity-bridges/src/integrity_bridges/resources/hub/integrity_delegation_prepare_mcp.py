@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Thin owner-host read-only MCP client for the protected Native preparation CLI.
 
 Only the installed adapter obtains live owner evidence. This client neither

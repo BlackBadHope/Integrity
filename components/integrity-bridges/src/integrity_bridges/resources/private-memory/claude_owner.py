@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Local Claude Code task owner for the existing Integrity host link.
 
 The hub delivers task requests; this module owns subscription CLI sessions on the

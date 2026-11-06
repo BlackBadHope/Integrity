@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Pure auxiliary retrieval; never rewrite the admitted query or its identity.
 
 This review candidate has no I/O, runtime imports, session gate or authority.

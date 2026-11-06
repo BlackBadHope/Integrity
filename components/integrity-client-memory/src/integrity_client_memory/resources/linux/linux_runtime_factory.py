@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Fixed-path Linux hook assembly. Existing Unix owner and peer transports only."""
 
 from integrity_client_memory.configuration import value as _integrity_value, require_config as _integrity_require_config

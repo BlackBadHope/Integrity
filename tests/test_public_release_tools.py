@@ -69,8 +69,8 @@ def test_guardian_sdist_keeps_an_exact_metadata_boundary(tmp_path: Path, unexpec
     directory.mkdir()
     with zipfile.ZipFile(directory / "integrity_guardian-6.1.1-py3-none-any.whl", "w") as archive:
         archive.writestr("integrity_guardian-6.1.1.dist-info/METADATA",
-                         "Name: integrity-guardian\nVersion: 6.1.1\nLicense-Expression: Apache-2.0\n\n")
-        archive.writestr("integrity_guardian-6.1.1.dist-info/licenses/LICENSE", "Apache-2.0")
+                         "Name: integrity-guardian\nVersion: 6.1.1\nLicense-Expression: BUSL-1.1\n\n")
+        archive.writestr("integrity_guardian-6.1.1.dist-info/licenses/LICENSE", "Business Source License 1.1")
         archive.writestr("integrity_guardian/__init__.py", "")
     members = ["src/integrity_guardian/__init__.py", "README.md", "LICENSE", "NOTICE",
                "AUTHORS.md", "pyproject.toml", "PKG-INFO", ".gitignore"]

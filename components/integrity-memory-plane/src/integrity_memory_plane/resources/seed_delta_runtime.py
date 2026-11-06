@@ -1,5 +1,5 @@
 #!/opt/integrity/current/venv/bin/python
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Loopback read-only Seed runtime backed by verified delta checkpoints."""
 
 from __future__ import annotations

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Create, independently read back, and restore-test a canonical Action Log backup."""
 
 from __future__ import annotations

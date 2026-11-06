@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Local, persistent message transport for Codex, Claude and Grok Bot.
 
 Messages are data. This server never runs message contents or calls an LLM.

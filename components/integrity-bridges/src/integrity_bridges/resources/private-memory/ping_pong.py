@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Deterministic Web/Codex handoff state; Computer Use is an external adapter."""
 from __future__ import annotations
 

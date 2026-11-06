@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Own Claude CLI proof from its actual ancestor, ledger and full transcript.
 
 No Codex Native context, random UUID, transcript UUID substitution, session

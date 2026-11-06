@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Turn-close guard and memory-status wording shared by the Integrity hooks.
 
 Pure, stdlib-only decisions. The hooks gather evidence (hook state, the hook

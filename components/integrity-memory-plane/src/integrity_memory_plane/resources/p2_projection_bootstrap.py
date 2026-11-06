@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Provision the disposable P2 projection schema and scoped worker identities."""
 
 from __future__ import annotations

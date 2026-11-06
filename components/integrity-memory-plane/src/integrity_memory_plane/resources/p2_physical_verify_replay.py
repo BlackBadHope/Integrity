@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Issue an immutable bounded-verifier receipt for an existing physical stage."""
 
 from __future__ import annotations

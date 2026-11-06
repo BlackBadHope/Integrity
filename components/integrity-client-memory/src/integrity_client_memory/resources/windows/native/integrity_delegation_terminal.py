@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Short-lived Native terminal observer and one-use DATA reply to the sender.
 
 Launched by the owning Stop hook after that hook returns. This module never

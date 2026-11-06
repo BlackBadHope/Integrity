@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Mid-turn delivery of bus pointers to an existing Codex thread.
 
 The Desktop queue (``codex queue``) dispatches only after the active turn ends,

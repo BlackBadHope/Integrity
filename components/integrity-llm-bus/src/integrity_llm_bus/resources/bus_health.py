@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """bus_health.py - read-only LLM bus status: processes, watchdog heartbeat, pending, last delivery per agent."""
 
 from integrity_llm_bus.configuration import value as _integrity_value, require_config as _integrity_require_config

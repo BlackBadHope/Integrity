@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Prove the P2 relay's positive and negative backend permissions."""
 
 from __future__ import annotations

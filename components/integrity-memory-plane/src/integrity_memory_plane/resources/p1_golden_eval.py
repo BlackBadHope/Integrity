@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Run reproducible P1 early/authority/causal retrieval evaluation."""
 
 from __future__ import annotations

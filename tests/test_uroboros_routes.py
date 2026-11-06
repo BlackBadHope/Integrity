@@ -143,7 +143,7 @@ def test_component_copy_matches_canonical_source():
     canonical = (root / "src/integrity_guardian/uroboros_routes.py").read_text(encoding="utf-8")
     component = (root / "components/integrity-action-log/src/integrity_action_log/resources/"
                  "uroboros_routes.py").read_text(encoding="utf-8")
-    assert component == "# SPDX-License-Identifier: Apache-2.0\n" + canonical
+    assert component == "# SPDX-License-Identifier: BUSL-1.1\n" + canonical
 
 
 def test_bundle_registers_several_routes_in_one_event():

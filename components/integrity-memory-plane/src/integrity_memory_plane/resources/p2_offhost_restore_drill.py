@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 """Restore a P2 capsule back from client and verify it without live memory services."""
 
 from __future__ import annotations
