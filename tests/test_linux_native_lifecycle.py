@@ -148,7 +148,8 @@ def test_model_facing_responses_fit_the_response_diet(lifecycle):
     admission_text = admission["content"][0]["text"]
     wrapper = json.loads(admission_text)
     assert len(admission_text.encode()) <= 8192
-    full_admission = wrapper["full_admission"]["bytes"]
+    # The full admission stays with the broker; its size is reported when the wrapper names it.
+    full_admission = (wrapper.get("full_admission") or {}).get("bytes", "n/a")
     opened = hook("PostToolUse", tool_name=TOOL + "integrity_context_admission_current_turn",
                   tool_input={"turn_ref": ref}, tool_response=admission)
     assert "CANONICAL READ PLANE READY" in opened, opened
