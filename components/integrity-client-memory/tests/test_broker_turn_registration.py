@@ -568,7 +568,7 @@ def test_native_runtime_forwards_only_a_blocking_reason(capsys):
              "integrity_context_admission_current_turn first"
     native_runtime.forward_block_reason(subprocess.CompletedProcess([], 2, b"{}", reason.encode()))
     assert capsys.readouterr().err == reason
-    native_runtime.forward_block_reason(subprocess.CompletedProcess([], 1, b"{}", b"Traceback ... /home/x"))
+    native_runtime.forward_block_reason(subprocess.CompletedProcess([], 1, b"{}", b"Traceback (most recent call last): private detail"))
     native_runtime.forward_block_reason(subprocess.CompletedProcess([], 0, b"{}", b"debug"))
     assert capsys.readouterr().err == ""
     source = Path(native_runtime.__file__).read_text(encoding="utf-8")

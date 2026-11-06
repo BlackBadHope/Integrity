@@ -1570,11 +1570,11 @@
       "sha256": "56cc3646e6593126e6da3d4a0f01f5d9c337861452118d30aeced8349962e3c1"
     },
     {
-      "bytes": 31234,
+      "bytes": 31262,
       "mode": "0o644",
       "path": "components/integrity-client-memory/tests/test_broker_turn_registration.py",
       "sanitization_edits": 0,
-      "sha256": "2f55c4d1080fd177b3edcac15db0b8c4d1509730e02357af984cddcbfd7a32a1"
+      "sha256": "897282b7d1c6fead41872457be820ef188c4c81765c527d2927f339ba09ac77c"
     },
     {
       "bytes": 19269,
@@ -7817,7 +7817,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:bfcd221629d62467cf44a7528a51f4479cd1c1850708307905ccebfc24b10f50",
+  "projection_digest": "sha256:838ab39069d6c10b5b28017ce2710499b159d6d48a73eb9f4d812334dc904641",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
