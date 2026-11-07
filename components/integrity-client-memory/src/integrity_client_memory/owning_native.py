@@ -21,6 +21,15 @@ def custody_mode():
     mode=_integrity_read_config().get('values',{}).get('linux_native_mode','system')
     need(mode in {'system','user'},'linux_native_mode_invalid')
     return mode
+def trusted_vendor_roots():
+    """Profile-declared vendor roots; absent in older profiles, which keep the single pin."""
+    try:raw=_integrity_read_config().get('values',{}).get('linux_native_trusted_roots','[]')
+    except Exception:return ()
+    try:roots=json.loads(raw)
+    except (TypeError,ValueError):raise ValueError('linux_native_trusted_roots_invalid') from None
+    need(isinstance(roots,list) and all(isinstance(r,str) and r.startswith('/') for r in roots),
+        'linux_native_trusted_roots_invalid')
+    return tuple(roots)
 def user_custody_caller_proven():
     """Profile-selected user custody with a live ancestor running the pinned vendor.
 
@@ -30,8 +39,9 @@ def user_custody_caller_proven():
     if os.name!='posix' or custody_mode()!='user':return False
     from integrity_client_memory import linux_user_native
     try:
+        roots=trusted_vendor_roots()
         linux_user_native.find_vendor_ancestor(_integrity_value('linux_native_executable'),
-            _integrity_value('linux_native_executable_sha256'))
+            _integrity_value('linux_native_executable_sha256'),**({'trusted_roots':roots} if roots else {}))
     except (OSError,ValueError):return False
     return True
 def verified_current_head(thread_id):
@@ -40,7 +50,8 @@ def verified_current_head(thread_id):
     if custody_mode()=='user':
         from integrity_client_memory import linux_user_native
         return linux_user_native.verified_head(Path(_integrity_value('linux_native_head_root')),thread_id,
-            _integrity_value('linux_native_executable'),_integrity_value('linux_native_executable_sha256'))
+            _integrity_value('linux_native_executable'),_integrity_value('linux_native_executable_sha256'),
+            *((trusted_vendor_roots(),) if trusted_vendor_roots() else ()))
     root=Path(_integrity_value('path_421d7209bec4'));factory_sha=_integrity_value('pin_49aaeb94d0ae')
     path=root/'linux_runtime_factory.py';details=path.lstat()
     need(not path.is_symlink() and stat.S_ISREG(details.st_mode) and details.st_uid==0

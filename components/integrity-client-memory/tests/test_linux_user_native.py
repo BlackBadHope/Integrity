@@ -185,7 +185,7 @@ def test_linux_codex_profile_is_owner_only_and_declares_user_custody(tmp_path):
     root = build(tmp_path)
     value, _ = runtime.verify(root / "profile.json")
     assert value["linux_native"] == {"mode": "user", "executable": PYTHON, "executable_sha256": PIN,
-                                     "head_root": str(root / "state/native-heads")}
+                                     "head_root": str(root / "state/native-heads"), "trusted_roots": []}
     component = install.read_json(root / "component.json")["values"]
     assert component["linux_native_mode"] == "user"
     for path in [root, *root.rglob("*")]:

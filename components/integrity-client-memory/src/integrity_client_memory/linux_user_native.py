@@ -4,8 +4,16 @@
 The pinned hook runner publishes the current Native turn head that the vendor
 process delivered on the hook's stdin. A reader (the local broker, or a later
 hook) accepts that head only while it still descends from the same live vendor
-process: same PID, same kernel start time, same euid, and an executable whose
-resolved path and SHA-256 equal the profile pin.
+process: same PID, same kernel start time, same euid, and a trusted vendor
+image. The image is trusted when its resolved path and SHA-256 equal the
+profile pin, or when it lies under one of the profile's trusted vendor roots
+(for Claude Code ``~/.local/share/claude/versions``) and the file and every
+directory from that root down to it are owned by this euid or root and not
+writable by group or others. Vendor auto-updates install a new version beside
+the old one, so a root keeps the profile valid across updates without widening
+the user-custody boundary stated below. A published head records the digest of
+the image that delivered it; a later reader accepts it only from the same live
+process still running that exact image.
 
 Trust boundary, stated plainly: this is user custody. Root and any process
 running as the same uid can read or replace these files, exactly as they could
@@ -90,20 +98,73 @@ def pin_executable(value):
     return str(resolved), file_digest(resolved)
 
 
-def _pinned(pid, executable, executable_sha256):
+def _custody_owner(info):
+    return info.st_uid in (os.geteuid(), 0) and not stat.S_IMODE(info.st_mode) & 0o022
+
+
+def trusted_root(value):
+    """Validate one owner-selected vendor root: absolute, a real directory, owner-only writes."""
+    candidate = Path(str(value))
+    need(candidate.is_absolute(), "linux_native_trusted_root_not_absolute")
+    try:
+        info = candidate.lstat()
+    except OSError:
+        raise LinuxNativeError("linux_native_trusted_root_missing") from None
+    need(stat.S_ISDIR(info.st_mode) and not stat.S_ISLNK(info.st_mode) and _custody_owner(info),
+         "linux_native_trusted_root_custody_invalid")
+    return str(candidate)
+
+
+def _under_trusted_root(image, roots):
+    """True when ``image`` is a regular file below a root through a custody-clean chain."""
+    for root in roots or ():
+        root = Path(root)
+        try:
+            relative = image.relative_to(root)
+        except ValueError:
+            continue
+        if not relative.parts:
+            continue
+        chain, current = [root], root
+        for part in relative.parts:
+            current = current / part
+            chain.append(current)
+        try:
+            infos = [path.lstat() for path in chain]
+        except OSError:
+            continue
+        if (all(not stat.S_ISLNK(i.st_mode) and _custody_owner(i) for i in infos)
+                and all(stat.S_ISDIR(i.st_mode) for i in infos[:-1])
+                and stat.S_ISREG(infos[-1].st_mode)):
+            return True
+    return False
+
+
+def image_digest(pid, executable, executable_sha256, trusted_roots=()):
+    """Digest of ``pid``'s image when it is a trusted vendor image run by this euid, else None."""
     try:
         image = process_executable(pid)
-    except OSError:
-        return False
-    if str(image) != executable:
-        return False
-    uids = process_uids(pid)
-    return (all(uid == os.geteuid() for uid in uids)
-            and file_digest(executable) == executable_sha256)
+        uids = process_uids(pid)
+    except (OSError, LinuxNativeError):
+        return None
+    if not all(uid == os.geteuid() for uid in uids):
+        return None
+    try:
+        if str(image) == executable and file_digest(executable) == executable_sha256:
+            return executable_sha256
+        if _under_trusted_root(image, trusted_roots):
+            return file_digest(image)
+    except (OSError, LinuxNativeError):
+        return None
+    return None
 
 
-def find_vendor_ancestor(executable, executable_sha256, *, start=None):
-    """Nearest live ancestor running the pinned vendor image as this euid."""
+def _pinned(pid, executable, executable_sha256, trusted_roots=()):
+    return image_digest(pid, executable, executable_sha256, trusted_roots) is not None
+
+
+def find_vendor_image_ancestor(executable, executable_sha256, *, start=None, trusted_roots=()):
+    """Nearest live ancestor running a trusted vendor image: (pid, birth, image digest)."""
     need(supported(), "linux_native_platform_unavailable")
     current = os.getppid() if start is None else int(start)
     for _ in range(MAX_ANCESTRY):
@@ -113,14 +174,22 @@ def find_vendor_ancestor(executable, executable_sha256, *, start=None):
             parent, birth = process_source(current)
         except (OSError, ValueError, IndexError):
             break
-        if _pinned(current, executable, executable_sha256):
-            return current, birth
+        digest = image_digest(current, executable, executable_sha256, trusted_roots)
+        if digest is not None:
+            return current, birth, digest
         current = parent
     raise LinuxNativeError("linux_native_vendor_ancestor_missing")
 
 
-def is_live_ancestor(pid, birth, executable, executable_sha256):
-    """True only if exact (pid, birth) is still an ancestor running the pin."""
+def find_vendor_ancestor(executable, executable_sha256, *, start=None, trusted_roots=()):
+    """Nearest live ancestor running a trusted vendor image as this euid."""
+    pid, birth, _ = find_vendor_image_ancestor(executable, executable_sha256, start=start,
+                                               trusted_roots=trusted_roots)
+    return pid, birth
+
+
+def is_live_ancestor(pid, birth, executable, executable_sha256, trusted_roots=(), image_sha256=None):
+    """True only if exact (pid, birth) is still an ancestor running the same trusted image."""
     current = os.getppid()
     for _ in range(MAX_ANCESTRY):
         if current <= 1:
@@ -130,7 +199,10 @@ def is_live_ancestor(pid, birth, executable, executable_sha256):
         except (OSError, ValueError, IndexError):
             return False
         if current == pid:
-            return observed == birth and _pinned(pid, executable, executable_sha256)
+            if observed != birth:
+                return False
+            digest = image_digest(pid, executable, executable_sha256, trusted_roots)
+            return digest is not None and (image_sha256 is None or digest == image_sha256)
         current = parent
     return False
 
@@ -232,11 +304,15 @@ def claude_transcript_custody(path, session_id):
     return True
 
 
-def verified_head(root, thread_id, executable, executable_sha256):
-    """Return {'id','status'} only for a head delivered by a live pinned ancestor."""
+def verified_head(root, thread_id, executable, executable_sha256, trusted_roots=()):
+    """Return {'id','status'} only for a head delivered by a live trusted ancestor."""
     need(supported(), "linux_native_platform_unavailable")
     value = read_head(root, thread_id)
-    need(value.get("native_executable_sha256") == executable_sha256, "linux_native_executable_pin_changed")
-    need(is_live_ancestor(value["native_pid"], value["native_birth"], executable, executable_sha256),
+    recorded = value.get("native_executable_sha256")
+    need(recorded == executable_sha256 or (bool(trusted_roots) and isinstance(recorded, str)
+                                           and re.fullmatch(r"[a-f0-9]{64}", recorded) is not None),
+         "linux_native_executable_pin_changed")
+    need(is_live_ancestor(value["native_pid"], value["native_birth"], executable, executable_sha256,
+                          trusted_roots, image_sha256=recorded),
          "linux_native_vendor_ancestor_missing")
     return {"id": value["turn_id"], "status": value["status"]}
