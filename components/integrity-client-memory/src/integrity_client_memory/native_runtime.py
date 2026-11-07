@@ -35,7 +35,8 @@ def verify(path):
             raise ValueError("Native profile root custody invalid: owner-only 0700 required")
     linux_native = profile.get("linux_native")
     if linux_native is not None and (sys.platform != "linux" or not isinstance(linux_native, dict)
-            or set(linux_native) != {"mode", "executable", "executable_sha256", "head_root"}
+            or set(linux_native) - {"trusted_roots"} != {"mode", "executable", "executable_sha256", "head_root"}
+            or not isinstance(linux_native.get("trusted_roots", []), list)
             or linux_native["mode"] != "user" or profile["vendor"] not in {"codex", "claude"}):
         raise ValueError("Native Linux custody declaration invalid")
     launch = Path(profile["python"])
@@ -245,14 +246,16 @@ def publish_linux_head(profile, root, event, payload):
             or caller not in (None, thread_id)):
         return None
     try:
-        pid, birth = native.find_vendor_ancestor(declared["executable"], declared["executable_sha256"])
+        pid, birth, image = native.find_vendor_image_ancestor(
+            declared["executable"], declared["executable_sha256"],
+            trusted_roots=declared.get("trusted_roots", ()))
     except (OSError, ValueError):
         return None
     head_root = Path(declared["head_root"])
     native.private_directory(head_root.parent)
     return native.publish_head(head_root, thread_id=thread_id, turn_id=turn_id,
                                status=HEAD_EVENTS[event], pid=pid, birth=birth,
-                               executable_sha256=declared["executable_sha256"])
+                               executable_sha256=image)
 
 
 def claude_linux_turn(profile, event, payload):
@@ -269,7 +272,9 @@ def claude_linux_turn(profile, event, payload):
     native.need(isinstance(session, str) and native.UUID.fullmatch(session) is not None,
                 "linux_native_subject_invalid")
     native.claude_transcript_custody(payload.get("transcript_path"), session)
-    pid, birth = native.find_vendor_ancestor(declared["executable"], declared["executable_sha256"])
+    pid, birth, image = native.find_vendor_image_ancestor(
+        declared["executable"], declared["executable_sha256"],
+        trusted_roots=declared.get("trusted_roots", ()))
     head_root = Path(declared["head_root"])
     if event == "UserPromptSubmit":
         prompt = payload.get("prompt")
@@ -277,16 +282,16 @@ def claude_linux_turn(profile, event, payload):
         native.private_directory(head_root.parent)
         head = native.publish_head(head_root, thread_id=session, turn_id=str(uuid.uuid4()),
                                    status="inProgress", pid=pid, birth=birth,
-                                   executable_sha256=declared["executable_sha256"],
+                                   executable_sha256=image,
                                    prompt_sha256=hashlib.sha256(prompt.encode("utf-8")).hexdigest())
         return head["turn_id"]
     head = native.read_head(head_root, session)
     native.need((head["native_pid"], head["native_birth"]) == (pid, birth)
-                and head["native_executable_sha256"] == declared["executable_sha256"],
+                and head["native_executable_sha256"] == image,
                 "linux_native_head_foreign_process")
     if event == "Stop" and head["status"] == "inProgress":
         native.publish_head(head_root, thread_id=session, turn_id=head["turn_id"], status="completed",
-                            pid=pid, birth=birth, executable_sha256=declared["executable_sha256"],
+                            pid=pid, birth=birth, executable_sha256=image,
                             prompt_sha256=head.get("prompt_sha256"))
     return head["turn_id"]
 

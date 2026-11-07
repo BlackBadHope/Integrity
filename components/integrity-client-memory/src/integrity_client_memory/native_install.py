@@ -259,12 +259,25 @@ def linux_native_binding(vendor, bindings):
     executable = bindings.get(key)
     if not isinstance(executable, str) or not executable.strip():
         raise ValueError(label + " requires " + key + ": the native " + binary + " binary that runs hooks")
-    from .linux_user_native import pin_executable
+    from .linux_user_native import pin_executable, trusted_root
     try:
         resolved, pin = pin_executable(executable)
     except (OSError, ValueError) as exc:
         raise ValueError(label + " executable rejected: " + str(exc)) from None
-    return {"mode": "user", "executable": resolved, "executable_sha256": pin}
+    roots = bindings.get(key + "_roots")
+    if roots is None:
+        # Vendor auto-updaters install each release beside the last one
+        # (Claude Code: ~/.local/share/claude/versions/<version>); trust that
+        # directory so an update does not break the profile.
+        parent = Path(resolved).parent
+        roots = [str(parent)] if parent.name == "versions" else []
+    if not isinstance(roots, list) or any(not isinstance(r, str) or not r for r in roots):
+        raise ValueError(label + " " + key + "_roots must be a list of absolute directories")
+    try:
+        roots = sorted({trusted_root(r) for r in roots})
+    except (OSError, ValueError) as exc:
+        raise ValueError(label + " trusted root rejected: " + str(exc)) from None
+    return {"mode": "user", "executable": resolved, "executable_sha256": pin, "trusted_roots": roots}
 
 
 def shared_cohort(vendor):
@@ -460,9 +473,11 @@ def _build(vendor, upstream, bindings, output, tools=None, *, deployment_root=No
         linux_native["head_root"] = str(selected_state / "native-heads")
         values.update(linux_native_mode="user", linux_native_executable=linux_native["executable"],
                       linux_native_executable_sha256=linux_native["executable_sha256"],
-                      linux_native_head_root=linux_native["head_root"], native_agent_product=vendor)
+                      linux_native_head_root=linux_native["head_root"], native_agent_product=vendor,
+                      linux_native_trusted_roots=json.dumps(linux_native["trusted_roots"]))
         required_keys |= {"linux_native_mode", "linux_native_executable", "native_agent_product",
-                          "linux_native_executable_sha256", "linux_native_head_root"}
+                          "linux_native_executable_sha256", "linux_native_head_root",
+                          "linux_native_trusted_roots"}
     values["pin_0266e73cb5e7"] = "disabled-no-historical-owner-enrollment"
     values["pin_37c8b12ade41"] = "disabled-no-historical-owner-enrollment"
     # The former publisher's one-off archive recovery allowlist is inert here.
