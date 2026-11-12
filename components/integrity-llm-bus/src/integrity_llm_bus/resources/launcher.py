@@ -39,7 +39,7 @@ def start(targets: str = "grok", max_calls: int = 20, environment: dict | None =
         process = subprocess.Popen(command,
                                    cwd=_integrity_value('path_dd2435d503a6'), env=child_environment, stdin=subprocess.DEVNULL,
                                    stdout=out, stderr=err, close_fds=True,
-                                   creationflags=subprocess.CREATE_NO_WINDOW)
+                                   creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     return process.pid
 
 

@@ -319,7 +319,7 @@ def queue_codex(prompts: list[str], thread_id: str) -> dict:
     for prompt in prompts:
         process = subprocess.run([str(executable), "queue", "--thread", thread_id, "--message", prompt],
                                  cwd=_integrity_value('path_dd2435d503a6'), env=environment, capture_output=True,
-                                 timeout=30, creationflags=subprocess.CREATE_NO_WINDOW)
+                                 timeout=30, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         if process.returncode != 0:
             raise OSError("partial or rejected Codex queue outcome")
         hashes.append(hashlib.sha256(process.stdout + process.stderr).hexdigest())

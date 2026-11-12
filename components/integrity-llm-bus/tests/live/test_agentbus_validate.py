@@ -171,9 +171,13 @@ class EdgeProbeTest(unittest.TestCase):
             with self.subTest(as_list=as_list):
                 # these levels still fit in 4096 bytes: the explicit limit, not the size cap, must reject them
                 levels = 2000 if as_list else 600
-                text = json.dumps({"v": 1, "k": "fyi", "data": {"x": nested(levels, as_list)}}, separators=(",", ":"))
+                # written as text: json.dumps of this depth hits the interpreter recursion limit on Python 3.11
+                deep = "[" * levels + "1" + "]" * levels if as_list else '{"a":' * levels + "1" + "}" * levels
+                text = '{"v":1,"k":"fyi","data":{"x":' + deep + "}}"
                 self.assertLessEqual(len(text.encode()), MAX_BODY_BYTES)
-                self.assertRejects(text, "nesting deeper than")
+                # the explicit limit answers on 3.12+, the parser's own recursion guard on 3.11: both reject
+                problems = validate(text)
+                self.assertTrue(problems and "nesting" in problems[0], problems)
                 # body object = level 1, data = level 2: data may hold MAX_DEPTH-2 more containers
                 ok = body(k="fyi", data={"x": nested(MAX_DEPTH - 2, as_list)})
                 self.assertEqual(validate(ok), [])
