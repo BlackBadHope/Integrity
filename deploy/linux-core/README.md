@@ -167,6 +167,9 @@ host; treat those items as unverified until they are.
   - The start-chain references match between files.
   - `host/integrity-custody-full-verify` differs from `release/run-mcp` only
     in the fixed directory and the final flag.
+  - `host/integrity-memory-mcp` has no command substitution in the argument
+    list of `env -i`; the Action Log token is read by the child shell that
+    `env` starts, so the value is never on any command line.
 - The pure helpers, on every platform:
   - argument parsing in `integrity-seed-wal-holder`;
   - path and digest canonicalisation in `verify-release`;
@@ -180,6 +183,9 @@ host; treat those items as unverified until they are.
   - `release/run-mcp` refuses a directory whose name is not a digest;
   - a `verify-release` build, verify and tamper round trip in a temporary
     directory, without the root-ownership check.
+  - `host/integrity-memory-mcp`, with its token file and program pointed at
+    a temporary directory: the program receives the token in its
+    environment, and the token appears in no recorded argument list.
 - Linux only (skipped elsewhere):
   - `transport-supervisor.py` relays a request and response to a fake child,
     returns the child's exit status and creates a private `0700` gate with two
@@ -193,7 +199,7 @@ Not verified here:
   an Action Log database owned by another account or the Guardian package.
   This covers `provision-state` past its argument check,
   `refresh-seed-read-acl` past name validation, the full `run-mcp` path and
-  `integrity-memory-mcp`.
+  `integrity-memory-mcp` against a real release and token file.
 - The supervisor's `main()` custody checks on root-owned paths. Also its
   behaviour under SIGKILL, slot exhaustion, the queue-wait timeout and stuck
   children.

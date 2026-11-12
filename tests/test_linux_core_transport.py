@@ -152,6 +152,16 @@ def test_custody_full_verify_differs_from_facade_only_in_fixed_dir_and_flag():
     assert len(diff) == 2
 
 
+def test_memory_wrapper_keeps_the_token_out_of_env_argv():
+    text = _text("host/integrity-memory-mcp")
+    start = text.index("exec /usr/bin/env -i")
+    env_args, inner = text[start:].split("/bin/sh -c '", 1)
+    assert "$(" not in env_args and "`" not in env_args
+    assert "TOKEN" not in env_args
+    assert inner.startswith("set -eu; INTEGRITY_ACTION_LOG_TOKEN=$(cat /etc/integrity-memory/action-log-token);"
+                            " export INTEGRITY_ACTION_LOG_TOKEN; exec \"$0\"' \\\n")
+
+
 # --- pure Python behaviour (all platforms) -------------------------------------------
 
 
@@ -282,6 +292,33 @@ def test_verify_release_build_verify_and_tamper(tmp_path):
         vr.verify_inventory(root, digest)
     with pytest.raises(vr.ReleaseInventoryError):
         vr.verify_inventory(root, hashlib.sha256(b"other").hexdigest())
+
+
+@POSIX
+def test_memory_wrapper_token_reaches_the_program_but_no_argv(tmp_path):
+    probe = "argv-probe-" + hashlib.sha256(os.urandom(16)).hexdigest()[:16]
+    (tmp_path / "token").write_text(probe)
+    log = tmp_path / "argv.log"
+    shim = tmp_path / "env"
+    shim.write_text(f'#!/bin/sh\nprintf "%s\\n" "$0" "$@" >> "{log}"\nexec /usr/bin/env "$@"\n')
+    program = tmp_path / "program"
+    program.write_text(f'#!/bin/sh\nprintf "%s\\n" "$0" "$@" >> "{log}"\n'
+                       f'printf "%s" "$INTEGRITY_ACTION_LOG_TOKEN" > "{tmp_path / "seen"}"\n'
+                       f'env > "{tmp_path / "environ"}"\n')
+    for item in (shim, program):
+        item.chmod(0o755)
+    text = _text("host/integrity-memory-mcp")
+    text = text.replace("exec /usr/bin/env -i", f"exec {shim} -i")
+    text = text.replace("/etc/integrity-memory/action-log-token", str(tmp_path / "token"))
+    text = text.replace("@MEMORY_RELEASE_DIR@/venv/bin/integrity-unified-mcp", str(program))
+    wrapper = tmp_path / "integrity-memory-mcp"
+    wrapper.write_text(text)
+    result = subprocess.run(["/bin/sh", str(wrapper)], capture_output=True, text=True, timeout=20)
+    assert result.returncode == 0, result.stderr
+    assert (tmp_path / "seen").read_text() == probe
+    assert probe not in log.read_text()
+    names = {line.split("=", 1)[0] for line in (tmp_path / "environ").read_text().splitlines() if "=" in line}
+    assert "INTEGRITY_ACTION_LOG_TOKEN" in names and "HOME" in names
 
 
 # --- Linux transport supervisor ------------------------------------------------------
