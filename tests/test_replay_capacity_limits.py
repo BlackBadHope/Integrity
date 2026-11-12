@@ -37,7 +37,7 @@ def test_logical_quota_and_declared_bounds(pool, monkeypatch):
     assert m.MAX_CONTEXT_ADMISSION_REPLAY_BYTES == 32 * 1024**2
     assert m.MAX_CONTEXT_ADMISSION_REPLAY_CATALOG_BYTES == 512 * 1024**2
     assert m.MAX_CONTEXT_ADMISSION_REPLAY_RECORDS == 128
-    assert m.CONTEXT_ADMISSION_REPLAY_TTL_SECONDS == 24 * 3600
+    assert m.CONTEXT_ADMISSION_REPLAY_TTL_SECONDS == 3 * 3600
     f = pool
     monkeypatch.setattr(m, "MAX_CONTEXT_ADMISSION_REPLAY_TOTAL_BYTES", 33 * 1024**2)
     assert f._reserve_context_admission_replay(replay_id("first")) == 0

@@ -7457,11 +7457,11 @@
       "sha256": "bbfe608b51aca31233d10b66b741c5e4d0a1833b9aea0116bfada12c18ee5dbf"
     },
     {
-      "bytes": 11798,
+      "bytes": 11797,
       "mode": "0o644",
       "path": "tests/test_replay_capacity_limits.py",
       "sanitization_edits": 0,
-      "sha256": "53a94739005b2ea7886363c73326a37499b33380eff3f1d5ed85386f9925b244"
+      "sha256": "5b55296eff3432e60f122592dfa72bec83b2e57219af62779028a057178297f4"
     },
     {
       "bytes": 3211,
@@ -7999,7 +7999,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:dd762891a552679476ba35573c070ddbc08fc33d0ddbaba37efdd3aad12a21d2",
+  "projection_digest": "sha256:e5725938e2ba4da6924cb5995fd45cb9f5102ce8fe30b28b80b7267f3d232b63",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
