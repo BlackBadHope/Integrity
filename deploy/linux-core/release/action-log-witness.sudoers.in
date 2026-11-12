@@ -1,0 +1,1 @@
+integrity-client ALL=(codex-action-log) NOPASSWD: @ACTION_LOG_WITNESS@

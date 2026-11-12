@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+# The Action Log token is read inside the clean child shell and is never in any argv.
+# env -i ... VAR="$(cat ...)" would put the value on env's command line
+# (/proc/<pid>/cmdline, readable by any local user).
+
+exec /usr/bin/env -i \
+  HOME=/nonexistent \
+  LANG=C.UTF-8 \
+  PATH=@MEMORY_RELEASE_DIR@/venv/bin:/usr/bin:/bin \
+  PYTHONDONTWRITEBYTECODE=1 \
+  INTEGRITY_HOME_SCOPE_REGISTRY=/etc/integrity-memory/memory-scopes.json \
+  INTEGRITY_SOLO_CANONICAL_BASE_URL=https://integrity-memory.example.invalid \
+  INTEGRITY_SOLO_SCOPE_IDS=personal:chronicle \
+  /bin/sh -c 'set -eu; INTEGRITY_ACTION_LOG_TOKEN=$(cat /etc/integrity-memory/action-log-token); export INTEGRITY_ACTION_LOG_TOKEN; exec "$0"' \
+  @MEMORY_RELEASE_DIR@/venv/bin/integrity-unified-mcp

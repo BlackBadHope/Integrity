@@ -21,7 +21,7 @@ from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Self
 
@@ -47,6 +47,7 @@ from .ledger import (
     LedgerAppendError,
     LedgerStore,
     LedgerVerificationError,
+    VerifiedLedgerState,
     build_ledger_event,
     event_digest,
     merkle_root,
@@ -94,6 +95,17 @@ EVENT_SUBSYSTEM = "integrity:medor-event-action"
 EVENT_AUTHORITY_ID = "authority:medor-event-append-one-use"
 EVENT_AUTHORITY_MAX_SECONDS = 900
 CUSTODY_LOCK_NAME = ".guardian-architecture.lock"
+# Written by the scheduled full verification (off the admission hot path). A "fail"
+# result blocks every later admission until the custody ledger is repaired.
+FULL_VERIFY_STATUS_NAME = "custody-full-verify.json"
+FULL_VERIFY_PROTOCOL = "integrity-guardian/medor-architecture-full-verify/v1"
+# The timer runs every 15 minutes; a status older than this also blocks admission, so a
+# stopped verifier cannot silently leave the hot path unchecked. A missing status is only
+# accepted before the first scheduled run (bootstrap right after a release switch).
+FULL_VERIFY_MAX_AGE_SECONDS = 3600
+# Once a full verification has passed, this marker lives inside the custody database
+# itself, so deleting the status file cannot reopen the bootstrap path.
+FULL_VERIFY_MARKER_TABLE = "medor_full_verify_marker"
 CUSTODY_LOCK_TIMEOUT_SECONDS = 45.0
 CUSTODY_LOCK_POLL_SECONDS = 0.025
 CUSTODY_SQLITE_BUSY_TIMEOUT_MS = 2_000
@@ -1533,6 +1545,10 @@ def _is_retryable_custody_conflict(exc: Exception) -> bool:
     return False
 
 
+class _CustodyFastPathMiss(Exception):
+    """K4: the incremental admission path does not apply; use the full path."""
+
+
 class PersistentMedorArchitectureService:
     """Append-only custody for admitted Mind receipts plus portable route proof.
 
@@ -1788,11 +1804,25 @@ class PersistentMedorArchitectureService:
         *,
         recovered_at: str,
     ) -> tuple[list[dict[str, Any]], dict[str, Any] | None, str]:
+        self._require_full_verify_not_failed()
         events = ledger.events()
         source_public_keys = self._source_public_keys(events)
-        ledger.verify(source_public_keys=source_public_keys)
-        digests = ledger.event_digests()
         checkpoint = self._load_checkpoint()
+        # Anchor the already-checkpointed prefix to its signed root: rows after it get the
+        # full per-row checks, rows inside it are bound by the Merkle root (see
+        # LedgerStore.verify). A bad or foreign checkpoint fails here instead of later.
+        anchor = checkpoint if checkpoint is not None and checkpoint.get("tree_size", 0) <= len(events) else None
+        try:
+            ledger.verify(
+                source_public_keys=source_public_keys,
+                anchor=anchor,
+                checkpoint_key=self.keys.checkpoint_key if anchor is not None else None,
+            )
+        except LedgerVerificationError as exc:
+            if anchor is None:
+                raise
+            raise MedorArchitectureError("architecture checkpoint signature or scope is invalid") from exc
+        digests = ledger.event_digests()
         if not events:
             if checkpoint is not None:
                 raise MedorArchitectureError("architecture checkpoint refers to an empty ledger")
@@ -1826,22 +1856,308 @@ class PersistentMedorArchitectureService:
         self._store_checkpoint(checkpoint)
         return events, checkpoint, "recovered-immediate-child"
 
+    @property
+    def full_verify_status_path(self) -> Path:
+        return self.ledger_path.parent / FULL_VERIFY_STATUS_NAME
+
+    def _require_full_verify_not_failed(self) -> None:
+        """Fail closed when the last scheduled full verification found a mismatch."""
+
+        path = self.full_verify_status_path
+        if not path.exists():
+            if self._full_verify_marker_present():
+                raise MedorArchitectureError(
+                    "custody full-verify status is missing after a completed run; admission blocked")
+            return
+        if path.is_symlink():
+            raise MedorArchitectureError("custody full-verify status path is unsafe")
+        try:
+            status = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            raise MedorArchitectureError("custody full-verify status is unreadable; admission blocked") from exc
+        if not isinstance(status, dict) or status.get("protocol") != FULL_VERIFY_PROTOCOL:
+            raise MedorArchitectureError("custody full-verify status is invalid; admission blocked")
+        if status.get("result") != "pass":
+            raise MedorArchitectureError("custody full verification failed; admission blocked until repaired")
+        try:
+            checked = datetime.fromisoformat(str(status.get("checked_at", "")).replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise MedorArchitectureError("custody full-verify status has no valid time; admission blocked") from exc
+        if checked.tzinfo is None:
+            raise MedorArchitectureError("custody full-verify status has no valid time; admission blocked")
+        age = (datetime.now(UTC) - checked).total_seconds()
+        if age > FULL_VERIFY_MAX_AGE_SECONDS:
+            raise MedorArchitectureError("custody full-verify status is stale; admission blocked until it reruns")
+
+    def _full_verify_marker_present(self) -> bool:
+        if not self.ledger_path.exists():
+            return False
+        connection = sqlite3.connect(f"file:{self.ledger_path.as_posix()}?mode=ro", uri=True, timeout=5)
+        try:
+            row = connection.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+                (FULL_VERIFY_MARKER_TABLE,),
+            ).fetchone()
+            if row is None:
+                return False
+            return connection.execute(f"SELECT COUNT(*) FROM {FULL_VERIFY_MARKER_TABLE}").fetchone()[0] > 0
+        finally:
+            connection.close()
+
+    def _set_full_verify_marker(self, observed_at: str) -> None:
+        connection = sqlite3.connect(self.ledger_path, timeout=CUSTODY_SQLITE_BUSY_TIMEOUT_MS / 1000)
+        try:
+            with connection:
+                connection.execute(
+                    f"CREATE TABLE IF NOT EXISTS {FULL_VERIFY_MARKER_TABLE} ("
+                    "singleton INTEGER PRIMARY KEY CHECK (singleton = 1), first_pass_at TEXT NOT NULL)"
+                )
+                connection.execute(
+                    f"INSERT OR IGNORE INTO {FULL_VERIFY_MARKER_TABLE} (singleton, first_pass_at) VALUES (1, ?)",
+                    (observed_at,),
+                )
+        finally:
+            connection.close()
+
+    def full_verify(self, *, observed_at: str | None = None) -> dict[str, Any]:
+        """Verify every custody event and the stored checkpoint, then record the result.
+
+        This is the complete O(N) check (schema, signatures, chains, Merkle prefix of the
+        signed checkpoint). It runs on a schedule, not on admission. A mismatch writes a
+        "fail" status that blocks admission (see ``_require_full_verify_not_failed``).
+        """
+
+        now = observed_at or datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
+        status: dict[str, Any] = {"protocol": FULL_VERIFY_PROTOCOL, "checked_at": now}
+        try:
+            with self._exclusive_custody(), LedgerStore(
+                self.ledger_path,
+                tenant_id=architecture_tenant_id(),
+                ledger_id=CUSTODY_LEDGER_ID,
+                busy_timeout_ms=CUSTODY_SQLITE_BUSY_TIMEOUT_MS,
+            ) as ledger:
+                events = ledger.events()
+                ledger.verify(source_public_keys=self._source_public_keys(events))
+                digests = ledger.event_digests()
+                checkpoint = self._load_checkpoint()
+                if checkpoint is not None:
+                    self._verify_prefix(checkpoint, digests)
+                self._set_full_verify_marker(now)
+                status.update({
+                    "result": "pass",
+                    "tree_size": len(digests),
+                    "root_digest": merkle_root(digests) if digests else None,
+                    "checkpoint_tree_size": checkpoint["tree_size"] if checkpoint else None,
+                    "checkpoint_root_digest": checkpoint["root_digest"] if checkpoint else None,
+                })
+        except (MedorArchitectureError, LedgerVerificationError, ValueError, TypeError, KeyError) as exc:
+            status.update({"result": "fail", "failure": type(exc).__name__, "reason": str(exc)[:300]})
+        self._write_full_verify_status(status)
+        return status
+
+    def _write_full_verify_status(self, status: Mapping[str, Any]) -> None:
+        path = self.full_verify_status_path
+        temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+        data = json.dumps(status, sort_keys=True).encode("utf-8") + b"\n"
+        descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        try:
+            os.write(descriptor, data)
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+        os.replace(temporary, path)
+
+    def _open_custody_ledger(self) -> LedgerStore:
+        return LedgerStore(
+            self.ledger_path,
+            tenant_id=architecture_tenant_id(),
+            ledger_id=CUSTODY_LEDGER_ID,
+            busy_timeout_ms=CUSTODY_SQLITE_BUSY_TIMEOUT_MS,
+            cache_verified_events=True,
+        )
+
+    def _prepare_custody(self, ledger: LedgerStore) -> tuple[dict[str, Any], VerifiedLedgerState] | None:
+        """K4 phase 1, outside the custody lock: complete anchored verification of one snapshot.
+
+        The retained checkpoint is read before the ledger snapshot, so it can only be at or
+        behind it. ``None`` means "use the full path under the lock".
+        """
+
+        checkpoint = self._load_checkpoint()
+        if checkpoint is None:
+            return None
+        keys = self._source_public_keys([{"source_id": s} for s in ledger.source_ids()])
+        state = ledger.verified_state(
+            source_public_keys=keys,
+            anchor=checkpoint,
+            checkpoint_key=self.keys.checkpoint_key,
+        )
+        self._verify_prefix(checkpoint, state.digests)
+        return checkpoint, state
+
+    def _record_prepared_custody(
+        self,
+        ledger: LedgerStore,
+        prepared: tuple[dict[str, Any], VerifiedLedgerState],
+        *,
+        payload_digest: str,
+        observed_at: str,
+    ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], str, str] | None:
+        """K4 phase 2, under the custody lock. ``None`` = fast path missed; nothing written."""
+
+        self._require_full_verify_not_failed()
+        verified_checkpoint, prepared_state = prepared
+        checkpoint = self._load_checkpoint()
+        if checkpoint is None:
+            return None
+        try:
+            with ledger.immediate_transaction():
+                state = ledger.extend_verified_state(
+                    prepared_state,
+                    source_public_keys=self._source_public_keys(
+                        [{"source_id": s} for s in ledger.source_ids()]
+                    ),
+                )
+                if checkpoint != verified_checkpoint:
+                    self._verify_prefix(checkpoint, state.digests)
+                if checkpoint["tree_size"] != len(state.rows):
+                    raise _CustodyFastPathMiss
+                matching = [e for e in state.events if e["payload_digest"] == payload_digest]
+                if len(matching) > 1:
+                    raise MedorArchitectureError("architecture admission was recorded more than once")
+                expected = state.digests
+                if matching:
+                    custody_event = matching[0]
+                    write_status = "already-recorded"
+                else:
+                    source_events = [e for e in state.events if e["source_id"] == SOURCE_ID]
+                    previous_digest = event_digest(source_events[-1]) if source_events else None
+                    custody_event = build_ledger_event(
+                        tenant_id=architecture_tenant_id(),
+                        source_id=SOURCE_ID,
+                        source_sequence=len(source_events),
+                        event_type="observation",
+                        payload_digest=payload_digest,
+                        previous_event_digest=previous_digest,
+                        signer=self.keys.source_signer,
+                        recorded_at=observed_at,
+                    )
+                    expected = [*expected, ledger.append_in_transaction(custody_event)]
+                    write_status = "recorded"
+        except (_CustodyFastPathMiss, LedgerVerificationError):
+            return None
+        except MedorArchitectureError as exc:
+            if "recorded more than once" in str(exc):
+                raise
+            return None
+        if ledger.event_digests() != expected:
+            raise MedorArchitectureError("architecture custody changed during admission")
+        if write_status == "recorded":
+            checkpoint = ledger.checkpoint(
+                checkpoint_id=CUSTODY_CHECKPOINT_ID,
+                signer=self.keys.checkpoint_signer,
+                created_at=observed_at,
+            )
+            self._store_checkpoint(checkpoint)
+        inclusion = ledger.inclusion_proof(event_digest(custody_event))
+        if (
+            checkpoint["tree_size"] != len(expected)
+            or checkpoint["last_event_digest"] != expected[-1]
+            or inclusion["tree_size"] != checkpoint["tree_size"]
+            or inclusion["root_digest"] != checkpoint["root_digest"]
+        ):
+            raise MedorArchitectureError("architecture checkpoint does not bind the admission")
+        return custody_event, checkpoint, inclusion, "retained-head", write_status
+
+    def _run_custody(self, fast, full):
+        """K4/K5: complete anchored pass before the lock; `fast` under it; any miss -> `full`.
+
+        `fast(ledger, prepared)` returns a result or None (miss, nothing it wrote is lost:
+        the old body continues from the committed state exactly as its recovery does).
+        `full(ledger)` is the pre-K4 body and always gets a store opened under the lock.
+        """
+        ledger: LedgerStore | None = None
+        prepared = None
+        if self.ledger_path.exists() and self.checkpoint_path.exists():
+            try:
+                ledger = self._open_custody_ledger()
+                prepared = self._prepare_custody(ledger)
+            except Exception:
+                prepared = None
+        try:
+            with self._exclusive_custody():
+                try:
+                    if ledger is not None and prepared is not None:
+                        result = fast(ledger, prepared)
+                        if result is not None:
+                            return result
+                    if ledger is not None:
+                        ledger.close()
+                        ledger = None
+                    ledger = self._open_custody_ledger()
+                    return full(ledger)
+                finally:
+                    if ledger is not None:
+                        ledger.close()
+                        ledger = None
+        finally:
+            if ledger is not None:
+                ledger.close()
+
+    @contextmanager
+    def _verified_head(self, ledger: LedgerStore, state: VerifiedLedgerState, verified_checkpoint):
+        """K5: BEGIN IMMEDIATE; prefix byte-identical, tail fully verified, checkpoint at head."""
+
+        checkpoint = self._load_checkpoint()
+        if checkpoint is None:
+            raise _CustodyFastPathMiss
+        with ledger.immediate_transaction():
+            current = ledger.extend_verified_state(
+                state,
+                source_public_keys=self._source_public_keys(
+                    [{"source_id": s} for s in ledger.source_ids()]
+                ),
+            )
+            if checkpoint != verified_checkpoint:
+                self._verify_prefix(checkpoint, current.digests)
+            if checkpoint["tree_size"] != len(current.rows):
+                raise _CustodyFastPathMiss
+            yield current, checkpoint
+
+    def _bind_after_write(self, ledger: LedgerStore, expected: list[str], checkpoint, proofs) -> None:
+        if ledger.event_digests() != expected:
+            raise MedorArchitectureError("architecture custody changed during the section")
+        if checkpoint["tree_size"] != len(expected) or checkpoint["last_event_digest"] != expected[-1]:
+            raise MedorArchitectureError("architecture checkpoint does not bind the section")
+        for proof in proofs:
+            if proof["tree_size"] != checkpoint["tree_size"] or proof["root_digest"] != checkpoint["root_digest"]:
+                raise MedorArchitectureError("inclusion proof does not bind the checkpoint")
+
     def _record_admission_custody(
         self,
         *,
         payload_digest: str,
         observed_at: str,
     ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], str, str]:
-        with (
-            self._exclusive_custody(),
-            LedgerStore(
-                self.ledger_path,
-                tenant_id=architecture_tenant_id(),
-                ledger_id=CUSTODY_LEDGER_ID,
-                busy_timeout_ms=CUSTODY_SQLITE_BUSY_TIMEOUT_MS,
-                cache_verified_events=True,
-            ) as ledger,
-        ):
+        # K4 (11.11.2026): the expensive complete pass runs before the exclusive section.
+        return self._run_custody(
+            lambda ledger, prepared: self._record_prepared_custody(
+                ledger, prepared, payload_digest=payload_digest, observed_at=observed_at
+            ),
+            lambda ledger: self._record_admission_custody_full(
+                ledger, payload_digest=payload_digest, observed_at=observed_at
+            ),
+        )
+
+    def _record_admission_custody_full(
+        self,
+        ledger: LedgerStore,
+        *,
+        payload_digest: str,
+        observed_at: str,
+    ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], str, str]:
+        """The pre-K4 admission body, unchanged; runs under the custody lock."""
+        if True:
             events, checkpoint, open_status = self._open_verified(
                 ledger,
                 recovered_at=observed_at,
@@ -2087,16 +2403,75 @@ class PersistentMedorArchitectureService:
             },
             domain=f"medor-event-append-decision-v{version}",
         )
-        with (
-            self._exclusive_custody(),
-            LedgerStore(
-                self.ledger_path,
-                tenant_id=architecture_tenant_id(),
-                ledger_id=CUSTODY_LEDGER_ID,
-                busy_timeout_ms=CUSTODY_SQLITE_BUSY_TIMEOUT_MS,
-                cache_verified_events=True,
-            ) as ledger,
-        ):
+        def fast(ledger, prepared):
+            self._require_full_verify_not_failed()
+            verified_checkpoint, state = prepared
+            # The fallback to the old body is allowed only until the consumption is written:
+            # before the decision, or between decision and consumption (the old body resumes
+            # from a committed decision exactly as its recovery does). After the consumption
+            # commit, nothing is caught: errors surface with their own text.
+            try:
+                with self._verified_head(ledger, state, verified_checkpoint) as (state, checkpoint):
+                    if any(e["source_id"] == source_id for e in state.events):
+                        # Existing grant state (consumed, mismatched, or a decision left by an
+                        # interrupted call): always decided by the old body (K5 v2, condition 2).
+                        raise _CustodyFastPathMiss
+                    decision_event = build_ledger_event(
+                        tenant_id=architecture_tenant_id(),
+                        source_id=source_id,
+                        source_sequence=0,
+                        event_type="toolz-authorization-decision",
+                        payload_digest=decision_payload,
+                        previous_event_digest=None,
+                        signer=self.keys.source_signer,
+                        recorded_at=recorded_at,
+                    )
+                    ledger.append_in_transaction(decision_event)
+                decision_checkpoint = ledger.checkpoint(
+                    checkpoint_id=CUSTODY_CHECKPOINT_ID,
+                    signer=self.keys.checkpoint_signer,
+                    created_at=recorded_at,
+                )
+                self._store_checkpoint(decision_checkpoint)
+                with self._verified_head(ledger, state, decision_checkpoint) as (state, checkpoint):
+                    consumption_payload = digest_object(
+                        {
+                            "grant_id": grant_id,
+                            "decision_event_digest": event_digest(decision_event),
+                            "request_digest": request_digest,
+                            "consumption": "single-use-consumed-before-action",
+                            "automatic_retry": False,
+                            "production_authority": False,
+                        },
+                        domain=f"medor-event-append-consumption-v{version}",
+                    )
+                    consumption_event = build_ledger_event(
+                        tenant_id=architecture_tenant_id(),
+                        source_id=source_id,
+                        source_sequence=1,
+                        event_type="toolz-authorization-consumption",
+                        payload_digest=consumption_payload,
+                        previous_event_digest=event_digest(decision_event),
+                        signer=self.keys.source_signer,
+                        recorded_at=recorded_at,
+                    )
+                    expected = [*state.digests, ledger.append_in_transaction(consumption_event)]
+            except (_CustodyFastPathMiss, LedgerVerificationError, MedorArchitectureError):
+                return None
+            # Point of no return: the one-use grant is consumed and committed.
+            consumption_checkpoint = ledger.checkpoint(
+                checkpoint_id=CUSTODY_CHECKPOINT_ID,
+                signer=self.keys.checkpoint_signer,
+                created_at=recorded_at,
+            )
+            self._store_checkpoint(consumption_checkpoint)
+            decision_proof = ledger.inclusion_proof(event_digest(decision_event))
+            proof = ledger.inclusion_proof(event_digest(consumption_event))
+            self._bind_after_write(ledger, expected, consumption_checkpoint, (decision_proof, proof))
+            return (decision_event, decision_checkpoint, decision_proof, consumption_event,
+                    consumption_checkpoint, proof, "retained-head")
+
+        def full(ledger):
             events, checkpoint, open_status = self._open_verified(ledger, recovered_at=recorded_at)
             source_events = [event for event in events if event["source_id"] == source_id]
             if len(source_events) >= 2:
@@ -2176,6 +2551,11 @@ class PersistentMedorArchitectureService:
                 checkpoint=consumption_checkpoint,
                 checkpoint_key=self.keys.checkpoint_key,
             )
+            return (decision_event, decision_checkpoint, decision_proof, consumption_event,
+                    consumption_checkpoint, proof, open_status)
+
+        (decision_event, decision_checkpoint, decision_proof, consumption_event,
+         consumption_checkpoint, proof, open_status) = self._run_custody(fast, full)
         core = {
             "protocol": f"integrity-guardian/medor-event-one-use-authority/v{version}",
             "grant_id": grant_id,
@@ -2242,16 +2622,50 @@ class PersistentMedorArchitectureService:
         }
         outcome_digest = digest_object(outcome_core, domain="medor-event-append-outcome-v1")
         source_id = "source:medor-event-outcome:" + grant_id.split(":", 1)[1]
-        with (
-            self._exclusive_custody(),
-            LedgerStore(
-                self.ledger_path,
-                tenant_id=architecture_tenant_id(),
-                ledger_id=CUSTODY_LEDGER_ID,
-                busy_timeout_ms=CUSTODY_SQLITE_BUSY_TIMEOUT_MS,
-                cache_verified_events=True,
-            ) as ledger,
-        ):
+        def fast(ledger, prepared):
+            self._require_full_verify_not_failed()
+            verified_checkpoint, state = prepared
+            try:
+                with self._verified_head(ledger, state, verified_checkpoint) as (state, checkpoint):
+                    grant_source_id = "source:medor-event-grant:" + request_digest.split(":", 1)[1]
+                    grant_events = [e for e in state.events if e["source_id"] == grant_source_id]
+                    if len(grant_events) != 2 or [e["source_sequence"] for e in grant_events] != [0, 1]:
+                        raise _CustodyFastPathMiss  # the old body raises "lacks a consumed grant"
+                    prior = [e for e in state.events if e["source_id"] == source_id]
+                    expected = state.digests
+                    if prior:
+                        if len(prior) != 1 or prior[0]["payload_digest"] != outcome_digest:
+                            raise _CustodyFastPathMiss  # the old body raises "replay mismatch"
+                        outcome_event = prior[0]
+                        write_status = "already-recorded"
+                    else:
+                        outcome_event = build_ledger_event(
+                            tenant_id=architecture_tenant_id(),
+                            source_id=source_id,
+                            source_sequence=0,
+                            event_type="observation",
+                            payload_digest=outcome_digest,
+                            previous_event_digest=None,
+                            signer=self.keys.source_signer,
+                            recorded_at=recorded_at,
+                        )
+                        expected = [*expected, ledger.append_in_transaction(outcome_event)]
+                        write_status = "recorded"
+            except (_CustodyFastPathMiss, LedgerVerificationError, MedorArchitectureError):
+                return None
+            # Point of no return (or nothing was written): errors surface as they are.
+            if write_status == "recorded":
+                checkpoint = ledger.checkpoint(
+                    checkpoint_id=CUSTODY_CHECKPOINT_ID,
+                    signer=self.keys.checkpoint_signer,
+                    created_at=recorded_at,
+                )
+                self._store_checkpoint(checkpoint)
+            proof = ledger.inclusion_proof(event_digest(outcome_event))
+            self._bind_after_write(ledger, expected, checkpoint, (proof,))
+            return outcome_event, checkpoint, proof, "retained-head", write_status
+
+        def full(ledger):
             events, checkpoint, open_status = self._open_verified(ledger, recovered_at=recorded_at)
             grant_source_id = "source:medor-event-grant:" + request_digest.split(":", 1)[1]
             grant_events = [event for event in events if event["source_id"] == grant_source_id]
@@ -2296,6 +2710,9 @@ class PersistentMedorArchitectureService:
             if checkpoint is None:
                 raise MedorArchitectureError("event append outcome checkpoint is absent")
             proof = ledger.inclusion_proof(event_digest(outcome_event))
+            return outcome_event, checkpoint, proof, open_status, write_status
+
+        outcome_event, checkpoint, proof, open_status, write_status = self._run_custody(fast, full)
         core = {
             "protocol": "integrity-guardian/medor-event-outcome-feedback/v1",
             **outcome_core,

@@ -1,0 +1,49 @@
+#!/bin/sh
+set -eu
+
+DIRECTORY=/var/lib/integrity-seed
+CATALOG=$DIRECTORY/catalog.sqlite3
+WAL=$DIRECTORY/catalog.sqlite3-wal
+SHM=$DIRECTORY/catalog.sqlite3-shm
+PRINCIPAL=${1:-integrity-client}
+
+case "$PRINCIPAL" in
+  integrity-*) ;;
+  *) echo "Seed reader principal must be an integrity-* account" >&2; exit 2 ;;
+esac
+case "${PRINCIPAL#integrity-}" in
+  ''|*[!a-z0-9-]*) echo "Seed reader principal is invalid" >&2; exit 2 ;;
+esac
+
+if [ "$(id -un)" != "integrity-seed" ] && [ "$(id -u)" -ne 0 ]; then
+  echo "must run as root or integrity-seed" >&2
+  exit 1
+fi
+if [ ! -d "$DIRECTORY" ] || [ -L "$DIRECTORY" ] || [ ! -f "$CATALOG" ] || [ -L "$CATALOG" ]; then
+  echo "canonical Seed ACL target is unavailable" >&2
+  exit 1
+fi
+getent passwd "$PRINCIPAL" >/dev/null
+
+# StateDirectoryMode and the catalog's crash-safe chmod may reset the ACL mask
+# to zero. Reassert both the named entry and its mask after every sync/start.
+setfacl -m "u:$PRINCIPAL:--x,m::--x" "$DIRECTORY"
+setfacl -m "d:u:$PRINCIPAL:r--,d:m::r--" "$DIRECTORY"
+setfacl -m "u:$PRINCIPAL:r--,m::r--" "$CATALOG"
+for companion in "$WAL" "$SHM"; do
+  if [ -e "$companion" ]; then
+    if [ ! -f "$companion" ] || [ -L "$companion" ]; then
+      echo "canonical Seed companion ACL target is invalid" >&2
+      exit 1
+    fi
+    setfacl -m "u:$PRINCIPAL:r--,m::r--" "$companion"
+  fi
+done
+
+if ! getfacl -cp "$DIRECTORY" | grep -qx "user:$PRINCIPAL:--x" || \
+   ! getfacl -cp "$DIRECTORY" | grep -qx "mask::--x" || \
+   ! getfacl -cp "$CATALOG" | grep -qx "user:$PRINCIPAL:r--" || \
+   ! getfacl -cp "$CATALOG" | grep -qx "mask::r--"; then
+  echo "canonical Seed read-only ACL post-check failed" >&2
+  exit 1
+fi

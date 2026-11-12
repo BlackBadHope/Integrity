@@ -2,6 +2,53 @@
 
 All notable public changes are recorded here.
 
+## Unreleased
+
+Changes on `main` after 7.0.1. Nothing here is tagged, and the distribution
+versions are unchanged unless an entry says otherwise.
+
+### Core fixes carried over from an installed release
+
+A running core release carried fixes that had not reached this repository.
+They are now in `src/integrity_guardian`:
+
+- **Custody verification is anchored** and runs before the custody lock, so the
+  lock is held only for the append. Architecture admission and the event-append
+  grant and outcome sections use the same pass. A scheduled full verification
+  runs off the hot path; admission is blocked when it is stale or missing.
+- **Replay pool adoption**: an existing replay pool is adopted instead of
+  rebuilt, and verified ledger row facts are reused.
+- **Seed catalog**: a read-only open that tolerates a quiescent WAL, and a
+  rewritten single-verifier lock.
+- **Seed event pages are byte-budgeted**, with a summary-only form for an
+  oversized event. Replay retention is 3 hours. Start-up no longer runs a full
+  Seed verification; a verified-namespace gate runs before the first Turn
+  Memory use and fails closed.
+- **Owner-rule selector** in the admission capsule (`owner_rules.py`), opt-in
+  and off by default.
+
+### Linux core deployment scripts
+
+`deploy/linux-core/` holds the scripts that serve the memory core over an
+OpenSSH forced command: the transport (`run-mcp`, `run-mcp-child`,
+`verify-release`, `transport-supervisor.py`), the facade release entry points,
+the passive Action Log witness with its sudoers template, and three host
+wrappers. Deployment-specific values are `@PLACEHOLDER@` tokens that must be
+filled before release digests are computed;
+[deploy/linux-core/README.md](deploy/linux-core/README.md) lists them and
+states what is verified.
+
+- **The Action Log token is no longer on a command line.**
+  `host/integrity-memory-mcp` used to pass the token as an argument of `env`,
+  where any local user could read it from the process list. A clean child
+  shell now reads the token file and exports the variable.
+
+### Documentation
+
+- A personal device nickname was replaced by a generic description in the
+  README, one embedded client comment and one test docstring. The affected
+  client resource pins were refreshed.
+
 ## 7.0.1 -- 2026-11-06
 
 Tagged as the GitHub release `v7.0.1` (client-memory 1.13.1). See

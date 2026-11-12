@@ -1,0 +1,130 @@
+#!/usr/bin/python3 -I
+"""Keep the Seed catalog's SQLite WAL companions present for read-only readers.
+
+integrity-seed-sync is a oneshot writer: when it is the last connection to close,
+SQLite checkpoints and deletes catalog.sqlite3-wal/-shm. Readers (integrity-client,
+integrity-reader) may only traverse the directory, so they cannot recreate them and
+every new read fails with "attempt to write a readonly database". This holder keeps
+one idle query_only connection open, so the writer is never the last one to close.
+
+It never writes catalog data and never keeps a transaction open: an idle
+autocommit connection holds no WAL read mark, so the writer's TRUNCATE checkpoint
+is not blocked. If the catalog file is replaced (new inode) or a companion
+disappears, the connection is reopened and read ACLs are reasserted.
+"""
+import os
+import shlex
+import signal
+import sqlite3
+import subprocess
+import sys
+import time
+
+POLL_SECONDS = 15
+
+
+def log(message: str) -> None:
+    print(message, flush=True)
+
+
+def identity(path: str) -> tuple[int, int] | None:
+    try:
+        details = os.stat(path)
+    except FileNotFoundError:
+        return None
+    return (details.st_dev, details.st_ino)
+
+
+def refresh_acls(commands: list[list[str]]) -> None:
+    for command in commands:
+        result = subprocess.run(command, capture_output=True, text=True, timeout=30, check=False)
+        if result.returncode != 0:
+            raise RuntimeError(f"read ACL refresh failed: {shlex.join(command)}: {result.stderr.strip()[:300]}")
+
+
+def parse_arguments(arguments: list[str]) -> tuple[str, list[list[str]]]:
+    """Return the catalog and the ACL refresh commands.
+
+    A plain argument is a refresh script run without arguments. The value of
+    ``--refresh-command`` is split like a shell word list, so one refresher can
+    serve several reader principals (``"refresher integrity-reader"``).
+    """
+
+    catalog, commands, index = None, [], 0
+    while index < len(arguments):
+        value = arguments[index]
+        if value == "--refresh-command":
+            if index + 1 == len(arguments):
+                raise ValueError("--refresh-command needs a value")
+            command = shlex.split(arguments[index + 1])
+            if not command:
+                raise ValueError("--refresh-command must not be empty")
+            commands.append(command)
+            index += 2
+            continue
+        if catalog is None:
+            catalog = value
+        else:
+            commands.append([value])
+        index += 1
+    if catalog is None:
+        raise ValueError("catalog path is required")
+    return catalog, commands
+
+
+class Stop(Exception):
+    """Raised from the signal handler so a pending sleep ends at once."""
+
+
+def stop(_signum, _frame):
+    raise Stop
+
+
+def hold(catalog: str, commands: list[list[str]]) -> None:
+    while True:
+        opened = identity(catalog)
+        if opened is None:
+            log("catalog absent; waiting")
+            time.sleep(POLL_SECONDS)
+            continue
+        connection = sqlite3.connect(f"file:{catalog}?mode=rw", uri=True, isolation_level=None, timeout=5)
+        try:
+            connection.execute("PRAGMA query_only = ON")
+            mode = str(connection.execute("PRAGMA journal_mode").fetchone()[0]).lower()
+            connection.execute("SELECT count(*) FROM sqlite_master").fetchone()
+            if connection.in_transaction:
+                raise RuntimeError("unexpected open transaction")
+            refresh_acls(commands)
+            log(f"holding catalog inode={opened[1]} journal_mode={mode} "
+                f"wal={os.path.exists(catalog + '-wal')} shm={os.path.exists(catalog + '-shm')}")
+            while True:
+                time.sleep(POLL_SECONDS)
+                if identity(catalog) != opened:
+                    log("catalog replaced; reopening")
+                    break
+                if mode == "wal" and not (os.path.exists(catalog + "-wal") and os.path.exists(catalog + "-shm")):
+                    log("WAL companion missing; reopening")
+                    break
+        finally:
+            connection.close()
+
+
+def main() -> int:
+    try:
+        catalog, commands = parse_arguments(sys.argv[1:])
+    except ValueError as error:
+        log(f"{error}; usage: integrity-seed-wal-holder CATALOG [REFRESH_ACL_SCRIPT ...] "
+            "[--refresh-command 'SCRIPT ARG ...' ...]")
+        return 2
+    signal.signal(signal.SIGTERM, stop)
+    signal.signal(signal.SIGINT, stop)
+    try:
+        hold(catalog, commands)
+    except Stop:
+        pass
+    log("stopped")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

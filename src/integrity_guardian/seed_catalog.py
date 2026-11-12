@@ -18,6 +18,7 @@ import os
 import re
 import sqlite3
 import stat
+import sys
 import weakref
 from collections import Counter
 from collections.abc import Callable, Iterable, Iterator, Sequence
@@ -1712,6 +1713,7 @@ def _verify_connection(
 # the server configures one. Time-dependent counters are always read fresh.
 VERIFICATION_MEMO_PROTOCOL = "integrity-guardian/seed-catalog-verification-memo/v1"
 VERIFICATION_MEMO_KEEP = 64
+SINGLE_VERIFIER_LOCK_ATTEMPTS = 16
 _DIGEST_RE = re.compile(r"sha256:[a-f0-9]{64}")
 _MEMO_KEY_RE = re.compile(r"[a-f0-9]{64}")
 _VERIFIED_CONTENT: dict[str, dict[str, str]] = {}
@@ -1757,6 +1759,8 @@ def _verifier_digest() -> str:
             # Verification also depends on the deployment profile (mandatory
             # anchor events), so a memo is bound to the active profile digest.
             + b"\0" + _deployment_profile.current().digest.encode("ascii")
+            # ISS-033: a memo is also bound to the interpreter (json/sqlite behaviour).
+            + b"\0" + sys.version.encode("utf-8")
         )
     return _verifier_identity
 
@@ -2070,22 +2074,46 @@ def _single_verifier(key: str) -> Iterator[None]:
         yield
         return
     lock_path = root / f"{key}.lock"
+    # K3 (11.11.2026): the holder unlinks the lock file before it releases the lock. A waiter
+    # that was blocked on that (now unlinked) inode must not proceed: a newcomer may already hold
+    # a fresh lock file at the same path. Accept the lock only while the path still names our
+    # inode; otherwise re-open and wait again (bounded). Any OS failure keeps the old fail-open
+    # behaviour: the memo is an optimization and verification itself stays complete.
+    descriptor = None
+    for _attempt in range(SINGLE_VERIFIER_LOCK_ATTEMPTS):
+        try:
+            candidate = os.open(
+                lock_path, os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0), 0o600
+            )
+        except OSError:
+            break
+        try:
+            fcntl.flock(candidate, fcntl.LOCK_EX)
+            opened = os.fstat(candidate)
+            try:
+                current = os.stat(lock_path, follow_symlinks=False)
+            except FileNotFoundError:
+                current = None
+            if current is not None and (current.st_dev, current.st_ino) == (
+                opened.st_dev,
+                opened.st_ino,
+            ):
+                descriptor, candidate = candidate, None
+                break
+        except OSError:
+            break
+        finally:
+            if candidate is not None:
+                os.close(candidate)
     try:
-        descriptor = os.open(
-            lock_path, os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0), 0o600
-        )
-    except OSError:
-        yield
-        return
-    try:
-        fcntl.flock(descriptor, fcntl.LOCK_EX)
         yield
     finally:
-        try:
-            os.unlink(lock_path)
-        except OSError:
-            pass
-        os.close(descriptor)
+        if descriptor is not None:
+            try:
+                os.unlink(lock_path)
+            except OSError:
+                pass
+            os.close(descriptor)
 
 
 def _remember_live_key(identity: tuple[int, ...], key: str) -> None:

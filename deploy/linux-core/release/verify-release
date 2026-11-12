@@ -1,0 +1,454 @@
+#!/usr/bin/python3 -I
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import re
+import stat
+import sys
+from collections.abc import Iterable, Sequence
+from pathlib import Path, PurePosixPath
+from typing import Any
+
+PROTOCOL = "integrity-guardian/client-memory-release-inventory/v1"
+INVENTORY_NAME = "release-inventory.json"
+INCOMPLETE_NAME = ".incomplete"
+SHA256_RE = re.compile(r"[a-f0-9]{64}")
+DIGEST_RE = re.compile(r"sha256:[a-f0-9]{64}")
+MODE_RE = re.compile(r"[0-7]{4}")
+MANIFEST_KEYS = {
+    "protocol",
+    "release_digest",
+    "file_count",
+    "symlink_count",
+    "files",
+    "symlinks",
+}
+
+
+class ReleaseInventoryError(RuntimeError):
+    pass
+
+
+def _release_root(value: Path) -> Path:
+    root = value.absolute()
+    try:
+        metadata = root.lstat()
+    except OSError as exc:
+        raise ReleaseInventoryError("release root is unavailable") from exc
+    if not stat.S_ISDIR(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
+        raise ReleaseInventoryError("release root is not a direct directory")
+    return root
+
+
+def _release_digest(value: str) -> str:
+    if SHA256_RE.fullmatch(value) is None:
+        raise ReleaseInventoryError("release digest is not lowercase SHA-256")
+    return value
+
+
+def _relative_path(value: str) -> str:
+    if not value or "\\" in value:
+        raise ReleaseInventoryError("inventory path is not canonical")
+    path = PurePosixPath(value)
+    if path.is_absolute() or any(part in {"", ".", ".."} for part in path.parts):
+        raise ReleaseInventoryError("inventory path is not canonical")
+    if path.as_posix() != value or value in {INVENTORY_NAME, INCOMPLETE_NAME}:
+        raise ReleaseInventoryError("inventory path is not canonical")
+    return value
+
+
+def _symlink_target(value: str) -> str:
+    if not value or "\\" in value:
+        raise ReleaseInventoryError("symlink target is not canonical")
+    target = PurePosixPath(value)
+    if target.is_absolute() or any(part in {"", ".", ".."} for part in target.parts):
+        raise ReleaseInventoryError("symlink target is not canonical")
+    if target.as_posix() != value:
+        raise ReleaseInventoryError("symlink target is not canonical")
+    return value
+
+
+def _assert_custody(path: Path, metadata: os.stat_result) -> None:
+    if metadata.st_uid != 0 or metadata.st_gid != 0:
+        raise ReleaseInventoryError(f"release entry is not root-owned: {path}")
+    if not stat.S_ISLNK(metadata.st_mode) and stat.S_IMODE(metadata.st_mode) & 0o022:
+        raise ReleaseInventoryError(f"release entry is group/world writable: {path}")
+
+
+def _hash_regular(path: Path) -> dict[str, object]:
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        descriptor = os.open(path, flags)
+    except OSError as exc:
+        raise ReleaseInventoryError(f"release file cannot be opened: {path}") from exc
+    try:
+        before = os.fstat(descriptor)
+        if not stat.S_ISREG(before.st_mode):
+            raise ReleaseInventoryError(f"release entry is not a regular file: {path}")
+        digest = hashlib.sha256()
+        while True:
+            chunk = os.read(descriptor, 1024 * 1024)
+            if not chunk:
+                break
+            digest.update(chunk)
+        after = os.fstat(descriptor)
+        identity_before = (
+            before.st_dev,
+            before.st_ino,
+            before.st_size,
+            before.st_mtime_ns,
+            before.st_ctime_ns,
+        )
+        identity_after = (
+            after.st_dev,
+            after.st_ino,
+            after.st_size,
+            after.st_mtime_ns,
+            after.st_ctime_ns,
+        )
+        if identity_before != identity_after:
+            raise ReleaseInventoryError(f"release file changed while hashing: {path}")
+        return {
+            "digest": f"sha256:{digest.hexdigest()}",
+            "size_bytes": before.st_size,
+            "mode": f"{stat.S_IMODE(before.st_mode):04o}",
+        }
+    finally:
+        os.close(descriptor)
+
+
+def _scan(
+    root: Path,
+    *,
+    ignored: Iterable[str],
+    require_root_owned: bool,
+) -> tuple[list[dict[str, object]], list[dict[str, str]]]:
+    ignored_paths = set(ignored)
+    files: list[dict[str, object]] = []
+    symlinks: list[dict[str, str]] = []
+    stack = [root]
+    while stack:
+        directory = stack.pop()
+        directory_metadata = directory.lstat()
+        if require_root_owned:
+            _assert_custody(directory, directory_metadata)
+        try:
+            with os.scandir(directory) as scanned:
+                entries = sorted(scanned, key=lambda item: item.name, reverse=True)
+        except OSError as exc:
+            raise ReleaseInventoryError(
+                f"release directory cannot be scanned: {directory}"
+            ) from exc
+        for entry in entries:
+            path = Path(entry.path)
+            relative = path.relative_to(root).as_posix()
+            if relative in ignored_paths:
+                continue
+            metadata = entry.stat(follow_symlinks=False)
+            if require_root_owned:
+                _assert_custody(path, metadata)
+            if stat.S_ISDIR(metadata.st_mode):
+                stack.append(path)
+            elif stat.S_ISREG(metadata.st_mode):
+                record = {"path": relative, **_hash_regular(path)}
+                files.append(record)
+            elif stat.S_ISLNK(metadata.st_mode):
+                symlinks.append({"path": relative, "target": os.readlink(path)})
+            else:
+                raise ReleaseInventoryError(f"unsupported release entry type: {relative}")
+    files.sort(key=lambda item: str(item["path"]))
+    symlinks.sort(key=lambda item: item["path"])
+    return files, symlinks
+
+
+def _canonical_bytes(value: dict[str, Any]) -> bytes:
+    return (
+        json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False) + "\n"
+    ).encode("utf-8")
+
+
+def _write_inventory(path: Path, payload: bytes) -> None:
+    flags = (
+        os.O_WRONLY
+        | os.O_CREAT
+        | os.O_EXCL
+        | getattr(os, "O_CLOEXEC", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+    )
+    try:
+        descriptor = os.open(path, flags, 0o444)
+    except OSError as exc:
+        raise ReleaseInventoryError("release inventory already exists or is unsafe") from exc
+    complete = False
+    try:
+        offset = 0
+        while offset < len(payload):
+            written = os.write(descriptor, payload[offset:])
+            if written <= 0:
+                raise ReleaseInventoryError("release inventory write was incomplete")
+            offset += written
+        os.fsync(descriptor)
+        os.fchmod(descriptor, 0o444)
+        complete = True
+    finally:
+        os.close(descriptor)
+        if not complete:
+            path.unlink(missing_ok=True)
+    directory = os.open(path.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+    try:
+        os.fsync(directory)
+    finally:
+        os.close(directory)
+
+
+def build_inventory(release_root: Path, expected_release_digest: str) -> dict[str, object]:
+    root = _release_root(release_root)
+    release_digest = _release_digest(expected_release_digest)
+    if root.name != release_digest:
+        raise ReleaseInventoryError("release directory does not match artifact digest")
+    inventory_path = root / INVENTORY_NAME
+    if inventory_path.exists() or inventory_path.is_symlink():
+        raise ReleaseInventoryError("release inventory already exists")
+
+    files, symlinks = _scan(
+        root,
+        ignored={INCOMPLETE_NAME},
+        require_root_owned=False,
+    )
+    manifest = {
+        "protocol": PROTOCOL,
+        "release_digest": f"sha256:{release_digest}",
+        "file_count": len(files),
+        "symlink_count": len(symlinks),
+        "files": files,
+        "symlinks": symlinks,
+    }
+    _validate_manifest(manifest, release_digest)
+    payload = _canonical_bytes(manifest)
+    _write_inventory(inventory_path, payload)
+    return _receipt(manifest, payload)
+
+
+def _read_inventory(path: Path) -> tuple[dict[str, Any], bytes]:
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        descriptor = os.open(path, flags)
+    except OSError as exc:
+        raise ReleaseInventoryError("release inventory is unavailable") from exc
+    try:
+        before = os.fstat(descriptor)
+        if not stat.S_ISREG(before.st_mode):
+            raise ReleaseInventoryError("release inventory is not a regular file")
+        if before.st_size > 8 * 1024 * 1024:
+            raise ReleaseInventoryError("release inventory is too large")
+        chunks: list[bytes] = []
+        size = 0
+        while True:
+            chunk = os.read(descriptor, 1024 * 1024)
+            if not chunk:
+                break
+            size += len(chunk)
+            if size > 8 * 1024 * 1024:
+                raise ReleaseInventoryError("release inventory is too large")
+            chunks.append(chunk)
+        after = os.fstat(descriptor)
+        identity_before = (
+            before.st_dev,
+            before.st_ino,
+            before.st_size,
+            before.st_mtime_ns,
+            before.st_ctime_ns,
+        )
+        identity_after = (
+            after.st_dev,
+            after.st_ino,
+            after.st_size,
+            after.st_mtime_ns,
+            after.st_ctime_ns,
+        )
+        if identity_before != identity_after:
+            raise ReleaseInventoryError("release inventory changed while reading")
+        payload = b"".join(chunks)
+    finally:
+        os.close(descriptor)
+    try:
+        value = json.loads(payload)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ReleaseInventoryError("release inventory JSON is invalid") from exc
+    if not isinstance(value, dict):
+        raise ReleaseInventoryError("release inventory is not an object")
+    if payload != _canonical_bytes(value):
+        raise ReleaseInventoryError("release inventory encoding is not canonical")
+    return value, payload
+
+
+def _validate_record_path_order(records: list[Any], *, symlink: bool) -> set[str]:
+    paths: list[str] = []
+    expected_keys = (
+        {"path", "target"}
+        if symlink
+        else {
+            "path",
+            "digest",
+            "size_bytes",
+            "mode",
+        }
+    )
+    for record in records:
+        if not isinstance(record, dict) or set(record) != expected_keys:
+            raise ReleaseInventoryError("release inventory record shape is invalid")
+        path = record.get("path")
+        if not isinstance(path, str):
+            raise ReleaseInventoryError("release inventory path is invalid")
+        paths.append(_relative_path(path))
+        if symlink:
+            target = record.get("target")
+            if not isinstance(target, str):
+                raise ReleaseInventoryError("release symlink target is invalid")
+            _symlink_target(target)
+        else:
+            digest = record.get("digest")
+            size = record.get("size_bytes")
+            mode = record.get("mode")
+            if not isinstance(digest, str) or DIGEST_RE.fullmatch(digest) is None:
+                raise ReleaseInventoryError("release file digest is invalid")
+            if isinstance(size, bool) or not isinstance(size, int) or size < 0:
+                raise ReleaseInventoryError("release file size is invalid")
+            if not isinstance(mode, str) or MODE_RE.fullmatch(mode) is None:
+                raise ReleaseInventoryError("release file mode is invalid")
+    if paths != sorted(paths) or len(paths) != len(set(paths)):
+        raise ReleaseInventoryError("release inventory paths are not sorted and unique")
+    return set(paths)
+
+
+def _validate_manifest(manifest: dict[str, Any], release_digest: str) -> None:
+    if set(manifest) != MANIFEST_KEYS or manifest.get("protocol") != PROTOCOL:
+        raise ReleaseInventoryError("release inventory contract is invalid")
+    if manifest.get("release_digest") != f"sha256:{release_digest}":
+        raise ReleaseInventoryError("release inventory digest binding is invalid")
+    files = manifest.get("files")
+    symlinks = manifest.get("symlinks")
+    if not isinstance(files, list) or not isinstance(symlinks, list):
+        raise ReleaseInventoryError("release inventory records are invalid")
+    file_paths = _validate_record_path_order(files, symlink=False)
+    symlink_paths = _validate_record_path_order(symlinks, symlink=True)
+    if file_paths & symlink_paths:
+        raise ReleaseInventoryError("release inventory path types overlap")
+    if manifest.get("file_count") != len(files):
+        raise ReleaseInventoryError("release inventory file count is invalid")
+    if manifest.get("symlink_count") != len(symlinks):
+        raise ReleaseInventoryError("release inventory symlink count is invalid")
+
+
+def _receipt(manifest: dict[str, Any], payload: bytes) -> dict[str, object]:
+    return {
+        "protocol": PROTOCOL,
+        "release_digest": manifest["release_digest"],
+        "inventory_digest": f"sha256:{hashlib.sha256(payload).hexdigest()}",
+        "file_count": manifest["file_count"],
+        "symlink_count": manifest["symlink_count"],
+        "verified": True,
+    }
+
+
+def _raise_inventory_mismatch(
+    expected: list[dict[str, object]],
+    actual: list[dict[str, object]],
+    *,
+    entry_type: str,
+) -> None:
+    expected_by_path = {str(item["path"]): item for item in expected}
+    actual_by_path = {str(item["path"]): item for item in actual}
+    missing = sorted(expected_by_path.keys() - actual_by_path.keys())
+    added = sorted(actual_by_path.keys() - expected_by_path.keys())
+    if missing:
+        detail = f"missing {entry_type} {missing[0]}"
+    elif added:
+        detail = f"added {entry_type} {added[0]}"
+    else:
+        changed = next(
+            path
+            for path in sorted(expected_by_path)
+            if expected_by_path[path] != actual_by_path[path]
+        )
+        detail = f"changed {entry_type} {changed}"
+    raise ReleaseInventoryError(f"release inventory does not match runtime files: {detail}")
+
+
+def verify_inventory(
+    release_root: Path,
+    expected_release_digest: str,
+    *,
+    require_root_owned: bool = False,
+) -> dict[str, object]:
+    root = _release_root(release_root)
+    release_digest = _release_digest(expected_release_digest)
+    if root.name != release_digest:
+        raise ReleaseInventoryError("release directory does not match artifact digest")
+    if (root / INCOMPLETE_NAME).exists() or (root / INCOMPLETE_NAME).is_symlink():
+        raise ReleaseInventoryError("release installation is incomplete")
+
+    inventory_path = root / INVENTORY_NAME
+    manifest, payload = _read_inventory(inventory_path)
+    if require_root_owned:
+        _assert_custody(inventory_path, inventory_path.lstat())
+    _validate_manifest(manifest, release_digest)
+    files, symlinks = _scan(
+        root,
+        ignored={INVENTORY_NAME},
+        require_root_owned=require_root_owned,
+    )
+    if files != manifest["files"]:
+        _raise_inventory_mismatch(manifest["files"], files, entry_type="file")
+    if symlinks != manifest["symlinks"]:
+        _raise_inventory_mismatch(manifest["symlinks"], symlinks, entry_type="symlink")
+    return _receipt(manifest, payload)
+
+
+def _parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Build or verify one client release inventory")
+    subparsers = parser.add_subparsers(dest="command")
+    for command in ("build", "verify"):
+        subparser = subparsers.add_parser(command)
+        subparser.add_argument("--release-root", type=Path, required=True)
+        subparser.add_argument("--expected-release-digest", required=True)
+        if command == "verify":
+            subparser.add_argument("--require-root-owned", action="store_true")
+    return parser
+
+
+def _default_release_root() -> Path:
+    return Path(__file__).absolute().parent
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = _parser().parse_args(argv)
+    try:
+        if args.command is None:
+            release_root = _default_release_root()
+            verify_inventory(
+                release_root,
+                release_root.name,
+                require_root_owned=True,
+            )
+            return 0
+        if args.command == "build":
+            receipt = build_inventory(args.release_root, args.expected_release_digest)
+        else:
+            receipt = verify_inventory(
+                args.release_root,
+                args.expected_release_digest,
+                require_root_owned=args.require_root_owned,
+            )
+    except (OSError, ReleaseInventoryError) as exc:
+        print(f"client release inventory denied: {exc}", file=sys.stderr)
+        return 1
+    print(json.dumps(receipt, sort_keys=True, separators=(",", ":")))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
