@@ -146,7 +146,7 @@ numbers refer to it.
 - **Linux native profiles** for Codex and Claude Code
   (PRs #38 and #39,
   beta.2).
-- **Mobile Codex (DroidDeck)**: Codex on an Android phone, in a Linux userland,
+- **Mobile Codex**: Codex on an Android phone, in a Linux userland,
   writes to the same core over SSH. Getting it there exposed real bugs.
   PR #43 (beta.2) fixes
   two of them: Codex hooks without `CODEX_THREAD_ID`, and sandboxes that refuse
@@ -205,10 +205,10 @@ python3 -m venv ~/.local/share/integrity/venv
 ~/.local/share/integrity/venv/bin/python -m pip install . ./components/integrity-action-log './components/integrity-client-memory[native]'
 ```
 
-### Android phone (DroidDeck)
+### Android phone
 
-*Tested once; no guide in this repository yet.* DroidDeck is our Android
-setup: a Linux userland on the phone. On it, the Codex CLI writes to the same
+*Tested once; no guide in this repository yet.* Our Android
+setup is a Linux userland on the phone. On it, the Codex CLI writes to the same
 core over the SSH forced command described below. Claude Code also runs there
 with Remote Control, so a prompt sent from claude.ai ran on the phone. Two
 things we learned:

@@ -993,7 +993,7 @@
       "mode": "0o644",
       "path": "components/integrity-client-memory/SOURCE-MAP.json",
       "sanitization_edits": 0,
-      "sha256": "7408892a8bd8157fb97a5eef69af8a1893945ca529a6e4691604274550c52a55"
+      "sha256": "20b24b0cbbf9b395f19be0aada29b15d61e7acccf0c2981b96523a93dd23b119"
     },
     {
       "bytes": 2713,
@@ -1241,18 +1241,18 @@
       "sha256": "9f464c21a2696140f9aad35a6324d2a4232f50177bd5655b8736a2fe87b180e1"
     },
     {
-      "bytes": 100417,
+      "bytes": 100418,
       "mode": "0o644",
       "path": "components/integrity-client-memory/src/integrity_client_memory/resources/claude-native/integrity-client-admission.py",
       "sanitization_edits": 0,
-      "sha256": "b697a53a2699fef1f9d95f56c823863dca00d57f851a66ba18aade29cbc5d2c7"
+      "sha256": "2276f0d7aa9eda599e26d22d0b92c36327877d00a7595fa6da41a11fd910ac5a"
     },
     {
-      "bytes": 82465,
+      "bytes": 82466,
       "mode": "0o644",
       "path": "components/integrity-client-memory/src/integrity_client_memory/resources/claude-native/integrity-client-turn-broker.py",
       "sanitization_edits": 0,
-      "sha256": "e88587da596b6d6fe086197263afaf9b5ecce61066d6023fbe58d0564896cf52"
+      "sha256": "80538a71bf2eea757b27711dfb80c67e1ccaf63db54330ec382ac56a9715e2a2"
     },
     {
       "bytes": 53262,
@@ -1444,18 +1444,18 @@
       "sha256": "db75d484ea1f54a3d5636f22c87f6e53ca9d42cb7c740fcfafc07013dcc2a753"
     },
     {
-      "bytes": 102886,
+      "bytes": 102887,
       "mode": "0o644",
       "path": "components/integrity-client-memory/src/integrity_client_memory/resources/windows/admission.py",
       "sanitization_edits": 0,
-      "sha256": "04f757e43de587c25982a7143ee79636b7d24ea80824b0c9e30a4bf454eada18"
+      "sha256": "6e959cb85aeea5f8def0da250a86d1b24f09153ad025b623c4daae03d831d722"
     },
     {
-      "bytes": 234771,
+      "bytes": 234772,
       "mode": "0o644",
       "path": "components/integrity-client-memory/src/integrity_client_memory/resources/windows/integrity-client-turn-broker.py",
       "sanitization_edits": 0,
-      "sha256": "ae1ab5da394d0235b08af4955995b23af056ce7e2dd8fe98f509b2cf3b394976"
+      "sha256": "a8835d0ecd8a921c1d526be8bd52ae67e7549bda83f84fcd7fe04b1cdf37257a"
     },
     {
       "bytes": 137025,
@@ -1581,7 +1581,7 @@
       "mode": "0o644",
       "path": "components/integrity-client-memory/tests/test_canonical_recovery_bundle.py",
       "sanitization_edits": 0,
-      "sha256": "f4734a54d14598f1948ef8eca72050f3ac12f84514a13d58c554e847ce1d597c"
+      "sha256": "9cd12d23ff7b1b0635d0928ce33857f524845f360213c562c9387d1e0843f0d7"
     },
     {
       "bytes": 890,
@@ -1612,11 +1612,11 @@
       "sha256": "ebbef85bc3d4a977f8df6459ef7e5fb47fbb04efa1474531b1da751d35bda9df"
     },
     {
-      "bytes": 11002,
+      "bytes": 11007,
       "mode": "0o644",
       "path": "components/integrity-client-memory/tests/test_daemon_hook_owner.py",
       "sanitization_edits": 0,
-      "sha256": "fc761abb724521757101e5c5526ec1ea2640effe2f0483e2a60bdec2d4e4c83c"
+      "sha256": "2236b8906dc240e2782216f0b7b40c423f8c244f7ff657d7742176433ee29276"
     },
     {
       "bytes": 1394,
@@ -7649,11 +7649,11 @@
       "sha256": "c773a85da94e9edf0b2b10e60fd43b00fe4f90e345ec0d958e6c5b4d0d405e8e"
     },
     {
-      "bytes": 38639,
+      "bytes": 38604,
       "mode": "0o644",
       "path": "README.md",
       "sanitization_edits": 0,
-      "sha256": "a54cf8c0d42bed11a47fa18dc72251187a194d7ba7cb9eb7f5bf92e88293508d"
+      "sha256": "fbab7f46a584e78bd70fc44b218c0103ac43728cc60d6a28fe96eedfe2b04e24"
     },
     {
       "bytes": 13466,
@@ -7824,7 +7824,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:68bde1032595e6faeec6df565522055cd639acc7a1a6e7d61ca9c9262734375c",
+  "projection_digest": "sha256:a404bcdfce54b8f1aa868925f87512519860d6cacb952b84c429b83b16302d06",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

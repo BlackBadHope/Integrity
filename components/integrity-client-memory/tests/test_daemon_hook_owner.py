@@ -212,7 +212,7 @@ BROKER = SOURCE.with_name("integrity-client-turn-broker.py")
 
 @pytest.mark.parametrize("source", [BROKER, SOURCE.with_name("admission.py")])
 def test_presentation_artifact_publishes_without_hard_links(tmp_path, monkeypatch, source):
-    """Android app sandboxes deny link(); DroidDeck reported a PermissionError fault."""
+    """Android app sandboxes deny link(); a phone client reported a PermissionError fault."""
     text = None
     for node in ast.walk(ast.parse(source.read_text(encoding="utf-8"))):
         if (isinstance(node, ast.Constant) and isinstance(node.value, str)
