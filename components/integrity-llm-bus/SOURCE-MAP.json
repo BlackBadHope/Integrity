@@ -109,7 +109,7 @@
     "path": "src/integrity_llm_bus/resources/core/bus_core_daemon.py",
     "source": "coordination/llm-bus/core/bus_core_daemon.py",
     "source_sha256": "8169a21ec69a5e34a0e8d0a3ce421b740fc9a6012e2e91592ef21b3506902cc7",
-    "sha256": "bf3abe8e2590f85387960e6bfb4cb481dd6fad5cb52c6dce674ae3b3e4e268f1"
+    "sha256": "81ddf98f49fba2263fd2dab68afcc645a29ff66c13793c304ca8a1a44c7ce6f0"
   },
   {
     "path": "src/integrity_llm_bus/resources/core/bus_journal.py",

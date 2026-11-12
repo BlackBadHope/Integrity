@@ -468,27 +468,27 @@ def vendor_cards(days=7):
         if runtime_state == "quota_exhausted":
             gate = "amber"
             selectable = False
-            gate_reason = f"provider quota exhausted: {runtime_detail}"
+            gate_reason = f"Лимит провайдера исчерпан: {runtime_detail}"
         elif not has_room_key:
             gate = "red"
             selectable = False
-            gate_reason = "no active room key on the core (no-key)"
+            gate_reason = "Нет активного ключа комнаты на ядре (no-key)"
         elif not ro_ok:
             gate = "red"
             selectable = False
-            gate_reason = c_info.get("ro_gap") or "read-only mechanism not verified"
+            gate_reason = c_info.get("ro_gap") or "Механизм «только чтение» не подтверждён"
         elif runtime_state == "waker_offline":
             gate = "amber"
             selectable = False
-            gate_reason = f"waker offline: {runtime_detail}"
+            gate_reason = f"Будильник офлайн: {runtime_detail}"
         elif runtime_state == "ready":
             gate = "green"
             selectable = True
-            gate_reason = c_info.get("ro_evidence") or "read-only mode verified"
+            gate_reason = c_info.get("ro_evidence") or "Режим «только чтение» подтверждён"
         else:
             gate = "red"
             selectable = False
-            gate_reason = f"state: {runtime_state} ({runtime_detail})"
+            gate_reason = f"Статус: {runtime_state} ({runtime_detail})"
 
         quota = None
         for n, q in keys:

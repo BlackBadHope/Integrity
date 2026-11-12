@@ -2823,11 +2823,11 @@
       "sha256": "55fc4213541bdc82366958d62770bbcb353b75de78aa994952128bb62a313196"
     },
     {
-      "bytes": 508,
+      "bytes": 574,
       "mode": "0o644",
       "path": "components/integrity-killswitch/scripts/windows/PANIC_KILL_ALL_LLMS.cmd",
       "sanitization_edits": 0,
-      "sha256": "e8bf7d81860d474a0ab488884f9f3cd9457f80e57d2c0a4f90bc7087370f39c8"
+      "sha256": "a936251d3215a6e800f47049b228415294a38d94815638e6e24c9bd1d07e6df9"
     },
     {
       "bytes": 360,
@@ -2858,11 +2858,11 @@
       "sha256": "c8f683ca7912761b8f39c87bba442e9b0ca1ca0c91ad2dbe96101c82c5913dcd"
     },
     {
-      "bytes": 52565,
+      "bytes": 52922,
       "mode": "0o644",
       "path": "components/integrity-killswitch/src/integrity_killswitch/killswitch.py",
       "sanitization_edits": 0,
-      "sha256": "fa1eeed5f2915d7890f20147ae59118d5ccb9d7910621430baf3630b01957b18"
+      "sha256": "66740fa29df6e62ee9574159f58967787abd5659b9019d922e218470cbee503e"
     },
     {
       "bytes": 16030,
@@ -2904,7 +2904,7 @@
       "mode": "0o644",
       "path": "components/integrity-llm-bus/SOURCE-MAP.json",
       "sanitization_edits": 0,
-      "sha256": "ef1433a703b582378f54637450d94c4373a2ba9604594d7da6ee27a65ebd07dd"
+      "sha256": "bd75c2ef89133f3213b4845093847b8edc32eb7ab208962716fe58b0fa844d28"
     },
     {
       "bytes": 587,
@@ -3103,11 +3103,11 @@
       "sha256": "e99f186d82156f308bace867a5288fb55a9575ff4533ea637aa453f860f55398"
     },
     {
-      "bytes": 44121,
+      "bytes": 44287,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/core/bus_core_daemon.py",
       "sanitization_edits": 0,
-      "sha256": "bf3abe8e2590f85387960e6bfb4cb481dd6fad5cb52c6dce674ae3b3e4e268f1"
+      "sha256": "81ddf98f49fba2263fd2dab68afcc645a29ff66c13793c304ca8a1a44c7ce6f0"
     },
     {
       "bytes": 2731,
@@ -8741,7 +8741,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:385de9a05c091ec84263c8b7c1b5a7d4e68912b8b9cff56c429efc6c2ee83d5c",
+  "projection_digest": "sha256:ce53ee27f87f3420b43a2923824f748d6beac58f19b303fda7c31c8e81f854a5",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

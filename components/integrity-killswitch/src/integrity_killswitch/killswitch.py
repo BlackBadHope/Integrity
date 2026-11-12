@@ -662,7 +662,7 @@ def cmd_check(args: argparse.Namespace) -> int:
 
 
 HTML_DASHBOARD = """<!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -769,7 +769,7 @@ HTML_DASHBOARD = """<!DOCTYPE html>
   <header>
     <div>
       <h1>Integrity Safe Switch</h1>
-      <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.25rem;">Emergency switch for LLM access to the infrastructure</p>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.25rem;">Аварийный тумблер доступа LLM к инфраструктуре</p>
     </div>
     <div id="masterBadge" class="badge badge-ok">NORMAL</div>
   </header>
@@ -777,22 +777,22 @@ HTML_DASHBOARD = """<!DOCTYPE html>
   <div class="panic-box">
     <div class="panic-text">
       <h2 id="panicHeader">MASTER KILLSWITCH</h2>
-      <p id="panicDesc">Cuts ALL LLM access to the infrastructure, the bus and the secrets at once</p>
+      <p id="panicDesc">Мгновенное отключение доступа ВСЕХ LLM к инфраструктуре, шине и секретам</p>
     </div>
     <div id="panicAction">
       <button class="btn-panic" onclick="togglePanic(true)">🚨 PANIC STOP</button>
     </div>
   </div>
 
-  <h2 style="font-size: 1.15rem; margin-bottom: 1rem; color: var(--text-muted);">Per-vendor switches</h2>
+  <h2 style="font-size: 1.15rem; margin-bottom: 1rem; color: var(--text-muted);">Тумблеры по вендорам</h2>
   <div class="grid" id="vendorGrid">
     <!-- Populated by JS -->
   </div>
 
   <div class="audit-box">
-    <h3>Latest security events</h3>
+    <h3>Последние события безопасности</h3>
     <div class="log-list" id="auditList">
-      <div class="log-entry">Loading the log...</div>
+      <div class="log-entry">Загрузка журнала...</div>
     </div>
   </div>
 
@@ -829,7 +829,7 @@ HTML_DASHBOARD = """<!DOCTYPE html>
         badge.className = 'badge badge-danger';
         badge.textContent = 'ALL LLMS CUT OFF';
         panicHeader.textContent = '🚨 MASTER PANIC ACTIVE';
-        panicAction.innerHTML = '<button class="btn-resume" onclick="togglePanic(false)">🟢 Restore access</button>';
+        panicAction.innerHTML = '<button class="btn-resume" onclick="togglePanic(false)">🟢 Восстановить доступ</button>';
       } else {
         badge.className = 'badge badge-ok';
         badge.textContent = 'NORMAL';
@@ -869,7 +869,7 @@ HTML_DASHBOARD = """<!DOCTYPE html>
           return `<div class="log-entry ${isBlock ? 'block' : ''}">[${esc(String(l.ts || '').replace('T', ' ').slice(0, 19))}] <strong>${esc(String(l.action || '').toUpperCase())}</strong>: ${esc(l.vendor || '')} ${l.target ? '@' + esc(l.target) : ''} - ${esc(l.reason || '')}</div>`;
         }).join('');
       } else {
-        logList.innerHTML = '<div class="log-entry">No lock events</div>';
+        logList.innerHTML = '<div class="log-entry">Событий блокировки нет</div>';
       }
     }
 
@@ -882,12 +882,12 @@ HTML_DASHBOARD = """<!DOCTYPE html>
         });
         await loadStatus();
       } catch (err) {
-        alert('Switch failed: ' + err);
+        alert('Ошибка переключения: ' + err);
       }
     }
 
     async function togglePanic(activate) {
-      if (activate && !confirm('WARNING: this blocks ALL models from the infrastructure. Proceed?')) {
+      if (activate && !confirm('ВНИМАНИЕ! Это полностью заблокирует доступ ВСЕМ моделям к инфраструктуре. Подтверждаете?')) {
         return;
       }
       try {
@@ -898,7 +898,7 @@ HTML_DASHBOARD = """<!DOCTYPE html>
         });
         await loadStatus();
       } catch (err) {
-        alert('Switch failed: ' + err);
+        alert('Ошибка переключения: ' + err);
       }
     }
 
