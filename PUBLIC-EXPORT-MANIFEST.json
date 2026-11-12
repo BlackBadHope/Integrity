@@ -412,7 +412,7 @@
       "mode": "0o644",
       "path": "components/integrity-adapter-sdk/src/integrity_adapter_sdk/guardian-origin.json",
       "sanitization_edits": 2,
-      "sha256": "a15bae00042efeae8eba969654bfdd36a93b1122895d166c639867fbac6fb390"
+      "sha256": "fb622d819d6e74cb0751ab040a69625fef54378aeaf34b1b6b78ad989baa4c16"
     },
     {
       "bytes": 632,
@@ -7782,11 +7782,11 @@
       "sha256": "6a035fa7fe0d28a1f1477db42895e008b0235d23b35f7a0fec3f0f98163f0908"
     },
     {
-      "bytes": 37322,
+      "bytes": 39578,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "58d991521d46b2188f116b21e94dc8bca5964613b38d6b79a1ff318c39782150"
+      "sha256": "e4db7325c243a1fc97b840ae3415df6ac4c69e8ec2937ccd4bb24ea320e2e480"
     },
     {
       "bytes": 775,
@@ -7999,7 +7999,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:1d541974ecaea8d15c58ad953b18bf8995532b8c4750300277e0b7ca9b774733",
+  "projection_digest": "sha256:dd762891a552679476ba35573c070ddbc08fc33d0ddbaba37efdd3aad12a21d2",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
