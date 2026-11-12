@@ -1,0 +1,21 @@
+{
+  "format": "uroboros-compiled-route/v1",
+  "route_id": "echo-route",
+  "version": 1,
+  "safety": "read",
+  "summary": "Invented example: greets {{name}} and reads back the greeting",
+  "params": {"name": "[a-z][a-z0-9-]{0,30}"},
+  "preconditions": [
+    {"name": "python-available", "argv": ["python", "-c", "print('ok')"], "expect": "^ok", "timeout_s": 10}
+  ],
+  "steps": [
+    {
+      "name": "greet",
+      "argv": ["python", "-c", "print('hello {{name}}')"],
+      "expect": "hello {{name}}",
+      "extract": {"greeting": "^(hello \\S+)"},
+      "timeout_s": 10
+    }
+  ],
+  "timeout_s": 30
+}

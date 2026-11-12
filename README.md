@@ -574,6 +574,8 @@ different interfaces and deliberately do not all match the Guardian version.
 | [`integrity-bridges`](components/integrity-bridges/README.md) | 0.7.0 | Hub, delegation and native peer transports |
 | [`integrity-remote`](components/integrity-remote/README.md) | 0.1.0b1 | Cross-machine core access over an OpenSSH forced command |
 | [`integrity-cloud`](components/integrity-cloud/README.md) | 0.1.0b1 | Signed turn journals for cloud agents without local hooks |
+| [`integrity-guards`](components/integrity-guards/README.md) | 0.1.0a1 | Hook-side guards: remote-change locks, forgotten-rule checks, compiled routes |
+| [`integrity-killswitch`](components/integrity-killswitch/README.md) | 0.1.0a1 | Per-vendor and global switch for agent access on one workstation |
 
 `components/integrity-seed` and `plugins/` also retain their specific plugin
 interfaces; they are not extra Python distributions. The Codex registration

@@ -233,6 +233,21 @@
     },
     {
       "dependencies": [],
+      "distribution": "integrity-guards",
+      "entry_points": {
+        "integrity-guards": "integrity_guards.cli:main"
+      },
+      "import_roots": [
+        "integrity_guards"
+      ],
+      "license": "BUSL-1.1",
+      "optional_dependencies": {},
+      "path": "components/integrity-guards",
+      "python": ">=3.11",
+      "version": "0.1.0a1"
+    },
+    {
+      "dependencies": [],
       "distribution": "integrity-home",
       "entry_points": {
         "integrity-chronicle": "integrity_chronicle.cli:main",
@@ -250,6 +265,21 @@
       "path": "components/integrity-home",
       "python": ">=3.11",
       "version": "0.2.0a1"
+    },
+    {
+      "dependencies": [],
+      "distribution": "integrity-killswitch",
+      "entry_points": {
+        "integrity-killswitch": "integrity_killswitch.killswitch:main"
+      },
+      "import_roots": [
+        "integrity_killswitch"
+      ],
+      "license": "BUSL-1.1",
+      "optional_dependencies": {},
+      "path": "components/integrity-killswitch",
+      "python": ">=3.11",
+      "version": "0.1.0a1"
     },
     {
       "dependencies": [

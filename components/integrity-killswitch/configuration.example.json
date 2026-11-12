@@ -1,0 +1,17 @@
+{
+  "state_file": "C:/integrity-example/killswitch/killswitch.json",
+  "log_file": "C:/integrity-example/killswitch/killswitch.log",
+  "dashboard_port": 8890,
+  "vendors": {
+    "example-agent": {
+      "title": "Example local agent",
+      "markers": ["example-agent"]
+    }
+  },
+  "bus_sync": {
+    "ssh_command": ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8", "-l", "operator", "bus.example.invalid"],
+    "principals_path": "/opt/example-agent-bus/principals.json",
+    "remote_command": ["sudo", "-n", "python3", "-"],
+    "host_label": "bus.example.invalid"
+  }
+}

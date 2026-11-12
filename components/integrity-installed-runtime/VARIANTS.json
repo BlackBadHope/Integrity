@@ -50,12 +50,20 @@
       "path": "components/integrity-experience-adapters/src/integrity_experience_adapters"
     },
     {
+      "component": "integrity-guards",
+      "path": "components/integrity-guards/src/integrity_guards"
+    },
+    {
       "component": "integrity-home",
       "path": "components/integrity-home/src/integrity_chronicle"
     },
     {
       "component": "integrity-home",
       "path": "components/integrity-home/src/integrity_home"
+    },
+    {
+      "component": "integrity-killswitch",
+      "path": "components/integrity-killswitch/src/integrity_killswitch"
     },
     {
       "component": "integrity-llm-bus",

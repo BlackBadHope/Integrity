@@ -1,0 +1,15 @@
+{
+  "format": "uroboros-compiled-route/v1",
+  "route_id": "echo-write-route",
+  "version": 1,
+  "safety": "write",
+  "summary": "Invented example of a write route: backup first, then one writing step",
+  "params": {"value": "[0-9]{1,4}"},
+  "backup": [
+    {"name": "backup", "argv": ["python", "-c", "print('backup-id 42')"], "extract": {"backup_id": "backup-id (\\d+)"}}
+  ],
+  "steps": [
+    {"name": "write-value", "argv": ["python", "-c", "print('wrote {{value}} after {{backup_id}}')"], "writes": true}
+  ],
+  "timeout_s": 30
+}

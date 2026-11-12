@@ -1,5 +1,5 @@
 {
-  "file_count": 1153,
+  "file_count": 1179,
   "files": [
     {
       "bytes": 3435,
@@ -72,11 +72,11 @@
       "sha256": "bf23ba02498540d50a6eb700f5382a02160c20d66ba5ce754f2535158bce7cba"
     },
     {
-      "bytes": 10838,
+      "bytes": 11649,
       "mode": "0o644",
       "path": "COMPONENTS.json",
       "sanitization_edits": 0,
-      "sha256": "a81a5da5578990d72b296922ff06a4b259ebaf87b55299ce9415421a6ffe44cb"
+      "sha256": "804d09a81889c20044fbf44eb1a4ed4a4eebd45411016b5fc0d1adf1df467c46"
     },
     {
       "bytes": 1797,
@@ -2144,6 +2144,139 @@
       "sha256": "1b8c922d6723478b8f729d6859d1919f9fe10cfcd881a2324c5737b97a15fbb8"
     },
     {
+      "bytes": 629,
+      "mode": "0o644",
+      "path": "components/integrity-guards/scripts/uroboros-run.sh",
+      "sanitization_edits": 0,
+      "sha256": "10d00038a00971a9b91bc97f7134aa67bbd835691b4ca86d0dbfc3f1e2898815"
+    },
+    {
+      "bytes": 145,
+      "mode": "0o644",
+      "path": "components/integrity-guards/src/integrity_guards/__init__.py",
+      "sanitization_edits": 0,
+      "sha256": "6f585e660f2735c1b1d985f5335f61d235026be66f32bbe6ff8130d0f763f926"
+    },
+    {
+      "bytes": 64,
+      "mode": "0o644",
+      "path": "components/integrity-guards/src/integrity_guards/__main__.py",
+      "sanitization_edits": 0,
+      "sha256": "d2922d537824e329ea227ea5fb87d49799e61795442e6dbb5ed4f5233b6d9c02"
+    },
+    {
+      "bytes": 1842,
+      "mode": "0o644",
+      "path": "components/integrity-guards/src/integrity_guards/antigravity_adapter.py",
+      "sanitization_edits": 0,
+      "sha256": "3fc7c9d9fd0e8d5e6c52bc4d0f00f60513e6a1017934d0e7527717fc4e52e3f3"
+    },
+    {
+      "bytes": 3360,
+      "mode": "0o644",
+      "path": "components/integrity-guards/src/integrity_guards/cli.py",
+      "sanitization_edits": 0,
+      "sha256": "e7c1f875f02f0f13905d2daf177bc1ee246ba737afad09dd0963e35f46602e0b"
+    },
+    {
+      "bytes": 1783,
+      "mode": "0o644",
+      "path": "components/integrity-guards/src/integrity_guards/config.py",
+      "sanitization_edits": 0,
+      "sha256": "9fb504f9ed7f23a22ec54ec8654806d40ee207e76e3d59180456b55f410dc90d"
+    },
+    {
+      "bytes": 3193,
+      "mode": "0o644",
+      "path": "components/integrity-guards/src/integrity_guards/install.py",
+      "sanitization_edits": 0,
+      "sha256": "d0e72b0beacb834d8e45fd1ca1a94c8dd25e2c35ffa9ad552624d2a800ffe605"
+    },
+    {
+      "bytes": 151940,
+      "mode": "0o644",
+      "path": "components/integrity-guards/src/integrity_guards/lock_guard.py",
+      "sanitization_edits": 0,
+      "sha256": "62fd20e075b2687970a02594c82f020ac43bc9811648802251078ffe69676b16"
+    },
+    {
+      "bytes": 15199,
+      "mode": "0o644",
+      "path": "components/integrity-guards/src/integrity_guards/rule_guard.py",
+      "sanitization_edits": 0,
+      "sha256": "4bc17bea3ded1253fcc37ef189b5342eb15ca49ce392b8ec47d112b24eda0a58"
+    },
+    {
+      "bytes": 2506,
+      "mode": "0o644",
+      "path": "components/integrity-guards/src/integrity_guards/rule_libs.py",
+      "sanitization_edits": 0,
+      "sha256": "e921ae31b2c79143c681d61f08303778045dc0f51a004bc98d5678b57fed8a1b"
+    },
+    {
+      "bytes": 2725,
+      "mode": "0o644",
+      "path": "components/integrity-guards/src/integrity_guards/rules_drift_check.py",
+      "sanitization_edits": 0,
+      "sha256": "b160364e12d107705173405a8bb4fb7822d28bd7a782904facfc0b2e30d18f12"
+    },
+    {
+      "bytes": 13285,
+      "mode": "0o644",
+      "path": "components/integrity-guards/src/integrity_guards/uroboros_exec.py",
+      "sanitization_edits": 0,
+      "sha256": "5a6f232ae467a27a2f1feae1e8655889cfad79d546cd2f9c0faa1e671c17e0f0"
+    },
+    {
+      "bytes": 3477,
+      "mode": "0o644",
+      "path": "components/integrity-guards/src/integrity_guards/uroboros_list.py",
+      "sanitization_edits": 0,
+      "sha256": "e686b44a5c4ea3613f1ff97cfd6e535ca53f91f94bf3806c5dc2583bd478d2cf"
+    },
+    {
+      "bytes": 19934,
+      "mode": "0o644",
+      "path": "components/integrity-guards/src/integrity_guards/uroboros_repeat_hook.py",
+      "sanitization_edits": 0,
+      "sha256": "cd4f8b008dea8028dfc86cc12892bdce1c7ce552aa50b135862834075e25bad1"
+    },
+    {
+      "bytes": 4647,
+      "mode": "0o644",
+      "path": "components/integrity-guards/src/integrity_guards/uroboros_route_share.py",
+      "sanitization_edits": 0,
+      "sha256": "881adf7614cd2b07d5c060a860545d6ffbae07cca34e6ee598b668c816e9da87"
+    },
+    {
+      "bytes": 8125,
+      "mode": "0o644",
+      "path": "components/integrity-guards/tests/test_lock_guard.py",
+      "sanitization_edits": 0,
+      "sha256": "bb5fa698943452d25b949753b27744c4b46bbc004e5fd47e8c26f06b5b4cf1dd"
+    },
+    {
+      "bytes": 14649,
+      "mode": "0o644",
+      "path": "components/integrity-guards/tests/test_rule_guard.py",
+      "sanitization_edits": 0,
+      "sha256": "fc60e88be413d3567378afa1396b4ab9e1d44d9679dfc8b16e577a47923b9207"
+    },
+    {
+      "bytes": 6625,
+      "mode": "0o644",
+      "path": "components/integrity-guards/tests/test_uroboros.py",
+      "sanitization_edits": 0,
+      "sha256": "96db670adc0d78e243b19484767698ee35d73114df3c92298414ece19f16e69e"
+    },
+    {
+      "bytes": 11305,
+      "mode": "0o644",
+      "path": "components/integrity-guards/tests/test_uroboros_repeat_hook.py",
+      "sanitization_edits": 0,
+      "sha256": "8aae9af51e7983964cdeedcb995c7011925f179623e65829dcce72186ace0f1b"
+    },
+    {
       "bytes": 7132,
       "mode": "0o644",
       "path": "components/integrity-home/LICENSE",
@@ -2662,11 +2795,11 @@
       "sha256": "9b6cfa9dde51133a7a386637497cf3bb17d279b8fce45899759d5123b9a569dd"
     },
     {
-      "bytes": 3419,
+      "bytes": 3665,
       "mode": "0o644",
       "path": "components/integrity-installed-runtime/VARIANTS.json",
       "sanitization_edits": 0,
-      "sha256": "ec640526aaca1ae20bfcdfc894e77830212b4e0a908e7be609e6c40c716e9b38"
+      "sha256": "e1f184a741a85b8a6de94968a8640a417d3bdc03843dada6a15a26cd985b15ed"
     },
     {
       "bytes": 2090,
@@ -2688,6 +2821,55 @@
       "path": "components/integrity-installed-runtime/verify_sources.py",
       "sanitization_edits": 0,
       "sha256": "55fc4213541bdc82366958d62770bbcb353b75de78aa994952128bb62a313196"
+    },
+    {
+      "bytes": 508,
+      "mode": "0o644",
+      "path": "components/integrity-killswitch/scripts/windows/PANIC_KILL_ALL_LLMS.cmd",
+      "sanitization_edits": 0,
+      "sha256": "e8bf7d81860d474a0ab488884f9f3cd9457f80e57d2c0a4f90bc7087370f39c8"
+    },
+    {
+      "bytes": 360,
+      "mode": "0o644",
+      "path": "components/integrity-killswitch/scripts/windows/START_KILLSWITCH_WEB_PANEL.cmd",
+      "sanitization_edits": 0,
+      "sha256": "3add92fc3abaf8aac9cae02913fc0914549d44dcbb8ae2a9db5826ac63ead429"
+    },
+    {
+      "bytes": 115,
+      "mode": "0o644",
+      "path": "components/integrity-killswitch/scripts/windows/STATUS_KILLSWITCH.cmd",
+      "sanitization_edits": 0,
+      "sha256": "06340e770dae2efae81638b1dea367ee17d663756023bb25dbc8cc37d98a4fd7"
+    },
+    {
+      "bytes": 120,
+      "mode": "0o644",
+      "path": "components/integrity-killswitch/src/integrity_killswitch/__init__.py",
+      "sanitization_edits": 0,
+      "sha256": "2d3754d8dbace836398255ba369eecf116d69dd7d8e23ac8a96b81137cd2f5a1"
+    },
+    {
+      "bytes": 79,
+      "mode": "0o644",
+      "path": "components/integrity-killswitch/src/integrity_killswitch/__main__.py",
+      "sanitization_edits": 0,
+      "sha256": "c8f683ca7912761b8f39c87bba442e9b0ca1ca0c91ad2dbe96101c82c5913dcd"
+    },
+    {
+      "bytes": 52565,
+      "mode": "0o644",
+      "path": "components/integrity-killswitch/src/integrity_killswitch/killswitch.py",
+      "sanitization_edits": 0,
+      "sha256": "fa1eeed5f2915d7890f20147ae59118d5ccb9d7910621430baf3630b01957b18"
+    },
+    {
+      "bytes": 16030,
+      "mode": "0o644",
+      "path": "components/integrity-killswitch/tests/test_killswitch.py",
+      "sanitization_edits": 0,
+      "sha256": "1c5c3cc7abceef0d1262af72801ed8e23dfaaf3046505364cf0c4fc9c1afa209"
     },
     {
       "bytes": 2997,
@@ -8073,7 +8255,7 @@
       "sha256": "178e2f0d53cb7fecb5fd2b422e2aa2db22c268d809b820399f35c7a9bcccc9b9"
     }
   ],
-  "generated_file_count": 55,
+  "generated_file_count": 69,
   "generated_files": [
     {
       "bytes": 1041,
@@ -8202,11 +8384,11 @@
       "sha256": "c773a85da94e9edf0b2b10e60fd43b00fe4f90e345ec0d958e6c5b4d0d405e8e"
     },
     {
-      "bytes": 38633,
+      "bytes": 38936,
       "mode": "0o644",
       "path": "README.md",
       "sanitization_edits": 0,
-      "sha256": "85d12836c2db1957dfdeaadfba0c5c85d13cd2cbe77149c3d8e591eb8d4c8508"
+      "sha256": "5aa6267eeeb4be13d8e2984b9f843512c938bdcd24fe6018d69688dddabdcf82"
     },
     {
       "bytes": 13466,
@@ -8228,6 +8410,104 @@
       "path": "SECURITY.md",
       "sanitization_edits": 0,
       "sha256": "7753326c2fe52694b452cb7ea8bb3cc3e9009a4feedc4d0a353473ef757d64ca"
+    },
+    {
+      "bytes": 7132,
+      "mode": "0o644",
+      "path": "components/integrity-guards/LICENSE",
+      "sanitization_edits": 0,
+      "sha256": "fa7a8cdcc5fb5671d3ead0045b5acef283956eb8c8a1623559f36be9a1c8ad91"
+    },
+    {
+      "bytes": 327,
+      "mode": "0o644",
+      "path": "components/integrity-guards/NOTICE",
+      "sanitization_edits": 0,
+      "sha256": "56d19068142031cebcb024a2f356b4a1734c7894a2039078584ca93bede2017f"
+    },
+    {
+      "bytes": 7003,
+      "mode": "0o644",
+      "path": "components/integrity-guards/README.md",
+      "sanitization_edits": 0,
+      "sha256": "e430b262f20c13fa11ed994b6bd9b7509a07bd19e8961e8e55f532cb863f590e"
+    },
+    {
+      "bytes": 1881,
+      "mode": "0o644",
+      "path": "components/integrity-guards/configuration.example.json",
+      "sanitization_edits": 0,
+      "sha256": "57cd08037bceac928400e308d34aadc825721d75686c580aa2d31756d13d9415"
+    },
+    {
+      "bytes": 602,
+      "mode": "0o644",
+      "path": "components/integrity-guards/examples/compiled-routes/echo-route.json",
+      "sanitization_edits": 0,
+      "sha256": "1ed6a7c5a6b95802c2caa55138bc6ad80aa482e000e6fa29dcba8ed55c26bbe5"
+    },
+    {
+      "bytes": 534,
+      "mode": "0o644",
+      "path": "components/integrity-guards/examples/compiled-routes/echo-write-route.json",
+      "sanitization_edits": 0,
+      "sha256": "495ba40e143221cca71573bccb50d0d7d7b6e5129b5a03dd5038dbb43ba7c90c"
+    },
+    {
+      "bytes": 1353,
+      "mode": "0o644",
+      "path": "components/integrity-guards/examples/device-registry.example.json",
+      "sanitization_edits": 0,
+      "sha256": "259b3c31003ddbce78d1572aba177c2c66f002724d0d6e853159ea2cba052e18"
+    },
+    {
+      "bytes": 318,
+      "mode": "0o644",
+      "path": "components/integrity-guards/examples/hosts.example.json",
+      "sanitization_edits": 0,
+      "sha256": "7dc9febc7443c8303683622f0f42100a2905f152e4229a8337ea73999f22588a"
+    },
+    {
+      "bytes": 563,
+      "mode": "0o644",
+      "path": "components/integrity-guards/pyproject.toml",
+      "sanitization_edits": 0,
+      "sha256": "0ab15b10da222bf8cdecfa738a3f1f1f1a311eae69dc07dff68439966ac85d84"
+    },
+    {
+      "bytes": 7132,
+      "mode": "0o644",
+      "path": "components/integrity-killswitch/LICENSE",
+      "sanitization_edits": 0,
+      "sha256": "fa7a8cdcc5fb5671d3ead0045b5acef283956eb8c8a1623559f36be9a1c8ad91"
+    },
+    {
+      "bytes": 331,
+      "mode": "0o644",
+      "path": "components/integrity-killswitch/NOTICE",
+      "sanitization_edits": 0,
+      "sha256": "0b83a9fecab86745165a7f7f712a12bc9880bb1ee5c4fa3841a7c43a6fcb4f67"
+    },
+    {
+      "bytes": 4937,
+      "mode": "0o644",
+      "path": "components/integrity-killswitch/README.md",
+      "sanitization_edits": 0,
+      "sha256": "47bb7b7d8fe407f6dcf16f1f41086ea5d7cce37086652418386b25122f467bd9"
+    },
+    {
+      "bytes": 580,
+      "mode": "0o644",
+      "path": "components/integrity-killswitch/configuration.example.json",
+      "sanitization_edits": 0,
+      "sha256": "5fe94f5f69b5de6e45b08bdbfd5ce59e2dd7c0e9c51b7ec9f2f25ebb11cbb559"
+    },
+    {
+      "bytes": 570,
+      "mode": "0o644",
+      "path": "components/integrity-killswitch/pyproject.toml",
+      "sanitization_edits": 0,
+      "sha256": "c4160d6f2a69b99c35007e060b74d8a7674db1ee07db9fa40b6306de283f4cd2"
     },
     {
       "bytes": 373,
@@ -8461,7 +8741,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:8b712c7f4693b7166cb8eae585e716218e553f80546cd88f7b7d909f4b22b0b1",
+  "projection_digest": "sha256:89971aa8e23112c5386f876bb2bf93463d58a71c59826fb40b26977fae7f92c0",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
