@@ -145,7 +145,8 @@ class AutoregTest(unittest.TestCase):
         def roll(name, payload, extra=""):
             line = json.dumps({"type": "session_meta", "payload": payload})
             (root / f"rollout-{name}.jsonl").write_text(line + "\n" + extra, encoding="utf-8")
-        roll("i", {"id": A, "originator": "Codex Desktop", "source": "vscode", "cwd": "D:\\work\\project"}, '{"prompt":"SECRET-PROMPT"}\n')
+        roll("i", {"id": A, "originator": "Codex Desktop", "source": "vscode",
+                   "cwd": "D:\\work\\project" if os.name == "nt" else "/work/project"}, '{"prompt":"SECRET-PROMPT"}\n')
         roll("e", {"id": B, "originator": "codex_exec", "source": "exec"})
         roll("s", {"id": "11111111-1111-4111-8111-111111111111", "originator": "Codex Desktop",
                    "source": {"subagent": {"thread_spawn": {"parent_thread_id": A}}}})

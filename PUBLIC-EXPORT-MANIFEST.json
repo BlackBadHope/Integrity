@@ -1,5 +1,5 @@
 {
-  "file_count": 1195,
+  "file_count": 1179,
   "files": [
     {
       "bytes": 3435,
@@ -111,7 +111,7 @@
       "mode": "0o644",
       "path": "components/integrity-action-log/README.md",
       "sanitization_edits": 0,
-      "sha256": "0cd1421bc00b7f0e9541fae9e2f767d31ea8c11b79d3be405b021f1679246a74"
+      "sha256": "0d119b81d7c4aef95ab7e9eb6fb97dd5917570bd70697397d55bcd7f0632c25e"
     },
     {
       "bytes": 872,
@@ -545,7 +545,7 @@
       "mode": "0o644",
       "path": "components/integrity-bridges/README.md",
       "sanitization_edits": 0,
-      "sha256": "4a70af7a0109b50da401f69b9dcebff8aa2c0cee226b39b4ec22ac8283a99778"
+      "sha256": "fccd37aaca7d4b6bfa178fd76b74a71dd73048ae81e1268283f1e26066e54621"
     },
     {
       "bytes": 3984,
@@ -783,7 +783,7 @@
       "mode": "0o644",
       "path": "components/integrity-claude-code/README.md",
       "sanitization_edits": 0,
-      "sha256": "994db9ecc0ff0c1a3330c3d1e547c17476661f7dee4436240666d131f45f47b0"
+      "sha256": "d1a84e4d2b061030403a1e2591d9ebed194cf2526d3a236229c6005819307466"
     },
     {
       "bytes": 561,
@@ -986,7 +986,7 @@
       "mode": "0o644",
       "path": "components/integrity-client-memory/README.md",
       "sanitization_edits": 0,
-      "sha256": "e0ad640683c328daf85481e84f93456eec4bbd846bd86876fbbe3db8895ba9e2"
+      "sha256": "cb7324ea4a66ba2c2c8c181dc9d03e6fcc46bff1be209a37f2acd011c58122a4"
     },
     {
       "bytes": 31487,
@@ -2904,7 +2904,7 @@
       "mode": "0o644",
       "path": "components/integrity-llm-bus/SOURCE-MAP.json",
       "sanitization_edits": 0,
-      "sha256": "bd75c2ef89133f3213b4845093847b8edc32eb7ab208962716fe58b0fa844d28"
+      "sha256": "0166477ddd9b70a1325ce4963afb6c8a98ad6cbb14ee0baeea84ea06dcbcf86a"
     },
     {
       "bytes": 587,
@@ -3159,11 +3159,11 @@
       "sha256": "697afa6d856499b60131fc0b267ab31eee6974101cb761db1f1c6cc6126c5855"
     },
     {
-      "bytes": 2519,
+      "bytes": 2534,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/launcher.py",
       "sanitization_edits": 0,
-      "sha256": "bb762924fc5e7fa5ec8564f9d851213959e2911bff4449bb0a4f59fd48ed0241"
+      "sha256": "45ce3cb7973a1382392cc6b0e27f98af5760f2f8799cf81fa8cb72cd22662605"
     },
     {
       "bytes": 12957,
@@ -3229,11 +3229,11 @@
       "sha256": "c3881fdcbb5ba0ecfb92b6eff405d316ec1fb58a73aff36516449236757dddd5"
     },
     {
-      "bytes": 44488,
+      "bytes": 44503,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/relay.py",
       "sanitization_edits": 0,
-      "sha256": "73a56e7e0e2265fbc0d592b179c7bf700c222a241b2001bef9109c412f65f265"
+      "sha256": "9c1559a60faaa14e804bb4ed654577775391028beda66ec9bab68fa4174e0d76"
     },
     {
       "bytes": 4002,
@@ -3306,11 +3306,11 @@
       "sha256": "21e5ba1fd93ed5d002bc72c624c32f7a6f97da7c1b6f333117ca61a1acfb769e"
     },
     {
-      "bytes": 9760,
+      "bytes": 10101,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/tests/live/test_agentbus_validate.py",
       "sanitization_edits": 0,
-      "sha256": "a6d490d03742963a41cde5d17a649f925a51e574b58b59c09667e893d013e32a"
+      "sha256": "78e491b296b153c456b125bd77d8c30541b1b66e088c776e479a385155d85ef2"
     },
     {
       "bytes": 4530,
@@ -3320,11 +3320,11 @@
       "sha256": "0a166938121d81ecbd5439e95b805c9c62ffa3f08d828e19e2b59867d4da8e75"
     },
     {
-      "bytes": 18233,
+      "bytes": 18292,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/tests/live/test_autoreg.py",
       "sanitization_edits": 0,
-      "sha256": "06950f73211a8f5c3220676f0cb9f471bb4002734c73ba05c6f33e5195c6b3cc"
+      "sha256": "85cbfc06f395a7aed3247624c1c3e0a047c5590ae7ba73dd19c4128c988e0c85"
     },
     {
       "bytes": 7535,
@@ -3548,7 +3548,7 @@
       "mode": "0o644",
       "path": "components/integrity-memory-plane/README.md",
       "sanitization_edits": 0,
-      "sha256": "9f8f110b081836f85d6662208b54e406516333e56ea145ad2b3a6f1dd578494b"
+      "sha256": "1bb7a620eb1f17af576257040ce60a1514e46902b8027d4e57b5f0aa17d2e521"
     },
     {
       "bytes": 36738,
@@ -4860,11 +4860,11 @@
       "sha256": "2b268ebff28b6ad4df5d8b461eb0bfab6e1e54d7ebaa0cb15b209c25cbb758f2"
     },
     {
-      "bytes": 5040,
+      "bytes": 5042,
       "mode": "0o644",
       "path": "components/integrity-space/README.md",
       "sanitization_edits": 0,
-      "sha256": "76dc03f75cb73937f6007d3dd29db0e93a60c5e7aa1f40f706b0afc57c035bb9"
+      "sha256": "93e75ad0289d0a5297e9f4323e3b0962661f4c77510786c1d02d4304888a13e0"
     },
     {
       "bytes": 135298,
@@ -5147,60 +5147,39 @@
       "sha256": "b547352be1a83f4e1f408437d6a5e35851d5c55f22f0fd49db0545ba487a05cd"
     },
     {
-      "bytes": 10162,
+      "bytes": 10100,
       "mode": "0o644",
       "path": "docs/CROSS_MACHINE_QUICKSTART.md",
       "sanitization_edits": 0,
-      "sha256": "30235c3658dc88f722a50c4a85208840ef04433c49dcf4ed19e8404fc5e4010e"
-    },
-    {
-      "bytes": 5226,
-      "mode": "0o644",
-      "path": "docs/DEPLOYMENT_PROFILE.md",
-      "sanitization_edits": 0,
-      "sha256": "9c1e4a1ffd226c49f71ee965dd1e38bfe332bb3fac08fc440237eef770fe1c3f"
-    },
-    {
-      "bytes": 2444,
-      "mode": "0o644",
-      "path": "docs/HOWTO_OPENAI_TUNNEL_SEATS.md",
-      "sanitization_edits": 0,
-      "sha256": "e84ea9e8ec62645612d0550ee4d6c4a7af2f7b4243891225bb364bb08a20bd8b"
-    },
-    {
-      "bytes": 5822,
-      "mode": "0o644",
-      "path": "docs/INSTALL.md",
-      "sanitization_edits": 0,
-      "sha256": "eff98088fe823c01627c345f0d125f8b52bc91d0212c2e5a0e9c3daf905f0aa0"
-    },
-    {
-      "bytes": 1314,
-      "mode": "0o644",
-      "path": "docs/MIGRATION_INTEGRITY_SEATS.md",
-      "sanitization_edits": 0,
-      "sha256": "ed8cc123ce265678da6071c38906ab75ccd42455c6fd7beb187e16148e691179"
-    },
-    {
-      "bytes": 2045,
-      "mode": "0o644",
-      "path": "docs/QUICKSTART_TEAM.md",
-      "sanitization_edits": 0,
-      "sha256": "6bca36b112f5ffd5677df2c55af6a02d2a04f1049dcdda0764f9feec4dd56e60"
+      "sha256": "a7fe83039f81810d7c383fe7f2de8c91110a6939d39be2b5caa8bcc5fe07b861"
     },
     {
       "bytes": 5164,
       "mode": "0o644",
-      "path": "docs/README.md",
+      "path": "docs/DEPLOYMENT_PROFILE.md",
       "sanitization_edits": 0,
-      "sha256": "d449d935519295968aab3e005c92990c404dda810363f88f7efd5d98d6dc8aa5"
+      "sha256": "ba5ec6600b4924c7a56ef27466b18fdaedff45dc4bae6a4b67dae96172be5537"
     },
     {
-      "bytes": 9028,
+      "bytes": 2382,
       "mode": "0o644",
-      "path": "docs/STATUS.md",
+      "path": "docs/HOWTO_OPENAI_TUNNEL_SEATS.md",
       "sanitization_edits": 0,
-      "sha256": "9c359d2f4e21e9697efd9d76e09332f97e61e2152688522135102f76ef40ce12"
+      "sha256": "b776b1e9c15bffee31f110d3bfd2d1b74dc35f99974cf578ea481e3b1f4b0fd5"
+    },
+    {
+      "bytes": 1252,
+      "mode": "0o644",
+      "path": "docs/MIGRATION_INTEGRITY_SEATS.md",
+      "sanitization_edits": 0,
+      "sha256": "b182c6f66ef158ab1250d583e1c63c37e8f49d5aed1361f2844c61b7bb4aab03"
+    },
+    {
+      "bytes": 1997,
+      "mode": "0o644",
+      "path": "docs/QUICKSTART_TEAM.md",
+      "sanitization_edits": 0,
+      "sha256": "7bbf4df08c90df239de8a99478d242b545900973b83e555aff38977d4b6f0555"
     },
     {
       "bytes": 5935,
@@ -5217,116 +5196,25 @@
       "sha256": "6b519adff898d7a10eae7b4a034342c63024f70981a065daba6fb08ddccdba44"
     },
     {
-      "bytes": 518,
-      "mode": "0o644",
-      "path": "docs/assets/badge-license.svg",
-      "sanitization_edits": 0,
-      "sha256": "1f0b54165a8a4e3d053287b0d81f44e2fb9222f45a347beb40ca77f71a9d96f0"
-    },
-    {
-      "bytes": 550,
-      "mode": "0o644",
-      "path": "docs/assets/badge-platforms.svg",
-      "sanitization_edits": 0,
-      "sha256": "68199e25b03e6e308d3537a525eeacfad82264209cbbfbcf087f338fa4da8ea0"
-    },
-    {
-      "bytes": 527,
-      "mode": "0o644",
-      "path": "docs/assets/badge-python.svg",
-      "sanitization_edits": 0,
-      "sha256": "db37b319fa3c93befa6c3b7154f3fdd00c25a541b50ddd2414c5dae61089b42e"
-    },
-    {
-      "bytes": 512,
-      "mode": "0o644",
-      "path": "docs/assets/badge-release.svg",
-      "sanitization_edits": 0,
-      "sha256": "bb310e88b6abe11390a27b04ea42218f8881317decef49affb92178584aa3599"
-    },
-    {
-      "bytes": 3739,
-      "mode": "0o644",
-      "path": "docs/assets/banner-dark.svg",
-      "sanitization_edits": 0,
-      "sha256": "001e70f408229d0489294e3b0b51eb1a083aaab96893e29266223f35bae5b926"
-    },
-    {
-      "bytes": 3739,
-      "mode": "0o644",
-      "path": "docs/assets/banner-light.svg",
-      "sanitization_edits": 0,
-      "sha256": "6639d1e4ee25ae2d24a514d32388f749e1eb4e4080f031ee27ce363e7e844101"
-    },
-    {
-      "bytes": 17168,
-      "mode": "0o644",
-      "path": "docs/assets/build_assets.py",
-      "sanitization_edits": 0,
-      "sha256": "aebcd685e695d5e358acca7d77ac2cef75985514b8ff702033f1a7dd0084981a"
-    },
-    {
-      "bytes": 5027,
-      "mode": "0o644",
-      "path": "docs/assets/deployments-dark.svg",
-      "sanitization_edits": 0,
-      "sha256": "58e6ef5a7b965dee35b83cb5b3da841a3ba91575f5083d330fde45216dbff015"
-    },
-    {
-      "bytes": 5027,
-      "mode": "0o644",
-      "path": "docs/assets/deployments-light.svg",
-      "sanitization_edits": 0,
-      "sha256": "78c127b626764e5498905dba42c9922b46040f742b791ffd186b4a652f80b2e6"
-    },
-    {
-      "bytes": 13042,
-      "mode": "0o644",
-      "path": "docs/assets/overview-dark.svg",
-      "sanitization_edits": 0,
-      "sha256": "6439a7f7274a34a905cc93496a55201b509126b9bb80f1b9215ba39015623479"
-    },
-    {
-      "bytes": 13042,
-      "mode": "0o644",
-      "path": "docs/assets/overview-light.svg",
-      "sanitization_edits": 0,
-      "sha256": "614f4758b50db98d894f7be7048a605b9510bcd8227ad1a34236e94ca6cc0105"
-    },
-    {
-      "bytes": 5438,
-      "mode": "0o644",
-      "path": "docs/assets/turn-lifecycle-dark.svg",
-      "sanitization_edits": 0,
-      "sha256": "3c26d11e1dc1ee8f17158396d2ec63abb1ff80e23e6f83ceb0c74d764ff97d92"
-    },
-    {
-      "bytes": 5438,
-      "mode": "0o644",
-      "path": "docs/assets/turn-lifecycle-light.svg",
-      "sanitization_edits": 0,
-      "sha256": "84a493dbaf51d888b661cb63d7fe91d2540e055078dce76f9dda3cf13d616688"
-    },
-    {
-      "bytes": 2503,
+      "bytes": 2441,
       "mode": "0o644",
       "path": "docs/expected-test-skips.md",
       "sanitization_edits": 0,
-      "sha256": "e5e5566cfa632e213c4b27a5301a9dd23d33a266c74f76169b2e53e1586bfc27"
+      "sha256": "53e67bd8e41b0894c04c9bd0631b769459d8f0b4f003956baca68aa4f9e9639c"
     },
     {
-      "bytes": 6115,
+      "bytes": 6053,
       "mode": "0o644",
       "path": "docs/hooks-troubleshooting.md",
       "sanitization_edits": 0,
-      "sha256": "3f89eb3a6839adb01df7251fdf011065617ce794988e6272104f47262c2d6c43"
+      "sha256": "d432ac9145cc94213385c79ebc1cd761856dda6f70507ddde21cbcf36957b388"
     },
     {
-      "bytes": 2638,
+      "bytes": 2576,
       "mode": "0o644",
       "path": "docs/runtime-source-sync.md",
       "sanitization_edits": 0,
-      "sha256": "cbe3c00111b656207be12a82de144cb7165b2ff9713c23b98f218100a96092cc"
+      "sha256": "83ce2d026bcdb03b3b79a86fcd6f473baf45a8305e0ce2e3f6568b2e4ad369f3"
     },
     {
       "bytes": 1424,
@@ -8003,11 +7891,11 @@
       "sha256": "7220ac37731e29813ba61d3fd35a42fc547b6991e3d72f70dbcdcb2db8423bc3"
     },
     {
-      "bytes": 16108,
+      "bytes": 16286,
       "mode": "0o644",
       "path": "tests/test_custody_event_sections.py",
       "sanitization_edits": 0,
-      "sha256": "cd569c2117f7e17192c9d476cf734570cb49b3fe6709f5412ff180711a28c622"
+      "sha256": "9cf216d5750f02ff52a334b9cfd04b465a161ae7f86ff2c3844477c6ce70ffdb"
     },
     {
       "bytes": 3240,
@@ -8433,11 +8321,11 @@
       "sha256": "63d0ef2b6b748fa625812ea9f35f70dd23bb17233d6ba1e25c543149e6e6d6ad"
     },
     {
-      "bytes": 15830,
+      "bytes": 13915,
       "mode": "0o644",
       "path": "ARCHITECTURE.md",
       "sanitization_edits": 0,
-      "sha256": "2b0747cfc33ca80dfef654f4a0c75f47957186a9633db97ac3852d917768495e"
+      "sha256": "3870c97d753abb03cd351c1f742dd3bab9567e08563c4beb1c08f76d5f92cc85"
     },
     {
       "bytes": 325,
@@ -8447,11 +8335,11 @@
       "sha256": "d7cadd9fb2cb6c9c4963392a5cc8d04e8a09fc7f7d4dbb69610b10e54f261140"
     },
     {
-      "bytes": 6503,
+      "bytes": 6439,
       "mode": "0o644",
       "path": "BOOTSTRAP.md",
       "sanitization_edits": 0,
-      "sha256": "a01eccae7535720c8ce0f059aa2d5738421911ea1ecac053f59df44dccb85903"
+      "sha256": "6a035fa7fe0d28a1f1477db42895e008b0235d23b35f7a0fec3f0f98163f0908"
     },
     {
       "bytes": 41225,
@@ -8496,25 +8384,25 @@
       "sha256": "c773a85da94e9edf0b2b10e60fd43b00fe4f90e345ec0d958e6c5b4d0d405e8e"
     },
     {
-      "bytes": 19852,
+      "bytes": 38936,
       "mode": "0o644",
       "path": "README.md",
       "sanitization_edits": 0,
-      "sha256": "574fa1b97020766b83afb81b9ca5154f9e069053c135c4e1ea0853d0bcbe1940"
+      "sha256": "5aa6267eeeb4be13d8e2984b9f843512c938bdcd24fe6018d69688dddabdcf82"
     },
     {
-      "bytes": 13444,
+      "bytes": 13466,
       "mode": "0o644",
       "path": "RELEASE_NOTES.md",
       "sanitization_edits": 0,
-      "sha256": "7f6b3e276b684153a94ab5c791da564c9deaf8614a39fe21996c167623444e07"
+      "sha256": "2ed237cf9e315ce7c2123dc242287d59c7e9cc16a474da1afeac50ebb00e8383"
     },
     {
-      "bytes": 3134,
+      "bytes": 1240,
       "mode": "0o644",
       "path": "ROADMAP.md",
       "sanitization_edits": 0,
-      "sha256": "71e3acc694558c0c0f9e7193cdda13197cee8d5cf38c7af4166ee2dc0c74a492"
+      "sha256": "631e21d0e6616558eac4ec925c18c99b4c9ab7f2f06a1336aaa3b55964976b5d"
     },
     {
       "bytes": 1104,
@@ -8706,18 +8594,18 @@
       "sha256": "80fba0a359ecfabd9ead56e5a011fabc9cee12e3c18b9d53b320225e1fa6477d"
     },
     {
-      "bytes": 6290,
+      "bytes": 6228,
       "mode": "0o644",
       "path": "docs/CLOUD_AGENTS.md",
       "sanitization_edits": 0,
-      "sha256": "ede161ea2c43d847aaffe1e375bd181d6c6ff0e6c6f7cd6c99f4d9878c785b00"
+      "sha256": "a37c5a130e2ff796b3cac4fa0d252f1c0bd0f0e06dd6bda5f65c1ee55310e903"
     },
     {
-      "bytes": 8620,
+      "bytes": 8558,
       "mode": "0o644",
       "path": "docs/UROBOROS.md",
       "sanitization_edits": 0,
-      "sha256": "ef80410cf19103df47f8904c6aa9860174f3f39ca19a0f8319325d0588ac575d"
+      "sha256": "55210d24e3362c3f7484a243fb8b3f5bb52e6f696267fe24df35e2962ebe29b8"
     },
     {
       "bytes": 8213,
@@ -8776,18 +8664,18 @@
       "sha256": "357c939ae645c8d9d726760a9cdd732eba1aba6d029b8dbdaf3101df08e1c5dd"
     },
     {
-      "bytes": 9054,
+      "bytes": 8992,
       "mode": "0o644",
       "path": "docs/linux-native-clients.md",
       "sanitization_edits": 0,
-      "sha256": "d08d7440c56c76331c6381ee89fb26fe688407a72628a31001b6a04e5dbed878"
+      "sha256": "6dcbea5072d6172730981c882dd9c91ef8ced4a94c49b350cffef7b8791bac77"
     },
     {
-      "bytes": 23633,
+      "bytes": 23571,
       "mode": "0o644",
       "path": "docs/native-onboarding.md",
       "sanitization_edits": 0,
-      "sha256": "bba156feaa93182037094e952c518b4c5fbc3053a8ed8889d1bee8767c69f225"
+      "sha256": "d1cc3a8affb63d07f3b5d54b3f44867ad2ac430eb7af97c4d2c4d7f14504bd31"
     },
     {
       "bytes": 9524,
@@ -8853,7 +8741,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:ebdf30385209a9e6004665d3ed51cd541b4f0a96ab24bd9e286b39b65e68c4c2",
+  "projection_digest": "sha256:d7a03b30960b2af54ff0a07d2cf688ca5d83ff45e23de66d520c3656b4c20dd1",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

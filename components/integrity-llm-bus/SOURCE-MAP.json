@@ -157,7 +157,7 @@
     "path": "src/integrity_llm_bus/resources/launcher.py",
     "source": "coordination/llm-bus/launcher.py",
     "source_sha256": "dd8759d7e0c5f3462d946f791f7a99e472cb7011d9826d28977dfd4580a2e075",
-    "sha256": "bb762924fc5e7fa5ec8564f9d851213959e2911bff4449bb0a4f59fd48ed0241"
+    "sha256": "45ce3cb7973a1382392cc6b0e27f98af5760f2f8799cf81fa8cb72cd22662605"
   },
   {
     "path": "src/integrity_llm_bus/resources/local_cli.py",
@@ -222,7 +222,7 @@
     "path": "src/integrity_llm_bus/resources/relay.py",
     "source": "coordination/llm-bus/relay.py",
     "source_sha256": "0cd5acc7abb6ec0a601f19f0994a8aec244e1004784d9935b641ac230461acf8",
-    "sha256": "73a56e7e0e2265fbc0d592b179c7bf700c222a241b2001bef9109c412f65f265"
+    "sha256": "9c1559a60faaa14e804bb4ed654577775391028beda66ec9bab68fa4174e0d76"
   },
   {
     "path": "src/integrity_llm_bus/resources/room_acl.py",
