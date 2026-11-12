@@ -114,7 +114,13 @@ from .replay_migration import ReplayMigration, ReplayMigrationError, load_admiss
 from . import deployment_profile as _deployment_profile
 from . import replay_catalog_pool as _catalog_pool
 from .schemas import validate
-from .seed_catalog import adopt_verified_copy, alias_verified_bytes
+from .seed_catalog import (
+    SeedCatalogReadChangedError,
+    adopt_verified_copy,
+    alias_verified_bytes,
+    open_catalog_readonly,
+    validate_seed_namespace,
+)
 from .signing import public_key_fingerprint
 from .turn_memory import (
     NO_EVENT_REASONS,
@@ -225,7 +231,9 @@ MAX_CONTEXT_ADMISSION_REPLAY_CATALOG_BYTES = 512 * 1_048_576
 MAX_CONTEXT_ADMISSION_REPLAY_TOTAL_BYTES = 4 * 1_024 * 1_024 * 1_024
 CONTEXT_ADMISSION_REPLAY_DISK_FREE_FLOOR_BYTES = 1_024 * 1_024 * 1_024
 MAX_CONTEXT_ADMISSION_REPLAY_RECORDS = 128
-CONTEXT_ADMISSION_REPLAY_TTL_SECONDS = 24 * 60 * 60
+# ISS-021: each replay pins a ~245 MB frozen Seed catalog copy; 24 h retention
+# filled the 4 GiB store (capacity-degraded). Recovery is only useful shortly after admission.
+CONTEXT_ADMISSION_REPLAY_TTL_SECONDS = 3 * 60 * 60
 CONTEXT_ADMISSION_REPLAY_ORPHAN_GRACE_SECONDS = 10 * 60
 CONTEXT_ADMISSION_REPLAY_LOCK_TIMEOUT_SECONDS = 60.0
 CONTEXT_ADMISSION_REPLAY_OPERATION_TIMEOUT_SECONDS = 150.0
@@ -260,6 +268,58 @@ MAX_RESPONSE_BYTES = 32 * 1_048_576
 MAX_HOME_RESPONSE_BYTES = 64 * 1_024
 HOME_CHILD_TIMEOUT_SECONDS = 15.0
 MAX_EVENT_PAGE_SIZE = 100
+# ISS-010: a page of 100 Seed events reached ~275 kB and overflowed client
+# tool-output limits. Pages are now byte-budgeted server-side without a schema change: the
+# page is cut at the budget, pagination.next_after_id/has_more point at the first omitted
+# event, and an event that alone exceeds the budget is presented summary-only (marked).
+EVENT_PAGE_BYTE_BUDGET = 49_152
+EVENT_SUMMARY_TEXT_LIMIT = 2_000
+EVENT_SUMMARY_SCALAR_LIMIT = 512
+
+
+def _event_page_bytes(value: Any) -> int:
+    return len(json.dumps(value, ensure_ascii=False, separators=(",", ":"), allow_nan=False).encode("utf-8"))
+
+
+def _summary_only_event(event: dict[str, Any], full_bytes: int) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    for key, value in event.items():
+        if key == "summary" and isinstance(value, str):
+            out[key] = value[:EVENT_SUMMARY_TEXT_LIMIT]
+        elif key == "tags" and isinstance(value, list):
+            out[key] = [tag for tag in value if isinstance(tag, str)][:20]
+        elif value is None or isinstance(value, (bool, int, float)):
+            out[key] = value
+        elif isinstance(value, str) and len(value) <= EVENT_SUMMARY_SCALAR_LIMIT:
+            out[key] = value
+    out["presentation"] = {"mode": "summary-only", "full_bytes": full_bytes,
+                           "reason": "event-exceeds-page-byte-budget"}
+    return out
+
+
+def _fit_event_page(events: list[Any], budget: int = EVENT_PAGE_BYTE_BUDGET) -> tuple[list[Any], dict[str, Any]]:
+    fitted: list[Any] = []
+    used = 2
+    summarized: list[int] = []
+    for event in events:
+        size = _event_page_bytes(event)
+        if used + size + 1 <= budget:
+            fitted.append(event)
+            used += size + 1
+            continue
+        if not fitted and isinstance(event, dict):
+            fitted.append(_summary_only_event(event, size))
+            summarized.append(int(event.get("id") or 0))
+        break
+    info = {
+        "byte_budget": budget,
+        "page_bytes": _event_page_bytes(fitted),
+        "source_count": len(events),
+        "returned_count": len(fitted),
+        "trimmed": len(fitted) < len(events),
+        "summary_only_event_ids": summarized,
+    }
+    return fitted, info
 MAX_HOME_PAGE_SIZE = 10
 MAX_DETAILS_BYTES = 65_536
 EVENT_KINDS = {"task", "thought", "concept"}
@@ -914,6 +974,12 @@ def _validated_turn_binding(value: Any, prompt: str) -> dict[str, Any]:
     return dict(value)
 
 
+# ISS-026 (11.11): one Mind projection costs ~6 s on the core host and concurrent ones
+# queue in the Action Log service; 15 s turned two simultaneous admissions into
+# "Action Log is unavailable" although the service answered a few seconds later.
+ACTION_LOG_MIND_TIMEOUT_SECONDS = 60.0
+
+
 class ActionLogClient:
     """Compatibility client for the existing canonical Action Log API."""
 
@@ -1015,11 +1081,13 @@ class ActionLogClient:
                     "limit": str(limit),
                     "snapshot_event_id": str(self._session_snapshot_event_id),
                 },
+                timeout=max(self.timeout, ACTION_LOG_MIND_TIMEOUT_SECONDS),
             )
         else:
             response = self.request(
                 "POST",
                 "/api/mind",
+                timeout=max(self.timeout, ACTION_LOG_MIND_TIMEOUT_SECONDS),
                 payload={
                     "q_segments": segments,
                     **auxiliary_fields,
@@ -1052,9 +1120,15 @@ class ActionLogClient:
         *,
         query: dict[str, str] | None = None,
         payload: dict[str, Any] | None = None,
+        timeout: float | None = None,
     ) -> dict[str, Any]:
         if method not in {"GET", "POST"} or not path.startswith("/"):
             raise McpFacadeError("invalid Action Log request")
+        if timeout is not None and (
+            isinstance(timeout, bool) or not isinstance(timeout, (int, float))
+            or not 0.05 <= timeout <= ACTION_LOG_MIND_TIMEOUT_SECONDS
+        ):
+            raise McpFacadeError("Action Log timeout must be bounded")
         url = self.base_url + path
         if query:
             url += "?" + urllib.parse.urlencode(query)
@@ -1070,7 +1144,9 @@ class ActionLogClient:
             headers["Content-Type"] = "application/json"
         request = urllib.request.Request(url, data=body, headers=headers, method=method)
         try:
-            response = open_action_log_reader_request(request, timeout=self.timeout)
+            response = open_action_log_reader_request(
+                request, timeout=self.timeout if timeout is None else float(timeout)
+            )
             with response:
                 raw = response.read(MAX_RESPONSE_BYTES + 1)
         except ActionLogReaderTransportError as exc:
@@ -1131,6 +1207,13 @@ class ActionLogClient:
             or returned_snapshot_event_id != snapshot_event_id
         ):
             raise McpFacadeError("Action Log response escaped the session snapshot")
+        events, budget_info = _fit_event_page(events)
+        if budget_info["trimmed"]:
+            pagination = dict(pagination)
+            pagination["next_after_id"] = int(events[-1].get("id") or 0) if events else after_id
+            pagination["has_more"] = True
+            pagination["returned_count"] = len(events)
+        pagination = dict(pagination, byte_budget=budget_info)
         self._seen_read_request_ids.add(request_identity)
         receipt = {
             "protocol": BRIDGE_PROTOCOL + "/read-receipt",
@@ -3122,6 +3205,53 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
             os.close(descriptor)
             raise
 
+    def _adopt_pooled_context_replay_catalog(
+        self,
+        source_descriptor: int,
+        details: os.stat_result,
+        source_identity: Any,
+        name: str,
+        root_descriptor: int,
+        replay_id: str,
+        frozen_catalog: "FrozenSeedCatalogSnapshot",
+    ) -> dict[str, Any] | None:
+        """Hash the frozen catalog once; reuse an existing pool holding the same bytes.
+
+        Saves the second full copy and its fsync on every admission after the first
+        for a catalog. Returns None (nothing written) when no exact pool exists, and
+        the caller copies as before.
+        """
+        digest = hashlib.sha256()
+        hashed = 0
+        while hashed < details.st_size:
+            self._check_context_replay_deadline()
+            chunk = os.read(source_descriptor, min(1_048_576, details.st_size - hashed))
+            if not chunk:
+                raise McpFacadeError("frozen Seed replay catalog is truncated")
+            digest.update(chunk)
+            hashed += len(chunk)
+        if self._context_replay_record_identity(os.fstat(source_descriptor)) != source_identity:
+            raise McpFacadeError("frozen Seed replay catalog changed while hashing")
+        binding = {
+            "protocol": "integrity-client/context-admission-frozen-catalog/v1",
+            "name": name,
+            "sha256": "sha256:" + digest.hexdigest(),
+            "bytes": hashed,
+        }
+        with self._context_replay_maintenance_lock():
+            self._context_replay_inventory(prune=True)
+            self._require_context_replay_reservation(replay_id)
+            self._check_context_replay_deadline()
+            adopted = _catalog_pool.adopt_existing_pool(
+                root_descriptor, name, binding, self._check_context_replay_deadline
+            )
+        if not adopted:
+            return None
+        alias_verified_bytes(frozen_catalog.path, binding["sha256"])
+        verification_descriptor = self._open_context_replay_catalog(replay_id, binding)
+        os.close(verification_descriptor)
+        return binding
+
     def _persist_context_replay_catalog(self, replay_id: str) -> dict[str, Any] | None:
         frozen_catalog = self._frozen_catalog
         if not isinstance(frozen_catalog, FrozenSeedCatalogSnapshot):
@@ -3148,6 +3278,14 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
             ):
                 raise McpFacadeError("frozen Seed replay catalog custody is invalid")
             source_identity = self._context_replay_record_identity(details)
+            if _deployment_profile.current().replay_catalog_pool:
+                adopted = self._adopt_pooled_context_replay_catalog(
+                    source_descriptor, details, source_identity, name, root_descriptor,
+                    replay_id, frozen_catalog,
+                )
+                if adopted is not None:
+                    return adopted
+                os.lseek(source_descriptor, 0, os.SEEK_SET)
             destination_descriptor = os.open(
                 temporary,
                 os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
@@ -3555,7 +3693,37 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
             self._maybe_recover_write_plane(stage="pre-turn-memory-lifecycle")
         if self.turn_memory is None:
             raise McpFacadeError("Turn Memory Receipt service is unavailable")
+        self._verify_turn_memory_namespace(self.turn_memory)
         return self.turn_memory
+
+    def _verify_turn_memory_namespace(self, store: TurnMemoryStore) -> None:
+        """K6: bind the start-up namespace to the VERIFIED catalog before first Turn Memory use.
+
+        The store was opened at start-up from one unverified metadata row; nothing it holds is
+        Seed data. Before it serves anything, the complete catalog verification runs (the same
+        memoized LTS snapshot every Seed tool uses) and the namespace fingerprint must match.
+        """
+
+        if getattr(self, "_turn_memory_namespace_store", None) is store:
+            return
+        try:
+            verified = self.lts.snapshot()
+            expected = namespace_fingerprint(
+                source_namespace=verified.get("source_namespace"),
+                trust_fingerprint=public_key_fingerprint(
+                    self.architecture.keys.source_signer.public_key
+                ),
+            )
+        except Exception as exc:  # noqa: BLE001 - verification failure denies, never admits
+            raise McpFacadeError(
+                f"Seed catalog verification failed before Turn Memory use: {type(exc).__name__}"
+            ) from exc
+        if store.namespace != expected:
+            self.turn_memory = None
+            raise McpFacadeError(
+                "Turn Memory namespace does not match the verified Seed catalog; Turn Memory disabled"
+            )
+        self._turn_memory_namespace_store = store
 
     def _turn_memory_call(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         store = self._require_turn_memory()
@@ -6908,6 +7076,38 @@ def serve(server: MemorySynapseMcp) -> int:
         server.close()
 
 
+def _startup_source_namespace(lts: MemorySynapseLtsService) -> str:
+    """K6: the catalog namespace for start-up wiring WITHOUT the full verification.
+
+    Reads exactly one row (seed_metadata.source_namespace) over a read-only connection. The
+    value only names the Turn Memory store; _verify_turn_memory_namespace binds it to the
+    verified catalog before any Turn Memory data is served.
+    """
+
+    # K6 v2: the same reader the full verification uses. A live catalog left by its writer
+    # in WAL mode without -wal/-shm cannot be opened with plain mode=ro by a reader that may
+    # not write next to it; open_catalog_readonly then reads with immutable=1 and raises
+    # SeedCatalogReadChangedError if the file changed meanwhile: one repeat, then refuse.
+    row = None
+    for attempt in range(2):
+        try:
+            with open_catalog_readonly(Path(lts.catalog_path)) as connection:
+                row = connection.execute(
+                    "SELECT value FROM seed_metadata WHERE key = 'source_namespace'"
+                ).fetchone()
+            break
+        except SeedCatalogReadChangedError:
+            if attempt:
+                raise MemorySynapseLtsError("catalog changed during the start-up namespace read")
+    if row is None or not isinstance(row[0], str):
+        raise MemorySynapseLtsError("catalog source namespace metadata is absent")
+    namespace = validate_seed_namespace(row[0])
+    expected = getattr(lts, "expected_source_namespace", None)
+    if expected is not None and namespace != validate_seed_namespace(expected):
+        raise MemorySynapseLtsError("catalog source namespace differs from the expected one")
+    return namespace
+
+
 def _build_write_plane_runtime(
     args: argparse.Namespace,
     package_lts: MemorySynapseLtsService,
@@ -7051,7 +7251,8 @@ def _build_write_plane_runtime(
             turn_memory = TurnMemoryStore(
                 args.architecture_root / "turn-memory" / "turn-memory.sqlite3",
                 namespace=namespace_fingerprint(
-                    source_namespace=package_lts.snapshot().get("source_namespace"),
+                    # K6: one metadata row; verified on first Turn Memory use.
+                    source_namespace=_startup_source_namespace(package_lts),
                     trust_fingerprint=public_key_fingerprint(
                         architecture.keys.source_signer.public_key
                     ),
@@ -7120,6 +7321,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--native-instance-id")
     parser.add_argument("--native-device-id")
     parser.add_argument("--version", action="store_true")
+    parser.add_argument(
+        "--custody-full-verify",
+        action="store_true",
+        help="run the scheduled full custody verification, record its status and exit",
+    )
     args = parser.parse_args(argv)
     if args.version:
         print(f"{SERVER_NAME} {SERVER_VERSION}")
@@ -7186,6 +7392,13 @@ def main(argv: list[str] | None = None) -> int:
         except (ReplayMigrationError, OSError, KeyError, TypeError, ValueError) as exc:
             parser.error(f"replay migration rejected: {type(exc).__name__}")
     runtime = _build_write_plane_runtime(args, package_lts)
+    if args.custody_full_verify:
+        if runtime.architecture is None or not hasattr(runtime.architecture, "full_verify"):
+            print(json.dumps({"result": "unavailable"}))
+            return 3
+        status = runtime.architecture.full_verify()
+        print(json.dumps(status, sort_keys=True))
+        return 0 if status.get("result") == "pass" else 4
 
     server = MemorySynapseMcp(
         package_lts,

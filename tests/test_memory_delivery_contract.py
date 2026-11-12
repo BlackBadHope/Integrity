@@ -291,6 +291,9 @@ def test_legacy_store_remains_servable_by_updated_facade(tmp_path):
     store = TurnMemoryStore(tmp_path / "legacy.sqlite3", namespace="sha256:" + "a" * 64,
                             signer=Ed25519Signer.generate("key:public-fixture"))
     server = MemorySynapseMcp(None, turn_memory=store, audit=lambda _: None)
+    # The Seed start-up gate has its own suite (test_seed_startup_gate.py). These doubles carry no
+    # Seed catalog, so the store namespace is marked as already verified.
+    server._turn_memory_namespace_store = store
     opened = server.call("integrity_turn_memory_open", {
         "machine_id": "machine:fixture", "thread_id": "fixture-thread",
         "turn_id": "fixture-turn", "prompt_sha256": "b" * 64,

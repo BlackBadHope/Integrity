@@ -8,6 +8,7 @@ import sqlite3
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from copy import deepcopy
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Self
@@ -292,6 +293,24 @@ def verify_ledger_inclusion_proof(
     return candidate
 
 
+@dataclass(frozen=True)
+class VerifiedLedgerState:
+    """Exact stored rows that one complete ``LedgerStore.verify`` pass accepted (K4).
+
+    ``rows`` are the raw 7-column tuples in ledger order, so a later pass can prove byte
+    identity without re-parsing; ``events`` are the parsed rows; ``source_tips`` is the
+    verified (source_sequence, digest) head per source. Read-only evidence, not authority.
+    """
+
+    rows: tuple[tuple[Any, ...], ...]
+    events: tuple[dict[str, Any], ...]
+    source_tips: Mapping[str, tuple[int, str]]
+
+    @property
+    def digests(self) -> list[str]:
+        return [row[1] for row in self.rows]
+
+
 class LedgerStore:
     """One customer-local SQLite ledger.
 
@@ -325,6 +344,13 @@ class LedgerStore:
         # source chains, and verifies the external checkpoint. This cache is
         # neither persistent trust nor authority to skip changed evidence.
         self._verified_event_bytes: dict[int, tuple[bytes | str, str, str]] | None = (
+            {} if cache_verified_events else None
+        )
+        # Same scope as above: for EXACT stored bytes already fully verified in this
+        # connection, reuse their deterministic digest and indexed fields instead of
+        # re-parsing and re-hashing them. Column, chain, anchor and checkpoint checks
+        # still run on every pass; any byte change misses the cache.
+        self._verified_row_facts: dict[int, tuple[bytes | str, str, dict[str, Any]]] | None = (
             {} if cache_verified_events else None
         )
         self._connection = connection or sqlite3.connect(
@@ -380,6 +406,8 @@ class LedgerStore:
     def close(self) -> None:
         if self._verified_event_bytes is not None:
             self._verified_event_bytes.clear()
+        if self._verified_row_facts is not None:
+            self._verified_row_facts.clear()
         self._connection.close()
 
     def bind_native_trust(
@@ -673,6 +701,131 @@ class LedgerStore:
         )
         return [parse_json_strict(row["event_json"]) for row in rows]
 
+    _ROW_SELECT = (
+        "SELECT ledger_sequence, event_digest, tenant_id, source_id, source_sequence, "
+        "previous_event_digest, event_json FROM ledger_events ORDER BY ledger_sequence"
+    )
+
+    def source_ids(self) -> list[str]:
+        rows = self._connection.execute(
+            "SELECT DISTINCT source_id FROM ledger_events ORDER BY source_id"
+        )
+        return [row["source_id"] for row in rows]
+
+    @contextmanager
+    def immediate_transaction(self) -> Iterator[None]:
+        """BEGIN IMMEDIATE ... COMMIT; any exception rolls back (K4)."""
+
+        if self._connection.in_transaction:
+            raise LedgerAppendError("an immediate transaction is already open")
+        with self._write_transaction():
+            yield
+
+    def append_in_transaction(self, event: dict[str, Any]) -> str:
+        """Append inside ``immediate_transaction`` after the caller proved the head (K4)."""
+
+        if not self._connection.in_transaction:
+            raise LedgerAppendError("append_in_transaction requires an open transaction")
+        return self._append_one(event)
+
+    def verified_state(
+        self,
+        *,
+        source_public_keys: dict[str, TrustedKey],
+        anchor: Mapping[str, Any] | None = None,
+        checkpoint_key: TrustedKey | None = None,
+    ) -> VerifiedLedgerState:
+        """Run the complete ``verify`` pass and capture its rows from the same read snapshot."""
+
+        if self._connection.in_transaction:
+            raise LedgerVerificationError("verified_state needs its own read snapshot")
+        self._connection.execute("BEGIN")
+        try:
+            self.verify(
+                source_public_keys=source_public_keys,
+                anchor=anchor,
+                checkpoint_key=checkpoint_key,
+            )
+            rows = tuple(tuple(row) for row in self._connection.execute(self._ROW_SELECT))
+        finally:
+            self._connection.rollback()
+        events = []
+        tips: dict[str, tuple[int, str]] = {}
+        for row in rows:
+            events.append(parse_json_strict(row[6]))
+            tips[row[3]] = (row[4], row[1])
+        return VerifiedLedgerState(rows, tuple(events), tips)
+
+    def extend_verified_state(
+        self,
+        state: VerifiedLedgerState,
+        *,
+        source_public_keys: dict[str, TrustedKey],
+    ) -> VerifiedLedgerState:
+        """Inside the caller's transaction: prove ``state`` unchanged, fully verify new rows.
+
+        Every stored row of the verified prefix must be byte-identical in all columns to the
+        row ``verify`` accepted. Rows after it get schema, identity, signature, digest,
+        indexed-field, tenant and per-source chain checks, exactly as a non-cached
+        ``verify`` pass does. Deleted, reordered or changed rows fail.
+        """
+
+        if not self._connection.in_transaction:
+            raise LedgerVerificationError("verified extension requires an open transaction")
+        prefix = state.rows
+        count = 0
+        tail: list[tuple[Any, ...]] = []
+        for row in self._connection.execute(self._ROW_SELECT):
+            values = tuple(row)
+            if count < len(prefix):
+                if values != prefix[count]:
+                    raise LedgerVerificationError(
+                        f"ledger sequence {values[0]} changed after verification"
+                    )
+            else:
+                tail.append(values)
+            count += 1
+        if count < len(prefix):
+            raise LedgerVerificationError("ledger lost rows after verification")
+        if not tail:
+            return state
+        tips = dict(state.source_tips)
+        events = list(state.events)
+        rows = list(prefix)
+        for values in tail:
+            sequence, digest, *indexed, raw = values
+            try:
+                event = parse_json_strict(raw)
+            except Exception as exc:
+                raise LedgerVerificationError(
+                    f"ledger sequence {sequence} has invalid event bytes"
+                ) from exc
+            source_id = event.get("source_id") if isinstance(event, dict) else None
+            trusted = source_public_keys.get(source_id) if isinstance(source_id, str) else None
+            if trusted is None:
+                raise LedgerVerificationError("source signature verification failed")
+            verify_ledger_event(event, trusted, expected_tenant_id=self.tenant_id)
+            if event_digest(event) != digest:
+                raise LedgerVerificationError(f"ledger sequence {sequence} digest mismatch")
+            for field, value in zip(
+                ("tenant_id", "source_id", "source_sequence", "previous_event_digest"),
+                indexed,
+                strict=True,
+            ):
+                if event[field] != value:
+                    raise LedgerVerificationError(
+                        f"ledger sequence {sequence} indexed {field} mismatch"
+                    )
+            previous = tips.get(source_id)
+            if event["source_sequence"] != (0 if previous is None else previous[0] + 1):
+                raise LedgerVerificationError("source sequence discontinuity")
+            if event["previous_event_digest"] != (None if previous is None else previous[1]):
+                raise LedgerVerificationError("source hash-chain discontinuity")
+            tips[source_id] = (event["source_sequence"], digest)
+            events.append(event)
+            rows.append(values)
+        return VerifiedLedgerState(tuple(rows), tuple(events), tips)
+
     def inclusion_proof(self, event_digest_value: str) -> dict[str, Any]:
         """Return a portable Merkle path for one event in the current ledger."""
 
@@ -723,13 +876,68 @@ class LedgerStore:
         validate("checkpoint", checkpoint)
         return checkpoint
 
+    @staticmethod
+    def _row_fact_fields(event: Mapping[str, Any]) -> dict[str, Any]:
+        """The fields a later pass needs from bytes it already verified."""
+
+        return {
+            "tenant_id": event["tenant_id"],
+            "source_id": event["source_id"],
+            "source_sequence": event["source_sequence"],
+            "previous_event_digest": event["previous_event_digest"],
+            "signature": {"key_id": event["signature"]["key_id"]},
+        }
+
+    def _reusable_row_facts(self, row, source_public_keys):
+        """Facts for EXACT bytes verified earlier in this connection under the same key."""
+
+        if self._verified_row_facts is None or self._verified_event_bytes is None:
+            return None
+        cached = self._verified_row_facts.get(row["ledger_sequence"])
+        if cached is None or cached[0] != row["event_json"]:
+            return None
+        trusted = source_public_keys.get(cached[2]["source_id"])
+        if trusted is None:
+            return None
+        token = (row["event_json"], trusted.key_id, public_key_value(trusted.public_key))
+        if self._verified_event_bytes.get(row["ledger_sequence"]) != token:
+            return None
+        return token, cached
+
     def verify(
         self,
         *,
         source_public_keys: dict[str, TrustedKey],
         checkpoint: dict[str, Any] | None = None,
         checkpoint_key: TrustedKey | None = None,
+        anchor: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
+        """Verify every row; optionally anchor a prefix to an earlier signed checkpoint.
+
+        With ``anchor`` (a checkpoint signed by ``checkpoint_key``), rows inside the
+        anchored prefix skip per-row schema and signature checks: their digests are
+        still recomputed from the stored bytes, chained and indexed as usual, and their
+        Merkle root must equal the anchor's signed root. Any change to an anchored row
+        therefore fails verification exactly as before, while rows after the anchor get
+        the full per-row checks. The cost of a pass no longer grows with signature
+        checks over the whole history.
+        """
+
+        anchor_size = 0
+        if anchor is not None:
+            if (
+                checkpoint_key is None
+                or anchor.get("signer_id") != checkpoint_key.key_id
+                or anchor.get("signature", {}).get("key_id") != checkpoint_key.key_id
+                or not verify_signature(dict(anchor), checkpoint_key.public_key)
+            ):
+                raise LedgerVerificationError("anchor checkpoint signature verification failed")
+            validate("checkpoint", dict(anchor))
+            if anchor["tenant_id"] != self.tenant_id or anchor["ledger_id"] != self.ledger_id:
+                raise LedgerVerificationError("anchor checkpoint scope mismatch")
+            anchor_size = int(anchor["tree_size"])
+        anchored_tokens: list[tuple[int, tuple[bytes | str, str, str]]] = []
+        anchored_facts: list[tuple[int, tuple[bytes | str, str, dict[str, Any]]]] = []
         source_tips: dict[str, tuple[int, str]] = {}
         reconstructed: list[str] = []
         rows = self._connection.execute(
@@ -741,31 +949,38 @@ class LedgerStore:
             """
         )
         for row in rows:
-            verified_bytes = False
-            cache_token = None
-            try:
-                event = parse_json_strict(row["event_json"])
-                if self._verified_event_bytes is not None and isinstance(event, dict):
-                    source_id = event.get("source_id")
-                    trusted = source_public_keys.get(source_id) if isinstance(source_id, str) else None
-                    if trusted is not None:
-                        cache_token = (
-                            row["event_json"], trusted.key_id,
-                            public_key_value(trusted.public_key),
-                        )
-                        verified_bytes = (
-                            self._verified_event_bytes.get(row["ledger_sequence"]) == cache_token
-                        )
-                if not verified_bytes:
-                    validate("ledger-event", event)
-            except Exception as exc:
-                raise LedgerVerificationError(
-                    f"ledger sequence {row['ledger_sequence']} has invalid event bytes"
-                ) from exc
-            calculated = event_digest(event)
+            sequence = row["ledger_sequence"]
+            in_anchor = len(reconstructed) < anchor_size
+            reused = self._reusable_row_facts(row, source_public_keys)
+            if reused is not None:
+                cache_token, (_stored, calculated, event) = reused
+                verified_bytes = True
+            else:
+                verified_bytes = False
+                cache_token = None
+                try:
+                    event = parse_json_strict(row["event_json"])
+                    if self._verified_event_bytes is not None and isinstance(event, dict):
+                        source_id = event.get("source_id")
+                        trusted = source_public_keys.get(source_id) if isinstance(source_id, str) else None
+                        if trusted is not None:
+                            cache_token = (
+                                row["event_json"], trusted.key_id,
+                                public_key_value(trusted.public_key),
+                            )
+                            verified_bytes = self._verified_event_bytes.get(sequence) == cache_token
+                    if in_anchor:
+                        verified_bytes = True  # bound below by the anchor's signed Merkle root
+                    if not verified_bytes:
+                        validate("ledger-event", event)
+                except Exception as exc:
+                    raise LedgerVerificationError(
+                        f"ledger sequence {sequence} has invalid event bytes"
+                    ) from exc
+                calculated = event_digest(event)
             if calculated != row["event_digest"]:
                 raise LedgerVerificationError(
-                    f"ledger sequence {row['ledger_sequence']} digest mismatch"
+                    f"ledger sequence {sequence} digest mismatch"
                 )
             for field in (
                 "tenant_id",
@@ -775,11 +990,12 @@ class LedgerStore:
             ):
                 if event[field] != row[field]:
                     raise LedgerVerificationError(
-                        f"ledger sequence {row['ledger_sequence']} indexed {field} mismatch"
+                        f"ledger sequence {sequence} indexed {field} mismatch"
                     )
             if event["tenant_id"] != self.tenant_id:
                 raise LedgerVerificationError("cross-tenant event found")
-            if event["event_id"] != ledger_event_identity(event):
+            # Identity is a pure function of the bytes; reused facts already passed it.
+            if reused is None and event["event_id"] != ledger_event_identity(event):
                 raise LedgerVerificationError("ledger event identity mismatch")
 
             previous = source_tips.get(event["source_id"])
@@ -797,9 +1013,27 @@ class LedgerStore:
             ):
                 raise LedgerVerificationError("source signature verification failed")
             if self._verified_event_bytes is not None and cache_token is not None:
-                self._verified_event_bytes[row["ledger_sequence"]] = cache_token
+                facts = (row["event_json"], calculated, self._row_fact_fields(event))
+                if in_anchor:
+                    anchored_tokens.append((sequence, cache_token))
+                    anchored_facts.append((sequence, facts))
+                else:
+                    self._verified_event_bytes[sequence] = cache_token
+                    if self._verified_row_facts is not None:
+                        self._verified_row_facts[sequence] = facts
             source_tips[event["source_id"]] = (event["source_sequence"], calculated)
             reconstructed.append(calculated)
+
+        if anchor is not None:
+            if anchor_size < 1 or anchor_size > len(reconstructed):
+                raise LedgerVerificationError("ledger is behind its anchor checkpoint")
+            prefix = reconstructed[:anchor_size]
+            if anchor["root_digest"] != merkle_root(prefix) or anchor["last_event_digest"] != prefix[-1]:
+                raise LedgerVerificationError("anchor checkpoint Merkle root mismatch")
+            if self._verified_event_bytes is not None:
+                self._verified_event_bytes.update(anchored_tokens)
+                if self._verified_row_facts is not None:
+                    self._verified_row_facts.update(anchored_facts)
 
         if checkpoint is not None:
             if (

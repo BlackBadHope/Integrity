@@ -454,7 +454,25 @@ def build_context_capsule(
 
     if policy.mode != "adaptive":
         raise ContextBudgetError("a context capsule requires adaptive mode")
+    # owner-rule/v1 (Ultima Memory Core): the request is stripped from
+    # source so that the disabled path is byte-identical to the previous release.
+    rules_request = source.get("owner_rules") if isinstance(source.get("owner_rules"), dict) else None
+    if "owner_rules" in source:
+        source = {key: value for key, value in source.items() if key != "owner_rules"}
+    if rules_request is None:
+        # Live path: opt-in by env flag + index file; the query is the prompt terms the
+        # admission already computed (recall / auxiliary_recall terms). Default off.
+        from .owner_rules import live_rules_request
+        rules_request = live_rules_request(source)
     capsule = _capsule_core(source, admission)
+    rules_receipt = None
+    if rules_request is not None and rules_request.get("enabled") is True:
+        from .owner_rules import select_owner_rules
+        picked, rules_receipt = select_owner_rules(
+            list(rules_request.get("index") or []), str(rules_request.get("query") or ""),
+            hosts=list(rules_request.get("hosts") or []), tools=list(rules_request.get("tools") or []),
+            max_rules=int(rules_request.get("max_rules", 8)), max_bytes=int(rules_request.get("max_bytes", 2048)))
+        capsule["working_set"]["owner_rules"] = picked
     auxiliary = _mapping(source.get("auxiliary_recall"))
     if auxiliary:
         capsule["retrieval_context"] = _bounded_value({
@@ -583,6 +601,8 @@ def build_context_capsule(
         "home_record_count": 0,
         "production_authority": False,
     }
+    # The selection receipt has a strict schema (memory-synapse-context-selection);
+    # the owner_rules block travels only inside the capsule working_set.
     receipt = {**selection_core, "receipt_id": _digest(selection_core)}
     return capsule, receipt
 

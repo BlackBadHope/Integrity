@@ -33,6 +33,9 @@ def gate(tmp_path):
         action_log=SimpleNamespace(reset_context=lambda: None, bind_project_scope=lambda scope: None),
         home=SimpleNamespace(reset_context=lambda: None),
         architecture=SimpleNamespace(root=tmp_path), turn_memory=store, audit=lambda receipt: None)
+    # The Seed start-up gate has its own suite (test_seed_startup_gate.py). These doubles carry no
+    # Seed catalog, so the store namespace is marked as already verified.
+    facade._turn_memory_namespace_store = store
     facade._session_recovery_enabled = True
     facade._broker_tool_surface_authenticated = True
     facade.native_device_id = "device:test"

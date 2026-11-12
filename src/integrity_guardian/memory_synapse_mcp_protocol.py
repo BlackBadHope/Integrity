@@ -567,6 +567,11 @@ def main(argv: list[str] | None = None) -> int:
         help="release an idle session's Seed copy after this many seconds; 0 disables",
     )
     parser.add_argument("--version", action="store_true")
+    parser.add_argument(
+        "--custody-full-verify",
+        action="store_true",
+        help="run the scheduled full custody verification, record its status and exit",
+    )
     args = parser.parse_args(argv)
     if args.idle_release_seconds and not (
         MIN_IDLE_RELEASE_SECONDS <= args.idle_release_seconds <= MAX_IDLE_RELEASE_SECONDS
@@ -653,6 +658,13 @@ def main(argv: list[str] | None = None) -> int:
         evidence_source_prefix=args.evidence_source_prefix,
     )
     runtime = legacy._build_write_plane_runtime(args, package_lts)
+    if args.custody_full_verify:
+        if runtime.architecture is None or not hasattr(runtime.architecture, "full_verify"):
+            print(json.dumps({"result": "unavailable"}))
+            return 3
+        status = runtime.architecture.full_verify()
+        print(json.dumps(status, sort_keys=True))
+        return 0 if status.get("result") == "pass" else 4
     server = legacy.MemorySynapseMcp(
         package_lts,
         architecture=runtime.architecture,

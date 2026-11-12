@@ -408,6 +408,30 @@ def promote_store(store, name, binding):
     return {'protocol': ALIAS, 'logical_name': name, 'pool_name': pool, 'binding_unchanged': True}
 
 
+def adopt_existing_pool_store(store, name, binding):
+    """Bind ``name`` to a pool that already holds exactly these bytes; caller holds the lock.
+
+    The pool is content addressed by ``binding['sha256']``. When it is present and its
+    full bytes verify, the end state equals ``promote_store`` for an existing pool (own
+    journal plus alias) without first writing a second full copy under ``name``.
+    Returns False, writing nothing, whenever that exact precondition does not hold;
+    the caller then takes the original copy-and-promote path.
+    """
+    alias = alias_document(name, binding)
+    journal_name = '.' + NAME.fullmatch(name)['id'] + '.catalog-pool.json'
+    if not store.exists(alias['pool_name']) or store.exists(name) or store.exists(journal_name):
+        return False
+    store.verify(alias['pool_name'], binding)
+    raw_alias = canonical(alias)
+    store.atomic_small(journal_name, canonical({'protocol': JOURNAL, 'alias': alias,
+                                                'alias_sha256': sha(raw_alias)}), absent=True)
+    store.atomic_small(name, raw_alias)
+    return True
+
+
+def adopt_existing_pool(root, name, binding, check):
+    return adopt_existing_pool_store(_store(root, check), name, binding)
+
 def promote(root, name, binding, check):
     return promote_store(_store(root, check), name, binding)
 
