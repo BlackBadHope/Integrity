@@ -1,5 +1,5 @@
 {
-  "file_count": 1099,
+  "file_count": 1153,
   "files": [
     {
       "bytes": 3435,
@@ -76,7 +76,7 @@
       "mode": "0o644",
       "path": "COMPONENTS.json",
       "sanitization_edits": 0,
-      "sha256": "2f305b708cb586849f1571be8d38991d0906831a1e58c82fed6202b03159a72d"
+      "sha256": "a81a5da5578990d72b296922ff06a4b259ebaf87b55299ce9415421a6ffe44cb"
     },
     {
       "bytes": 1797,
@@ -2690,11 +2690,11 @@
       "sha256": "55fc4213541bdc82366958d62770bbcb353b75de78aa994952128bb62a313196"
     },
     {
-      "bytes": 1281,
+      "bytes": 2997,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/CONFIGURATION-VALUES.json",
       "sanitization_edits": 0,
-      "sha256": "1fe336dbfe80f96470471278538492219ca5ffb852eaf5cf97003d24ad42376a"
+      "sha256": "a75e6b8d5d15100e97d9926717e25fe33171cc105f2319fa892e698e0f23a540"
     },
     {
       "bytes": 7132,
@@ -2711,39 +2711,39 @@
       "sha256": "a9faffe6445205b840de9ba75ac16498f48d1aaefa6c10512d44780b43eb4d98"
     },
     {
-      "bytes": 2556,
+      "bytes": 7375,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/README.md",
       "sanitization_edits": 0,
-      "sha256": "ae2bf6795ef36372ab99a5f8fd6f51eefe923fa52968e58e07145db16ac2ec48"
+      "sha256": "480a6a0cecd6928a27478fc1de9c1d21f3149a93ab14e7ee5fe892bdabd0add3"
     },
     {
-      "bytes": 4115,
+      "bytes": 12490,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/SOURCE-MAP.json",
       "sanitization_edits": 0,
-      "sha256": "b4e633b240b2b4812efd2f3cfbb87b59af0c8050046b9c5c502d5f2594364526"
+      "sha256": "ef1433a703b582378f54637450d94c4373a2ba9604594d7da6ee27a65ebd07dd"
     },
     {
-      "bytes": 385,
+      "bytes": 587,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/configuration.example.json",
       "sanitization_edits": 0,
-      "sha256": "9a1ca5b65d91d955af2d3681ad1ab52f7572f893875ec7a4b62dcd1526a3c312"
+      "sha256": "d30126e49839ed1b9ad3a33dc40552fc0cb19b922d37b27873f4c867e97976d4"
     },
     {
-      "bytes": 798,
+      "bytes": 810,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/pyproject.toml",
       "sanitization_edits": 0,
-      "sha256": "4de600221a25e1785c92beaf4817b2e7bebf1c5a641717240617d6aed524bd7e"
+      "sha256": "dc1cc552a44e56c789f4ef360abe74f9e684de22d8815a31171d6cd4d018a611"
     },
     {
       "bytes": 95,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/__init__.py",
       "sanitization_edits": 0,
-      "sha256": "d69dbaa90ff28bea6e59726733e38ff8d9488a7200cac8c3458a0231c69f5248"
+      "sha256": "48e7dd8fa0cce115fbc19db6d61e4ee2abebdfdfbe30df463cf2076c5cc59153"
     },
     {
       "bytes": 52,
@@ -2795,39 +2795,81 @@
       "sha256": "0e30d3df85c350972764df5e39e2b6b7e0d748072fa8582192f9df8d2f0543d0"
     },
     {
-      "bytes": 507,
+      "bytes": 2113,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources.json",
       "sanitization_edits": 0,
-      "sha256": "f6d75812fa7eed308785ca7984e3a40c7206f6d7d9b3687e058f18d1df54e8a8"
+      "sha256": "bafad4a965f9ecfbb99d7187ea53ef04fd2994d55edbcc1a2f25703da3b76106"
     },
     {
-      "bytes": 10786,
+      "bytes": 2881,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/agent-bus-1.schema.json",
+      "sanitization_edits": 0,
+      "sha256": "fd8dc3ad442441b40d69a6e52245c518026ece4c2cfa45122e3706ba6d437238"
+    },
+    {
+      "bytes": 12555,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/agent_registry.py",
       "sanitization_edits": 0,
-      "sha256": "5fd9f8058cea81ec1f8979709d6c3227cce221f006203708cdb0585f9639ce1d"
+      "sha256": "ad10c955a24def9152f223d4b503ddff325e907ca1f1d8021c689d53abe3c6c6"
     },
     {
-      "bytes": 22613,
+      "bytes": 8584,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/agentbus_validate.py",
+      "sanitization_edits": 0,
+      "sha256": "f7f3d438801fa6aa8309c39987e7ea0ff7ce9715a189d202f9f0079b977c7f9b"
+    },
+    {
+      "bytes": 4093,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/archived_detect.py",
+      "sanitization_edits": 0,
+      "sha256": "c2fc7de50f80f22475a781f5a1ae599105f17a3f9f1734294cd392223ed52b86"
+    },
+    {
+      "bytes": 4163,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/attach_cli.py",
+      "sanitization_edits": 0,
+      "sha256": "520ef5fa56ea47657c5e1eb1bcdc2bfa7a60713f7f00e5af582199844b874781"
+    },
+    {
+      "bytes": 18664,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/autoreg.py",
+      "sanitization_edits": 0,
+      "sha256": "79472aca084584a1b81fbf2aafa4209c47e12587dcf1b8d9f9190b7bc7027f50"
+    },
+    {
+      "bytes": 1614,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/autoreg_hook.py",
+      "sanitization_edits": 0,
+      "sha256": "209e8479da70c32d396350aacf1fe6ad6ee4b966415c633d52c00cde68ae886d"
+    },
+    {
+      "bytes": 23190,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/bus.py",
       "sanitization_edits": 0,
-      "sha256": "ff6f818d5a809501ac40046496a4534185b687fdf8171fd55efd945f13648608"
+      "sha256": "a42f68d95d4c2db4f10d1c60d604cbe915e1b4e1b4248699bfb7816aa511c7af"
     },
     {
-      "bytes": 4660,
+      "bytes": 5463,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/bus_claude_hook.py",
       "sanitization_edits": 0,
-      "sha256": "06e36705a9c2d16ab79d7b09cb80ff058a5d4b0188d5639c65891326aa4703cd"
+      "sha256": "841bce00a8c4ec3462f8f06e9606767ace8c25f0db4af28310df1243aba11698"
     },
     {
-      "bytes": 2718,
+      "bytes": 2819,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/bus_health.py",
       "sanitization_edits": 0,
-      "sha256": "367953c6a9b80fae2a774c559546410611161eedbb65bd6ef125d0600788ac0e"
+      "sha256": "cbb7f4cfb17b958d2d3f1a27575835c8f9211845646e299f8dcfc298d55b780a"
     },
     {
       "bytes": 3716,
@@ -2837,6 +2879,27 @@
       "sha256": "f566e509ada21d924cfa746575d83af34ee17e234676a380496876b88ba09da0"
     },
     {
+      "bytes": 14010,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/bus_remote.py",
+      "sanitization_edits": 0,
+      "sha256": "ee7b20ee86be981130a01e2109b96074a50fc09f5f36b7f184710904090f40fe"
+    },
+    {
+      "bytes": 3881,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/bus_replica_sync.py",
+      "sanitization_edits": 0,
+      "sha256": "678db95d2eda893f01d320061c6499f7d699084dfc42d20ab5718dcc2bf90411"
+    },
+    {
+      "bytes": 16903,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/chatgpt_bus.py",
+      "sanitization_edits": 0,
+      "sha256": "a80c753683475498f816ab55f59824a76ff16739c22dcdf93f63de3ed1f87520"
+    },
+    {
       "bytes": 6103,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/codex_outbox.py",
@@ -2844,25 +2907,67 @@
       "sha256": "5a771eef7c229a509b308dea8cbe7e1314bb4a98d993ef1f444349299bc36d6d"
     },
     {
-      "bytes": 5267,
+      "bytes": 6626,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/codex_steer.py",
       "sanitization_edits": 0,
-      "sha256": "f48589038e75edef18a31c252d980407cfbfb1e898caff5dfce1d7c9ce7af6b6"
+      "sha256": "464c2ceeac2049e742bd8c19cfdccc02225bf8cbc703fde38aa7d194ec6643d3"
     },
     {
-      "bytes": 1402,
+      "bytes": 2499,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/codex_steer_hook.py",
       "sanitization_edits": 0,
-      "sha256": "a893b5f07313b8f810123252b0ae39d298eabb25960a8cdc391d9835ba3ae91a"
+      "sha256": "e99f186d82156f308bace867a5288fb55a9575ff4533ea637aa453f860f55398"
     },
     {
-      "bytes": 8414,
+      "bytes": 44121,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/core/bus_core_daemon.py",
+      "sanitization_edits": 0,
+      "sha256": "bf3abe8e2590f85387960e6bfb4cb481dd6fad5cb52c6dce674ae3b3e4e268f1"
+    },
+    {
+      "bytes": 2731,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/core/bus_journal.py",
+      "sanitization_edits": 0,
+      "sha256": "a0c013c78a472981e1f45d5cc2911fab333b3347d14b44b876b4e43a2a1d2860"
+    },
+    {
+      "bytes": 2614,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/core/bus_quota_report.py",
+      "sanitization_edits": 0,
+      "sha256": "41f92ea3f816d19b408d4e145ec2ceb048a06f2c3d4293fe2b04348ebc8fbfbf"
+    },
+    {
+      "bytes": 3874,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/core/bus_routes_export.py",
+      "sanitization_edits": 0,
+      "sha256": "60134ac7e20f499e46aee0ac54644e2bb10e4d67496bfd446b6c39ab6588a9b7"
+    },
+    {
+      "bytes": 3318,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/core/migrate.py",
+      "sanitization_edits": 0,
+      "sha256": "42650ec9e696997094092d2d6cfc3897c2df218fb01279396394d3688a8b4b43"
+    },
+    {
+      "bytes": 8477,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/file_bridge.py",
       "sanitization_edits": 0,
-      "sha256": "9e95f1e9eb3a9a821ce607812aa134010ab85fa712ee501cb60680851729c56e"
+      "sha256": "3edf948be18028cbccf577b09fa89c556aa2e4ae8f042ff1c1cdd834a8600b75"
+    },
+    {
+      "bytes": 5105,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/fix_registry_topics.py",
+      "sanitization_edits": 0,
+      "sha256": "c92026fe0368a934cd71170692a03029add7af8fd9abf382acec913bc677e7b1"
     },
     {
       "bytes": 2270,
@@ -2872,25 +2977,95 @@
       "sha256": "697afa6d856499b60131fc0b267ab31eee6974101cb761db1f1c6cc6126c5855"
     },
     {
-      "bytes": 2310,
+      "bytes": 2519,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/launcher.py",
       "sanitization_edits": 0,
-      "sha256": "7b8abadc70da799cf1cdb340de5127ee52b75c14da108d19e98c9f45be68f57e"
+      "sha256": "bb762924fc5e7fa5ec8564f9d851213959e2911bff4449bb0a4f59fd48ed0241"
     },
     {
-      "bytes": 8968,
+      "bytes": 12957,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/local_cli.py",
       "sanitization_edits": 0,
-      "sha256": "e0635b7351acef35745f6f5d66236a9569f5f87fe6d759f477302f4b61089db7"
+      "sha256": "b71a8ecc580da1bccee2ef1db6338377b15759674b2566655d2b2eea1986a18e"
     },
     {
-      "bytes": 23947,
+      "bytes": 4549,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/maintenance.py",
+      "sanitization_edits": 0,
+      "sha256": "225d8fa0f9697b97d4c1a4bfd6988fa967a36dbc5ead9da04ceb9c6d05beb31f"
+    },
+    {
+      "bytes": 8965,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/mesh_cli.py",
+      "sanitization_edits": 0,
+      "sha256": "16dc9cd6c48d0260bc2be10209d3d6bef2fe426af738588de2f7b50f5c9bfd2b"
+    },
+    {
+      "bytes": 30866,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/mesh_store.py",
+      "sanitization_edits": 0,
+      "sha256": "5712fcb6016e0bcd83046206cbdcc97c031ef4094389401a201bfd44e39fefb2"
+    },
+    {
+      "bytes": 8407,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/mesh_validate.py",
+      "sanitization_edits": 0,
+      "sha256": "5f327d9f0c95131080988cf7faa899fcfd4323aed4347bc7f3e2ba8b675b6954"
+    },
+    {
+      "bytes": 14589,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/owner_layer.py",
+      "sanitization_edits": 0,
+      "sha256": "e8aa2d39938911ea636a71b7420aeb370b4066066e3199f271ece7929064040b"
+    },
+    {
+      "bytes": 13944,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/owner_verify.py",
+      "sanitization_edits": 0,
+      "sha256": "c4c21fb079eab55c3be05a924cf0ba606fc9a8e2ed0cf920cdecd54664381a37"
+    },
+    {
+      "bytes": 7247,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/reachability.py",
+      "sanitization_edits": 0,
+      "sha256": "5d252afd0cbbba5acdd5f98d8ebb53f98aa92455f12641d88a25d31511402236"
+    },
+    {
+      "bytes": 10339,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/registry_db.py",
+      "sanitization_edits": 0,
+      "sha256": "c3881fdcbb5ba0ecfb92b6eff405d316ec1fb58a73aff36516449236757dddd5"
+    },
+    {
+      "bytes": 44488,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/relay.py",
       "sanitization_edits": 0,
-      "sha256": "48e1469b55419ea1229c43c73099690321accf5db1b6079a7dcd2df38f48b97f"
+      "sha256": "73a56e7e0e2265fbc0d592b179c7bf700c222a241b2001bef9109c412f65f265"
+    },
+    {
+      "bytes": 4002,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/room_acl.py",
+      "sanitization_edits": 0,
+      "sha256": "dae33e2b269456344b57a1ed7e111ec81154c15859c1de471447f4cb89ee1788"
+    },
+    {
+      "bytes": 1517,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/watch_bus.py",
+      "sanitization_edits": 0,
+      "sha256": "426db142a64e6863f115f5af2ee5bd241a8a54b49eb2921fd7ab54805df93d7a"
     },
     {
       "bytes": 4676,
@@ -2912,6 +3087,209 @@
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/seat_verify.py",
       "sanitization_edits": 0,
       "sha256": "c8a07b1b6b013626dbbac5b29fe6988cce9f7bcbbd6f493419ff40aeebf37d28"
+    },
+    {
+      "bytes": 1905,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/_bus_setup.py",
+      "sanitization_edits": 0,
+      "sha256": "49455d050021d754f39b7280297a9f45ff1a4349d963f2b4f08147a4d7890f3f"
+    },
+    {
+      "bytes": 528,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/core/conftest.py",
+      "sanitization_edits": 0,
+      "sha256": "c193ae1e2c552b725e9ec3fab0a0893f8de7c223bb385cacdcf3c65932e9f6db"
+    },
+    {
+      "bytes": 15194,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/core/test_hub.py",
+      "sanitization_edits": 0,
+      "sha256": "b3223a2b251deaa1a6d70167e1c377cad6bf5ec9259565492c3e913e0878c2cc"
+    },
+    {
+      "bytes": 528,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/conftest.py",
+      "sanitization_edits": 0,
+      "sha256": "c193ae1e2c552b725e9ec3fab0a0893f8de7c223bb385cacdcf3c65932e9f6db"
+    },
+    {
+      "bytes": 5999,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_agent_registry.py",
+      "sanitization_edits": 0,
+      "sha256": "21e5ba1fd93ed5d002bc72c624c32f7a6f97da7c1b6f333117ca61a1acfb769e"
+    },
+    {
+      "bytes": 9760,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_agentbus_validate.py",
+      "sanitization_edits": 0,
+      "sha256": "a6d490d03742963a41cde5d17a649f925a51e574b58b59c09667e893d013e32a"
+    },
+    {
+      "bytes": 4530,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_archived_detect.py",
+      "sanitization_edits": 0,
+      "sha256": "0a166938121d81ecbd5439e95b805c9c62ffa3f08d828e19e2b59867d4da8e75"
+    },
+    {
+      "bytes": 18233,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_autoreg.py",
+      "sanitization_edits": 0,
+      "sha256": "06950f73211a8f5c3220676f0cb9f471bb4002734c73ba05c6f33e5195c6b3cc"
+    },
+    {
+      "bytes": 7535,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_autoreg_r3.py",
+      "sanitization_edits": 0,
+      "sha256": "a3dc573b0ef6df9926bb72761650b9eb890cd0bc0fb597e85a964c77bcce5d3a"
+    },
+    {
+      "bytes": 5604,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_bus.py",
+      "sanitization_edits": 0,
+      "sha256": "fad9393c2a5e40703a53b7f486951c0ffc18f230bd9832891ee656b83531c1da"
+    },
+    {
+      "bytes": 8564,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_chatgpt_bus.py",
+      "sanitization_edits": 0,
+      "sha256": "bb8d10a174b92b2402f7213d88c1714af3cfaafd0c08acbd01f487734482a03c"
+    },
+    {
+      "bytes": 8372,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_claude_sessions.py",
+      "sanitization_edits": 0,
+      "sha256": "aa7af981fffd51d3bf8d6a9dccf85454281b1ffa2e60d1f4b73e8196ae80d3bc"
+    },
+    {
+      "bytes": 4009,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_codex_outbox.py",
+      "sanitization_edits": 0,
+      "sha256": "be44c90d050bb23c2856ae3f8ded707569d2baff3c9e0f8985d5e3088f7902b3"
+    },
+    {
+      "bytes": 4673,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_codex_steer.py",
+      "sanitization_edits": 0,
+      "sha256": "e19b5bd74d54854e8718d35d6e6840248b2b0494c9a4a194265de624f84ff3c6"
+    },
+    {
+      "bytes": 6607,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_delivery.py",
+      "sanitization_edits": 0,
+      "sha256": "fa03239fbc7d2dcc753c28ddbfc7c05e80ca20d3de840d795203c55b201bd577"
+    },
+    {
+      "bytes": 1820,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_file_bridge.py",
+      "sanitization_edits": 0,
+      "sha256": "a3fdb2ab5245f1221baa91b59db6c9ae1739d7c22b903075b12f8dfc9abfc7e3"
+    },
+    {
+      "bytes": 4407,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_fix_registry_topics.py",
+      "sanitization_edits": 0,
+      "sha256": "abe5cff97e7e250a7f8aa57366aea7d8c99854fd61676437a0740d031349bb0e"
+    },
+    {
+      "bytes": 6234,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_grok_delivery.py",
+      "sanitization_edits": 0,
+      "sha256": "95dc78ce6a67d3e0e3561f4db716af5a2cfadf1b0e3957e403984d37aa31ba79"
+    },
+    {
+      "bytes": 3008,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_local_adapters.py",
+      "sanitization_edits": 0,
+      "sha256": "e7856688e527f9899872c29c396cccdca6b434bc4d7101f4b485d148453fc483"
+    },
+    {
+      "bytes": 4461,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_local_cli_strict.py",
+      "sanitization_edits": 0,
+      "sha256": "2f20880bed2a7c688b745742835d28b85bdcbb2d0f4f2cacf5494ac09e9fc983"
+    },
+    {
+      "bytes": 4192,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_orphan_deferred.py",
+      "sanitization_edits": 0,
+      "sha256": "695b791e34ff9abfc7edb42480d9c9b383c365c65ab846b1558abe61a35833df"
+    },
+    {
+      "bytes": 6264,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_p0_isolation.py",
+      "sanitization_edits": 0,
+      "sha256": "7059d93445ac618575b62e77537a332a6c6cc13cbce4f533f86e8b1e346475a9"
+    },
+    {
+      "bytes": 3485,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_p0_maintenance.py",
+      "sanitization_edits": 0,
+      "sha256": "7669e2ae87616d2176de9817e1d986e62d162aef6f8e9e0bd427f24b0ed2da46"
+    },
+    {
+      "bytes": 3704,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_p0_reachability.py",
+      "sanitization_edits": 0,
+      "sha256": "4a8eeeac50c1bb13ac61e313a5c774e7b51f05e42eb8b48c3ed548f4795b4ba8"
+    },
+    {
+      "bytes": 4491,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_queue_paging.py",
+      "sanitization_edits": 0,
+      "sha256": "80d2a1cc38a11d087762d7f62cbd6de65b19863a200fd4fd405b6a123bba0e06"
+    },
+    {
+      "bytes": 7275,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_relay.py",
+      "sanitization_edits": 0,
+      "sha256": "57d86ad8bcb2b7cae3c140365aebb056803578b306046b1d7cb013dbb16d665d"
+    },
+    {
+      "bytes": 6279,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_relay_size.py",
+      "sanitization_edits": 0,
+      "sha256": "d5317b67bff8bc2043282a4e6cda294c552b6414be805802dda05371a87f8934"
+    },
+    {
+      "bytes": 5143,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_relay_stale_turn_hint.py",
+      "sanitization_edits": 0,
+      "sha256": "e0cf8e036d599e6257b6a5604589366c20f91b176f1ce091e817087449a48b6e"
+    },
+    {
+      "bytes": 3832,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_zz_isolation_guard.py",
+      "sanitization_edits": 0,
+      "sha256": "897c9894a242ce6d693ed1de4f0120483779093ee89543b200b6f72be62c8af0"
     },
     {
       "bytes": 2724,
@@ -7695,7 +8073,7 @@
       "sha256": "178e2f0d53cb7fecb5fd2b422e2aa2db22c268d809b820399f35c7a9bcccc9b9"
     }
   ],
-  "generated_file_count": 43,
+  "generated_file_count": 55,
   "generated_files": [
     {
       "bytes": 1041,
@@ -7824,11 +8202,11 @@
       "sha256": "c773a85da94e9edf0b2b10e60fd43b00fe4f90e345ec0d958e6c5b4d0d405e8e"
     },
     {
-      "bytes": 38604,
+      "bytes": 38633,
       "mode": "0o644",
       "path": "README.md",
       "sanitization_edits": 0,
-      "sha256": "fbab7f46a584e78bd70fc44b218c0103ac43728cc60d6a28fe96eedfe2b04e24"
+      "sha256": "85d12836c2db1957dfdeaadfba0c5c85d13cd2cbe77149c3d8e591eb8d4c8508"
     },
     {
       "bytes": 13466,
@@ -7850,6 +8228,90 @@
       "path": "SECURITY.md",
       "sanitization_edits": 0,
       "sha256": "7753326c2fe52694b452cb7ea8bb3cc3e9009a4feedc4d0a353473ef757d64ca"
+    },
+    {
+      "bytes": 373,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/examples/client/CORE.example.json",
+      "sanitization_edits": 0,
+      "sha256": "17f6195674a0e8b0bce162826db5e5c400ed9a815bdd46ca3c8d84ab3dc328c6"
+    },
+    {
+      "bytes": 3753,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/examples/hub/bin/bus-gateway",
+      "sanitization_edits": 0,
+      "sha256": "9b99f14e1e19046c9633c333907db4e4c296ae6b057dfc992407f3cef84508ab"
+    },
+    {
+      "bytes": 799,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/examples/hub/bin/bus-gw-shell",
+      "sanitization_edits": 0,
+      "sha256": "9e3ab3fd1410d5421949be79f5fa6960a201c75b65b073e2a112e1c63b9bfc56"
+    },
+    {
+      "bytes": 490,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/examples/hub/bin/llm-bus-journal-seal",
+      "sanitization_edits": 0,
+      "sha256": "9cb52fe629c0082ad1d32e149222ebc7aa9714242756c0f39dfa8ab495f220ac"
+    },
+    {
+      "bytes": 474,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/examples/hub/core.example.json",
+      "sanitization_edits": 0,
+      "sha256": "d1c0a8730fb78c7c49677e8aa92137b8cfb137658370e197a510fc358c2403ca"
+    },
+    {
+      "bytes": 1419,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/examples/hub/principals.example.json",
+      "sanitization_edits": 0,
+      "sha256": "27688c7562dce2fff5cec839035b5937175fb1dc3abd4c555e4922c761f63d04"
+    },
+    {
+      "bytes": 312,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/examples/hub/room.example.json",
+      "sanitization_edits": 0,
+      "sha256": "eee00ef92d78c42b168d87bda6fe056800a0e423c4a95f97fb988dda01d3d199"
+    },
+    {
+      "bytes": 1823,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/examples/hub/systemd/llm-bus-core.service",
+      "sanitization_edits": 0,
+      "sha256": "e7b2307258cc11f92bf3d3f0ae2302edbe772ad29e081aed6b8d1e97423cc9b6"
+    },
+    {
+      "bytes": 292,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/examples/hub/systemd/llm-bus-journal-seal.service",
+      "sanitization_edits": 0,
+      "sha256": "c11bd69f5abe58a1550467ec67fa9bab282508a4b4f5478dd8f6b90a13a00aef"
+    },
+    {
+      "bytes": 128,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/examples/hub/systemd/llm-bus-journal-seal.timer",
+      "sanitization_edits": 0,
+      "sha256": "617763cb3939a655579e43b1688d961749e69274c1cf4d46c137caf3bc786d59"
+    },
+    {
+      "bytes": 1050,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/examples/hub/systemd/llm-bus-routes-export.service",
+      "sanitization_edits": 0,
+      "sha256": "6bebd2325b39391e6e13a4a7e351bf5c1f5711c823a2e0a57de47561d9e5a31d"
+    },
+    {
+      "bytes": 128,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/examples/hub/systemd/llm-bus-routes-export.timer",
+      "sanitization_edits": 0,
+      "sha256": "80fba0a359ecfabd9ead56e5a011fabc9cee12e3c18b9d53b320225e1fa6477d"
     },
     {
       "bytes": 6228,
@@ -7999,7 +8461,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:e5725938e2ba4da6924cb5995fd45cb9f5102ce8fe30b28b80b7267f3d232b63",
+  "projection_digest": "sha256:8b712c7f4693b7166cb8eae585e716218e553f80546cd88f7b7d909f4b22b0b1",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

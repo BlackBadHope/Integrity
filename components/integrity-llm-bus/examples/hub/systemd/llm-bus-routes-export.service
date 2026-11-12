@@ -1,0 +1,22 @@
+# Example: exports the route catalog read by the hub `routes` operation from an action-log Seed database.
+#   @ROUTES_USER@        account that may read the Seed database (read-only open)
+#   @COMPONENT_CONFIG@   integrity-llm-bus configuration with routes_seed, routes_module, routes_catalog,
+#                        routes_source_label (environment ROUTES_SEED / ROUTES_MODULE / ROUTES_OUT / ROUTES_SOURCE override them)
+#   @RESOURCES_DIR@      installed resources directory of integrity_llm_bus
+#   @CATALOG_DIR@        directory of routes_catalog; @SEED_DIR@ directory of routes_seed
+[Unit]
+Description=LLM bus: export the route catalog from the action-log Seed (read-only, safe fields)
+
+[Service]
+Type=oneshot
+User=@ROUTES_USER@
+Environment=INTEGRITY_LLM_BUS_CONFIG=@COMPONENT_CONFIG@
+ExecStart=/usr/bin/python3 -I @RESOURCES_DIR@/core/bus_routes_export.py
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateNetwork=yes
+ReadWritePaths=@CATALOG_DIR@ @SEED_DIR@
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX

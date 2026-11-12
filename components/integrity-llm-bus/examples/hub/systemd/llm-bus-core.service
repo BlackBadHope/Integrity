@@ -1,0 +1,49 @@
+# Example unit for the LLM bus hub daemon. Replace every @NAME@ placeholder before installing.
+#   @BUS_USER@ / @BUS_GROUP@  dedicated nologin account that owns the state, journal and database
+#   @SOCKET_GROUP@            group of the SSH gateway account; it may connect to the socket (core.json socket_group)
+#   @COMPONENT_CONFIG@        absolute path of the integrity-llm-bus configuration (configured: true)
+#   @CORE_CONFIG@             absolute path of core.json (see examples/hub/core.example.json)
+#   @RESOURCES_DIR@           installed resources directory of integrity_llm_bus (contains core/ and bus.py)
+#   @STATE_ROOT@              parent directory of state_dir and journal_dir from core.json
+# python3 -I ignores PYTHONPATH: the integrity_llm_bus package must be importable by the system interpreter.
+[Unit]
+Description=LLM bus hub: fixed protocol over a unix socket, per-vendor keys, owner gate, hash-chained journal
+After=local-fs.target
+
+[Service]
+User=@BUS_USER@
+Group=@BUS_GROUP@
+SupplementaryGroups=@SOCKET_GROUP@
+Environment=INTEGRITY_LLM_BUS_CONFIG=@COMPONENT_CONFIG@
+Environment=BUS_CORE_CONF=@CORE_CONFIG@
+ExecStart=/usr/bin/python3 -I @RESOURCES_DIR@/core/bus_core_daemon.py
+RuntimeDirectory=llm-bus
+RuntimeDirectoryMode=0750
+Restart=on-failure
+UMask=0077
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+PrivateNetwork=yes
+RestrictAddressFamilies=AF_UNIX
+ReadWritePaths=@STATE_ROOT@
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallFilter=@system-service
+SystemCallArchitectures=native
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+MemoryMax=512M
+TasksMax=64
+
+[Install]
+WantedBy=multi-user.target

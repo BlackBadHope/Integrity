@@ -13,6 +13,9 @@ import sqlite3
 import sys
 
 import agent_registry
+import agentbus_validate
+import owner_verify
+import reachability
 from bus import AGENTS, DEFAULT_TTL_HOURS, DELIVERY_MODES, MAX_BODY_BYTES, MessageStore, _row, _validate_message, queue_page, queue_view
 
 
@@ -28,6 +31,9 @@ def open_store(state_dir: Path, ttl_hours: int = DEFAULT_TTL_HOURS) -> MessageSt
     else:
         state_dir.mkdir(mode=0o700, exist_ok=True)
         state_dir.chmod(0o700)
+    import bus_remote  # hub mode: writes go to the hub; the local database is a read-only replica
+    if bus_remote.active(state_dir):
+        return bus_remote.RemoteStore(state_dir, ttl_hours * 3600)
     store = MessageStore(state_dir / "bus.sqlite3", ttl_hours * 3600)
     if os.name == "nt":
         secure_state_directory(state_dir)
@@ -50,11 +56,44 @@ def status(store: MessageStore, mid: str) -> dict:
             "replies": [summary(_row(row)) for row in replies]}
 
 
+def owner_verify_readonly(state_dir: Path, mid: str, expect: str | None) -> dict:
+    """owner-verify is strictly read-only: no open_store/MessageStore (schema/ALTER/NONCE), no ACL rewrite,
+    no registry load, no prune. SQLite mode=ro + PRAGMA query_only=ON. Live store only (no archive lookup)."""
+    db_path = state_dir.absolute() / "bus.sqlite3"
+    if not db_path.is_file():
+        raise ValueError("message not found")
+    db = sqlite3.connect(db_path.resolve().as_uri() + "?mode=ro", uri=True, timeout=5)
+    try:
+        db.row_factory = sqlite3.Row
+        db.execute("PRAGMA query_only = ON")
+        row = db.execute("SELECT * FROM messages WHERE id=?", (mid,)).fetchone()
+    finally:
+        db.close()
+    if row is None:
+        raise ValueError("message not found")
+    message = _row(row)
+    keys = owner_verify.load_keys(state_dir.absolute() / "owner_keys.json")
+    try:  # freshness is judged at the time the bus accepted the message
+        own = owner_verify.verify(message, keys, message["created_at"])
+    except owner_verify.OwnerSignatureError as exc:
+        return {"id": mid, "verified": False, "reason": str(exc)}
+    pinned = owner_verify.pin_matches(expect, own["fingerprint"])
+    result = {"id": mid, "verified": pinned and own["mode"] != "session", "signature_valid": True,
+              "kid": own["kid"], "fingerprint": own["fingerprint"], "mode": own["mode"],
+              "pin_checked": expect is not None, "root": own["root"], "to": own["to"], "ts": own["ts"]}
+    if not pinned:
+        result["reason"] = ("no --expect pin: owner-verified needs the fingerprint the owner gave this agent"
+                            if expect is None else "key fingerprint differs from the one pinned by this agent")
+    elif own["mode"] == "session":
+        result["reason"] = "session mode is not owner-verified in v1"
+    return result
+
+
 def main(argv: list[str] | None = None) -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description="Local same-owner Codex/Claude/Grok bus client")
-    parser.add_argument("--state-dir", type=Path, default=Path(__file__).resolve().parent / "state")
+    parser.add_argument("--state-dir", type=Path, default=Path(_integrity_value('state_directory')))
     sub = parser.add_subparsers(dest="command", required=True)
     send = sub.add_parser("send")
     send.add_argument("--from", dest="sender", required=True)
@@ -64,7 +103,10 @@ def main(argv: list[str] | None = None) -> int:
     send.add_argument("--reply-to")
     send.add_argument("--delivery", choices=DELIVERY_MODES,
                       help="Codex recipients: automatic steer by default (running-turn hook, idle queue fallback); "
-                           "explicit queue = fresh next turn. Ignored for claude/grok. Check `queue --agent <to>` first.")
+                           "explicit queue = fresh next turn. Grok: steer is an existing-task webhook continuation; queue unsupported. "
+                           "Claude stores the field only. Check `queue --agent <to>` first.")
+    send.add_argument("--strict", action="store_true",
+                      help="validate the body as agent-bus/1 (agent-bus-1.schema.json); on any error exit 2 before the DB write")
     queue = sub.add_parser("queue", help="read-only: pending (undelivered/unread) messages of any address with relay state")
     queue.add_argument("--agent", required=True)
     queue.add_argument("--limit", type=int, default=50)
@@ -95,7 +137,18 @@ def main(argv: list[str] | None = None) -> int:
     alias.add_argument("--address", required=True)
     alias.add_argument("--expected", help="Current lead address; omit only for an unbound alias")
     sub.add_parser("agents", help="list built-in and registered addresses")
+    ov = sub.add_parser('owner-verify', help='read-only: is this message signed by the owner key? (owner/1)')
+    ov.add_argument('--id', required=True)
+    ov.add_argument('--expect', help="fingerprint (>=16 hex prefix) the owner gave THIS agent in its own chat; required for verified")
     args = parser.parse_args(argv)
+    if args.command == 'owner-verify':  # before all_agents/open_store: no init, migration, ACL or prune
+        try:
+            print(json.dumps(owner_verify_readonly(args.state_dir, args.id, args.expect),
+                             ensure_ascii=False, separators=(",", ":")))
+            return 0
+        except (OSError, ValueError, sqlite3.Error, owner_verify.OwnerSignatureError) as exc:
+            print(json.dumps({"error": type(exc).__name__, "detail": str(exc)}, ensure_ascii=False), file=sys.stderr)
+            return 2
     known = agent_registry.all_agents(args.state_dir.absolute())
     for name in ("sender", "recipient", "agent"):
         if getattr(args, name, None) is not None and getattr(args, name) not in known:
@@ -106,10 +159,10 @@ def main(argv: list[str] | None = None) -> int:
             identity = args.session if args.harness == "claude" else (args.thread or os.environ.get("CODEX_THREAD_ID"))
             if args.harness == "claude" and args.thread:
                 raise ValueError("Claude uses --session, not --thread")
-            if args.harness in ("codex", "gemini", "antigravity") and args.session:
+            if args.harness in ("codex", "gemini", "antigravity", "chatgpt") and args.session:
                 raise ValueError("--session is only for harness=claude")
-            if args.harness in ("gemini", "antigravity") and not args.thread:
-                raise ValueError("Antigravity/Gemini registration requires explicit --thread (Antigravity conversation UUID)")
+            if args.harness in ("gemini", "antigravity", "chatgpt") and not args.thread:
+                raise ValueError("Antigravity/Gemini/ChatGPT registration requires explicit --thread (UUID)")
             if args.harness == "claude" and not args.session:
                 raise ValueError("Claude registration requires explicit --session UUID")
             if not identity:
@@ -125,18 +178,30 @@ def main(argv: list[str] | None = None) -> int:
             raw = args.body_file.read_bytes()
             if len(raw) > MAX_BODY_BYTES + 3:
                 raise ValueError("body too large")
+            body = raw.decode("utf-8-sig")
+            if args.strict:
+                try:
+                    errors = agentbus_validate.validate(body)
+                except Exception as exc:  # a validator defect must still reject, never store or crash
+                    errors = [f"$: validator error {type(exc).__name__}"]
+                if errors:
+                    print(json.dumps({"error": "SchemaError", "protocol": "agent-bus/1", "errors": errors},
+                                     ensure_ascii=False), file=sys.stderr)
+                    return 2
             message = _validate_message({"id": args.id, "from": args.sender, "to": args.recipient,
-                                         "body": raw.decode("utf-8-sig"), "reply_to": args.reply_to,
+                                         "body": body, "reply_to": args.reply_to,
                                          "delivery": args.delivery}, args.sender, args.state_dir.absolute())
             row, duplicate = store.post(message)
-            result = {"message": summary(row), "duplicate": duplicate}
+            result = {"message": summary(row), "duplicate": duplicate,
+                      **reachability.assess(args.recipient, args.state_dir.absolute())}
         elif args.command == "inbox":
             if not 1 <= args.limit <= 50:
                 raise ValueError("limit must be 1-50")
             rows = store.inbox(args.agent, args.status, args.limit)
             result = {"messages": [summary(row) for row in rows] if args.summary else rows}
         elif args.command == "queue":
-            result = queue_page(store, args.agent, args.limit, args.after_seq)
+            result = {**queue_page(store, args.agent, args.limit, args.after_seq),
+                      **reachability.assess(args.agent, args.state_dir.absolute())}
         elif args.command == "ack":
             row = store.ack(args.id, args.agent)
             if row is None:
@@ -155,6 +220,7 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, ValueError, sqlite3.Error) as exc:
         print(json.dumps({"error": type(exc).__name__, "detail": str(exc)}, ensure_ascii=False), file=sys.stderr)
         return 2
+
 
 
 if __name__ == "__main__":

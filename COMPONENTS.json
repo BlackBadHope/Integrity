@@ -270,7 +270,7 @@
       },
       "path": "components/integrity-llm-bus",
       "python": ">=3.11",
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     {
       "dependencies": [

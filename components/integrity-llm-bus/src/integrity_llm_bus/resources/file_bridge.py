@@ -116,9 +116,10 @@ def file_to_sqlite(store, st: dict, files: list[dict]) -> int:
             continue
         sender, to = m.get("from"), m.get("to")
         body = m.get("body")
-        if sender not in AGENTS or not isinstance(body, str) or not body.strip():
+        known = agent_registry.all_agents(Path(_integrity_value('state_directory')))
+        if sender not in known or not isinstance(body, str) or not body.strip():
             done.add(fid); log(f"skip file {fid}: bad sender/body"); continue
-        targets = [a for a in AGENTS if a != sender] if to == "all" else [to] if to in agent_registry.all_agents() and to != sender else []
+        targets = [a for a in AGENTS if a != sender] if to == "all" else [to] if to in known and to != sender else []
         if not targets:
             done.add(fid); log(f"skip file {fid}: bad to={to}"); continue
         if len(body.encode("utf-8")) > MAX_BODY_BYTES:
@@ -212,6 +213,7 @@ def main() -> int:
         log("bridge stopped")
         PID_F.unlink(missing_ok=True)
     return 0
+
 
 
 if __name__ == "__main__":

@@ -1,0 +1,19 @@
+#!/usr/bin/python3 -I
+# SPDX-License-Identifier: BUSL-1.1
+"""Example login shell for the hub's SSH gateway account.
+
+sshd runs a forced command as `<shell> -c "<command from authorized_keys>"`. This "shell" interprets nothing:
+it accepts EXACTLY the string `<GATEWAY> <vendor-id>` and execs the gateway. An interactive login, any other
+command or substitution is refused without starting anything. Set GATEWAY to the installed bus-gateway path.
+"""
+import os, re, sys
+
+GATEWAY = "/usr/local/sbin/bus-gateway"
+
+a = sys.argv
+if len(a) == 3 and a[1] == "-c":
+    m = re.fullmatch(re.escape(GATEWAY) + r" ([a-z0-9-]{2,32})", a[2])
+    if m:
+        os.execv("/usr/bin/python3", ["python3", "-I", GATEWAY, m.group(1)])
+sys.stdout.write('{"ok": false, "error": "no shell on this account"}\n')
+sys.exit(1)

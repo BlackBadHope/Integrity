@@ -1,0 +1,12 @@
+{
+  "state_dir": "/var/lib/llm-bus/state",
+  "principals": "/etc/llm-bus/principals.json",
+  "journal_dir": "/var/lib/llm-bus/journal",
+  "socket": "/run/llm-bus/core.sock",
+  "socket_group": "<gateway-group>",
+  "gateway_user": "<gateway-user>",
+  "ttl_hours": 168,
+  "routes_catalog": "/var/lib/llm-bus-routes/catalog.json",
+  "routes_module": "/opt/integrity/integrity_action_log/resources/uroboros_routes.py",
+  "bus_dir": "/opt/integrity/integrity_llm_bus/resources"
+}

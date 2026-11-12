@@ -570,7 +570,7 @@ different interfaces and deliberately do not all match the Guardian version.
 | [`integrity-home`](components/integrity-home/README.md) | 0.2.0a1 | Home archive and Chronicle projections |
 | [`integrity-space`](components/integrity-space/README.md) | 0.2.0 | Read-only MCP Apps lab and workbench UI |
 | [`integrity-claude-code`](components/integrity-claude-code/README.md) | 0.1.0rc3 | Separately guarded Windows CLI executor |
-| [`integrity-llm-bus`](components/integrity-llm-bus/README.md) | 1.0.0 | Local queue, registry, relay and steering transports |
+| [`integrity-llm-bus`](components/integrity-llm-bus/README.md) | 1.1.0 | Local queue, registry, relay and steering transports; hub daemon for a shared bus |
 | [`integrity-bridges`](components/integrity-bridges/README.md) | 0.7.0 | Hub, delegation and native peer transports |
 | [`integrity-remote`](components/integrity-remote/README.md) | 0.1.0b1 | Cross-machine core access over an OpenSSH forced command |
 | [`integrity-cloud`](components/integrity-cloud/README.md) | 0.1.0b1 | Signed turn journals for cloud agents without local hooks |

@@ -1,0 +1,9 @@
+[Unit]
+Description=Seal the LLM bus journal hourly
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1h
+
+[Install]
+WantedBy=timers.target

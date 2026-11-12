@@ -1,0 +1,47 @@
+{
+  "principals": {
+    "vendor-a": {
+      "key_sha256": "<sha256 hex of this client's bus token; not needed for SSH-gateway vendors>",
+      "vendor": "claude",
+      "account": "example-subscription-a",
+      "addresses": ["claude"],
+      "ops": ["send", "poll", "get", "ack", "status", "list-rooms", "watch"],
+      "write": true,
+      "rate_per_min": 30
+    },
+    "auditor": {
+      "key_sha256": "<sha256 hex>",
+      "vendor": "bus",
+      "role": "observer",
+      "account": "example-observer",
+      "addresses": [],
+      "ops": ["agents-status", "list-rooms", "watch", "vendor-cards"],
+      "write": false,
+      "watch_any": true
+    },
+    "client-hub": {
+      "key_sha256": "<sha256 hex>",
+      "vendor": "bus",
+      "role": "hub",
+      "any_address": true,
+      "watch_any": true,
+      "account": "example-client-node",
+      "addresses": ["codex"],
+      "ops": ["send", "poll", "get", "ack", "status", "list-rooms", "watch", "changes", "registry"],
+      "write": true,
+      "rate_per_min": 120
+    },
+    "owner-console": {
+      "key_sha256": "<sha256 hex>",
+      "vendor": "human",
+      "role": "owner-console",
+      "account": "example-owner-console",
+      "addresses": ["owner"],
+      "ops": ["send", "status", "room-arbiter", "room-arbiter-set", "vendor-cards"],
+      "write": true
+    }
+  },
+  "accounts": {
+    "example-subscription-a": {"seats": 2, "rate_per_min": 60}
+  }
+}

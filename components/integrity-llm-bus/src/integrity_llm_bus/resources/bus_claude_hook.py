@@ -10,6 +10,10 @@ import uuid
 from contextlib import closing
 from pathlib import Path
 import agent_registry
+try:  # r3: an autoreg import failure must never break pointer delivery for registered sessions
+    import autoreg
+except Exception:
+    autoreg = None
 from datetime import datetime, timezone
 
 HERE = Path(__file__).resolve().parent
@@ -24,6 +28,16 @@ def collect(payload: dict, state_dir: Path, *, now: int | None = None) -> dict:
             or payload.get('sessionId', session) != session):
         return {'pointers': [], 'reason': 'missing-or-conflicting-session'}
     addresses = agent_registry.claude_mailboxes(session, state_dir)
+    if autoreg is None:
+        pass  # registered sessions still get pointers; autoregistration is skipped
+    elif not addresses:
+        # Auto-registration (bounded, fail-open). Topic carries no prompt text.
+        cwd = payload.get('cwd')
+        autoreg.ensure_bounded('claude', session, state_dir=state_dir, source='hook:UserPromptSubmit',
+                               topic=(Path(cwd).name + ' claude') if isinstance(cwd, str) else 'claude')
+        addresses = agent_registry.claude_mailboxes(session, state_dir)
+    else:
+        autoreg.ensure_bounded('claude', session, state_dir=state_dir, source='hook:UserPromptSubmit')  # heartbeat
     if not addresses:
         return {'pointers': [], 'reason': 'unregistered-session'}
     with agent_registry._writer(state_dir):
@@ -81,12 +95,12 @@ def main():
         temp.replace(path)
 
 
-if __name__ == "__main__":
-    _integrity_require_config()
-
 if __name__ == '__main__':
     try:
         main()
     except Exception:
         pass  # Never block the owner's prompt; durable queue remains.
     sys.exit(0)
+
+if __name__ == "__main__":
+    _integrity_require_config()

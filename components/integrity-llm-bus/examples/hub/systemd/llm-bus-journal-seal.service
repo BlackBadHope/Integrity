@@ -1,0 +1,8 @@
+# Example: marks the current journal file append-only and closed months immutable (needs root and chattr).
+# @SBIN_DIR@ is where examples/hub/bin/llm-bus-journal-seal was installed.
+[Unit]
+Description=Seal the LLM bus journal
+
+[Service]
+Type=oneshot
+ExecStart=@SBIN_DIR@/llm-bus-journal-seal

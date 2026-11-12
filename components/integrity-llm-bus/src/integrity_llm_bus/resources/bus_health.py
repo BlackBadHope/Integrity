@@ -9,7 +9,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 def procs():
     ps = ("Get-CimInstance Win32_Process -Filter \"Name='python.exe' OR Name='pythonw.exe'\" | "
           "? { $_.CommandLine -like '*llm-bus-20261009*' } | % { \"$($_.ProcessId)`t$($_.CommandLine)\" }")
-    out = subprocess.run(["powershell", "-NoProfile", "-Command", ps], capture_output=True, text=True).stdout
+    out = subprocess.run(["powershell", "-NoProfile", "-Command", ps], capture_output=True, text=True, encoding="oem", errors="replace").stdout or ""
     res = {"bridge": None, "relay": None}
     for line in out.splitlines():
         pid, _, cmd = line.partition("\t")
@@ -38,7 +38,10 @@ report = {
     "minutes_since_last_relay_delivery": {k: age(v) for k, v in last_relay.items()},
 }
 try:
-    report["relay_threads"] = json.loads((Path(__file__).resolve().parent / "state" / "relay-threads.json").read_text(encoding="utf-8"))
+    report["relay_threads"] = json.loads((Path(_integrity_value('state_directory')) / "relay-threads.json").read_text(encoding="utf-8"))
 except Exception as exc:
     report["relay_threads"] = f"unreadable: {type(exc).__name__}"
 print(json.dumps(report, ensure_ascii=False, indent=1))
+
+if __name__ == "__main__":
+    _integrity_require_config()

@@ -1,18 +1,69 @@
 {
+  "agent_registry": {
+    "path": "resources/agent_registry.py"
+  },
+  "agentbus_validate": {
+    "path": "resources/agentbus_validate.py"
+  },
+  "archived_detect": {
+    "path": "resources/archived_detect.py"
+  },
+  "attach_cli": {
+    "path": "resources/attach_cli.py"
+  },
+  "autoreg": {
+    "path": "resources/autoreg.py"
+  },
+  "autoreg_hook": {
+    "path": "resources/autoreg_hook.py"
+  },
   "bus": {
     "path": "resources/bus.py"
   },
   "bus_claude_hook": {
     "path": "resources/bus_claude_hook.py"
   },
+  "bus_health": {
+    "path": "resources/bus_health.py"
+  },
   "bus_integrity_adapter": {
     "path": "resources/bus_integrity_adapter.py"
+  },
+  "bus_remote": {
+    "path": "resources/bus_remote.py"
+  },
+  "bus_replica_sync": {
+    "path": "resources/bus_replica_sync.py"
+  },
+  "chatgpt_bus": {
+    "path": "resources/chatgpt_bus.py"
+  },
+  "codex_steer": {
+    "path": "resources/codex_steer.py"
   },
   "codex_steer_hook": {
     "path": "resources/codex_steer_hook.py"
   },
+  "core_core_daemon": {
+    "path": "resources/core/bus_core_daemon.py"
+  },
+  "core_journal": {
+    "path": "resources/core/bus_journal.py"
+  },
+  "core_migrate": {
+    "path": "resources/core/migrate.py"
+  },
+  "core_quota_report": {
+    "path": "resources/core/bus_quota_report.py"
+  },
+  "core_routes_export": {
+    "path": "resources/core/bus_routes_export.py"
+  },
   "file_bridge": {
     "path": "resources/file_bridge.py"
+  },
+  "fix_registry_topics": {
+    "path": "resources/fix_registry_topics.py"
   },
   "launcher": {
     "path": "resources/launcher.py"
@@ -20,7 +71,28 @@
   "local_cli": {
     "path": "resources/local_cli.py"
   },
+  "maintenance": {
+    "path": "resources/maintenance.py"
+  },
+  "mesh_cli": {
+    "path": "resources/mesh_cli.py"
+  },
+  "mesh_validate": {
+    "path": "resources/mesh_validate.py"
+  },
+  "owner_layer": {
+    "path": "resources/owner_layer.py"
+  },
+  "owner_verify": {
+    "path": "resources/owner_verify.py"
+  },
+  "reachability": {
+    "path": "resources/reachability.py"
+  },
   "relay": {
     "path": "resources/relay.py"
+  },
+  "watch_bus": {
+    "path": "resources/watch_bus.py"
   }
 }

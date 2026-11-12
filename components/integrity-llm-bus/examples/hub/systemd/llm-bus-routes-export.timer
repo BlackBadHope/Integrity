@@ -1,0 +1,9 @@
+[Unit]
+Description=LLM bus route catalog export
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=15min
+
+[Install]
+WantedBy=timers.target
