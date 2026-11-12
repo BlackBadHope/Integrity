@@ -1,0 +1,43 @@
+{
+  "lock_guard": {
+    "hosts_file": "C:/integrity-example/guards/hosts.json",
+    "state_dir": "C:/integrity-example/guards/lock-cache",
+    "server_lock_kind": false,
+    "standard_ssh_configs": ["(?:^|[/\\\\])ops[/\\\\]ssh-config[\\w.-]*\\.conf$"]
+  },
+  "rule_guard": {
+    "mode": "warn",
+    "device_registry": "C:/integrity-example/guards/device-registry.json",
+    "device_tool_patterns": ["switch-runner(?:\\.py)?"],
+    "device_address_patterns": ["198\\.51\\.100\\.\\d{1,3}"],
+    "exempt_command_patterns": ["\\bwave-runner\\.py\\b[^\\n;|&]*\\b(apply|rollback|save)\\b"],
+    "protected_secret_paths": ["vault[\\\\/][^\\s\"'|;&]*\\.md\\b", "vault[\\\\/][^\\s\"'|;&]*\\.bak\\b"],
+    "secret_tool": "vault_get.py",
+    "sql_write_targets": ["\\bbilling-db\\b"],
+    "sql_write_marker": "db-write-go:",
+    "browser_js_warning": "JavaScript in the browser is not allowed on admin.example.invalid (navigate + screenshot only); check values on the server"
+  },
+  "rules_drift": {
+    "memory_dir": "~/agent-memory/rules",
+    "export": "C:/integrity-example/guards/rules-export.json"
+  },
+  "uroboros": {
+    "compiled_routes": "C:/integrity-example/guards/compiled-routes",
+    "hosts": {"192.0.2.10": "node-a", "192.0.2.20": "node-b"},
+    "aliases": ["ops-node"],
+    "host_patterns": {"switch": "\\b198\\.51\\.100\\.\\d{1,3}\\b"},
+    "host_route_markers": {"switch": ["switch-show"]},
+    "ignore_words": ["operator"],
+    "run_prefix": "integrity-guards uroboros run",
+    "prod_patterns": ["\\bnode-[a-z]\\b"],
+    "timezone_offset_hours": 0,
+    "pin_guard": {
+      "host": "node-a",
+      "pins_file": "C:/integrity-example/guards/pins-node-a.json",
+      "prefixes": ["/opt/example-app/", "/etc/example-app/"],
+      "label": "example-app release files",
+      "pre_check_route": "example-pin-check",
+      "post_check_route": "example-sync-health"
+    }
+  }
+}

@@ -22,6 +22,8 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 import agent_registry
+import owner_verify
+import room_acl
 
 
 AGENTS = ("codex", "claude", "grok", "codexfc")  # built-ins; more via agent_registry (self-registration)
@@ -31,7 +33,7 @@ MAX_BODY_BYTES = 32 * 1024
 MAX_REQUEST_BYTES = 48 * 1024
 MAX_INBOX_LIMIT = 50
 DEFAULT_TTL_HOURS = 168
-DELIVERY_MODES = ("steer", "queue")  # Codex recipients only; None means default queue
+DELIVERY_MODES = ("steer", "queue")  # Codex: both; Grok webhook: continuation steer, queue rejected.
 MESSAGE_KEYS = {"id", "from", "to", "body", "reply_to"}
 
 
@@ -100,6 +102,8 @@ def queue_view(store: "MessageStore", recipient: str, limit: int = 50, after_seq
     journal, steer = {}, {}
     try:
         for key, batch in json.loads((state_dir / "relay-journal.json").read_text(encoding="utf-8"))["batches"].items():
+            if batch.get("state") == "superseded":
+                continue  # retired not-sent attempt; the live entry for its ids is elsewhere
             for mid in batch.get("ids", []):
                 journal[mid] = (key, batch)
     except (OSError, ValueError, KeyError, TypeError):
@@ -182,6 +186,7 @@ class MessageStore:
             # Additive, nullable migration (2026-10-13): per-message Codex delivery mode.
             if "delivery" not in {r[1] for r in db.execute("PRAGMA table_info(messages)")}:
                 db.execute("ALTER TABLE messages ADD COLUMN delivery TEXT")
+            db.execute(owner_verify.NONCE_SCHEMA)  # Additive (owner/1)
 
     def _connect(self) -> sqlite3.Connection:
         db = sqlite3.connect(self.path, timeout=5)
@@ -220,6 +225,9 @@ class MessageStore:
                 if not same:
                     raise FileExistsError("message id is already used for different content")
                 return _row(existing), True
+            room_acl.check(message)  # human/room roles: no GO, room-only routing
+            if message["from"] == agent_registry.OWNER:  # owner/1: fail closed without a valid Hello signature
+                owner_verify.gate(db, message, owner_verify.load_keys(self.path.parent / "owner_keys.json"), now)
             if message["reply_to"] is not None:
                 parent = db.execute("SELECT * FROM messages WHERE id = ?", (message["reply_to"],)).fetchone()
                 if not parent or parent["recipient"] != message["from"] or parent["sender"] != message["to"]:
@@ -481,7 +489,7 @@ def main() -> int:
     args = parser.parse_args()
     if not 1 <= args.port <= 65535:
         parser.error("--port must be between 1 and 65535")
-    state_dir = Path(__file__).resolve().parent / "state"
+    state_dir = Path(_integrity_value('state_directory'))
     try:
         server = create_server(state_dir, {agent: os.environ.get(name, "") for agent, name in TOKEN_ENV.items()}, args.port, args.ttl_hours)
     except (ValueError, OSError, sqlite3.Error) as exc:
@@ -494,6 +502,7 @@ def main() -> int:
     finally:
         server.server_close()
     return 0
+
 
 
 if __name__ == "__main__":

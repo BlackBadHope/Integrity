@@ -1,0 +1,8 @@
+#!/bin/sh
+# SPDX-License-Identifier: BUSL-1.1
+# Example: the current journal file becomes append-only, closed ones immutable. Runs as root.
+# JOURNAL_DIR must equal journal_dir from core.json.
+JOURNAL_DIR="${JOURNAL_DIR:?set JOURNAL_DIR to journal_dir from core.json}"
+cur="$JOURNAL_DIR/journal-$(date -u +%Y%m).jsonl"
+for f in "$JOURNAL_DIR"/journal-*.jsonl; do [ -e "$f" ] || continue
+  if [ "$f" = "$cur" ]; then chattr +a "$f"; else chattr -a "$f" 2>/dev/null; chattr +i "$f"; fi; done

@@ -17,11 +17,15 @@ import sqlite3
 import time
 import uuid
 
+import registry_db
+
 BUILTIN = ("codex", "claude", "grok", "codexfc")
 BUILTIN_CODEX = ("codex", "codexfc")
+RESERVED = ("bus-relay",)  # system senders: never registrable, never addressable
+OWNER = "owner"  # owner/1: addressable by everyone, never registrable; as sender only with a valid owner signature
 ADDRESS_RE = re.compile(r"[a-z0-9-]{2,32}\Z")
 THREAD_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\Z")
-HARNESSES = ("codex", "claude", "gemini", "antigravity")
+HARNESSES = ("codex", "claude", "gemini", "antigravity", "chatgpt")
 DEFAULT_STATE = Path(_integrity_value('state_directory'))
 
 
@@ -29,14 +33,23 @@ def _path(state_dir: Path | None) -> Path:
     return (state_dir or DEFAULT_STATE) / "agents-registry.json"
 
 
+def _is_registry(path: Path) -> bool:
+    return path.name == "agents-registry.json"
+
+
 def _document(path: Path) -> dict:
-    if not path.exists():
+    # r2: once migrated, bus.sqlite3 is the source of truth; the JSON file is a generated export.
+    if _is_registry(path) and registry_db.migrated(path.parent):
+        data = registry_db.load_doc(path.parent)
+    elif not path.exists():
         return {"version": 1, "agents": {}}
-    data = json.loads(path.read_text(encoding="utf-8"))
+    else:
+        data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict) or data.get("version") not in (1, 2) or not isinstance(data.get("agents"), dict):
         raise ValueError("invalid registry; refusing overwrite")
     for name, entry in data["agents"].items():
         if (not isinstance(name, str) or not ADDRESS_RE.fullmatch(name) or name in BUILTIN
+                or __import__('room_acl').reserved(name)
                 or not isinstance(entry, dict) or not THREAD_RE.fullmatch(str(entry.get("thread", "")))
                 or entry.get("harness", "codex") not in HARNESSES):
             raise ValueError("invalid registry entry; refusing overwrite")
@@ -94,7 +107,8 @@ def builtin_threads(state_dir: Path | None) -> dict:
 
 
 def all_agents(state_dir: Path | None = None) -> tuple[str, ...]:
-    return BUILTIN + tuple(sorted(load(state_dir)))
+    import room_acl
+    return BUILTIN + (OWNER,) + room_acl.addresses(state_dir) + tuple(sorted(load(state_dir)))
 
 
 def codex_threads(state_dir: Path | None = None) -> dict:
@@ -106,6 +120,13 @@ def codex_threads(state_dir: Path | None = None) -> dict:
 
 def register(address: str, thread: str, harness: str = "codex", topic: str = "",
              state_dir: Path | None = None) -> tuple[dict, bool]:
+    import bus_remote  # hub mode
+    sd = Path(state_dir or DEFAULT_STATE)
+    if bus_remote.active(sd):
+        res = bus_remote.registry(sd, "register", address=address, thread=thread, harness=harness, topic=topic)
+        if harness == "claude" and not res["existing"]:
+            _initialize_claude_cursor(sd, thread, address)
+        return res["entry"], res["existing"]
     with _writer(state_dir):
         return _register(address, thread, harness, topic, state_dir)
 
@@ -118,13 +139,15 @@ def _register(address: str, thread: str, harness: str, topic: str,
     if not isinstance(thread, str) or not THREAD_RE.fullmatch(thread):
         raise ValueError("thread/session must be a lowercase UUID")
     if harness not in HARNESSES:
-        raise ValueError("harness must be codex, claude, gemini or antigravity")
+        raise ValueError("harness must be codex, claude, gemini, antigravity or chatgpt")
     topic = (topic or "").strip()
     if len(topic) > 200:
         raise ValueError("topic is too long (max 200)")
     taken = {v: k for k, v in builtin_threads(state_dir).items()}
     if address in BUILTIN:
         raise ValueError(f"address {address} is built-in and cannot be re-registered")
+    if address in RESERVED or address == OWNER or __import__('room_acl').reserved(address):
+        raise ValueError(f"address {address} is reserved for the bus itself")
     if thread in taken:
         raise ValueError(f"thread is already the built-in address {taken[thread]}")
     path = _path(state_dir)
@@ -158,6 +181,9 @@ def _save(path: Path, agents: dict) -> None:
 
 
 def _save_document(path: Path, data: dict) -> None:
+    if _is_registry(path) and registry_db.migrated(path.parent):
+        registry_db.upsert_doc(path.parent, data)  # upsert only; autoreg columns untouched
+        return
     tmp = path.with_name(path.name + '.' + uuid.uuid4().hex + '.tmp')
     with tmp.open('x', encoding='utf-8') as stream:
         json.dump(data, stream, ensure_ascii=False, indent=1)
@@ -168,6 +194,13 @@ def _save_document(path: Path, data: dict) -> None:
 def set_claude_alias(address: str, expected: str | None = None,
                      state_dir: Path | None = None) -> dict:
     """CAS only: route the legacy claude mailbox to one registered lead session."""
+    import bus_remote  # hub mode
+    sd = Path(state_dir or DEFAULT_STATE)
+    if bus_remote.active(sd):
+        res = bus_remote.registry(sd, "alias", address=address, expected=expected)
+        if not res.get("unchanged"):
+            _initialize_claude_cursor(sd, res["session_id"], "claude")
+        return res
     with _writer(state_dir) as path:
         data = _document(path)
         entry = data['agents'].get(address)
@@ -242,3 +275,6 @@ def listing(state_dir: Path | None = None) -> list[dict]:
     except (OSError, ValueError):
         pass
     return rows
+
+if __name__ == "__main__":
+    _integrity_require_config()

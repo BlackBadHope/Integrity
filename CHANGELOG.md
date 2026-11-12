@@ -27,6 +27,38 @@ They are now in `src/integrity_guardian`:
 - **Owner-rule selector** in the admission capsule (`owner_rules.py`), opt-in
   and off by default.
 
+### Agent bus 1.1.0
+
+`integrity-llm-bus` moves from 1.0.0 to 1.1.0 and now matches the bus scripts
+of an installed deployment:
+
+- **Hub**: a unix-socket daemon with a fixed JSON protocol, per-key rights,
+  rate and seat limits, an owner gate, a hash-chained request journal, a
+  replica change log, a migration tool and a route-catalog export
+  (`resources/core/`), with example systemd units and an SSH gateway.
+- **Hub client**: writes go to the hub over SSH and the local database becomes
+  a guarded read-only replica. Enabled only by `<state>/CORE.json`.
+- **Owner layer**: a message sent as `owner` must carry a valid owner
+  signature; no key replaces it.
+- **Agent mesh**, **human room** rules, a SQLite registry, automatic
+  registration of harness sessions, ChatGPT registration, maintenance flag,
+  attachments and reachability.
+- Registration refuses the reserved `human-*` and `room-*` prefixes.
+
+The component README lists what was run and what was not; the hub's socket
+handler, the systemd sandbox and multi-host operation are not verified.
+
+### New components
+
+- **`integrity-killswitch` 0.1.0a1**: a cooperative per-vendor and global
+  switch for agent access on one workstation, with an audit log, a loopback
+  dashboard and an optional sync to a bus host. It does not terminate
+  processes; see its README for what it does not do.
+- **`integrity-guards` 0.1.0a1**: hook-side guards for coding agents - a
+  remote-change lock guard, a rule guard with a device command registry, a
+  rules drift check, compiled routes and a repeat hook. Host tables, device
+  registries and routes are yours to write; the examples are invented.
+
 ### Linux core deployment scripts
 
 `deploy/linux-core/` holds the scripts that serve the memory core over an

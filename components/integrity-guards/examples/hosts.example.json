@@ -1,0 +1,11 @@
+{
+  "hosts": {
+    "node-a": ["node-a.example.invalid", "192.0.2.10"],
+    "node-b": ["node-b.example.invalid", "192.0.2.20"],
+    "hypervisor-a": ["hv-a", "198.51.100.5"]
+  },
+  "vmids": {
+    "_comment": "Proxmox guest id -> canonical host, for pct exec / qm guest exec on the hypervisor",
+    "101": "node-b"
+  }
+}

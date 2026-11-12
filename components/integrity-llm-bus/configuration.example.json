@@ -10,6 +10,13 @@
     "path_d4f3db5417f4": null,
     "path_dd2435d503a6": null,
     "endpoint_173b0c3b2ac1": null,
-    "native_peer_port_49481": null
+    "native_peer_port_49481": null,
+    "native_peer_host_id": null,
+    "chatgpt_thread_id": null,
+    "core_config": null,
+    "routes_seed": null,
+    "routes_module": null,
+    "routes_catalog": null,
+    "routes_source_label": null
   }
 }

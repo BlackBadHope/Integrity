@@ -11,6 +11,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+import maintenance
+
 HERE = Path(__file__).resolve().parent
 
 
@@ -21,10 +23,13 @@ def start(targets: str = "grok", max_calls: int = 20, environment: dict | None =
         raise RuntimeError("Existing relay PID manifest: inspect relay.ps1 status before another start")
     if not state.is_dir():
         raise RuntimeError("Initialize the local bus first")
+    held = maintenance.blocking(state)
+    if held is not None:
+        raise RuntimeError(f"{held['kind']} active (owner {held.get('owner')!r}); relay not started")
     child_environment = os.environ.copy() if environment is None else environment.copy()
-    if "grok" in targets and not (child_environment.get("GROKBOT_WEBHOOK_KEY") or child_environment.get("GROK_WEBHOOK_TOKEN")):
+    if "grok" in targets.split(",") and not (child_environment.get("GROKBOT_WEBHOOK_KEY") or child_environment.get("GROK_WEBHOOK_TOKEN")):
         raise RuntimeError("Grok process environment credential unavailable")
-    if "codex" in targets and not thread_id:
+    if "codex" in targets.split(",") and not thread_id:
         raise RuntimeError("The codex target requires an explicit thread id")
     command = [sys.executable, "-B", str(HERE / "relay.py"), "--watch",
                "--targets", targets, "--max-calls", str(max_calls)]
@@ -34,8 +39,9 @@ def start(targets: str = "grok", max_calls: int = 20, environment: dict | None =
         process = subprocess.Popen(command,
                                    cwd=_integrity_value('path_dd2435d503a6'), env=child_environment, stdin=subprocess.DEVNULL,
                                    stdout=out, stderr=err, close_fds=True,
-                                   creationflags=subprocess.CREATE_NO_WINDOW)
+                                   creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     return process.pid
+
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "integrity-llm-bus"
-version = "1.0.0"
+version = "1.1.0"
 description = "Explicitly configured integrity-llm-bus sources for Integrity"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -22,4 +22,4 @@ integrity-llm-bus = "integrity_llm_bus.launcher:main"
 packages = ["src/integrity_llm_bus"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src", "README.md", "LICENSE", "NOTICE", "configuration.example.json", "CONFIGURATION-VALUES.json", "SOURCE-MAP.json", "legacy-tests", "tests", "pyproject.toml"]
+include = ["src", "README.md", "LICENSE", "NOTICE", "configuration.example.json", "CONFIGURATION-VALUES.json", "SOURCE-MAP.json", "examples", "legacy-tests", "tests", "pyproject.toml"]

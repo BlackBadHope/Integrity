@@ -1,0 +1,8 @@
+{
+  "human": "human-operator",
+  "vendors": ["room-operator-claude", "room-operator-codex"],
+  "arbiters": {
+    "claude": {"address": "room-operator-claude", "ro": "read-only sandbox", "ro_verified": false},
+    "codex": {"address": "room-operator-codex", "ro": "read-only sandbox", "ro_verified": false}
+  }
+}

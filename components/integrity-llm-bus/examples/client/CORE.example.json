@@ -1,0 +1,11 @@
+{
+  "dest": "<gateway-user>@hub.example.invalid",
+  "keys": {
+    "hub": "<absolute path of this client's hub SSH key>",
+    "owner": "<absolute path of the owner-console SSH key, only where owner messages are sent>"
+  },
+  "ssh": "",
+  "ssh_args": ["-p", "22", "-o", "UserKnownHostsFile=<absolute path of a pinned known_hosts>"],
+  "connect_timeout": 8,
+  "timeout": 60
+}

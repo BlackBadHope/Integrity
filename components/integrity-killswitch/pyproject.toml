@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "integrity-killswitch"
+version = "0.1.0a1"
+description = "Emergency stop and cooperative access gate for local LLM agent processes, with a status command, a loopback web panel and an optional bus principal sync"
+requires-python = ">=3.11"
+license = "BUSL-1.1"
+license-files = ["LICENSE", "NOTICE"]
+readme = "README.md"
+dependencies = []
+
+[project.scripts]
+integrity-killswitch = "integrity_killswitch.killswitch:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

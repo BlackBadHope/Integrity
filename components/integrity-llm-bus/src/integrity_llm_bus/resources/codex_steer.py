@@ -6,8 +6,9 @@ so a busy thread would leave bus notices waiting. Instead a pointer for an
 active thread is staged here and handed to the model by ``codex_steer_hook.py``
 as PostToolUse additional context: it arrives after the next tool call, like a
 steer, and never passes through UserPromptSubmit, so Integrity LTS does not
-record it as owner scope. Idle threads still use the queue, which dispatches
-immediately. Every entry moves once: staged -> steered | queued.
+record it as owner scope. Idle threads use the authenticated existing Desktop owner through relay.
+Every entry moves once: staged -> steered | owner_sending -> owner_accepted | unknown.
+Explicit queue requests retain the separate queue route.
 """
 from __future__ import annotations
 
@@ -116,6 +117,35 @@ def take_for_queue(thread_id: str, key: str, root: Path = STEER_DIR) -> str | No
     return None
 
 
+def take_for_owner(thread_id: str, key: str, root: Path = STEER_DIR, *, expected_ids: list[str]) -> str | None:
+    """Reserve before send; unknown outcomes are never replayed."""
+    path, lock = _paths(thread_id, root)
+    with _locked(lock):
+        data = _load(path)
+        for entry in data["entries"]:
+            if entry["key"] == key and entry["state"] == "staged":
+                if entry.get("ids") != expected_ids:
+                    return None
+                entry.update(state="owner_sending", done_at=int(time.time()))
+                _save(path, data)
+                return entry["text"]
+    return None
+
+
+def finish_owner(thread_id: str, key: str, state: str, root: Path = STEER_DIR) -> None:
+    if state not in ("owner_accepted", "unknown"):
+        raise ValueError("invalid_owner_terminal")
+    path, lock = _paths(thread_id, root)
+    with _locked(lock):
+        data = _load(path)
+        for entry in data["entries"]:
+            if entry["key"] == key and entry["state"] == "owner_sending":
+                entry.update(state=state, done_at=int(time.time()))
+                _save(path, data)
+                return
+        raise ValueError("owner_claim_missing")
+
+
 def entries(thread_id: str, root: Path = STEER_DIR) -> list[dict]:
     path, _ = _paths(thread_id, root)
     return _load(path)["entries"] if path.exists() else []
@@ -141,3 +171,6 @@ def turn_active(transcript: Path) -> bool | None:
         if b'"type":"task_complete"' in raw or b'"type":"turn_aborted"' in raw:
             return False
     return None
+
+if __name__ == "__main__":
+    _integrity_require_config()

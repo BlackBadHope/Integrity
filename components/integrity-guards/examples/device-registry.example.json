@@ -1,0 +1,37 @@
+{
+  "detect_order": ["vendor-a-access", "vendor-b-core", "vendor-c-untested", "vendor-d-readonly"],
+  "profiles": {
+    "vendor-a-access": {
+      "paging_off": "disable clipaging",
+      "identify": "show switch",
+      "port_state_read": "show ports {port}",
+      "port_disable": ["config ports {port} medium_type copper state disable"],
+      "port_enable": ["config ports {port} medium_type copper state enable"],
+      "max_port": 24
+    },
+    "vendor-b-core": {
+      "identify": "show switch",
+      "port_state_read": "show ports {port}",
+      "port_disable": ["config ports {port} state disable"],
+      "port_enable": ["config ports {port} state enable"],
+      "max_port": 20
+    },
+    "vendor-c-untested": {
+      "identify": "show version",
+      "port_disable": ["interface ethernet {port}"],
+      "note": "write syntax not yet live-tested on this model"
+    },
+    "vendor-d-readonly": {
+      "identify": "show version",
+      "port_state_read": "show interfaces status",
+      "read_only": true
+    }
+  },
+  "wave": {
+    "vendor-b-core": {
+      "tc_set": {"cmd": "config traffic control {port} broadcast enable threshold {bc}", "status": "verified"},
+      "tc_read": {"cmd": "show traffic control {ports}", "status": "verified"},
+      "stp_set": {"cmd": "config stp ports {port} edge true", "status": "unverified"}
+    }
+  }
+}
