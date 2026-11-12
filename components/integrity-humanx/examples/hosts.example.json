@@ -1,0 +1,9 @@
+{
+  "_comment": "Value of hosts_file: the hosts room_tool 'host' may read. jump=true goes through the 'jump' SSH alias. Invented values.",
+  "jump": "jump-alias",
+  "hosts": {
+    "node-a": {"dest": "reader@192.0.2.21", "jump": true},
+    "node-b": {"dest": "reader@192.0.2.22", "jump": true},
+    "core": {"dest": "core-alias", "jump": false}
+  }
+}

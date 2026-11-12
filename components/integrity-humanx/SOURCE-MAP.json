@@ -1,0 +1,176 @@
+[
+  {
+    "path": "src/integrity_humanx/resources/client/antigravity_quota.py",
+    "source": "humanx/client/antigravity_quota.py",
+    "source_sha256": "33337f6c05df78191147e848cd05de168d561c62b7e5b577c8d5a3d442b07bc8",
+    "sha256": "33337f6c05df78191147e848cd05de168d561c62b7e5b577c8d5a3d442b07bc8"
+  },
+  {
+    "path": "src/integrity_humanx/resources/client/humanx_attach.py",
+    "source": "humanx/client/humanx_attach.py",
+    "source_sha256": "c079ae2773115ef6bb634e6bf7b18b7b102549230a3f1396b212bfe8fe954c98",
+    "sha256": "6b110e17667df94bf02e9f5262893c88f7d3c9a8258329e167045b9d20b85620"
+  },
+  {
+    "path": "src/integrity_humanx/resources/client/humanx_codexquota.py",
+    "source": "humanx/client/humanx_codexquota.py",
+    "source_sha256": "5ff7eab2fcc20e1771479d448a5e654ed7974856dd7dd2a2e74eda1391e45911",
+    "sha256": "5ff7eab2fcc20e1771479d448a5e654ed7974856dd7dd2a2e74eda1391e45911"
+  },
+  {
+    "path": "src/integrity_humanx/resources/client/humanx_context.py",
+    "source": "humanx/client/humanx_context.py",
+    "source_sha256": "213154442d531572f125f2fa7e990768e7c48265d4486fb4cc5720533be79b2b",
+    "sha256": "fea0d9312e02004737e39ad136f733ad00cf00556296aa95519e3fd05f6f2fff"
+  },
+  {
+    "path": "src/integrity_humanx/resources/client/humanx_delivery.py",
+    "source": "humanx/client/humanx_delivery.py",
+    "source_sha256": "f9b88b39b178a93940aad7f2b3e8085aee50f15e3db1b7615264a850ab510f5c",
+    "sha256": "3464f267c44dd6f9da32d8f7301bfa9396cc913f80e234b5171c458c1475d573"
+  },
+  {
+    "path": "src/integrity_humanx/resources/client/humanx_kparts.py",
+    "source": "humanx/client/humanx_kparts.py",
+    "source_sha256": "5d346c1b5c12ebba2d5316d9d9a2a8055ca879f6dcfb4d2077796bd4aa91e001",
+    "sha256": "7acbb80a7c00ba2725c7de6670f398f567e7785009bdf1285b3b636c5eff5271"
+  },
+  {
+    "path": "src/integrity_humanx/resources/client/humanx_maxreason.py",
+    "source": "humanx/client/humanx_maxreason.py",
+    "source_sha256": "86549b65cbef3a3663da121ad5f13dec6b9b58944e1ff2d04706ea8cd94b5b86",
+    "sha256": "c9762296abf6814ec981eacc5e189903dd03bb0bc7c13aa75a3d50e009bd8f58"
+  },
+  {
+    "path": "src/integrity_humanx/resources/client/humanx_topics.py",
+    "source": "humanx/client/humanx_topics.py",
+    "source_sha256": "bdccbb01ef643d0c06d49cef0acc305f8e7140de70d6167ccdcc4f85e033f3a2",
+    "sha256": "3b19267bf2eaac41fffda3eacfb2bf7fae04516cbd5854162377a2e929ed5e44"
+  },
+  {
+    "path": "src/integrity_humanx/resources/client/humanx_wake_launch.py",
+    "source": "humanx/client/humanx_wake_launch.py",
+    "source_sha256": "ac15c2440e329d6abf43c56b729c2101b7e478bfda1f664f4cc5d80849cb992c",
+    "sha256": "9403abfc7bf8403f97d942845f500685bd024d41c269b98a997591368739cba8"
+  },
+  {
+    "path": "src/integrity_humanx/resources/client/humanx_wakers_supervisor.py",
+    "source": "humanx/client/humanx_wakers_supervisor.py",
+    "source_sha256": "c0a59031861a097129e2b39343f246c1f04588f2702f337b033c599c163a7315",
+    "sha256": "aed72dfcd3ba84e834610e8b19505ffd194acfab5cabb64f3ff6ddb8412f97df"
+  },
+  {
+    "path": "src/integrity_humanx/resources/client/room_claude_wake.py",
+    "source": "humanx/client/room_claude_wake.py",
+    "source_sha256": "96cd94e2e718a45d5bc6eafa6fad090ddb72698cbefcc79d8ba64247bf8d9f2b",
+    "sha256": "46f21eef129abcf693165d148f56d4502f443c58af93ac28aebd245197da4abe"
+  },
+  {
+    "path": "src/integrity_humanx/resources/client/room_codex_waker.py",
+    "source": "humanx/client/room_codex_waker.py",
+    "source_sha256": "fb3eda9ce443a85d122975f807bd0d5f7cd9c788e872962fb31f37b4ed62822c",
+    "sha256": "905cf01f2dcc5b20602386246f2e821129d5173f2d00c826a3e9deb5db443682"
+  },
+  {
+    "path": "src/integrity_humanx/resources/client/room_gemini_waker.py",
+    "source": "humanx/client/room_gemini_waker.py",
+    "source_sha256": "5e6f685bde1a6313d4e273930b917c4591ca4eb4296efca08fe81361ff248de3",
+    "sha256": "c382fd1c885a878339805f56113ceb12ef37b8f0ef5e5b0d130c0f5cbda194e4"
+  },
+  {
+    "path": "src/integrity_humanx/resources/client/room_grok_waker.py",
+    "source": "humanx/client/room_grok_waker.py",
+    "source_sha256": "a19a3e537c5117844edc6d02d486026b2fac8cb3350b237a18babf0140fa2c08",
+    "sha256": "4fee8592b4ade9cdf07c328f9a79c124fe395a1522622e0fce65e4a4842b9d66"
+  },
+  {
+    "path": "src/integrity_humanx/resources/client/vendor_room_guard.py",
+    "source": "humanx/client/vendor_room_guard.py",
+    "source_sha256": "bef10e0e5e4a89121bdc765411ec0c4eb1f942f5f1164d6c7da95406e22354f3",
+    "sha256": "0f13677d95626e000275304f23111f8d6874295158ea0b45377efa5e4b6e5ae4"
+  },
+  {
+    "path": "src/integrity_humanx/resources/room/room_tool.py",
+    "source": "humanx/room/room_tool.py",
+    "source_sha256": "5c2b2e647870012921a2f146580fd7636e49e0f972ae0094356edd3bf63009cc",
+    "sha256": "2100c569395e25259c6ab0d764158851b9592706c5c5fbb1374b5a311fad0520"
+  },
+  {
+    "path": "src/integrity_humanx/resources/room/room_ro_guard.py",
+    "source": "humanx/room/room_ro_guard.py",
+    "source_sha256": "d52b972ea4c6460c95a55c016433aafca0985d2349da971064304cf0420d15cf",
+    "sha256": "3b6557e1748240b739a62c06b548b05bcfd6734c7fcc886c8bbcf5e4942bbc31"
+  },
+  {
+    "path": "src/integrity_humanx/resources/room/humanx_room_ro_mcp.py",
+    "source": "humanx/room/humanx_room_ro_mcp.py",
+    "source_sha256": "2d43b0a6872ce64214c3a8e55a35168a1d390d6dbe2f5333bbb58ef12feb1c2e",
+    "sha256": "4356df8ea9320ec4dcd6cee1d593ca3083fabce7c68520c1faca41d5d68e3986"
+  },
+  {
+    "path": "src/integrity_humanx/resources/room/codex-room-mcp.json",
+    "source": "humanx/room/codex-room-mcp.json",
+    "source_sha256": "0418d1dd932641e97be4b25696fbdcd0d2bf1b34de5820e11c9d9c8057f037d9",
+    "sha256": "a43e1cd31c7a15c239a011c430a9122b1226ea8e1da6361f1109f6308978cdeb"
+  },
+  {
+    "path": "src/integrity_humanx/resources/web/humanx_web.py",
+    "source": "humanx/server/web/humanx_web.py",
+    "source_sha256": "afe3db0d818ec7a6de7043670e3a112d8ccbad59aa6ee693aba6f83acecfe948",
+    "sha256": "8d96758f5fc8672eb64e7fa9eff60cf59d9ae4614d26dcb92fef98e6d2da16f1"
+  },
+  {
+    "path": "src/integrity_humanx/resources/web/rings_screen.py",
+    "source": "humanx/server/web/rings_screen.py",
+    "source_sha256": "9dce1c9bc6cade269fea7aa33db74c63cb20cc7e9d492f9668ddb23b336f6f16",
+    "sha256": "cd03865e445f2898884c2b4cc0fd45f4937b94ee5d24ce07eff586e84c6892f7"
+  },
+  {
+    "path": "src/integrity_humanx/resources/web/storm_screen.py",
+    "source": "humanx/server/web/storm_screen.py",
+    "source_sha256": "45cd4e5a334ec69b5eaf3205cb143e074a3d22cf070f160f1454e831941848f2",
+    "sha256": "f7f1f9b483525a182ee0834e3b9f122b646dc1a24f8a9c1dc955387a852bfe04"
+  },
+  {
+    "path": "src/integrity_humanx/resources/ro/humanx_ro_gw.py",
+    "source": "humanx/server/ro/humanx_ro_gw.py",
+    "source_sha256": "5c53b8b56865673e6cd5e05050839670d660e66078e28eb0e54c3534e0dba462",
+    "sha256": "5e485e9b99b0eb0fba4b54ce57d0e9527616ba0f78f1adc3d569be9738a71baa"
+  },
+  {
+    "path": "src/integrity_humanx/resources/ro/dlinkcli.py",
+    "source": "humanx/server/ro/dlinkcli.py",
+    "source_sha256": "b04f803a6ddd6373577000092455e5afcbfd4d505b662157fa6f6ba95aa78996",
+    "sha256": "aafee8f822fd8a828cb6bd852a4e867b1ab33bc104ecf5a5bd95ce7884ebb81d"
+  },
+  {
+    "path": "src/integrity_humanx/resources/ro/humanx_ro_snapshot.py",
+    "source": "humanx/server/ro/humanx_ro_snapshot.py",
+    "source_sha256": "2fe9d3186d7302f8ce5a3021d07fd750e3f99983e78c9d4ab87a4d663809ac9a",
+    "sha256": "6d091c4860c1357cecb61e1c92389a3abcbace6f6517cd4cc9e9a7806614d443"
+  },
+  {
+    "path": "examples/room-instructions/CLAUDE.example.md",
+    "source": "humanx/room-instructions/CLAUDE.md",
+    "source_sha256": "6b968f80913e19054518ecd25888c90dfc5667f271516534efdac0aa0c964357",
+    "sha256": "0bc3fe32111d41ad468b9080dac6de93b016a5218fba82e34bcdd558abe5bb55"
+  },
+  {
+    "path": "examples/room-instructions/AGENTS.example.md",
+    "source": "humanx/room-instructions/AGENTS.md",
+    "source_sha256": "d27e1475bc77e27ece05b584da544d5fa50cee38501d851d106669fbdd9e222d",
+    "sha256": "06ab16c5d18612ed9c3d05882779617d4909f99744fa650bc0777e7abd51144b"
+  },
+  {
+    "path": "examples/room-instructions/GEMINI.example.md",
+    "source": "humanx/room-instructions/GEMINI.md",
+    "source_sha256": "4e38d6019147e7fb9a6cb7bab81c8c33b6687ec3e1952c1d29c5e9f67430b866",
+    "sha256": "693793b704368ea38a1113d0f43d0f3a461c8501d16d85736508414592e3c391"
+  },
+  {
+    "path": "examples/room-instructions/GROK.example.md",
+    "source": "humanx/room-instructions/GROK.md",
+    "source_sha256": "a46eb15d5495eb1a25a6a5bfdd1d2c13275711c820755ac1731f7721ef5b40d1",
+    "sha256": "7a47d6189e37942c74955ffe3e86235d1d83d6b348270af09a509854f8a48db6"
+  }
+]

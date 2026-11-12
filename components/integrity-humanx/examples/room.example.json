@@ -1,0 +1,9 @@
+{
+  "_comment": "Placed as room.json beside room_tool.py in each <pilot>/room-<vendor>/. Invented values.",
+  "mode": "core",
+  "address": "room-operator-claude",
+  "ssh": "ssh",
+  "ssh_args": ["-o", "StrictHostKeyChecking=yes"],
+  "dest": "bus-room@192.0.2.10",
+  "key": "<path to the room SSH key>"
+}
