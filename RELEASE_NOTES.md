@@ -219,7 +219,7 @@ Existing search and fetch handlers are unchanged.
 
 ## Install
 
-Follow the [public beta quickstart](README.md#public-beta-quickstart) and
+Follow the [quick start](README.md#quick-start) and
 [team quickstart](docs/QUICKSTART_TEAM.md) from a clean virtualenv. Confirm
 `guardian version --all` and the read-only MCP walkthrough before creating
 seats.

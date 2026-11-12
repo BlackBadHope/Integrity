@@ -1,5 +1,7 @@
 # Clean bootstrap
 
+[Project README](README.md) · [Documentation](docs/README.md)
+
 This guide creates an isolated Integrity installation from the reviewed public
 source tree. You choose which included component packages to install and bind
 to your own machine.

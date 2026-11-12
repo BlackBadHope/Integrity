@@ -1,5 +1,7 @@
 # Migrating to Integrity Seats
 
+[Documentation](README.md) · [Project README](../README.md)
+
 An existing single-user or silo install keeps that isolation until you migrate
 on purpose. A new empty root defaults to `shared-core`.
 

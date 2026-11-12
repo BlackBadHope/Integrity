@@ -1,5 +1,7 @@
 # Expected test skips
 
+[Documentation](README.md) · [Project README](../README.md)
+
 A full run of the public suite skips some tests on every platform. This page
 lists the skips you should expect, so a first run can tell a normal result from
 a broken one.

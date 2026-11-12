@@ -1,10 +1,12 @@
 # Team quickstart (2–5 people)
 
+[Documentation](README.md) · [Project README](../README.md)
+
 Each person keeps their own model account. The shared core holds the Action
 Log, Seed, bus, and work claims. Seats are access seats, not shared logins.
 
 Install from a clean virtualenv using the
-[public beta quickstart](../README.md#public-beta-quickstart): `python -m pip install .`
+[install guide](INSTALL.md#install-from-source): `python -m pip install .`
 then `python -m pip install ./components/integrity-home`. `guardian version --all`
 checks the Guardian install. The commands below use `integrity-seats` from
 `integrity-home`.

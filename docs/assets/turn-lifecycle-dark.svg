@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 372" width="1280" height="372" role="img" aria-labelledby="t d" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<title id="t">The life of one agent turn</title>
+<desc id="d">A turn is admitted, does its work, appends events and ends with a signed close receipt or a signed coverage gap.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6E7681"/></marker><linearGradient id="hero" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0D1117"/><stop offset="1" stop-color="#0E2A22"/></linearGradient></defs>
+<rect x="1" y="1" width="1278" height="370" rx="16" fill="#0D1117" stroke="#30363D"/>
+<text x="44" y="46" font-size="12" font-weight="700" text-anchor="start" fill="#9198A1" letter-spacing="1.2">THE LIFE OF ONE TURN</text>
+<rect x="44" y="70" width="206" height="132" rx="10" fill="#161B22" stroke="#30363D"/>
+<text x="62" y="97" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">1  Prompt</text>
+<text x="62" y="117" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">The client hook starts</text>
+<text x="62" y="135" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">the turn and asks the</text>
+<text x="62" y="153" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">model to admit it.</text>
+<path d="M250 136L278 136" stroke="#6E7681" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<rect x="280" y="70" width="206" height="132" rx="10" fill="#0F2238" stroke="#79B8FF"/>
+<rect x="280" y="80" width="4" height="112" rx="2" fill="#79B8FF"/>
+<text x="298" y="97" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">2  Admission</text>
+<text x="298" y="117" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">A bounded capsule from</text>
+<text x="298" y="135" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Seed and Mind, at most</text>
+<text x="298" y="153" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">8 KB, with known routes</text>
+<text x="298" y="171" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">as hints.</text>
+<path d="M486 136L514 136" stroke="#6E7681" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<rect x="516" y="70" width="206" height="132" rx="10" fill="#161B22" stroke="#30363D"/>
+<text x="534" y="97" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">3  Work</text>
+<text x="534" y="117" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Tools run. With the gate</text>
+<text x="534" y="135" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">on, nothing else runs</text>
+<text x="534" y="153" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">before admission.</text>
+<path d="M722 136L750 136" stroke="#6E7681" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<rect x="752" y="70" width="206" height="132" rx="10" fill="#0E2A22" stroke="#3FCF9F"/>
+<rect x="752" y="80" width="4" height="112" rx="2" fill="#3FCF9F"/>
+<text x="770" y="97" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">4  Append</text>
+<text x="770" y="117" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Events with provenance.</text>
+<text x="770" y="135" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">A report stays a report</text>
+<text x="770" y="153" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">until it is verified.</text>
+<path d="M958 136L986 136" stroke="#6E7681" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<rect x="988" y="70" width="248" height="60" rx="10" fill="#0E2A22" stroke="#3FCF9F"/>
+<rect x="988" y="80" width="4" height="40" rx="2" fill="#3FCF9F"/>
+<text x="1006" y="97" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">5  Close</text>
+<text x="1006" y="117" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Signed close receipt.</text>
+<rect x="988" y="142" width="248" height="60" rx="10" fill="#2B2210" stroke="#E3B341"/>
+<rect x="988" y="152" width="4" height="40" rx="2" fill="#E3B341"/>
+<text x="1006" y="169" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">5  No close</text>
+<text x="1006" y="189" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Signed coverage gap.</text>
+<path d="M44 248H1236" stroke="#30363D"/>
+<rect x="44" y="270" width="102" height="30" rx="15" fill="#2B2210" stroke="#E3B341"/>
+<text x="95.0" y="290" font-size="12" font-weight="600" text-anchor="middle" fill="#E3B341">Enforcement</text>
+<text x="160" y="290" font-size="13" font-weight="400" text-anchor="start" fill="#E6EDF3">Where the client can block, a turn that changed state without a close is stopped once, then the gap is recorded. A turn cannot loop.</text>
+<rect x="44" y="314" width="95" height="30" rx="15" fill="#1C222B" stroke="#9198A1"/>
+<text x="91.5" y="334" font-size="12" font-weight="600" text-anchor="middle" fill="#9198A1">Blind spot</text>
+<text x="160" y="334" font-size="13" font-weight="400" text-anchor="start" fill="#E6EDF3">A turn that skips admission leaves no record. integrity-doctor shows how many did.</text>
+</svg>

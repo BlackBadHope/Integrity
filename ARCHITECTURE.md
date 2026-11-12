@@ -1,5 +1,14 @@
 # Architecture
 
+[Project README](README.md) · [Documentation](docs/README.md) · [What is verified](docs/STATUS.md)
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/overview-dark.svg">
+    <img src="docs/assets/overview-light.svg" alt="Agents reach the core through client hooks and an MCP facade; coordination, reach and operator tools sit around the core" width="100%">
+  </picture>
+</p>
+
 The Chronicle [product brief](docs/architecture/chronicle/PRODUCT-BRIEF.md) and
 [indexing pipeline](docs/architecture/chronicle/SORTING-AND-INDEXING-PIPELINE.md)
 are retained as **DESIGN_ONLY** documents. They do not certify that every
@@ -10,7 +19,8 @@ authorized, what changed, and whether an independent observer can verify the
 outcome. This page maps the package onto those questions and states which
 guarantees the public test suite actually exercises.
 
-The source version is Guardian **7.0.0**, published as the release tag `v7.0.0`; the previous pre-release is `v7.0.0-beta.4`. Seats, the shared bus, and host enrollment are described in [docs/QUICKSTART_TEAM.md](docs/QUICKSTART_TEAM.md). The memory MCP facade API is
+The source version is Guardian **7.0.0**; the stable release tag is `v7.0.1`. Seats, the shared bus, and host
+enrollment are described in [docs/QUICKSTART_TEAM.md](docs/QUICKSTART_TEAM.md). The memory MCP facade API is
 **2.11.0**; optional distributions have independent versions recorded in
 [COMPONENTS.json](COMPONENTS.json). These numbers identify separate contracts.
 
@@ -63,6 +73,10 @@ registered sources -> Space lab or Hub workbench -> bounded read-only UI
 
 LLM bus / bridges -> transport receipts -> separate execution and observation
 SDK -> configured executor -> independent outcome evidence
+
+client machine -> OpenSSH forced command -> core on another machine
+cloud agent sandbox -> signed turn journal -> offline verification -> reported evidence
+agent hooks -> guards and kill switch -> allow, warn or deny a tool call on that machine
 ```
 
 - **Action Log** is the separately versioned HTTP service. **Memory Plane**
@@ -82,6 +96,25 @@ SDK -> configured executor -> independent outcome evidence
 - **LLM Bus** and **Bridges** carry messages and bound peer requests. Queue
   acceptance, steering, receipt and ACK are transport evidence; they do not
   prove that a model acted or that a requested outcome occurred.
+- **LLM Bus hub** (bus 1.1.0) is a unix-socket daemon for a shared bus: per-key
+  rights, rate and seat limits, an owner gate and a hash-chained request
+  journal. With a hub configured, writes go to it over SSH and the local
+  database becomes a guarded read-only replica. A message sent as the owner
+  must carry a valid owner signature; no key replaces it. The socket handler,
+  the systemd sandbox and multi-host operation are not verified.
+- **Remote** serves the core to other machines over an OpenSSH forced command
+  with a pinned host key. The server side is in `deploy/linux-core`, with
+  placeholders that the owner fills before release digests are computed.
+- **Cloud** gives an agent without local hooks a signed turn journal. Nothing
+  is sent over the network; the owner verifies the bundle offline and imports
+  it as reported evidence.
+- **Guards** run inside the agent's hooks: a remote-change lock guard, a rule
+  guard with a device command registry, a rules drift check and compiled
+  routes. They decide about a tool call on that machine. They are not
+  Guardian authority, and passing a guard grants nothing.
+- **Kill switch** is a cooperative per-vendor and global switch for agent
+  access on one workstation, with an audit log. It does not terminate
+  processes.
 - **Claude Code** is a separate Windows executor through the Adapter SDK.
   Installation supplies neither a provider executable nor subscription access
   nor an activation proof. An executor is not the read-only memory client.

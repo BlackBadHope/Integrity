@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 300" width="1280" height="300" role="img" aria-labelledby="t d" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<title id="t">Integrity Guardian</title>
+<desc id="d">An accountability layer and shared memory for teams of AI agents.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8C959F"/></marker><linearGradient id="hero" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6F8FA"/><stop offset="1" stop-color="#E2F5EE"/></linearGradient></defs>
+<rect x="1" y="1" width="1278" height="298" rx="16" fill="url(#hero)" stroke="#D0D7DE"/>
+<path d="M158.29 82.51A68 68 0 0 1 217.49 141.71" fill="none" stroke="#0969DA" stroke-width="15" stroke-linecap="round"/>
+<path d="M217.49 158.29A68 68 0 0 1 158.29 217.49" fill="none" stroke="#9A6700" stroke-width="15" stroke-linecap="round"/>
+<path d="M141.71 217.49A68 68 0 0 1 82.51 158.29" fill="none" stroke="#59636E" stroke-width="15" stroke-linecap="round"/>
+<path d="M82.51 141.71A68 68 0 0 1 141.71 82.51" fill="none" stroke="#0B7A5E" stroke-width="15" stroke-linecap="round"/>
+<circle cx="150" cy="150" r="20.4" fill="#0B7A5E"/>
+<text x="262" y="138" font-size="66" font-weight="700" fill="#1F2328" letter-spacing="-1.5">Integrity<tspan font-weight="300" fill="#59636E"> Guardian</tspan></text>
+<text x="266" y="182" font-size="22" font-weight="400" text-anchor="start" fill="#1F2328">An accountability layer and shared memory for teams of AI agents.</text>
+<rect x="266" y="212" width="283" height="30" rx="15" fill="#E2F5EE" stroke="#0B7A5E"/>
+<text x="407.5" y="232" font-size="13" font-weight="600" text-anchor="middle" fill="#0B7A5E">Append-only record, signed receipts</text>
+<rect x="561" y="212" width="239" height="30" rx="15" fill="#FFF4D6" stroke="#9A6700"/>
+<text x="680.5" y="232" font-size="13" font-weight="600" text-anchor="middle" fill="#9A6700">Memory never grants authority</text>
+<rect x="812" y="212" width="268" height="30" rx="15" fill="#E7F1FD" stroke="#0969DA"/>
+<text x="946.0" y="232" font-size="13" font-weight="600" text-anchor="middle" fill="#0969DA">Claude Code · Codex · Antigravity</text>
+<path d="M1092 70V230" stroke="#8C959F" stroke-width="1.6" stroke-dasharray="2 5"/>
+<rect x="1068" y="58" width="160" height="34" rx="8" fill="#E7F1FD" stroke="#0969DA"/>
+<circle cx="1092" cy="75" r="5" fill="#0969DA"/>
+<text x="1110" y="80" font-size="13" font-weight="600" text-anchor="start" fill="#1F2328" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">observed</text>
+<rect x="1068" y="108" width="160" height="34" rx="8" fill="#FFF4D6" stroke="#9A6700"/>
+<circle cx="1092" cy="125" r="5" fill="#9A6700"/>
+<text x="1110" y="130" font-size="13" font-weight="600" text-anchor="start" fill="#1F2328" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">authorized</text>
+<rect x="1068" y="158" width="160" height="34" rx="8" fill="#EEF1F4" stroke="#59636E"/>
+<circle cx="1092" cy="175" r="5" fill="#59636E"/>
+<text x="1110" y="180" font-size="13" font-weight="600" text-anchor="start" fill="#1F2328" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">changed</text>
+<rect x="1068" y="208" width="160" height="34" rx="8" fill="#E2F5EE" stroke="#0B7A5E"/>
+<circle cx="1092" cy="225" r="5" fill="#0B7A5E"/>
+<text x="1110" y="230" font-size="13" font-weight="600" text-anchor="start" fill="#1F2328" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">verified</text>
+</svg>

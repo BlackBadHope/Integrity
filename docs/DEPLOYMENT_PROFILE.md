@@ -1,5 +1,7 @@
 # Deployment identity profile
 
+[Documentation](README.md) · [Project README](../README.md)
+
 A Memory server reads and writes ledgers that are bound to identity values:
 tenant identifiers, the Action Log protocol labels it accepts, and the schema
 constants signed into security and route receipts. The public distribution

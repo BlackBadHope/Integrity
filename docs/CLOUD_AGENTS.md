@@ -1,5 +1,7 @@
 # Cloud agents: Integrity memory without local hooks
 
+[Documentation](README.md) · [Project README](../README.md)
+
 Local Codex and Claude sessions take part in Integrity memory through hooks:
 a context admission opens each turn and a signed receipt closes it. A cloud
 agent such as a Codex cloud task runs in a container where these hooks cannot

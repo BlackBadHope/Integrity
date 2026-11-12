@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 846" width="1280" height="846" role="img" aria-labelledby="t d" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<title id="t">How Integrity fits together</title>
+<desc id="d">Agents reach the core through client hooks and an MCP facade. The core keeps the signed record; coordination, reach and operator tools sit around it.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6E7681"/></marker><linearGradient id="hero" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0D1117"/><stop offset="1" stop-color="#0E2A22"/></linearGradient></defs>
+<rect x="1" y="1" width="1278" height="844" rx="16" fill="#0D1117" stroke="#30363D"/>
+<rect x="24" y="24" width="1232" height="132" rx="12" fill="#10151C" stroke="#30363D" stroke-dasharray="2 5"/>
+<text x="44" y="50" font-size="12" font-weight="700" text-anchor="start" fill="#9198A1" letter-spacing="1.2">AGENTS</text>
+<text x="1236" y="50" font-size="12" font-weight="400" text-anchor="end" fill="#9198A1">any mix of vendors, one shared record</text>
+<rect x="44" y="64" width="289" height="74" rx="10" fill="#161B22" stroke="#30363D"/>
+<text x="62" y="91" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Claude Code</text>
+<text x="62" y="111" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">lifecycle hooks</text>
+<rect x="345" y="64" width="289" height="74" rx="10" fill="#161B22" stroke="#30363D"/>
+<text x="363" y="91" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Codex</text>
+<text x="363" y="111" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">lifecycle hooks</text>
+<rect x="646" y="64" width="289" height="74" rx="10" fill="#161B22" stroke="#30363D"/>
+<text x="664" y="91" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Antigravity</text>
+<text x="664" y="111" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">lifecycle hooks</text>
+<rect x="947" y="64" width="289" height="74" rx="10" fill="#161B22" stroke="#30363D"/>
+<text x="965" y="91" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Cloud agents</text>
+<text x="965" y="111" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">no hooks: a signed journal</text>
+<rect x="24" y="190" width="1232" height="170" rx="12" fill="#10151C" stroke="#30363D" stroke-dasharray="2 5"/>
+<text x="44" y="216" font-size="12" font-weight="700" text-anchor="start" fill="#9198A1" letter-spacing="1.2">ON THE AGENT&#x27;S MACHINE</text>
+<text x="1236" y="216" font-size="12" font-weight="400" text-anchor="end" fill="#9198A1">checked on every turn</text>
+<rect x="44" y="230" width="440" height="112" rx="10" fill="#0F2238" stroke="#79B8FF"/>
+<rect x="44" y="240" width="4" height="92" rx="2" fill="#79B8FF"/>
+<text x="62" y="257" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Hooks and memory broker</text>
+<text x="62" y="277" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">integrity-client-memory</text>
+<text x="62" y="297" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Admission-first gate, turn-close guard,</text>
+<text x="62" y="315" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">status notices, integrity-doctor</text>
+<rect x="496" y="230" width="364" height="112" rx="10" fill="#2B2210" stroke="#E3B341"/>
+<rect x="496" y="240" width="4" height="92" rx="2" fill="#E3B341"/>
+<text x="514" y="257" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Guards</text>
+<text x="514" y="277" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">integrity-guards</text>
+<text x="514" y="297" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Remote-change locks, forgotten-rule checks,</text>
+<text x="514" y="315" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">compiled routes</text>
+<rect x="872" y="230" width="364" height="112" rx="10" fill="#2B2210" stroke="#E3B341"/>
+<rect x="872" y="240" width="4" height="92" rx="2" fill="#E3B341"/>
+<text x="890" y="257" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Kill switch</text>
+<text x="890" y="277" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">integrity-killswitch</text>
+<text x="890" y="297" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Stops agent access per vendor</text>
+<text x="890" y="315" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">or for everyone at once</text>
+<rect x="24" y="394" width="1232" height="216" rx="12" fill="#10151C" stroke="#30363D" stroke-dasharray="2 5"/>
+<text x="44" y="420" font-size="12" font-weight="700" text-anchor="start" fill="#9198A1" letter-spacing="1.2">THE CORE YOU OPERATE</text>
+<text x="1236" y="420" font-size="12" font-weight="400" text-anchor="end" fill="#9198A1">local, or on another machine over SSH</text>
+<rect x="44" y="434" width="250" height="156" rx="10" fill="#161B22" stroke="#30363D"/>
+<text x="62" y="461" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">MCP facade</text>
+<text x="62" y="481" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">guardian-memory-synapse-mcp</text>
+<text x="62" y="501" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Tools for agents: admission,</text>
+<text x="62" y="519" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">bounded recall, append,</text>
+<text x="62" y="537" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">signed turn close.</text>
+<text x="62" y="555" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">A read is never a permission.</text>
+<rect x="334" y="434" width="286" height="156" rx="10" fill="#0E2A22" stroke="#3FCF9F"/>
+<rect x="334" y="444" width="4" height="136" rx="2" fill="#3FCF9F"/>
+<text x="352" y="461" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Seed and Action Log</text>
+<text x="352" y="481" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">integrity-action-log</text>
+<text x="352" y="501" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Append-only events with</text>
+<text x="352" y="519" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">provenance. Reported, verified</text>
+<text x="352" y="537" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">and refuted stay apart;</text>
+<text x="352" y="555" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">corrections are appended.</text>
+<rect x="660" y="434" width="268" height="156" rx="10" fill="#0E2A22" stroke="#3FCF9F"/>
+<rect x="660" y="444" width="4" height="136" rx="2" fill="#3FCF9F"/>
+<text x="678" y="461" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Mind</text>
+<text x="678" y="481" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">mind_*  uroboros_*</text>
+<text x="678" y="501" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Read-only projection of Seed:</text>
+<text x="678" y="519" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">tasks, goals, facts,</text>
+<text x="678" y="537" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">contradictions, stale claims,</text>
+<text x="678" y="555" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">known routes (Uroboros).</text>
+<rect x="968" y="434" width="268" height="156" rx="10" fill="#2B2210" stroke="#E3B341"/>
+<rect x="968" y="444" width="4" height="136" rx="2" fill="#E3B341"/>
+<text x="986" y="461" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Guardian authority</text>
+<text x="986" y="481" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">intent_custody  authority_scope</text>
+<text x="986" y="501" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Signed, one-use grants.</text>
+<text x="986" y="519" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">The owner&#x27;s approval is</text>
+<text x="986" y="537" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">a separate, explicit step.</text>
+<text x="986" y="555" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Independent observers verify.</text>
+<path d="M294 512L332 512" stroke="#6E7681" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<path d="M620 512L658 512" stroke="#6E7681" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<rect x="24" y="634" width="1232" height="188" rx="12" fill="#10151C" stroke="#30363D" stroke-dasharray="2 5"/>
+<text x="44" y="660" font-size="12" font-weight="700" text-anchor="start" fill="#9198A1" letter-spacing="1.2">AROUND THE CORE</text>
+<text x="1236" y="660" font-size="12" font-weight="400" text-anchor="end" fill="#9198A1">optional components</text>
+<rect x="44" y="674" width="388" height="128" rx="10" fill="#161B22" stroke="#30363D"/>
+<text x="62" y="701" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Coordination</text>
+<text x="62" y="721" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">integrity-llm-bus  integrity-bridges</text>
+<text x="62" y="741" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Local queue, registry, relay and a hub for</text>
+<text x="62" y="759" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">a shared bus; delegation and peer</text>
+<text x="62" y="777" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">transports; fenced work claims.</text>
+<rect x="446" y="674" width="388" height="128" rx="10" fill="#161B22" stroke="#30363D"/>
+<text x="464" y="701" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Reach</text>
+<text x="464" y="721" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">integrity-remote  integrity-cloud</text>
+<text x="464" y="741" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Core access from other machines over an</text>
+<text x="464" y="759" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">OpenSSH forced command; offline import</text>
+<text x="464" y="777" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">of cloud-agent journals.</text>
+<rect x="848" y="674" width="388" height="128" rx="10" fill="#161B22" stroke="#30363D"/>
+<text x="866" y="701" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Operator tools</text>
+<text x="866" y="721" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">integrity-home  integrity-space</text>
+<text x="866" y="741" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Seats console and private archive;</text>
+<text x="866" y="759" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">read-only lab and workbench UI;</text>
+<text x="866" y="777" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">resource and usage projections.</text>
+<path d="M640 156L640 188" stroke="#6E7681" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<text x="650.0" y="168.0" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1">a hook runs at every prompt, tool call and stop</text>
+<path d="M264 342L264 432" stroke="#6E7681" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<text x="274.0" y="365.0" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1">MCP tools: admission, append, close</text>
+<path d="M640 672L640 592" stroke="#6E7681" stroke-width="1.6" fill="none" marker-end="url(#arrow)" stroke-dasharray="5 5"/>
+<text x="650.0" y="616.0" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1">receipts and imported journals enter the record as evidence, never as authority</text>
+</svg>
