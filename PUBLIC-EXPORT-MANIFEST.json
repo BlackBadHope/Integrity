@@ -1,5 +1,5 @@
 {
-  "file_count": 1084,
+  "file_count": 1099,
   "files": [
     {
       "bytes": 3435,
@@ -4489,6 +4489,104 @@
       "sha256": "119cd311d32d3d96cb5d5039c8d38c667fdbc0c4cad152ea46842174db527753"
     },
     {
+      "bytes": 12575,
+      "mode": "0o644",
+      "path": "deploy/linux-core/README.md",
+      "sanitization_edits": 0,
+      "sha256": "a7f4366abc51ede8a96339165a4a8ebceb1bdd6361084b2605006bede17f547b"
+    },
+    {
+      "bytes": 2979,
+      "mode": "0o755",
+      "path": "deploy/linux-core/host/integrity-custody-full-verify",
+      "sanitization_edits": 0,
+      "sha256": "ee76aa65bd5cd5dec63cf6f96a891dde7f9c3204c45e0e21b456d501f30ba8e2"
+    },
+    {
+      "bytes": 498,
+      "mode": "0o755",
+      "path": "deploy/linux-core/host/integrity-memory-mcp",
+      "sanitization_edits": 0,
+      "sha256": "eb1a95ead11414e080058e2a7f45073c33b3523f40b98360bc586e3b61e8a549"
+    },
+    {
+      "bytes": 4622,
+      "mode": "0o755",
+      "path": "deploy/linux-core/host/integrity-seed-wal-holder",
+      "sanitization_edits": 0,
+      "sha256": "cedc45ea424aa63ab0d531b562a9239e7fe1a2fb10b3639515df072b40a43ed0"
+    },
+    {
+      "bytes": 3245,
+      "mode": "0o755",
+      "path": "deploy/linux-core/release/action-log-passive-witness",
+      "sanitization_edits": 0,
+      "sha256": "00980bb19fa2e19f80e3bea8b647c34ad7c2a679b83c9c57d5bea021f3861abb"
+    },
+    {
+      "bytes": 71,
+      "mode": "0o644",
+      "path": "deploy/linux-core/release/action-log-witness.sudoers.in",
+      "sanitization_edits": 0,
+      "sha256": "99a36465125c44ac4ccd5a06866aac7d4f1d96b15b8777e8e0ccc08e46d8cf00"
+    },
+    {
+      "bytes": 5651,
+      "mode": "0o755",
+      "path": "deploy/linux-core/release/provision-state",
+      "sanitization_edits": 0,
+      "sha256": "97d24056a3521b83cdef62d87dc280244e072471560c68208342c69c3cbf9e15"
+    },
+    {
+      "bytes": 1665,
+      "mode": "0o755",
+      "path": "deploy/linux-core/release/refresh-seed-read-acl",
+      "sanitization_edits": 0,
+      "sha256": "ec8006c85bee2bef7bcabb9bc246efacc814720537dccbfa6d6a6bc244dfa0e1"
+    },
+    {
+      "bytes": 2981,
+      "mode": "0o755",
+      "path": "deploy/linux-core/release/run-mcp",
+      "sanitization_edits": 0,
+      "sha256": "d920b62c80b507df4d95e99da46d54fb438ba27956f038909fb5760a93281c59"
+    },
+    {
+      "bytes": 16878,
+      "mode": "0o755",
+      "path": "deploy/linux-core/release/verify-release",
+      "sanitization_edits": 0,
+      "sha256": "d8fa0657620e8425983db866d06d070602ef8eeae307fd72393f61536587cf7b"
+    },
+    {
+      "bytes": 491,
+      "mode": "0o755",
+      "path": "deploy/linux-core/transport/run-mcp",
+      "sanitization_edits": 0,
+      "sha256": "ce695b720a66caa945b5557e330aa905e4348c930155c034411de8608d818944"
+    },
+    {
+      "bytes": 221,
+      "mode": "0o755",
+      "path": "deploy/linux-core/transport/run-mcp-child",
+      "sanitization_edits": 0,
+      "sha256": "d5c726d4c71b64aacf6b21bd8a7228f976f6311e7e42a4b00e01b87ab417952d"
+    },
+    {
+      "bytes": 13857,
+      "mode": "0o644",
+      "path": "deploy/linux-core/transport/transport-supervisor.py",
+      "sanitization_edits": 0,
+      "sha256": "ebf5d4ec56690c4f071d11e90c96e6d07e80dbc5eee4b999e2576cef98e877cb"
+    },
+    {
+      "bytes": 1109,
+      "mode": "0o755",
+      "path": "deploy/linux-core/transport/verify-release",
+      "sanitization_edits": 0,
+      "sha256": "b547352be1a83f4e1f408437d6a5e35851d5c55f22f0fd49db0545ba487a05cd"
+    },
+    {
       "bytes": 10100,
       "mode": "0o644",
       "path": "docs/CROSS_MACHINE_QUICKSTART.md",
@@ -7296,6 +7394,13 @@
       "sha256": "7ee6dfc25bda6de9c533b6cbd883a92e403577a1c037e82f57db58c62f818d0c"
     },
     {
+      "bytes": 12854,
+      "mode": "0o644",
+      "path": "tests/test_linux_core_transport.py",
+      "sanitization_edits": 0,
+      "sha256": "0d8a052f0ea948831e873a4a4bfc04f193a6cc307589f09fe2181dcf6d6b9f66"
+    },
+    {
       "bytes": 9585,
       "mode": "0o644",
       "path": "tests/test_linux_native_lifecycle.py",
@@ -7894,7 +7999,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:9e44e0e8501331c37c6590758e4bac8bc6eb05e6110761eea5d1db3237dc3faf",
+  "projection_digest": "sha256:6490c6555a56dedc7920484b0a37c347f10f42eb0afe969e4c153f2064629794",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

@@ -1,0 +1,119 @@
+#!/bin/sh
+set -eu
+
+# Personal-native provisioning has no operator-supplied trust roots.  The
+# installed Guardian artifact creates the instance genesis and operational
+# keys under the service principal.  Existing architecture custody is adopted
+# only after its complete signed chain and external checkpoint verify.
+
+STATE_ROOT=/var/lib/integrity-client
+NATIVE_STATE_ROOT=$STATE_ROOT/native-state
+ARCHITECTURE_ROOT=$STATE_ROOT/architecture
+EVIDENCE_ROOT=$STATE_ROOT/evidence
+LEGACY_KEY_ROOT=$STATE_ROOT/keys
+SOURCE_KEY=$LEGACY_KEY_ROOT/architecture-source.ed25519
+CHECKPOINT_KEY=$LEGACY_KEY_ROOT/architecture-checkpoint.ed25519
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+RELEASE_DIGEST=${SCRIPT_DIR##*/}
+WITNESS=$SCRIPT_DIR/action-log-passive-witness
+SUDOERS=/etc/sudoers.d/integrity-client-action-log-witness-$RELEASE_DIGEST
+PROVISION_ROOT=$STATE_ROOT/provision
+READER_ENV=/etc/integrity-client-memory-lts.env
+
+fail() {
+  echo "client Memory & Synapse state provisioning denied: $*" >&2
+  exit 1
+}
+
+[ "$#" -eq 0 ] || fail "personal-native provisioning accepts no key or bundle arguments"
+[ "$(id -u)" -eq 0 ] || fail "root is required"
+case "$RELEASE_DIGEST" in
+  *[!a-f0-9]*|'') fail "provisioner is not inside an immutable release" ;;
+esac
+[ "${#RELEASE_DIGEST}" -eq 64 ] || fail "provisioner is not inside an immutable release"
+[ -x "$SCRIPT_DIR/verify-release" ] && [ ! -L "$SCRIPT_DIR/verify-release" ] || \
+  fail "release verifier is unavailable"
+"$SCRIPT_DIR/verify-release" || fail "installed release runtime verification failed"
+[ -x "$WITNESS" ] && [ ! -L "$WITNESS" ] || fail "release witness is unavailable"
+getent passwd integrity-client >/dev/null || fail "integrity-client principal is absent"
+[ -d "$STATE_ROOT" ] && [ ! -L "$STATE_ROOT" ] || fail "existing client state root is invalid"
+[ "$(stat -c '%u' "$STATE_ROOT")" -eq 0 ] || fail "existing client state root owner is unsafe"
+STATE_ROOT_MODE=$(stat -c '%a' "$STATE_ROOT")
+case "$STATE_ROOT_MODE" in
+  *[!0-7]*|'') fail "existing client state root mode is invalid" ;;
+esac
+[ $((0$STATE_ROOT_MODE & 022)) -eq 0 ] || fail "existing client state root is writable by a non-root principal"
+sudo -n -u integrity-client -- test ! -w "$STATE_ROOT" || \
+  fail "existing client state root is writable by the service principal"
+[ -f "$READER_ENV" ] && [ ! -L "$READER_ENV" ] || fail "reader env is unavailable"
+[ "$(stat -c '%U:%G:%a' "$READER_ENV")" = "root:integrity-client:640" ] || \
+  fail "reader env custody is unsafe"
+[ "$(sed -n 's/^\([A-Z_][A-Z0-9_]*\)=.*/\1/p' "$READER_ENV")" = "CODEX_LOG_TOKEN" ] || \
+  fail "reader env key set is invalid"
+awk -F= '$1 == "CODEX_LOG_TOKEN" && length(substr($0, index($0, "=") + 1)) > 0 { found = 1 } END { exit found ? 0 : 1 }' \
+  "$READER_ENV" || fail "reader token is unavailable"
+
+for directory in "$NATIVE_STATE_ROOT" "$ARCHITECTURE_ROOT" "$EVIDENCE_ROOT" "$PROVISION_ROOT"; do
+  if [ -e "$directory" ] || [ -L "$directory" ]; then
+    [ -d "$directory" ] && [ ! -L "$directory" ] || \
+      fail "existing client state child is invalid: $directory"
+  fi
+done
+
+install -d -o integrity-client -g integrity-client -m 0700 \
+  "$NATIVE_STATE_ROOT" "$ARCHITECTURE_ROOT" "$EVIDENCE_ROOT"
+install -d -o root -g integrity-client -m 0750 "$PROVISION_ROOT"
+
+set --
+if [ -f "$ARCHITECTURE_ROOT/guardian-architecture.sqlite3" ]; then
+  if [ -e "$SOURCE_KEY" ] || [ -e "$CHECKPOINT_KEY" ]; then
+    [ -f "$SOURCE_KEY" ] && [ ! -L "$SOURCE_KEY" ] || \
+      fail "legacy architecture source key is unavailable"
+    [ -f "$CHECKPOINT_KEY" ] && [ ! -L "$CHECKPOINT_KEY" ] || \
+      fail "legacy architecture checkpoint key is unavailable"
+    set -- \
+      --legacy-source-key "$SOURCE_KEY" \
+      --legacy-checkpoint-key "$CHECKPOINT_KEY"
+  fi
+fi
+
+sudo -n -u integrity-client -- \
+  "$SCRIPT_DIR/venv/bin/guardian" native-trust-bootstrap \
+  --state-root "$NATIVE_STATE_ROOT" \
+  --instance-id instance:client-personal \
+  --device-id device:client-codex \
+  --architecture-root "$ARCHITECTURE_ROOT" \
+  "$@" >"$PROVISION_ROOT/native-trust-$RELEASE_DIGEST.json" || \
+  fail "personal-native trust bootstrap or exact-chain migration failed"
+
+[ -f "$NATIVE_STATE_ROOT/native-trust/v1/genesis.json" ] || \
+  fail "native trust genesis is absent after bootstrap"
+[ -f "$ARCHITECTURE_ROOT/guardian-architecture.sqlite3" ] || \
+  fail "native architecture database is absent after bootstrap"
+
+"$SCRIPT_DIR/refresh-seed-read-acl"
+
+temporary=$(mktemp "$PROVISION_ROOT/.witness-sudoers.XXXXXX")
+trap 'rm -f "$temporary"' EXIT HUP INT TERM
+sed "s|@ACTION_LOG_WITNESS@|$WITNESS|" \
+  "$SCRIPT_DIR/action-log-witness.sudoers.in" >"$temporary"
+visudo -cf "$temporary" >/dev/null || fail "release witness sudoers admission failed"
+if [ -e "$SUDOERS" ]; then
+  [ "$(sha256sum "$SUDOERS" | awk '{print $1}')" = \
+    "$(sha256sum "$temporary" | awk '{print $1}')" ] || \
+    fail "existing release witness sudoers differs; overwrite is forbidden"
+  rm -f "$temporary"
+else
+  install -o root -g root -m 0440 "$temporary" "$SUDOERS"
+  rm -f "$temporary"
+fi
+trap - EXIT HUP INT TERM
+
+sudo -n -u integrity-client -- \
+  sudo -n -u codex-action-log -- "$WITNESS" \
+  <<'EOF' >/dev/null || fail "restricted Action Log witness admission failed"
+{"event_uid":"client:provision-health-only","request_sha256":"0000000000000000000000000000000000000000000000000000000000000000"}
+EOF
+
+printf 'result=ready release=%s trust_profile=personal-native native_genesis=true database_enrollment=true history_rewritten=false seed_read=true reader_auth=true evidence_root=private-curated restricted_action_witness=true production_authority=false\n' \
+  "$RELEASE_DIGEST"

@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+# This immutable upstream entrypoint still performs the complete verify-release
+# and preserves its original release directory, environment and Guardian args.
+exec /bin/sh '@FACADE_RELEASE_DIR@/run-mcp'

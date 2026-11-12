@@ -1,0 +1,102 @@
+#!/usr/bin/python3
+"""Content-free one-shot witness for one canonical Action Log event UID."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+import sqlite3
+import sys
+
+DATABASE = "/var/lib/codex-action-log/codex-action-log.sqlite3"
+EVENT_UID_RE = re.compile(r"^client:[A-Za-z0-9][A-Za-z0-9._:-]{7,154}$")
+RESERVED_DETAILS_KEY = "_integrity_client"
+
+
+def canonical_json(value: object) -> bytes:
+    return json.dumps(
+        value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode("utf-8")
+
+
+def digest(value: object) -> str:
+    return "sha256:" + hashlib.sha256(canonical_json(value)).hexdigest()
+
+
+def fail() -> int:
+    return 1
+
+
+def main() -> int:
+    raw = sys.stdin.buffer.readline(4_097)
+    if not raw or len(raw) > 4_096 or sys.stdin.buffer.read(1):
+        return fail()
+    try:
+        request = json.loads(raw)
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return fail()
+    if not isinstance(request, dict) or set(request) != {"event_uid", "request_sha256"}:
+        return fail()
+    event_uid = request["event_uid"]
+    request_sha256 = request["request_sha256"]
+    if (
+        not isinstance(event_uid, str)
+        or EVENT_UID_RE.fullmatch(event_uid) is None
+        or not isinstance(request_sha256, str)
+        or re.fullmatch(r"[a-f0-9]{64}", request_sha256) is None
+    ):
+        return fail()
+    try:
+        connection = sqlite3.connect(f"file:{DATABASE}?mode=ro", uri=True)
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA query_only = ON")
+        rows = list(
+            connection.execute(
+                "SELECT id, event_uid, details FROM events WHERE event_uid = ? LIMIT 2",
+                (event_uid,),
+            )
+        )
+        connection.close()
+    except (OSError, sqlite3.Error):
+        return fail()
+    if not rows:
+        response = {
+            "status": "absent",
+            "event_uid": event_uid,
+            "event_id": 0,
+            "request_sha256": request_sha256,
+            "observed_record_digest": digest([]),
+        }
+    elif len(rows) == 1:
+        row = rows[0]
+        try:
+            details = json.loads(row["details"])
+        except (TypeError, json.JSONDecodeError):
+            return fail()
+        marker = details.get(RESERVED_DETAILS_KEY, {}) if isinstance(details, dict) else {}
+        actual = marker.get("request_sha256") if isinstance(marker, dict) else None
+        event_id = row["id"]
+        if isinstance(event_id, bool) or not isinstance(event_id, int) or event_id < 1:
+            return fail()
+        response = {
+            "status": "exact" if actual == request_sha256 else "collision",
+            "event_uid": event_uid,
+            "event_id": event_id,
+            "request_sha256": request_sha256,
+            "observed_record_digest": digest(
+                {
+                    "event_id": event_id,
+                    "event_uid": row["event_uid"],
+                    "stored_request_sha256": actual,
+                }
+            ),
+        }
+    else:
+        return fail()
+    sys.stdout.buffer.write(canonical_json(response) + b"\n")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

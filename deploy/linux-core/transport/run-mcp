@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+umask 077
+export LANG=C.UTF-8 PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONHASHSEED=0
+unset PYTHONPATH PYTHONHOME VIRTUAL_ENV
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+# Only the small transport inventory precedes channel ownership. The original
+# full runtime verification runs inside the supervised run-mcp-child.
+"$SCRIPT_DIR/verify-release" --transport-only
+exec /usr/bin/python3 -I "$SCRIPT_DIR/transport-supervisor.py" "$SCRIPT_DIR/run-mcp-child"

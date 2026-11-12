@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+DIGEST=${SCRIPT_DIR##*/}
+case "$DIGEST" in *[!a-f0-9]*|'') exit 125;; esac
+[ "${#DIGEST}" -eq 64 ] || exit 125
+[ "$(/usr/bin/stat -c '%u:%a' "$SCRIPT_DIR")" = '0:555' ] || exit 125
+for name in run-mcp run-mcp-child transport-supervisor.py verify-release SHA256SUMS artifact.sha256; do
+  file=$SCRIPT_DIR/$name
+  [ -f "$file" ] && [ ! -L "$file" ] || exit 125
+  case "$(/usr/bin/stat -c '%u:%a' "$file")" in 0:444|0:555) ;; *) exit 125;; esac
+done
+[ "$(/usr/bin/sha256sum "$SCRIPT_DIR/SHA256SUMS" | /usr/bin/cut -d ' ' -f 1)" = "$DIGEST" ] || exit 125
+[ "$(/usr/bin/cat "$SCRIPT_DIR/artifact.sha256")" = "$DIGEST" ] || exit 125
+(cd "$SCRIPT_DIR" && /usr/bin/sha256sum --check --status SHA256SUMS) || exit 125
+[ -f '@FACADE_RELEASE_DIR@/run-mcp' ] && [ ! -L '@FACADE_RELEASE_DIR@/run-mcp' ] || exit 125
+[ "$(/usr/bin/sha256sum '@FACADE_RELEASE_DIR@/run-mcp' | /usr/bin/cut -d ' ' -f 1)" = '@FACADE_RUN_MCP_SHA256@' ] || exit 125
+case "${1:-}" in
+  --transport-only) ;;
+  '') '@FACADE_RELEASE_DIR@/verify-release' ;;
+  *) exit 64 ;;
+esac

@@ -1,0 +1,88 @@
+#!/bin/sh
+set -eu
+
+# OpenSSH invokes this file as an exact forced command. Client arguments and
+# SSH_ORIGINAL_COMMAND are intentionally ignored; all bindings are root-owned.
+umask 077
+export HOME=/var/lib/integrity-client
+export LANG=C.UTF-8
+export PYTHONDONTWRITEBYTECODE=1
+export PYTHONUNBUFFERED=1
+export PYTHONHASHSEED=0
+unset PYTHONPATH PYTHONHOME VIRTUAL_ENV
+
+SCRIPT_DIR=@FACADE_RELEASE_DIR@
+RELEASE_DIGEST=${SCRIPT_DIR##*/}
+case "$RELEASE_DIGEST" in
+  *[!a-f0-9]*|'') echo "invalid immutable release path" >&2; exit 1 ;;
+esac
+if [ "${#RELEASE_DIGEST}" -ne 64 ]; then
+  echo "invalid immutable release path" >&2
+  exit 1
+fi
+"$SCRIPT_DIR/verify-release"
+
+client_READER_ENV=/etc/integrity-client-memory-lts.env
+[ -f "$client_READER_ENV" ] && [ ! -L "$client_READER_ENV" ] || {
+  echo "reader env is unavailable" >&2
+  exit 1
+}
+[ "$(stat -c '%u:%g:%a' "$client_READER_ENV")" = "0:$(id -g):640" ] || {
+  echo "reader env custody is unsafe" >&2
+  exit 1
+}
+set -a
+# shellcheck disable=SC1090
+. "$client_READER_ENV"
+set +a
+[ -n "${CODEX_LOG_TOKEN:-}" ] || {
+  echo "reader token is unavailable" >&2
+  exit 1
+}
+case "${INTEGRITY_TTT_PATH_CATALOG:+path}:${INTEGRITY_TTT_PATH_CATALOG_SHA256:+digest}" in
+  path:digest) ;;
+  :) ;;
+  *) echo "TTT path catalogue and digest must be configured together" >&2; exit 1 ;;
+esac
+
+DEPLOYMENT_PROFILE=/etc/integrity-client-memory-lts.deployment-profile.json
+[ -f "$DEPLOYMENT_PROFILE" ] && [ ! -L "$DEPLOYMENT_PROFILE" ] || {
+  echo "deployment profile is unavailable" >&2
+  exit 1
+}
+[ "$(stat -c '%u:%a' "$DEPLOYMENT_PROFILE")" = "0:644" ] || {
+  echo "deployment profile custody is unsafe" >&2
+  exit 1
+}
+
+SNAPSHOT_ROOT=/var/lib/integrity-client/seed-sessions
+if ! mkdir -m 0700 "$SNAPSHOT_ROOT" 2>/dev/null; then
+  [ -d "$SNAPSHOT_ROOT" ] && [ ! -L "$SNAPSHOT_ROOT" ] || {
+    echo "private snapshot disk root is unavailable" >&2
+    exit 1
+  }
+fi
+[ "$(stat -c '%u:%a' "$SNAPSHOT_ROOT")" = "$(id -u):700" ] || {
+  echo "private snapshot disk custody is unsafe" >&2
+  exit 1
+}
+
+set -- "$SCRIPT_DIR/venv/bin/guardian-memory-synapse-mcp" \
+  --catalog /var/lib/integrity-seed/catalog.sqlite3 \
+  --evidence-root /var/lib/integrity-client/evidence \
+  --evidence-source-prefix /opt/integrity/workspace \
+  --architecture-root /var/lib/integrity-client/architecture \
+  --snapshot-root "$SNAPSHOT_ROOT" \
+  --trust-profile personal-native \
+  --native-state-root /var/lib/integrity-client/native-state \
+  --native-instance-id instance:client-personal \
+  --native-device-id device:client-codex \
+  --deployment-profile /etc/integrity-client-memory-lts.deployment-profile.json \
+  --expected-deployment-profile-digest sha256:@DEPLOYMENT_PROFILE_SHA256@ \
+  --action-log-witness-helper @ACTION_LOG_WITNESS_HELPER@
+if [ -n "${INTEGRITY_TTT_PATH_CATALOG:-}" ]; then
+  set -- "$@" \
+    --ttt-path-catalog "$INTEGRITY_TTT_PATH_CATALOG" \
+    --expected-ttt-path-catalog-digest "$INTEGRITY_TTT_PATH_CATALOG_SHA256"
+fi
+exec "$@" --custody-full-verify
