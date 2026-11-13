@@ -35,11 +35,14 @@ class Base(unittest.TestCase):
         ks.configure({})
         self._detect, self._web = ks.detect_vendor, ks.web_actor
         self._ancestors = ks.get_process_ancestor_names
+        self._linux = ks.read_linux_ancestry
         ks.get_process_ancestor_names = lambda *a, **k: ["python.exe", "fake-parent.exe"]
+        ks.read_linux_ancestry = lambda *a, **k: None
 
     def tearDown(self) -> None:
         ks.detect_vendor, ks.web_actor = self._detect, self._web
         ks.get_process_ancestor_names = self._ancestors
+        ks.read_linux_ancestry = self._linux
         ks.configure({})
         for k, v in self._env.items():
             if v is None:
@@ -98,6 +101,237 @@ class DetectVendor(Base):
             "garbage line\n"
         )
         self.assertEqual(ks._parse_msys_ps(out), {46052: 12868, 12868: 35500})
+
+
+def _symlinks_work() -> bool:
+    with tempfile.TemporaryDirectory() as folder:
+        try:
+            os.symlink("/invented/target", os.path.join(folder, "link"))
+            return True
+        except (OSError, NotImplementedError):
+            return False
+
+
+@unittest.skipUnless(_symlinks_work(), "a fake /proc needs symbolic links")
+class LinuxAncestry(Base):
+    """read_linux_ancestry and classify_linux on an invented /proc tree."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        ks.read_linux_ancestry = self._linux
+        self.proc = self.dir / "proc"
+
+    def add(self, pid: int, ppid: int, start: int, exe: str | None, comm: str | None,
+            argv: list[str] | None) -> None:
+        folder = self.proc / str(pid)
+        folder.mkdir(parents=True)
+        name = comm or "x"
+        # The comm field may hold spaces and ')': the parser cuts at the last ')'.
+        (folder / "stat").write_text(f"{pid} ({name} )x) S {ppid} 1 1 0 -1 4194560 0 0 0 0 0 0 0 0 20 0 1 0 "
+                                     f"{start} 1 1\n", encoding="utf-8")
+        if exe is not None:
+            os.symlink(exe, folder / "exe")
+        if comm is not None:
+            (folder / "comm").write_text(comm + "\n", encoding="utf-8")
+        if argv is not None:
+            (folder / "cmdline").write_bytes(b"\0".join(a.encode() for a in argv) + b"\0")
+
+    def chain(self, *rows) -> None:
+        """rows from the caller upwards: (exe, comm, argv); pids 105..101, start times rising downwards."""
+        pids = list(range(100 + len(rows), 100, -1))
+        pids[-1] = 1
+        for index, (exe, comm, argv) in enumerate(rows):
+            ppid = pids[index + 1] if index + 1 < len(pids) else 0
+            self.add(pids[index], ppid, 1000 - index * 10, exe, comm, argv)
+        self.start = pids[0]
+
+    def walk(self):
+        return ks.read_linux_ancestry(self.start, proc_root=str(self.proc))
+
+    def judge(self, env=None) -> str:
+        return ks.classify_linux(self.walk(), env or {})
+
+    SELF = ("/usr/bin/python3.12", "integrity-killsw", ["/venv/bin/python", "/venv/bin/integrity-killswitch", "on", "x"])
+    SSH = [("/usr/bin/bash", "bash", ["-bash"]), (None, "sshd-session", ["sshd-session: user@pts/0"]),
+           (None, "sshd", ["sshd: /usr/sbin/sshd -D"]), (None, "systemd", ["/sbin/init"])]
+    CONSOLE = [("/usr/bin/bash", "bash", ["-bash"]), (None, "login", ["/bin/login", "-p", "--"]),
+               (None, "systemd", ["/sbin/init"])]
+
+    def test_console_login_shell_is_the_owner(self) -> None:
+        self.chain(self.SELF, *self.CONSOLE)
+        self.assertEqual([name for name, _ in self.walk()], ["python", "bash", "login", "systemd"])
+        self.assertEqual(self.judge(), "owner")
+        self.assertEqual(self.judge({"LLM_VENDOR": "grok"}), "grok")
+        self.assertEqual(self.judge({"LLM_VENDOR": "owner"}), "owner")
+
+    def test_desktop_terminal_with_sudo_is_the_owner(self) -> None:
+        self.chain(self.SELF, (None, "sudo", ["sudo", "integrity-killswitch", "on", "x"]),
+                   ("/usr/bin/zsh", "zsh", ["zsh"]),
+                   ("/usr/libexec/gnome-terminal-server", "gnome-terminal-", ["/usr/libexec/gnome-terminal-server"]),
+                   ("/usr/lib/systemd/systemd", "systemd", ["/usr/lib/systemd/systemd", "--user"]),
+                   (None, "systemd", ["/sbin/init"]))
+        self.assertEqual(self.judge(), "owner")
+
+    def test_ssh_and_tmux_shells_are_not_the_owner(self) -> None:
+        self.chain(self.SELF, *self.SSH)
+        self.assertEqual([name for name, _ in self.walk()], ["python", "bash", "sshd-session", "sshd", "systemd"])
+        self.assertEqual(self.judge(), "unknown_llm")
+        self.chain_reset()
+        self.chain(self.SELF, ("/usr/bin/bash", "bash", ["-bash"]), ("/usr/bin/tmux", "tmux: server", ["tmux"]),
+                   ("/usr/lib/systemd/systemd", "systemd", ["/usr/lib/systemd/systemd", "--user"]),
+                   (None, "systemd", ["/sbin/init"]))
+        self.assertEqual(self.judge(), "unknown_llm")
+
+    def test_node_agent_script_is_a_marker(self) -> None:
+        agent = ("/usr/bin/node", "node", ["node", "--no-warnings", "/usr/lib/node_modules/@vendor/claude-code/cli.js"])
+        self.chain(self.SELF, ("/usr/bin/bash", "bash", ["bash", "-c", "x"]), agent, *self.CONSOLE)
+        self.assertEqual(self.judge(), "claude")
+
+    def test_interpreter_path_alone_is_not_a_marker(self) -> None:
+        tool = ("/opt/claude-tools/bin/python3", "python3", ["python3", "/opt/tool/run.py"])
+        self.chain(self.SELF, tool, *self.CONSOLE)
+        self.assertEqual(self.judge(), "unknown_llm")  # an interpreter above the caller runs some program
+        self.chain_reset()
+        node = ("/opt/codex/bin/node", "node", ["node", "-e", "1"])
+        self.chain(self.SELF, node, *self.CONSOLE)
+        self.assertEqual(self.judge(), "unknown_llm")
+
+    def chain_reset(self) -> None:
+        import shutil
+
+        shutil.rmtree(self.proc)
+
+    def test_native_agent_binary_is_a_marker(self) -> None:
+        self.chain(self.SELF, ("/opt/agents/bin/codex", "codex", ["codex"]), *self.CONSOLE)
+        self.assertEqual(self.judge(), "codex")
+
+    def test_unreadable_exe_uses_comm_and_cmdline(self) -> None:
+        self.chain(self.SELF, (None, "grok", ["grok", "chat"]), *self.CONSOLE)
+        self.assertEqual(self.judge(), "grok")
+
+    def test_unreadable_exe_comm_and_cmdline_refuse(self) -> None:
+        for row in ((None, None, ["bash"]), (None, "bash", None), (None, None, None)):
+            with self.subTest(row=row):
+                self.chain_reset() if self.proc.exists() else None
+                self.chain(self.SELF, row, *self.CONSOLE)
+                self.assertIsNone(self.walk())
+                self.assertEqual(self.judge(), "unknown_llm")
+                self.assertEqual(self.judge({"LLM_VENDOR": "codex"}), "codex")
+
+    def test_interpreter_without_command_line_refuses(self) -> None:
+        self.chain(self.SELF, ("/usr/bin/node", "node", None), *self.CONSOLE)
+        self.assertIsNone(self.walk())
+
+    def test_parent_exited_during_the_walk_refuses(self) -> None:
+        self.chain(self.SELF, *self.SSH)
+        real = ks._linux_stat
+        calls = {"n": 0}
+
+        def flaky(proc, pid):
+            calls["n"] += 1
+            if pid == 104 and calls["n"] > 5:  # the second pass finds the shell gone
+                return None
+            return real(proc, pid)
+
+        ks._linux_stat = flaky
+        try:
+            self.assertIsNone(self.walk())
+        finally:
+            ks._linux_stat = real
+
+    def test_parent_replaced_during_the_walk_refuses(self) -> None:
+        self.chain(self.SELF, *self.SSH)
+        real = ks._linux_stat
+        seen: set[int] = set()
+
+        def reparented(proc, pid):
+            first = pid not in seen
+            seen.add(pid)
+            ppid, start = real(proc, pid)
+            return (ppid, start) if first or pid != 105 else (1, start)
+
+        ks._linux_stat = reparented
+        try:
+            self.assertIsNone(self.walk())
+        finally:
+            ks._linux_stat = real
+
+    def test_reused_parent_pid_refuses(self) -> None:
+        self.chain(self.SELF, *self.SSH)
+        stat = self.proc / "104" / "stat"
+        stat.write_text(stat.read_text(encoding="utf-8").replace(" 990 ", " 5000 "), encoding="utf-8")
+        self.assertIsNone(self.walk())
+
+    def test_detached_shell_and_services(self) -> None:
+        self.chain(self.SELF, ("/usr/bin/bash", "bash", ["bash", "-c", "x"]),
+                   ("/usr/lib/systemd/systemd", "systemd", ["/usr/lib/systemd/systemd", "--user"]),
+                   (None, "systemd", ["/sbin/init"]))
+        self.assertEqual(self.judge(), "unknown_llm")
+        self.chain_reset()
+        self.chain(self.SELF, (None, "systemd", ["/sbin/init"]))
+        self.assertEqual(self.judge(), "service")
+        self.chain_reset()
+        self.chain(self.SELF, (None, "cron", ["/usr/sbin/cron", "-f"]), (None, "systemd", ["/sbin/init"]))
+        self.assertEqual(self.judge(), "unknown_llm")
+
+    def test_walk_must_reach_pid_one(self) -> None:
+        self.add(105, 7, 1000, "/usr/bin/python3", "python3", ["python3", "-c", "1"])
+        self.start = 105
+        self.assertIsNone(self.walk())
+
+    def test_python_command_lines(self) -> None:
+        cases = [
+            (["python3", "-I", "-B", "/x/claude/a.py", "arg"], "/x/claude/a.py"),
+            (["python3", "-W", "ignore", "-m", "pkg.mod"], "pkg.mod"),
+            (["python3", "-mpkg"], "pkg"),
+            (["python3", "-c", "print(1)"], ""),
+            (["python3"], ""),
+            (["python3", "-m"], None),
+        ]
+        for argv, want in cases:
+            with self.subTest(argv=argv):
+                self.assertEqual(ks._linux_script("python", argv), want)
+        self.assertEqual(ks._linux_script("node", ["node", "-r", "x", "s.js"]), "s.js")
+        self.assertEqual(ks._linux_script("deno", ["deno", "run", "-A", "m.ts"]), "m.ts")
+
+
+@unittest.skipUnless(ks.LINUX_ANCESTRY, "Linux only: reads the real /proc")
+class LinuxRealProcesses(Base):
+    """read_linux_ancestry on real processes started by this test."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        ks.read_linux_ancestry = self._linux
+
+    def run_child(self, parent_script: Path) -> dict:
+        code = ("import json, os; from integrity_killswitch import killswitch as ks; "
+                "print(json.dumps({'names': [n for n, _ in ks.read_linux_ancestry() or []], "
+                "'vendor': ks.detect_vendor(env={})}))")
+        parent_script.parent.mkdir(parents=True, exist_ok=True)
+        parent_script.write_text("import subprocess, sys\n"
+                                 f"sys.exit(subprocess.run([sys.executable, '-c', {code!r}]).returncode)\n",
+                                 encoding="utf-8")
+        out = subprocess.run([sys.executable, str(parent_script)], capture_output=True, text=True, timeout=60,
+                             env={**os.environ, "PYTHONPATH": os.pathsep.join(sys.path)})
+        self.assertEqual(out.returncode, 0, out.stderr)
+        return json.loads(out.stdout)
+
+    def test_this_process_tree_reaches_pid_one(self) -> None:
+        entries = ks.read_linux_ancestry()
+        self.assertIsNotNone(entries)
+        self.assertEqual(entries[0][0], "python")
+        self.assertEqual(ks.get_process_ancestor_names(), [name for name, _ in entries])
+
+    def test_agent_script_in_the_parent_is_detected(self) -> None:
+        result = self.run_child(self.dir / "claude-agent" / "agent.py")
+        self.assertEqual(result["names"][:2], ["python", "python"])
+        self.assertEqual(result["vendor"], "claude")
+
+    def test_unknown_parent_script_is_not_the_owner(self) -> None:
+        result = self.run_child(self.dir / "plain-tool" / "tool.py")
+        self.assertEqual(result["names"][:2], ["python", "python"])
+        # unknown_llm in CI; under an agent its own marker wins. Never the owner.
+        self.assertNotIn(result["vendor"], ("owner", "service"))
 
 
 class Configuration(Base):
@@ -220,7 +454,7 @@ class DoctorAndUninstall(Base):
         self.assertEqual(list(self.dir.iterdir()), [])  # no state file, no log line
         checks = self.report()
         self.assertIn("not created yet", checks["state"]["detail"])
-        self.assertEqual(checks["caller"]["result"], "ok" if os.name == "nt" else "warn")
+        self.assertEqual(checks["caller"]["result"], "ok" if ks.ANCESTRY_SUPPORTED else "warn")
         self.assertIn("not configured", checks["bus sync"]["detail"])
 
     def test_doctor_names_what_is_blocked(self) -> None:

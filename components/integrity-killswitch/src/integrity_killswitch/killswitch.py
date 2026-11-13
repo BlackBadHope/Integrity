@@ -23,10 +23,12 @@ Commands:
 
 Security model (read before trusting it):
   * The caller is identified by its process ancestry. Git's msys ssh breaks the
-    Windows parent chain, so the msys process table is used to bridge it.
+    Windows parent chain, so the msys process table is used to bridge it. On
+    Linux the ancestry is read from /proc; other systems read none.
   * Tightening access (off, panic) is open to every caller. Restoring access
     (on, resume, un-revoking on the bus host) is owner-only: an interactive
-    shell or a browser without an LLM ancestor.
+    shell or a browser without an LLM ancestor (on Linux: a chain of shells
+    under a console login or a desktop terminal; never over SSH).
   * This is a local, cooperative gate. Any process of this user can still edit
     the state file or skip the gate. Real enforcement is the revocation on the
     bus host (sync-bus). It does not terminate running processes.
@@ -148,9 +150,14 @@ def get_process_ancestor_names(start_pid: int | None = None) -> list[str]:
     """Inspects the Windows process tree and returns executable names of ancestors.
 
     Starts at this process, or at ``start_pid`` (used for dashboard clients).
-    Returns an empty list on other platforms, which detect_vendor treats as unknown.
+    On Linux it returns the names read from /proc (see read_linux_ancestry), or an
+    empty list when the walk was refused. Other platforms get an empty list, which
+    detect_vendor treats as unknown.
     """
     if os.name != "nt":
+        if LINUX_ANCESTRY:
+            entries = read_linux_ancestry(start_pid)
+            return [entry[0] for entry in entries] if entries else []
         return []
 
     try:
@@ -271,6 +278,186 @@ def _parse_msys_ps(out: str) -> dict[int, int]:
     return result
 
 
+# Linux: the ancestry is read from /proc. macOS and other systems are not supported.
+LINUX_ANCESTRY = sys.platform.startswith("linux")
+ANCESTRY_SUPPORTED = os.name == "nt" or LINUX_ANCESTRY
+LINUX_INTERPRETERS = {"python", "node", "bun", "deno"}
+LINUX_MAX_DEPTH = 64
+_PYTHON_NAME_RE = re.compile(r"python[0-9.]*")
+
+
+def _linux_name(basename: str) -> str:
+    """Normalises an executable name: python3.12 and python3 become python."""
+    name = basename.strip().lower()
+    return "python" if _PYTHON_NAME_RE.fullmatch(name) else name
+
+
+def _linux_script(name: str, argv: list[str]) -> str | None:
+    """Returns the script an interpreter runs, "" when it runs none (-c, -e, REPL).
+
+    Options before the script are skipped. For python -m the module name stands
+    for the script. Returns None when the command line cannot be understood.
+    """
+    takes_value = {"python": {"-W", "-X", "-Q"}, "node": {"-r", "--require", "--import", "--loader"},
+                   "bun": set(), "deno": set()}[name]
+    inline = {"python": {"-c"}, "node": {"-e", "--eval", "-p", "--print"},
+              "bun": {"-e", "--eval"}, "deno": {"eval"}}[name]
+    args = argv[1:]
+    if name == "deno" and args and args[0] == "run":
+        args = args[1:]
+    if name == "bun" and args and args[0] == "run":
+        args = args[1:]
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg in inline:
+            return ""
+        if name == "python" and arg == "-m":
+            return args[i + 1] if i + 1 < len(args) else None
+        if name == "python" and arg.startswith("-m") and len(arg) > 2:
+            return arg[2:]
+        if name == "python" and arg.startswith("-c"):
+            return ""
+        if arg == "--":
+            return args[i + 1] if i + 1 < len(args) else ""
+        if arg.startswith("-"):
+            i += 2 if arg in takes_value else 1
+            continue
+        return arg
+    return ""
+
+
+def _linux_stat(proc: Path, pid: int) -> tuple[int, int] | None:
+    """(ppid, start time) of a process from /proc/<pid>/stat, or None."""
+    try:
+        raw = (proc / str(pid) / "stat").read_bytes().decode("utf-8", "replace")
+        rest = raw[raw.rindex(")") + 2:].split()
+        return int(rest[1]), int(rest[19])
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def _linux_entry(proc: Path, pid: int) -> tuple[str, str] | None:
+    """(name, text searched for agent markers) of one process, or None to refuse.
+
+    The name is the executable's base name; when the executable link cannot be
+    read (a process of another account), comm stands in. For an interpreter only
+    the script path in its command line is searched for markers, never the
+    interpreter's own path.
+    """
+    base = proc / str(pid)
+    exe = ""
+    try:
+        exe = os.readlink(base / "exe")
+    except OSError:
+        exe = ""
+    try:
+        comm = (base / "comm").read_bytes().decode("utf-8", "replace").strip()
+    except OSError:
+        comm = None
+    try:
+        raw_cmdline = (base / "cmdline").read_bytes()
+        argv = [part.decode("utf-8", "replace") for part in raw_cmdline.split(b"\0") if part]
+    except OSError:
+        argv = None
+    if exe.endswith(" (deleted)"):
+        exe = exe[: -len(" (deleted)")]
+    if exe:
+        name = _linux_name(os.path.basename(exe))
+    elif comm and argv is not None:
+        name = _linux_name(comm)
+    else:
+        return None
+    if name in LINUX_INTERPRETERS:
+        if argv is None:
+            return None
+        script = _linux_script(name, argv)
+        if script is None:
+            return None
+        return name, script.lower()
+    parts = (exe, comm or "") if exe else (comm or "", argv[0] if argv else "")
+    return name, " ".join(part for part in parts if part).lower()
+
+
+def read_linux_ancestry(start_pid: int | None = None,
+                        proc_root: str = "/proc") -> list[tuple[str, str]] | None:
+    """Walks the Linux process tree from ``start_pid`` (default: this process) to pid 1.
+
+    Returns [(name, marker text), ...] from the process itself upwards, or None
+    when the walk must be refused: a process could not be read, a parent started
+    after its child (its pid was reused), or a second pass found a different
+    parent or start time (a parent exited or was replaced during the walk).
+    """
+    proc = Path(proc_root)
+    pid = start_pid or os.getpid()
+    chain: list[tuple[int, int, int]] = []  # (pid, start time, ppid)
+    entries: list[tuple[str, str]] = []
+    seen: set[int] = set()
+    while pid > 0:
+        if pid in seen or len(chain) >= LINUX_MAX_DEPTH:
+            return None
+        seen.add(pid)
+        stat = _linux_stat(proc, pid)
+        if stat is None:
+            return None
+        ppid, start = stat
+        if chain and start > chain[-1][1]:
+            return None
+        entry = _linux_entry(proc, pid)
+        if entry is None:
+            return None
+        chain.append((pid, start, ppid))
+        entries.append(entry)
+        pid = ppid
+    if not chain or chain[-1][0] != 1:
+        return None
+    for pid, start, ppid in chain:
+        if _linux_stat(proc, pid) != (ppid, start):
+            return None
+    return entries
+
+
+LINUX_SHELLS = {"bash", "sh", "dash", "zsh", "fish", "ksh", "tcsh"}
+# Where an operator sits: a console login or a desktop terminal. SSH, tmux and screen are not
+# here: the far end of an SSH session (often another machine's agent) cannot be seen, and a
+# detached tmux or screen server has lost whoever started it.
+LINUX_TERMINALS = {"login", "agetty", "gnome-terminal-server", "konsole", "xterm", "alacritty", "kitty",
+                   "tilix", "xfce4-terminal", "terminator", "foot", "wezterm-gui"}
+LINUX_ROOTS = {"systemd", "init"}
+LINUX_NEUTRAL = LINUX_SHELLS | LINUX_TERMINALS | LINUX_ROOTS | {"sudo", "su"}
+
+
+def classify_linux(entries: list[tuple[str, str]] | None, env: Any) -> str:
+    """detect_vendor for a Linux ancestry from read_linux_ancestry.
+
+    The first entry is the calling process itself; a python there is neutral.
+    Any interpreter above it runs some other program and is not neutral.
+    """
+    if entries:
+        joined = " ".join(text for _name, text in entries)
+        for vendor, markers in LLM_MARKERS:
+            if any(marker in joined for marker in markers):
+                return vendor
+    env_vendor = str(env.get("LLM_VENDOR", "")).strip().lower()
+    if env_vendor in KNOWN_VENDORS:
+        return env_vendor
+    if not entries:
+        return "unknown_llm"
+    names = [name for name, _text in entries]
+    if names[0] == "python":
+        names = names[1:]
+    if not names or not all(name in LINUX_NEUTRAL for name in names):
+        return "unknown_llm"
+    # A shell with no terminal or login above it was detached from whatever started it.
+    if any(name in LINUX_TERMINALS for name in names):
+        return "owner"
+    if any(name in LINUX_SHELLS for name in names):
+        return "unknown_llm"
+    if names[-1] in LINUX_ROOTS:
+        return "service"
+    return "unknown_llm"
+
+
 INTERACTIVE_SHELLS = {"powershell.exe", "pwsh.exe", "cmd.exe"}
 UI_ANCHORS = {"explorer.exe", "windowsterminal.exe", "mintty.exe"}
 MSYS_SHELLS = {"bash.exe", "sh.exe"}
@@ -292,7 +479,12 @@ def detect_vendor(ancestors: list[str] | None = None, env: Any = None) -> str:
       3. windowless daemons are "service";
       4. "owner" needs a chain made only of neutral system/shell processes.
     Everything else is unknown and blocked.
+
+    Without ``ancestors`` on Linux the tree is read from /proc and judged by
+    classify_linux. A list passed in is judged by the Windows rules.
     """
+    if ancestors is None and LINUX_ANCESTRY:
+        return classify_linux(read_linux_ancestry(), os.environ if env is None else env)
     if ancestors is None:
         ancestors = get_process_ancestor_names()
     if env is None:
@@ -1307,7 +1499,7 @@ def doctor_report(state_arg: str | None = None, config_source: str | None = None
     add("audit log", "ok", f"{log_file}: " + (f"{log_file.stat().st_size} bytes" if log_file.exists()
                                              else "not created yet"))
 
-    if os.name != "nt":
+    if not ANCESTRY_SUPPORTED:
         add("caller", "warn", "process ancestry is not read on this system: off, panic and check work, "
                               "on and resume are always refused; restore access by editing the state file")
     else:
@@ -1355,7 +1547,7 @@ def cmd_uninstall(args: argparse.Namespace) -> int:
     if state_file.exists() and stored_restrictions(state_file) != []:
         # Deleting a state that blocks something restores access, so it follows the rule for on and resume.
         if admin_actor("uninstall", owner_only=True) is None:
-            if os.name != "nt":
+            if not ANCESTRY_SUPPORTED:
                 print("killswitch: on this system the operator removes the files listed above by hand.",
                       file=sys.stderr)
             return EXIT_REFUSED
