@@ -7,6 +7,32 @@ All notable public changes are recorded here.
 Changes on `main` after 7.0.1. Nothing here is tagged, and the distribution
 versions are unchanged unless an entry says otherwise.
 
+### Local memory on one machine
+
+- **`guardian-local-memory`**: a new command in `integrity-guardian`
+  (`integrity_guardian.local_memory`). `init` creates a private instance and
+  prints the MCP block for Claude Code, Codex or Antigravity; `serve` is the
+  MCP server the client starts; `doctor` checks the instance read-only;
+  `uninstall` removes it. Windows and Linux.
+- The server joins three existing stores - Seed catalog, Turn Memory, work
+  claims - and offers eleven tools, among them `lm_work_claim`,
+  `lm_work_release`, `lm_work_claims` and `lm_turn_receipt_by_event`, which
+  finds the signed turn and its closing receipt from one event.
+- The tool names start with `lm_` and differ from the tool names of the core.
+  A Native lifecycle hook recognises the core's tools by name; a test checks
+  that no name of this server is one of them.
+- The Codex block from `init` carries `default_tools_approval_mode =
+  "approve"`: without it a non-interactive `codex exec` refuses the tools.
+- Events carry `declared_agent`, `declared_client` and `declared_machine`.
+  These are declared by the writer and not verified.
+- This is not the core write path: no Action Log, no custody ledger, no
+  admission of actions. [docs/LOCAL_MEMORY.md](docs/LOCAL_MEMORY.md) lists
+  the limits.
+- `WorkClaimRegistry.claim` takes an optional `reference`, stored in the
+  claim's log event and so covered by the hash chain. Existing callers are
+  unchanged.
+- The memory facade (`memory_synapse_mcp.py`) is not changed.
+
 ### The kill switch installs, checks and removes on its own
 
 - `integrity-killswitch doctor`: a read-only self-check. It creates no state

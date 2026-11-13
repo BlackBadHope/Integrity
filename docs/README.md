@@ -12,6 +12,7 @@ and what was not.
 | [Project README](../README.md) | What Integrity is, the pictures, a five-minute first run |
 | [The four-scene demo](../README.md#the-demo-step-by-step) | `python demo/run.py`: record, recall, a one-use grant, a missed close. One machine, synthetic data, no network |
 | [Install and test](INSTALL.md) | Prerequisites, a source install, the checks that public CI runs |
+| [Local memory on one machine](LOCAL_MEMORY.md) | Install stage 1: a memory server with writes and task claims for your own agents on one computer; what it does not prove |
 | [Clean bootstrap](../BOOTSTRAP.md) | Optional components, wheels, an isolated local instance |
 | [Read-only memory walkthrough](../examples/local-memory/README.md) | A disposable catalog connected to Codex, Claude Code and Antigravity without hooks |
 

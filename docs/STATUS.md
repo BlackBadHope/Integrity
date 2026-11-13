@@ -43,6 +43,12 @@ To try memory without hooks, use the read-only
 [local-memory walkthrough](../examples/local-memory/README.md). CI runs it on
 Linux and Windows, and it prints PASS for all three clients.
 
+To let your own agents write and claim tasks on one machine, use the
+[local memory profile](LOCAL_MEMORY.md) (`guardian-local-memory`). CI runs its
+tests and its `init`, `doctor` and `uninstall` on Linux and Windows. It is not
+the core write path, agent names in it are declared and not verified, and it
+has not been run with a real agent client yet.
+
 The four-scene demo at the top of the [README](../README.md#the-demo-step-by-step)
 (`demo/run.py`) is run by `tests/test_demo.py` in CI on Linux and Windows. It
 runs no model, and its scene 2 is a recall, not the context a hooked client

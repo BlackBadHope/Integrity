@@ -1,5 +1,5 @@
 {
-  "file_count": 1371,
+  "file_count": 1374,
   "files": [
     {
       "bytes": 3435,
@@ -79,11 +79,11 @@
       "sha256": "bf23ba02498540d50a6eb700f5382a02160c20d66ba5ce754f2535158bce7cba"
     },
     {
-      "bytes": 12108,
+      "bytes": 12181,
       "mode": "0o644",
       "path": "COMPONENTS.json",
       "sanitization_edits": 0,
-      "sha256": "b057737ac4ddf73f13244bf2520ef87afd947bd1995f099c38dca747c244a4f7"
+      "sha256": "7a93f447780c4fa8ccaa1f47c967d56c3da91148d2cae9aa7bdc40d6776b9a00"
     },
     {
       "bytes": 1797,
@@ -419,7 +419,7 @@
       "mode": "0o644",
       "path": "components/integrity-adapter-sdk/src/integrity_adapter_sdk/guardian-origin.json",
       "sanitization_edits": 2,
-      "sha256": "fb622d819d6e74cb0751ab040a69625fef54378aeaf34b1b6b78ad989baa4c16"
+      "sha256": "e7e125b814e6af2e582a0400262e52ed805bc45e839b2c18d2f78e49d70f773b"
     },
     {
       "bytes": 632,
@@ -5735,6 +5735,13 @@
       "sha256": "e84ea9e8ec62645612d0550ee4d6c4a7af2f7b4243891225bb364bb08a20bd8b"
     },
     {
+      "bytes": 6514,
+      "mode": "0o644",
+      "path": "docs/LOCAL_MEMORY.md",
+      "sanitization_edits": 0,
+      "sha256": "b5e43cc2f687e7ecd76a05229ba66f0e8ca14abf09e4bc97ea5d4b752f598e36"
+    },
+    {
       "bytes": 1314,
       "mode": "0o644",
       "path": "docs/MIGRATION_INTEGRITY_SEATS.md",
@@ -6727,6 +6734,13 @@
       "path": "src/integrity_guardian/local_machine.py",
       "sanitization_edits": 0,
       "sha256": "e565623f856f242a366d1a3cc761a0d54f54690dc09db8d70088ba32bbe9a93b"
+    },
+    {
+      "bytes": 38233,
+      "mode": "0o644",
+      "path": "src/integrity_guardian/local_memory.py",
+      "sanitization_edits": 0,
+      "sha256": "d97638b76c3418beb4c499f352a83ea043d29d406614086069daac696e736fc8"
     },
     {
       "bytes": 6140,
@@ -8640,11 +8654,11 @@
       "sha256": "36635a2ec71a1580560f9a2cae53c55661ab61474e80fe30cc53bde5a3daa37c"
     },
     {
-      "bytes": 24519,
+      "bytes": 25570,
       "mode": "0o644",
       "path": "src/integrity_guardian/work_claims.py",
       "sanitization_edits": 0,
-      "sha256": "0b39f235cb1d20d406a404ab4d11b22022d803c5c6a818cbc4d64192be48c9cb"
+      "sha256": "2c3bb520741383cc043174a1d596f9186794ab5159c603252189a796a6c76bb6"
     },
     {
       "bytes": 50040,
@@ -8897,6 +8911,13 @@
       "path": "tests/test_linux_native_lifecycle.py",
       "sanitization_edits": 0,
       "sha256": "cf5213b135142a33e80ce394a2a9c804b9ca41643d78eb9ffa715b660d7d8bd1"
+    },
+    {
+      "bytes": 14086,
+      "mode": "0o644",
+      "path": "tests/test_local_memory.py",
+      "sanitization_edits": 0,
+      "sha256": "141376e8cbe8398ade8a8067a70f2a3843e53a2f34446eef597f669d41248912"
     },
     {
       "bytes": 17413,
@@ -9186,11 +9207,11 @@
       "sha256": "0f49e87acc4df9af73ba78aeea2578fced3bb04b5e86990c628b51d72bbab783"
     },
     {
-      "bytes": 7664,
+      "bytes": 8497,
       "mode": "0o644",
       "path": "tests/test_work_claims.py",
       "sanitization_edits": 0,
-      "sha256": "178e2f0d53cb7fecb5fd2b422e2aa2db22c268d809b820399f35c7a9bcccc9b9"
+      "sha256": "1affe5cfd4b696dae0efc81f0451145beed9c95a05233baef7080303dc5c357a"
     },
     {
       "bytes": 2059,
@@ -9651,11 +9672,11 @@
       "sha256": "c7febfedca7cf8e16f62f00b6af65808b633dc1ba26351c7b1ada8de2946e222"
     },
     {
-      "bytes": 7820,
+      "bytes": 8301,
       "mode": "0o644",
       "path": ".github/workflows/public-surface.yml",
       "sanitization_edits": 0,
-      "sha256": "3f2ef0961640f4a23a6ff03a30703a71ad7b5117e327b04bd1afb8c0a2472616"
+      "sha256": "0422d989a21685cdf6ad2265bb06e924dd4cfc73533fd8bf0573241b5a03c88f"
     },
     {
       "bytes": 132,
@@ -9686,11 +9707,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 48587,
+      "bytes": 50097,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "c17f7ca10d92d7a511e9064f31966edc771f6bdf5b6665f69875f420ded96474"
+      "sha256": "ed90111bfe1469163becb213e47ca2a53bc4bf722140ba5f564f7105bb813764"
     },
     {
       "bytes": 775,
@@ -10064,18 +10085,18 @@
       "sha256": "e03cd2506f026c9e618ee2035b2676fb52369982e79e9df6eba0d3f5c1df5465"
     },
     {
-      "bytes": 6255,
+      "bytes": 6429,
       "mode": "0o644",
       "path": "docs/README.md",
       "sanitization_edits": 0,
-      "sha256": "8d5de0b4d2f900e81eb9d21f3f4b23c01d69e62b86942c7fb613668aeb9c08f3"
+      "sha256": "c447a457f20f17bb4c28077bc0eda3b6b4f5e22a36a37245a0325e7c6625d0e7"
     },
     {
-      "bytes": 10563,
+      "bytes": 10915,
       "mode": "0o644",
       "path": "docs/STATUS.md",
       "sanitization_edits": 0,
-      "sha256": "a0b9be161ccd50a6966d1dbae5f3fc1f52a38e77a5a4c50dbe662f2dd149d1db"
+      "sha256": "1542e54320caa71745f5471d33ef2989d73012f363a547677b81df8f450bf2a2"
     },
     {
       "bytes": 8620,
@@ -10295,11 +10316,11 @@
       "sha256": "90c65124e71bba9a456fd8202098dcbf34ba12c23e9a76069b2667fc36372ecf"
     },
     {
-      "bytes": 1549,
+      "bytes": 1612,
       "mode": "0o644",
       "path": "pyproject.toml",
       "sanitization_edits": 0,
-      "sha256": "2939ee139f590da2217904a4ee6ba705961a7bb58fbea06856b46c6a88a4d306"
+      "sha256": "52244cb65aa416d448f922f95aa9ce02c7b29c54ecae1d4ce04e3685e970b990"
     },
     {
       "bytes": 432,
@@ -10309,7 +10330,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:298673317b34195e76caab6d1443ec6417354b5db2a85d7842a0f1e00baa3c8a",
+  "projection_digest": "sha256:1e6935e9409bb8f6b058d47b3126e289e7d1edd7150773a3e6865e6c60a02ad5",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

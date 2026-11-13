@@ -171,3 +171,16 @@ def test_two_processes_one_writer(tmp_path: Path) -> None:
     assert statuses == ["acquired", "waiting"]
     with WorkClaimRegistry(path) as registry:
         assert registry.verify_events() == 2
+
+
+def test_claim_reference_is_part_of_the_hash_chain(registry: WorkClaimRegistry) -> None:
+    held = registry.claim(agent_id="agent-a", resources=["task:demo"], now=at(0),
+                          reference={"turn_id": "turn-1", "registration_id": "sha256:" + "a" * 64})
+    registry.claim(agent_id="agent-b", resources=["task:demo"], now=at(1))
+    first, second = registry.events()
+    assert first["reference"] == {"registration_id": "sha256:" + "a" * 64, "turn_id": "turn-1"}
+    assert "reference" not in second and held.status is ClaimStatus.ACQUIRED
+    assert registry.verify_events() == 2
+    for bad in ({}, {"Turn": "x"}, {"turn_id": ""}, {"turn_id": 5}, {"turn_id": "a\nb"}):
+        with pytest.raises(WorkClaimError):
+            registry.claim(agent_id="agent-c", resources=["task:other"], now=at(2), reference=bad)

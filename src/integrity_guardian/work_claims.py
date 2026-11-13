@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import re
 import sqlite3
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -178,6 +178,21 @@ def _agent(agent_id: str) -> str:
     return agent_id
 
 
+def _reference(reference: Mapping[str, str]) -> dict[str, str]:
+    if not isinstance(reference, Mapping) or not 1 <= len(reference) <= 8:
+        raise WorkClaimError("claim reference must hold 1..8 entries")
+    for key, value in reference.items():
+        if (
+            not isinstance(key, str)
+            or _KIND.fullmatch(key.replace("_", "-")) is None
+            or not isinstance(value, str)
+            or not 1 <= len(value) <= 512
+            or not value.isprintable()
+        ):
+            raise WorkClaimError("claim reference entries must be short printable strings")
+    return dict(sorted(reference.items()))
+
+
 def _ttl(ttl_seconds: int) -> int:
     if (
         isinstance(ttl_seconds, bool)
@@ -253,11 +268,18 @@ class WorkClaimRegistry:
         resources: Iterable[str],
         ttl_seconds: int = 300,
         now: datetime | None = None,
+        reference: Mapping[str, str] | None = None,
     ) -> ClaimDecision:
-        """Request exclusive write access to a blast radius."""
+        """Request exclusive write access to a blast radius.
+
+        ``reference`` is optional caller-asserted context, such as the turn a
+        claim belongs to. It is stored in the claim's log event and so becomes
+        part of the hash chain; it never changes the decision.
+        """
 
         agent = _agent(agent_id)
         ttl = _ttl(ttl_seconds)
+        extra = None if reference is None else {"reference": _reference(reference)}
         normalized = tuple(sorted({normalize_resource(item) for item in resources}))
         if not normalized or len(normalized) > MAX_RESOURCES:
             raise WorkClaimError(f"a claim must name 1..{MAX_RESOURCES} resources")
@@ -278,7 +300,7 @@ class WorkClaimRegistry:
                     blocked_by=tuple(row["claim_id"] for row in own),
                     reason="overlaps a claim this agent already holds or awaits",
                 )
-                self._append_event("claim-rejected", decision, current)
+                self._append_event("claim-rejected", decision, current, extra=extra)
                 return decision
             claim_id = "claim:" + digest_object(
                 {
@@ -304,6 +326,7 @@ class WorkClaimRegistry:
                 "claim-acquired" if decision.status is ClaimStatus.ACQUIRED else "claim-waiting",
                 decision,
                 current,
+                extra=extra,
             )
             return decision
 
