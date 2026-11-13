@@ -1,0 +1,28 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -2061,6 +2061,25 @@
+         )
+         save_state(identity, state)
+         return
++    if (
++        re.search(r"(?i)(?:^|__)integrity_turn_memory_close$", name)
++        and arguments.get("outcome") == "no-event"
++        and state.get("append_outcome") in {"created", "duplicate"}
++        and arguments.get("registration_id") == state.get("turn_memory_registration_id")
++    ):
++        # ISS-019: a turn that appended an event must not be closed as no-event;
++        # the signed terminal receipt cannot be corrected afterwards.
++        deny(
++            "this turn appended event "
++            + str(state.get("append_event_id"))
++            + "; close it with outcome=events and events=[{event_uid: "
++            + repr(state.get("append_event_uid"))
++            + ", event_id: "
++            + str(state.get("append_event_id"))
++            + ", request_sha256: "
++            + repr(state.get("append_request_sha256"))
++            + "}] instead of no-event"
++        )
+     if INTEGRITY_TOOL_RE.search(name) and not APPEND_TOOL_RE.search(name):
+         return
+     if APPEND_TOOL_RE.search(name):

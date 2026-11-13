@@ -37,6 +37,16 @@ They are now in `src/integrity_guardian`:
   hooks do not read the value.
 - A test now checks that the shipped tools catalogue lists every tool of the
   facade's current profile.
+- **Claude hook patch series**
+  (`components/integrity-client-memory/hook-series/claude-windows/`): a second
+  Claude Code hook lineage, the one that runs on a Windows workstation,
+  published as a base file plus 23 strict patches (20 for the admission hook,
+  3 for the turn guard), the builder and the full build. A test rebuilds the
+  series in a temporary folder, checks every recorded step sha and compares
+  the result with `built/` byte for byte. Private marks of the installation
+  were replaced, so the build differs from the installed bytes in 33 + 5
+  lines. The published build was not installed or run. It is not part of any
+  launcher profile, and the two Claude hooks are not merged.
 
 ### Agent bus 1.1.0
 

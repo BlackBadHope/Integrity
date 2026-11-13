@@ -1,0 +1,89 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -1972,6 +1972,13 @@
+             "turn's registration with the event's receipt."
+         )
+         interrupted_gap = (interrupted_gap + chr(10) + notice) if interrupted_gap else notice
++    unsent = state.pop(APPEND_NOT_SENT_STATE, None)
++    if isinstance(unsent, str):
++        notice = (
++            "APPEND NOT SENT IN THE PREVIOUS TURN (ISS-066): nothing was written. After admission, append "
++            "that event once" + (f" with the same event_uid {unsent}" if unsent else "") + "."
++        )
++        interrupted_gap = (interrupted_gap + chr(10) + notice) if interrupted_gap else notice
+     generation = next_turn_memory_generation(state)
+     prior_turn_ref = state.get("turn_ref")
+     if isinstance(prior_turn_ref, str):
+@@ -2270,6 +2277,12 @@
+             deny("turn_memory_registration_required")
+         if state.get("append_outcome") == "unknown-outcome":
+             deny("prior append outcome is unknown; automatic retry is forbidden")
++        if state.get("append_attempted") is True and state.get("append_outcome") == "not-sent":
++            deny(
++                "the previous append of this turn was not sent (ISS-066: upstream transport lost, "
++                "nothing written) and this turn's admitted context is gone; append it in the next turn "
++                "with the same event_uid"
++            )
+         if state.get("append_attempted") is True:
+             deny("only one append attempt is allowed in the current turn")
+         pending_uid = tool_input(payload).get("event_uid")
+@@ -2485,6 +2498,47 @@
+     )
+ 
+ 
++def _pre_send_append_transport_denial(item: dict[str, Any]) -> bool:
++    """ISS-066: the broker lost its upstream before any byte of this append was written."""
++    return (
++        item.get("protocol") == "integrity-client/turn-broker-denial/v1"
++        and item.get("tool") == "integrity_append_event"
++        and item.get("failure_layer") == "broker-upstream"
++        and item.get("outcome") == "denied"
++        and item.get("request_sent") is False
++        and item.get("canonical_writes") == 0
++    )
++
++
++APPEND_NOT_SENT_STATE = "append_not_sent_event_uid"
++
++
++def _record_unsent_append(event: str, identity: str, state: dict[str, Any]) -> bool:
++    """ISS-066: an append that never left the broker wrote nothing and is safe to send again,
++    but not in this turn: the admitted logical context died with the upstream transport, the
++    broker closes it, and the turn envelope was already consumed by the admission, so no second
++    admission (and no admitted append) is possible before the next prompt. Record the outcome
++    honestly and carry the event_uid to the next turn."""
++
++    if state.get("append_outcome") != "started":
++        return False
++    uid = state.get("append_pending_event_uid")
++    uid = uid if isinstance(uid, str) else ""
++    state["append_outcome"] = "not-sent"
++    state["unresolved_mutation"] = False
++    state[APPEND_NOT_SENT_STATE] = uid
++    save_state(identity, state)
++    output_context(
++        event,
++        "INTEGRITY APPEND NOT SENT (ISS-066): the broker lost its upstream transport before any byte "
++        "of this append was sent; canonical_writes=0, nothing was written. The admitted context was "
++        "lost with that transport, so this turn cannot append again: do not retry now. In the next "
++        "turn, after admission, append the same content once with the same event_uid "
++        + (uid or "(the one you used)") + " and close both registrations.",
++    )
++    return True
++
++
+ def _arm_supported_retry(
+     event: str,
+     retryable_wal: dict[str, Any] | None,
+@@ -2575,6 +2629,11 @@
+     name = tool_name(payload)
+     if subagent_id(payload) is not None:
+         return  # ISS-049: a subagent never arms the parent's admission retry
++    if APPEND_TOOL_RE.search(name):
++        document = _failure_document(payload)
++        if document is not None and find_document(document, _pre_send_append_transport_denial) is not None:
++            _record_unsent_append(event, identity, state)
++        return
+     if not CURRENT_CONTEXT_TOOL_RE.search(name):
+         return
+     if tool_input(payload).get("turn_ref") != state.get("turn_ref"):

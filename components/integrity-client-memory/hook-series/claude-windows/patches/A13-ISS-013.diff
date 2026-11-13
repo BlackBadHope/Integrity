@@ -1,0 +1,24 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -121,7 +121,11 @@
+ LEGACY_SERVER_VERSION = "2.7.0"
+ ROLLOUT_LEGACY_SERVER_VERSION = "2.6.0"
+ HOOK_VERSION = "1.7.5"
+-LIFECYCLE_BUDGET_SECONDS = 45
++# ISS-013: the broker drops a silent upstream after UPSTREAM_INITIALIZE_TIMEOUT_SECONDS=20
++# and reconnects once; the server then answers (gap observed twice) while the hook
++# had already given up at 35 s. 48 s per read inside a 52 s budget waits for that one retry and,
++# with up to 5 s for broker close, stays under the 60 s hook timeout.
++LIFECYCLE_BUDGET_SECONDS = 52
+ LIFECYCLE_DEADLINE: float | None = None
+ SEMANTIC_CADENCE_MAX_AGE_SECONDS = 3600
+ SEMANTIC_CADENCE_MAX_ACTIONS = 24
+@@ -1145,7 +1149,7 @@
+         self._send({"jsonrpc": "2.0", "id": request_id, "method": method, "params": params})
+         if self.process.stdout is None:
+             raise HookError("connector_output_closed")
+-        line = self._readline(remaining_lifecycle_seconds(35))
++        line = self._readline(remaining_lifecycle_seconds(48))
+         if not line:
+             raise HookTransportError("response_stream_closed")
+         response = json.loads(line)

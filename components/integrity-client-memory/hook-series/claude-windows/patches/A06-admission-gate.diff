@@ -1,0 +1,41 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -1878,12 +1878,38 @@
+     )
+ 
+ 
++def admission_gate_reason(state: dict[str, Any], name: str) -> str | None:
++    """Admission-first gate (turn-guard.json ``admission_first``); never raises."""
++
++    if _turn_guard is None or not hasattr(_turn_guard, "admission_gate"):
++        return None
++    try:
++        policy = _turn_guard.load_gate_policy(state_root().parent)
++        failure_probe = globals().get("last_broker_failure")
++        failure = failure_probe() if callable(failure_probe) else None
++        reason = _turn_guard.admission_gate(state, name, policy, broker_failure=failure)
++    except Exception:  # noqa: BLE001 - the gate fails open
++        return None
++    if reason:
++        _turn_guard.note_gate_denial(state)
++    return reason
++
++
++def deny_gate(message: str) -> None:
++    print(message, file=sys.stderr)
++    raise SystemExit(2)
++
++
+ def handle_pre_tool(payload: dict[str, Any], identity: str, state: dict[str, Any]) -> None:
+     name = tool_name(payload)
+     arguments = tool_input(payload)
+     encoded = compact(arguments)
+     if re.search(r"(?is)\bdelete\s+from\s+.{0,64}\bevents\b", encoded):
+         deny("canonical Action Log events are immutable")
++    gate = admission_gate_reason(state, name)
++    if gate:
++        save_state(identity, state)
++        deny_gate(gate)
+     if _turn_guard is not None and _turn_guard.note_tool(state, name):
+         # The Stop guard needs to know that this turn attempted a state change.
+         save_state(identity, state)

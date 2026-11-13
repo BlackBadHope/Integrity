@@ -1,0 +1,41 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -91,7 +91,11 @@
+ # only their leading harness tag (after system reminders) tells them apart from owner text.
+ HARNESS_PROMPT_TAG_RE = re.compile(
+     r"\A(?:\s*<system-reminder>.*?</system-reminder>)*\s*"
+-    r"<(?:cross-session-message|side-sessions-event|task-notification)[\s>]",
++    r"(?:<(?:cross-session-message|side-sessions-event|task-notification)[\s>]"
++    # Claude Desktop 2.1.3xx relays background-task and peer-idle events as plain
++    # text banners (owner rule: no admission on such turns).
++    r"|\[SYSTEM NOTIFICATION - NOT USER INPUT\]"
++    r"|\[Cross-session (?:idle|delivery) notice\])",
+     re.DOTALL,
+ )
+ TRANSCRIPT_TAIL_BYTES = 256 * 1024
+@@ -1666,7 +1670,10 @@
+     origin = harness_prompt_origin(payload, intent) if event == "UserPromptSubmit" else None
+     probable_notification = event == "UserPromptSubmit" and (
+         origin in NON_OWNER_PROMPT_ORIGINS
+-        or (origin == ("sdk", "sdk") and HARNESS_PROMPT_TAG_RE.match(intent) is not None)
++        # origin is None when the prompt row is not yet in the transcript at
++        # UserPromptSubmit time (Claude Desktop); the leading harness
++        # banner/tag is then the only signal. Advisory text only, lifecycle unchanged.
++        or (origin in (None, ("sdk", "sdk")) and HARNESS_PROMPT_TAG_RE.match(intent) is not None)
+     )
+     current_turn = turn_id(payload) or f"turn:{uuid.uuid4()}"
+     state = load_state(identity)
+@@ -1750,9 +1757,10 @@
+             else ""
+         )
+         + (
+-            "INTEGRITY client: the harness transcript marks this prompt as a task notification "
+-            "(diagnostic, unsigned). It is not counted toward the offline notice; "
+-            "diagnostic only; admission and lifecycle requirements are unchanged.\n"
++            "INTEGRITY client: HARNESS NOTIFICATION TURN (task notification / peer event; diagnostic, "
++            "unsigned). Owner rule: do NOT call integrity_context_admission_current_turn "
++            "for this turn unless you must append an Integrity event in it; no close is owed when "
++            "no admission was made. The turn_ref below is for that exception only.\n"
+             if probable_notification
+             else ""
+         )

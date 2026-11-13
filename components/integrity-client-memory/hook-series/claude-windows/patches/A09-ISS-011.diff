@@ -1,0 +1,17 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -1941,9 +1941,11 @@
+         )
+         + (
+             "INTEGRITY client: HARNESS NOTIFICATION TURN (task notification / peer event; diagnostic, "
+-            "unsigned). Owner rule: do NOT call integrity_context_admission_current_turn "
+-            "for this turn unless you must append an Integrity event in it; no close is owed when "
+-            "no admission was made. The turn_ref below is for that exception only.\n"
++            "unsigned). Owner rule: a read-only notification turn does NOT call "
++            "integrity_context_admission_current_turn and owes no close. ISS-011: "
++            "if this turn will change state (edit/write files, run shell commands, send messages) or "
++            "append an Integrity event, call admission with the turn_ref below before the first such "
++            "tool and close the registration before finishing.\n"
+             if probable_notification and state.get("turn_guard_interrupted_owner") is not True
+             else (
+                 "INTEGRITY client: this notification arrived inside an unfinished owner turn. The "

@@ -1,0 +1,14 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -939,6 +939,11 @@
+         return None
+     closed = close_interrupted_with_events(registration, state)
+     if closed is not None:
++        # ISS-023: the cut-off turn's state change is covered by the event it was
++        # just closed with. The continuation turn stays an owner turn (still gated), but it
++        # must not inherit that change, or Stop demands a second close for covered work.
++        if isinstance(interrupted, dict):
++            interrupted["state_changed"] = False
+         return closed
+     try:
+         coverage = lifecycle_call(

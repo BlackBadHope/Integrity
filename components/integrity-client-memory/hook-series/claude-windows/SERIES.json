@@ -1,0 +1,249 @@
+{
+  "protocol": "integrity-client-memory/claude-hook-series/v1",
+  "admission": {
+    "file": "integrity-client-admission.py",
+    "base": "local fork of the Claude admission hook, state before the first step",
+    "base_sha256": "faa5c618e1d21f61f0a223de7d9ebded20d2b4267d4c594ac531f850e9f34606",
+    "base_origin": "local fork before the notification exemption",
+    "steps": [
+      {
+        "patch": "A01-notif-exemption.diff",
+        "change": "notif-exemption",
+        "origin": "harness notification banners are exempt from admission",
+        "pre_sha256": "faa5c618e1d21f61f0a223de7d9ebded20d2b4267d4c594ac531f850e9f34606",
+        "post_sha256": "df4c9d9ee5cd197e5c94f61837c38d8bdbde6ff8d832d11e30d8307c3d765750",
+        "crlf": false,
+        "added": 13,
+        "removed": 5
+      },
+      {
+        "patch": "A02-turn-guard-beta3.diff",
+        "change": "turn-guard-beta3",
+        "origin": "vendored turn-close guard wired into the hook",
+        "pre_sha256": "df4c9d9ee5cd197e5c94f61837c38d8bdbde6ff8d832d11e30d8307c3d765750",
+        "post_sha256": "2b399323ba14e4a7e76a4a971326cc3b1271838df4fcd8e3ff608c5b99135f3f",
+        "crlf": true,
+        "added": 95,
+        "removed": 31
+      },
+      {
+        "patch": "A03-probefix.diff",
+        "change": "probefix",
+        "origin": "memory-server probe reports evidence instead of a guess",
+        "pre_sha256": "2b399323ba14e4a7e76a4a971326cc3b1271838df4fcd8e3ff608c5b99135f3f",
+        "post_sha256": "371c1a5e6826d41daed46d7a631cefe16b15125c0f3ecebaf1260c199962692c",
+        "crlf": true,
+        "added": 43,
+        "removed": 11
+      },
+      {
+        "patch": "A04-livefix.diff",
+        "change": "livefix",
+        "origin": "longer probe timeout; gap recording for an interrupted turn",
+        "pre_sha256": "371c1a5e6826d41daed46d7a631cefe16b15125c0f3ecebaf1260c199962692c",
+        "post_sha256": "33236268b980115b8ffe6111d7c698af1ea84456e0056aa6e31a34cb981e090e",
+        "crlf": true,
+        "added": 39,
+        "removed": 2
+      },
+      {
+        "patch": "A05-interruptmsg.diff",
+        "change": "interruptmsg",
+        "origin": "notice for a notification inside an unfinished owner turn",
+        "pre_sha256": "33236268b980115b8ffe6111d7c698af1ea84456e0056aa6e31a34cb981e090e",
+        "post_sha256": "a1d44a8e74f6fe5774dd7e381cdbd70fdf979ac3b9a63b983c1ceb8bb03613a1",
+        "crlf": true,
+        "added": 9,
+        "removed": 2
+      },
+      {
+        "patch": "A06-admission-gate.diff",
+        "change": "admission-gate",
+        "origin": "admission-first gate before other tools",
+        "pre_sha256": "a1d44a8e74f6fe5774dd7e381cdbd70fdf979ac3b9a63b983c1ceb8bb03613a1",
+        "post_sha256": "a3f0e34b9f51e266e2c5cea6b484f70c5687f072a67ee6a372fcba756c22bd0c",
+        "crlf": false,
+        "added": 26,
+        "removed": 0
+      },
+      {
+        "patch": "A07-broker-registration.diff",
+        "change": "broker-registration",
+        "origin": "turn registration opened by the warm broker",
+        "pre_sha256": "a3f0e34b9f51e266e2c5cea6b484f70c5687f072a67ee6a372fcba756c22bd0c",
+        "post_sha256": "ea426dec6bba33be5a57a80a420f0bed2ed7601d9b8ad49233c9db9ce86329a7",
+        "crlf": false,
+        "added": 56,
+        "removed": 2
+      },
+      {
+        "patch": "A08-ISS-007-009.diff",
+        "change": "ISS-007-009",
+        "origin": "an interrupted turn is closed with its appended event",
+        "pre_sha256": "ea426dec6bba33be5a57a80a420f0bed2ed7601d9b8ad49233c9db9ce86329a7",
+        "post_sha256": "e724c449ffdbfd4954a1e04d0f254a5cedc1ec1e2bb5f4a5f880d5494c669838",
+        "crlf": false,
+        "added": 42,
+        "removed": 2
+      },
+      {
+        "patch": "A09-ISS-011.diff",
+        "change": "ISS-011",
+        "origin": "a notification turn that changes state needs admission",
+        "pre_sha256": "e724c449ffdbfd4954a1e04d0f254a5cedc1ec1e2bb5f4a5f880d5494c669838",
+        "post_sha256": "c52b921fa689a123ea5b9e9903af0f071f8e436480712a3752d87377c1007939",
+        "crlf": false,
+        "added": 5,
+        "removed": 3
+      },
+      {
+        "patch": "A10-ISS-017.diff",
+        "change": "ISS-017",
+        "origin": "Stop skips re-verification after an observed close",
+        "pre_sha256": "c52b921fa689a123ea5b9e9903af0f071f8e436480712a3752d87377c1007939",
+        "post_sha256": "4bb96d36526630741e2b7788593eea84bfa9a6d7174d15706dc08fae4f4ee36e",
+        "crlf": false,
+        "added": 15,
+        "removed": 1
+      },
+      {
+        "patch": "A11-ISS-018.diff",
+        "change": "ISS-018",
+        "origin": "notice for a declined close in the next turn",
+        "pre_sha256": "4bb96d36526630741e2b7788593eea84bfa9a6d7174d15706dc08fae4f4ee36e",
+        "post_sha256": "cbf3d056e5b751b97f36a4dc163065e43a272ad98d452084851b908aac66eede",
+        "crlf": false,
+        "added": 16,
+        "removed": 0
+      },
+      {
+        "patch": "A12-ISS-019.diff",
+        "change": "ISS-019",
+        "origin": "a no-event close after an append is refused",
+        "pre_sha256": "cbf3d056e5b751b97f36a4dc163065e43a272ad98d452084851b908aac66eede",
+        "post_sha256": "6f84234904b5f4ff2623968df30cc771796739dd22e7b905a9791e5c6feb4694",
+        "crlf": false,
+        "added": 19,
+        "removed": 0
+      },
+      {
+        "patch": "A13-ISS-013.diff",
+        "change": "ISS-013",
+        "origin": "lifecycle budget covers one broker reconnect",
+        "pre_sha256": "6f84234904b5f4ff2623968df30cc771796739dd22e7b905a9791e5c6feb4694",
+        "post_sha256": "51cc025952404a54153a1d06a0fdb5a92f2154d8fd484898a1894690caec5704",
+        "crlf": true,
+        "added": 6,
+        "removed": 2
+      },
+      {
+        "patch": "A14-ISS-023.diff",
+        "change": "ISS-023",
+        "origin": "a continuation turn does not inherit an already covered change",
+        "pre_sha256": "51cc025952404a54153a1d06a0fdb5a92f2154d8fd484898a1894690caec5704",
+        "post_sha256": "3ea0285e74c475392888dd5db77ecd8cacd73c078e18880fa0d72185b5678708",
+        "crlf": true,
+        "added": 5,
+        "removed": 0
+      },
+      {
+        "patch": "A15-ISS-028.diff",
+        "change": "ISS-028",
+        "origin": "gapped registrations are closed by later events, one per hook call",
+        "pre_sha256": "3ea0285e74c475392888dd5db77ecd8cacd73c078e18880fa0d72185b5678708",
+        "post_sha256": "5e582e88103c83836c8273d391721543b0b51f020fed473ee34d9866ff3173a2",
+        "crlf": true,
+        "added": 70,
+        "removed": 1
+      },
+      {
+        "patch": "A16-ISS-042.diff",
+        "change": "ISS-042",
+        "origin": "the supported admission retry also runs on PostToolUseFailure",
+        "pre_sha256": "5e582e88103c83836c8273d391721543b0b51f020fed473ee34d9866ff3173a2",
+        "post_sha256": "27e4f38208bde4a0859f43b12aaf3f41a90f7345f4f9d1c81c9444a70f29321e",
+        "crlf": true,
+        "added": 130,
+        "removed": 69
+      },
+      {
+        "patch": "A17-ISS-049.diff",
+        "change": "ISS-049",
+        "origin": "subagent calls never use the parent's turn state",
+        "pre_sha256": "27e4f38208bde4a0859f43b12aaf3f41a90f7345f4f9d1c81c9444a70f29321e",
+        "post_sha256": "ef0f3b20fbb3fedd5190cc11d0fa436fbeb45a566ec3749da98cc05f61529799",
+        "crlf": true,
+        "added": 43,
+        "removed": 0
+      },
+      {
+        "patch": "A18-ISS-050.diff",
+        "change": "ISS-050",
+        "origin": "resolver for the broker's compact append view",
+        "pre_sha256": "ef0f3b20fbb3fedd5190cc11d0fa436fbeb45a566ec3749da98cc05f61529799",
+        "post_sha256": "c8be63202dfede053c7afa0af40d18c9e32087654011fa7e30f7faffe3a0d9a4",
+        "crlf": true,
+        "added": 8,
+        "removed": 0
+      },
+      {
+        "patch": "A19-keywords-line.diff",
+        "change": "keywords-line",
+        "origin": "advisory check of the keywords line in event summaries",
+        "pre_sha256": "c8be63202dfede053c7afa0af40d18c9e32087654011fa7e30f7faffe3a0d9a4",
+        "post_sha256": "29480a89eba5ff42730a5baf5c7bd4e724c370d52be1401681bf991e1b4618a6",
+        "crlf": true,
+        "added": 68,
+        "removed": 0
+      },
+      {
+        "patch": "A20-ISS066.diff",
+        "change": "ISS066",
+        "origin": "an append that was never sent is carried to the next turn",
+        "pre_sha256": "29480a89eba5ff42730a5baf5c7bd4e724c370d52be1401681bf991e1b4618a6",
+        "post_sha256": "dc02a1f33d84ebce187eb9a9ba56dc6cb24def938eb5c9230e917f4f06de6bad",
+        "crlf": true,
+        "added": 59,
+        "removed": 0
+      }
+    ]
+  },
+  "turn_guard": {
+    "file": "integrity_turn_guard.py",
+    "base": "vendored turn guard (integrity-next v7.0.0-beta.3), state before the first step",
+    "base_sha256": "2cf45e51c56b4e96c239590949c50545e32c5c619648a766a54e373105e0d041",
+    "base_origin": "vendored beta.3 turn guard before the admission-first gate",
+    "steps": [
+      {
+        "patch": "T01-tg-to-ISS-011.diff",
+        "change": "tg-to-ISS-011",
+        "origin": "admission-first gate in the turn guard",
+        "pre_sha256": "2cf45e51c56b4e96c239590949c50545e32c5c619648a766a54e373105e0d041",
+        "post_sha256": "befa614cc19567235473fad48969698b541139f557c10b20bae759b2f57fed67",
+        "crlf": false,
+        "added": 92,
+        "removed": 0
+      },
+      {
+        "patch": "T02-tg-ISS-011-to-ISS-018.diff",
+        "change": "tg-ISS-011-to-ISS-018",
+        "origin": "a notification turn that changes state is gated",
+        "pre_sha256": "befa614cc19567235473fad48969698b541139f557c10b20bae759b2f57fed67",
+        "post_sha256": "5618be4c421c8dd7e7347b92f675fdd3d7b85ce2f3f5e3096e41de326ce59e76",
+        "crlf": false,
+        "added": 14,
+        "removed": 2
+      },
+      {
+        "patch": "T03-tg-ISS-018.diff",
+        "change": "tg-ISS-018",
+        "origin": "explicit close instruction for a turn without an event",
+        "pre_sha256": "5618be4c421c8dd7e7347b92f675fdd3d7b85ce2f3f5e3096e41de326ce59e76",
+        "post_sha256": "f18047d6f45122f84641be8fdd37c2d886df7342bc96d8f43f05d7cabcfd1d93",
+        "crlf": false,
+        "added": 21,
+        "removed": 8
+      }
+    ]
+  }
+}

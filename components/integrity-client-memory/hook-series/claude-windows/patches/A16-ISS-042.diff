@@ -1,0 +1,234 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -2357,6 +2357,130 @@
+     return task if matched else None
+ 
+ 
++def _retryable_read_seal_denial(item: dict[str, Any]) -> bool:
++    return (
++        item.get("reason_code") == "seed_catalog_checkpoint_required"
++        and item.get("automatic_retry_allowed") is True
++        and item.get("canonical_writes") == 0
++        and item.get("retry_disposition") == "exact-envelope-after-supported-read-seal"
++    )
++
++
++def _retryable_pre_send_transport_denial(item: dict[str, Any]) -> bool:
++    return (
++        item.get("protocol") == "integrity-client/turn-broker-denial/v1"
++        and item.get("failure_layer") == "broker-upstream"
++        and item.get("request_sent") is False
++        and item.get("automatic_retry_allowed") is True
++        and item.get("canonical_writes") == 0
++        and item.get("retry_disposition") == "exact-envelope-after-pre-send-transport"
++    )
++
++
++def _arm_supported_retry(
++    event: str,
++    retryable_wal: dict[str, Any] | None,
++    retryable_transport: dict[str, Any] | None,
++    identity: str,
++    state: dict[str, Any],
++) -> bool:
++    """The one supported retry of the current-turn admission; True when it was armed.
++
++    Moved verbatim from handle_post_tool (ISS-042) and shared with PostToolUseFailure: same
++    proofs, same counters (each branch at most once per turn), same state and notices on both
++    paths. The read-seal branch is checked first, as before; a failed envelope arm arms nothing.
++    """
++
++    if retryable_wal is not None and int(state.get("model_mcp_read_seal_retry_count", 0)) < 1:
++        state["model_mcp_read_seal_retry_count"] = 1
++        state["model_mcp_admission_attempted"] = False
++        state["model_mcp_admission_status"] = "required"
++        state["automatic_retry_allowed"] = True
++        state["retry_disposition"] = "exact-envelope-after-supported-read-seal"
++        save_state(identity, state)
++        output_context(
++            event,
++            "INTEGRITY READ PLANE RETRYABLE: the exact current turn_ref was not consumed. "
++            "After the Seed owner completes the supported read-seal recovery, retry "
++            "integrity_context_admission_current_turn once with the identical turn_ref. "
++            "No other tool is admitted before that retry.",
++        )
++        return True
++    if retryable_transport is not None and int(state.get("model_mcp_transport_retry_count", 0)) < 1:
++        try:
++            turn_envelope.arm(
++                str(state.get("turn_ref", "")),
++                machine_id=machine_id(),
++                thread_id=identity,
++                turn_id=str(state.get("turn_id", "")),
++                generation=int(state.get("turn_memory_generation", 0)),
++                prompt_sha256=str(state.get("prompt_sha256", "")),
++            )
++        except (OSError, ValueError, turn_envelope.TurnEnvelopeError):
++            return False
++        state["model_mcp_transport_retry_count"] = 1
++        state["model_mcp_admission_attempted"] = False
++        state["model_mcp_admission_status"] = "required"
++        state["automatic_retry_allowed"] = True
++        state["retry_disposition"] = "exact-envelope-after-pre-send-transport"
++        save_state(identity, state)
++        output_context(
++            event,
++            "INTEGRITY TRANSPORT RETRYABLE: no admission request bytes were sent and "
++            "the exact current turn_ref remains armed. Retry "
++            "integrity_context_admission_current_turn once with the identical turn_ref. "
++            "No other Integrity tool is admitted before that retry.",
++        )
++        return True
++    return False
++
++
++def _failure_document(payload: dict[str, Any]) -> dict[str, Any] | None:
++    """ISS-042: a tool that ends in error reaches the hook as PostToolUseFailure, with the
++    denial text in `error` and no tool_response (verified live on Claude Code 2.1.321).
++    Only the first JSON object counts."""
++
++    text = payload.get("error")
++    if not isinstance(text, str):
++        return None
++    start = text.find("{")
++    if start < 0:
++        return None
++    try:
++        value, _ = json.JSONDecoder().raw_decode(text[start:])
++    except ValueError:
++        return None
++    return value if isinstance(value, dict) else None
++
++
++def handle_post_tool_failure(
++    event: str, payload: dict[str, Any], identity: str, state: dict[str, Any]
++) -> None:
++    """ISS-042: the supported admission retries on the tool-error path.
++
++    The facade read-seal denial and the broker pre-send transport denial both reach the hook as
++    tool errors, so the PostToolUse branches never saw them and the turn stayed single-shot
++    without admission. Same proofs and counters via _arm_supported_retry; any other failure keeps
++    the previous behaviour (before this step the hook saw no failures at all).
++    """
++
++    name = tool_name(payload)
++    if not CURRENT_CONTEXT_TOOL_RE.search(name):
++        return
++    if tool_input(payload).get("turn_ref") != state.get("turn_ref"):
++        return
++    document = _failure_document(payload)
++    if document is None:
++        return
++    _arm_supported_retry(
++        event,
++        find_document(document, _retryable_read_seal_denial),
++        find_document(document, _retryable_pre_send_transport_denial),
++        identity,
++        state,
++    )
++
++
+ def handle_post_tool(
+     event: str, payload: dict[str, Any], identity: str, state: dict[str, Any]
+ ) -> None:
+@@ -2419,80 +2543,14 @@
+         if context is None:
+             # A result above Claude Code's output limit reaches the hook only as a notice.
+             context = find_document(spilled_tool_result(response, payload), is_context)
+-        retryable_wal = find_document(
+-            response,
+-            lambda item: (
+-                item.get("reason_code") == "seed_catalog_checkpoint_required"
+-                and item.get("automatic_retry_allowed") is True
+-                and item.get("canonical_writes") == 0
+-                and item.get("retry_disposition")
+-                == "exact-envelope-after-supported-read-seal"
+-            ),
+-        )
+-        retryable_transport = find_document(
+-            response,
+-            lambda item: (
+-                item.get("protocol") == "integrity-client/turn-broker-denial/v1"
+-                and item.get("failure_layer") == "broker-upstream"
+-                and item.get("request_sent") is False
+-                and item.get("automatic_retry_allowed") is True
+-                and item.get("canonical_writes") == 0
+-                and item.get("retry_disposition")
+-                == "exact-envelope-after-pre-send-transport"
+-            ),
+-        )
++        retryable_wal = find_document(response, _retryable_read_seal_denial)
++        retryable_transport = find_document(response, _retryable_pre_send_transport_denial)
+         if (
+             context is None
+             and CURRENT_CONTEXT_TOOL_RE.search(name)
+-            and retryable_wal is not None
+-            and int(state.get("model_mcp_read_seal_retry_count", 0)) < 1
++            and _arm_supported_retry(event, retryable_wal, retryable_transport, identity, state)
+         ):
+-            state["model_mcp_read_seal_retry_count"] = 1
+-            state["model_mcp_admission_attempted"] = False
+-            state["model_mcp_admission_status"] = "required"
+-            state["automatic_retry_allowed"] = True
+-            state["retry_disposition"] = "exact-envelope-after-supported-read-seal"
+-            save_state(identity, state)
+-            output_context(
+-                event,
+-                "INTEGRITY READ PLANE RETRYABLE: the exact current turn_ref was not consumed. "
+-                "After the Seed owner completes the supported read-seal recovery, retry "
+-                "integrity_context_admission_current_turn once with the identical turn_ref. "
+-                "No other tool is admitted before that retry.",
+-            )
+             return
+-        if (
+-            context is None
+-            and CURRENT_CONTEXT_TOOL_RE.search(name)
+-            and retryable_transport is not None
+-            and int(state.get("model_mcp_transport_retry_count", 0)) < 1
+-        ):
+-            try:
+-                turn_envelope.arm(
+-                    str(state.get("turn_ref", "")),
+-                    machine_id=machine_id(),
+-                    thread_id=identity,
+-                    turn_id=str(state.get("turn_id", "")),
+-                    generation=int(state.get("turn_memory_generation", 0)),
+-                    prompt_sha256=str(state.get("prompt_sha256", "")),
+-                )
+-            except (OSError, ValueError, turn_envelope.TurnEnvelopeError):
+-                retryable_transport = None
+-            else:
+-                state["model_mcp_transport_retry_count"] = 1
+-                state["model_mcp_admission_attempted"] = False
+-                state["model_mcp_admission_status"] = "required"
+-                state["automatic_retry_allowed"] = True
+-                state["retry_disposition"] = "exact-envelope-after-pre-send-transport"
+-                save_state(identity, state)
+-                output_context(
+-                    event,
+-                    "INTEGRITY TRANSPORT RETRYABLE: no admission request bytes were sent and "
+-                    "the exact current turn_ref remains armed. Retry "
+-                    "integrity_context_admission_current_turn once with the identical turn_ref. "
+-                    "No other Integrity tool is admitted before that retry.",
+-                )
+-                return
+         try:
+             if context is None or context.get("production_authority") is not False:
+                 raise HookError("model_mcp_context_receipt_missing")
+@@ -2886,6 +2944,7 @@
+             "UserPromptSubmit",
+             "PreToolUse",
+             "PostToolUse",
++            "PostToolUseFailure",
+             "SubagentStart",
+             "Stop",
+             "SubagentStop",
+@@ -2945,6 +3004,8 @@
+             handle_pre_tool(payload, identity, state)
+         elif args.event == "PostToolUse":
+             handle_post_tool(args.event, payload, identity, state)
++        elif args.event == "PostToolUseFailure":
++            handle_post_tool_failure(args.event, payload, identity, state)
+         else:
+             handle_stop(args.event, identity, state, payload)
+     return 0

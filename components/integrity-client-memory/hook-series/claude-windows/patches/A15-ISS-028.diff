@@ -1,0 +1,95 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -927,6 +927,64 @@
+     )
+ 
+ 
++ISS028_GAPPED_CLOSE_BUDGET_SECONDS = 30
++
++
++def close_gapped_with_events(state: dict[str, Any], close_arguments: Any, identity: str | None = None) -> None:
++    """ISS-025: close earlier interrupted, gapped registrations of this session.
++
++    A registration cut off by a new prompt before it appended anything gets a signed gap
++    and then stayed open forever. When the session's next turn closes with events, the
++    same events close those registrations too: the gap receipt stays as the record of the
++    interruption, and the coverage debt is settled by a fact, never by an inferred no-event.
++    Failures keep the registration for the next close (two attempts at most).
++    """
++
++    pending = [r for r in (state.get("iss025_gapped_registrations") or []) if isinstance(r, str)]
++    if not pending or not isinstance(close_arguments, dict):
++        return
++    events = close_arguments.get("events")
++    if not isinstance(events, list) or not events or not all(isinstance(item, dict) for item in events):
++        return
++    # ISS-028: one registration per hook call, inside a bounded budget, with the
++    # attempt persisted before the network call. Two pending closes at up to 52 s each had
++    # outlived the 60 s PostToolUse timeout; the killed hook then lost the observed close.
++    global LIFECYCLE_DEADLINE
++    current = state.get("turn_memory_registration_id")
++    candidates = [r for r in pending if r != current]
++    if not candidates:
++        state["iss025_gapped_registrations"] = []
++        state["iss025_close_attempts"] = {}
++        return
++    registration = candidates[0]
++    attempts = dict(state.get("iss025_close_attempts") or {})
++    if int(attempts.get(registration, 0)) >= 2:
++        # Two attempts were already spent (possibly by killed hooks): give up on it.
++        state["iss025_gapped_registrations"] = candidates[1:]
++        state["iss025_close_attempts"] = {k: v for k, v in attempts.items() if k in candidates[1:]}
++        return
++    count = int(attempts.get(registration, 0)) + 1
++    attempts[registration] = count
++    state["iss025_close_attempts"] = attempts
++    if identity is not None:
++        save_state(identity, state)
++    previous = LIFECYCLE_DEADLINE
++    LIFECYCLE_DEADLINE = time.monotonic() + ISS028_GAPPED_CLOSE_BUDGET_SECONDS
++    try:
++        lifecycle_call(
++            "integrity_turn_memory_close",
++            {"registration_id": registration, "outcome": "events", "events": events},
++        )
++        closed = True
++    except Exception:  # noqa: BLE001 - advisory; keep it for the next close
++        closed = False
++    finally:
++        LIFECYCLE_DEADLINE = previous
++    remaining = [r for r in candidates if r != registration or (not closed and count < 2)]
++    state["iss025_gapped_registrations"] = remaining
++    state["iss025_close_attempts"] = {k: v for k, v in attempts.items() if k in remaining}
++
++
+ def record_interrupted_gap(interrupted: dict[str, Any] | None, state: dict[str, Any] | None = None) -> str | None:
+     """Record coverage debt for a registration a new prompt cuts off before Stop.
+ 
+@@ -959,6 +1017,13 @@
+     terminal = coverage.get("terminal_receipt") if isinstance(coverage, dict) else None
+     if isinstance(terminal, dict):
+         return None  # it was closed after all
++    if isinstance(state, dict):
++        # ISS-025: keep the gapped registration; the session's next close with
++        # events closes it too (the owner's work continued), instead of leaving it open forever.
++        pending = [r for r in (state.get("iss025_gapped_registrations") or []) if isinstance(r, str)]
++        if registration not in pending:
++            pending.append(registration)
++        state["iss025_gapped_registrations"] = pending[-8:]
+     return (
+         f"TURN MEMORY INTERRUPTED: this prompt arrived before the previous turn stopped; its open "
+         f"registration {registration} was recorded as coverage debt (gap_receipt_id="
+@@ -2300,8 +2365,12 @@
+     if _turn_guard is not None and INTEGRITY_TOOL_RE.search(name):
+         # Evidence for the status notice (the server answered) and the Stop guard (closed).
+         _turn_guard.note_mcp_answer(state, name, response)
+-        _turn_guard.note_close(state, name, response)
++        closed_now = _turn_guard.note_close(state, name, response)
++        # ISS-028: persist the observed close first; nothing after it may lose it.
+         save_state(identity, state)
++        if closed_now and state.get("turn_memory_close_outcome") == "events":
++            close_gapped_with_events(state, tool_input(payload), identity)
++            save_state(identity, state)
+     if CONTEXT_TOOL_RE.search(name):
+         completed = tool_input(payload)
+         if CURRENT_CONTEXT_TOOL_RE.search(name):

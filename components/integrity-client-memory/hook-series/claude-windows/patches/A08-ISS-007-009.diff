@@ -1,0 +1,67 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -886,7 +886,44 @@
+         return None
+ 
+ 
+-def record_interrupted_gap(interrupted: dict[str, Any] | None) -> str | None:
++def close_interrupted_with_events(registration: str, state: dict[str, Any] | None) -> str | None:
++    """ISS-007: an interrupted turn that already appended its event is closed honestly.
++
++    The hook recorded the passive-witness receipt of the one append this turn made
++    (created/duplicate). Closing with exactly that event is a fact, not an inferred
++    no-event; any failure falls back to the existing gap path. Turns without an
++    appended event keep the gap (coverage debt) exactly as before.
++    """
++
++    if not isinstance(state, dict) or state.get("append_outcome") not in {"created", "duplicate"}:
++        return None
++    event_id, event_uid, request = (
++        state.get("append_event_id"), state.get("append_event_uid"), state.get("append_request_sha256")
++    )
++    if (
++        isinstance(event_id, bool) or not isinstance(event_id, int) or event_id < 1
++        or not isinstance(event_uid, str) or not isinstance(request, str) or len(request) != 64
++    ):
++        return None
++    try:
++        lifecycle_call(
++            "integrity_turn_memory_close",
++            {
++                "registration_id": registration,
++                "outcome": "events",
++                "events": [{"event_uid": event_uid, "event_id": event_id, "request_sha256": request}],
++            },
++        )
++    except Exception:  # noqa: BLE001 - fall back to the gap path
++        return None
++    return (
++        f"TURN MEMORY INTERRUPTED: the previous turn's registration {registration} was cut off before "
++        f"Stop and has been closed with its appended event {event_id} (outcome=events). "
++        "Work continued in this turn still needs its own admission and close."
++    )
++
++
++def record_interrupted_gap(interrupted: dict[str, Any] | None, state: dict[str, Any] | None = None) -> str | None:
+     """Record coverage debt for a registration a new prompt cuts off before Stop.
+ 
+     Without this the registration was dropped from hook state while still open:
+@@ -896,6 +933,9 @@
+     registration = (interrupted or {}).get("registration_id")
+     if not isinstance(registration, str):
+         return None
++    closed = close_interrupted_with_events(registration, state)
++    if closed is not None:
++        return closed
+     try:
+         coverage = lifecycle_call(
+             "integrity_turn_memory_gap", {"registration_id": registration, "stage": "reconciliation"}
+@@ -1822,7 +1862,7 @@
+         state["turn_kind"] = NOTIFICATION_TURN_KIND
+     offline_notice = admission_offline_notice(state, probable_notification)
+     interrupted = _turn_guard.interrupted_owner_turn(state) if _turn_guard is not None else None
+-    interrupted_gap = record_interrupted_gap(interrupted)
++    interrupted_gap = record_interrupted_gap(interrupted, state)
+     generation = next_turn_memory_generation(state)
+     prior_turn_ref = state.get("turn_ref")
+     if isinstance(prior_turn_ref, str):

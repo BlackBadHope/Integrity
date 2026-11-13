@@ -1,0 +1,105 @@
+--- a/integrity_turn_guard.py
++++ b/integrity_turn_guard.py
+@@ -244,6 +244,7 @@
+         "turn_guard_last_decision",
+         "turn_guard_interrupted_owner",
+         "turn_memory_close_outcome",
++        "admission_gate_denials",
+     ):
+         state.pop(key, None)
+ 
+@@ -745,3 +746,94 @@
+             1 for row in changed if row.get("closed") and row.get("close_outcome") == "no-event"
+         ),
+     }
++
++
++# --- admission-first gate -----------------------------------------------------
++#
++# In an owner turn, deny every tool except ToolSearch until the model has called
++# the current-turn admission. Routes and context arrive with that admission, so
++# reading files first wastes calls. Opt-in (default off); fail-open whenever the
++# memory server looks unavailable, and never more than GATE_MAX_DENIALS per turn.
++
++GATE_KEY = "admission_first"
++ENV_GATE = "INTEGRITY_ADMISSION_FIRST"
++GATE_MODES = ("block", "off")
++GATE_DEFAULT_MODE = "off"
++GATE_MAX_DENIALS = 2
++GATE_MARKER = "INTEGRITY ADMISSION FIRST"
++GATE_ALLOWED_TOOLS = frozenset({"ToolSearch"})
++
++
++def load_gate_policy(root: Path | str | None, environ: Mapping[str, str] | None = None) -> dict[str, Any]:
++    """Gate mode: ``INTEGRITY_ADMISSION_FIRST``, then ``turn-guard.json`` ``admission_first``, then off."""
++
++    environ = os.environ if environ is None else environ
++    raw = environ.get(ENV_GATE, "").strip().lower()
++    if raw:
++        mode = {"1": "block", "on": "block", "true": "block", "0": "off", "false": "off"}.get(raw, raw)
++        if mode in GATE_MODES:
++            return {"mode": mode, "source": "env:" + ENV_GATE}
++        return {"mode": GATE_DEFAULT_MODE, "source": "env:" + ENV_GATE, "error": "invalid mode " + raw[:20]}
++    explicit = environ.get(ENV_POLICY, "").strip()
++    path = Path(explicit) if explicit else (Path(root) / POLICY_FILE if root is not None else None)
++    if path is not None:
++        try:
++            if path.is_file() and not path.is_symlink() and path.stat().st_size <= 64 * 1024:
++                document = json.loads(path.read_text(encoding="utf-8"))
++                mode = document.get(GATE_KEY) if isinstance(document, dict) else None
++                if mode is True:
++                    mode = "block"
++                elif mode is False or mode is None:
++                    mode = "off"
++                if mode in GATE_MODES:
++                    return {"mode": mode, "source": str(path)}
++                return {"mode": GATE_DEFAULT_MODE, "source": str(path), "error": "invalid " + GATE_KEY}
++        except (OSError, ValueError, UnicodeError):
++            return {"mode": GATE_DEFAULT_MODE, "source": str(path), "error": "unreadable policy file"}
++    return {"mode": GATE_DEFAULT_MODE, "source": "default"}
++
++
++def admission_gate(
++    state: Mapping[str, Any],
++    tool: object,
++    policy: Mapping[str, Any],
++    *,
++    broker_failure: str | None = None,
++) -> str | None:
++    """Return the deny message for ``tool``, or ``None`` to let it run.
++
++    The gate is open when it is off, outside an owner turn, once the model has
++    attempted admission (even if that call failed), when the turn has no armed
++    envelope, when the memory broker or the last probe failed (fail-open), and
++    after ``GATE_MAX_DENIALS`` denials in the turn.
++    """
++
++    if policy.get("mode") != "block":
++        return None
++    name = str(tool or "")
++    if name in GATE_ALLOWED_TOOLS or INTEGRITY_TOOL_RE.search(name):
++        return None
++    owner_turn = state.get("turn_kind") == "owner" or state.get("turn_guard_interrupted_owner") is True
++    if not owner_turn or is_exempt(state):
++        return None
++    if state.get("model_mcp_admission_attempted") is True:
++        return None
++    turn_ref = state.get("turn_ref")
++    if not isinstance(turn_ref, str) or not turn_ref.startswith("turnref:"):
++        return None
++    if broker_failure or state.get("mcp_probe_ok") is False:
++        return None
++    denials = state.get("admission_gate_denials")
++    if isinstance(denials, int) and denials >= GATE_MAX_DENIALS:
++        return None
++    return (
++        f"{GATE_MARKER}: call integrity_context_admission_current_turn first, "
++        f"with turn_ref='{turn_ref}', no limit, "
++        'budget={"max_context_bytes": 8192, "max_candidates": 5}. '
++        "If the tool is deferred, load it with ToolSearch. Then continue."
++    )
++
++
++def note_gate_denial(state: dict[str, Any]) -> None:
++    denials = state.get("admission_gate_denials")
++    state["admission_gate_denials"] = (denials if isinstance(denials, int) else 0) + 1
