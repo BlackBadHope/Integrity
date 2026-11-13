@@ -101,6 +101,7 @@ Marks used on this page and in [what is verified](docs/STATUS.md):
 | **Coordination** | Fenced work claims on one machine; an [agent bus](components/integrity-llm-bus/README.md) with a hub for a shared bus | daily use, CI; hub socket handler and multi-host use not verified |
 | **Reach** | The core on another machine over an [OpenSSH forced command](docs/CROSS_MACHINE_QUICKSTART.md); [signed journals](docs/CLOUD_AGENTS.md) for cloud agents | daily use, CI; no live Codex Cloud acceptance |
 | **Guards and kill switch** | [Hook-side guards](components/integrity-guards/README.md) for remote changes and forgotten rules; a [per-vendor and global switch](components/integrity-killswitch/README.md) for agent access | CI; both are alpha |
+| **Human operator room** | [HumanX](components/integrity-humanx/README.md): a web page for a person; room agents of four vendors are woken over the bus, held read-only by hooks, and read production through a read-only gateway | CI; alpha port of a working pilot, no live run of the ported form |
 | **Private archive and UI** | [Home](components/integrity-home/README.md), kept apart from project memory; a read-only [lab and workbench](components/integrity-space/README.md) | CI |
 
 ## Quick start
@@ -220,7 +221,7 @@ workstation hand tasks to each other through the
 
 ## Components
 
-The repository holds one canonical Guardian runtime and 19 optional Python
+The repository holds one canonical Guardian runtime and 20 optional Python
 distributions. Their versions describe different interfaces and deliberately
 do not match the Guardian version. [COMPONENTS.json](COMPONENTS.json) records
 versions, dependencies, import namespaces and entry points.
@@ -268,6 +269,7 @@ versions, dependencies, import namespaces and entry points.
 | --- | --- | --- |
 | [`integrity-home`](components/integrity-home/README.md) | 0.2.0a1 | Home archive, Chronicle projections and the `integrity-seats` console |
 | [`integrity-space`](components/integrity-space/README.md) | 0.2.0 | Read-only MCP Apps lab and workbench UI |
+| [`integrity-humanx`](components/integrity-humanx/README.md) | 0.1.0a1 | Human operator room: web page, read-only room agents woken over the bus, read-only gateway |
 | [`integrity-resource-advisor`](components/integrity-resource-advisor/README.md) | 0.1.0rc6 | Local resource and usage projections |
 
 `components/integrity-seed` and `plugins/` hold plugin interfaces; they are not
@@ -290,7 +292,8 @@ run `git checkout v7.0.1` after cloning.
   retention;
 - agent bus 1.1.0 with a hub daemon, a hub client and an owner signature
   layer;
-- two new components, `integrity-killswitch` and `integrity-guards`;
+- three new components: `integrity-killswitch`, `integrity-guards` and
+  `integrity-humanx`;
 - [Linux core deployment scripts](deploy/linux-core/README.md) for the
   OpenSSH forced-command transport.
 

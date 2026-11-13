@@ -115,6 +115,10 @@ agent hooks -> guards and kill switch -> allow, warn or deny a tool call on that
 - **Kill switch** is a cooperative per-vendor and global switch for agent
   access on one workstation, with an audit log. It does not terminate
   processes.
+- **HumanX** is a room for a human operator: a web page, room agents woken
+  over the bus and held read-only by hooks, and a read-only gateway for SQL,
+  switch `show` commands and a Seed snapshot. Changes go to the operator as
+  text; the room changes nothing itself. It is an alpha port with no live run.
 - **Claude Code** is a separate Windows executor through the Adapter SDK.
   Installation supplies neither a provider executable nor subscription access
   nor an activation proof. An executor is not the read-only memory client.

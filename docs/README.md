@@ -55,7 +55,7 @@ run.
 | Coordination and reach | [llm-bus](../components/integrity-llm-bus/README.md), [bridges](../components/integrity-bridges/README.md), [remote](../components/integrity-remote/README.md), [cloud](../components/integrity-cloud/README.md) |
 | Safety on the agent's machine | [guards](../components/integrity-guards/README.md), [killswitch](../components/integrity-killswitch/README.md) |
 | Execution and adapters | [adapter-sdk](../components/integrity-adapter-sdk/README.md), [execution-bridge](../components/integrity-execution-bridge/README.md), [agents-api](../components/integrity-agents-api/README.md), [codex-persistent](../components/integrity-codex-persistent/README.md), [claude-code](../components/integrity-claude-code/README.md), [active-inquiry](../components/integrity-active-inquiry/README.md), [experience-adapters](../components/integrity-experience-adapters/README.md) |
-| Operator tools | [home](../components/integrity-home/README.md), [space](../components/integrity-space/README.md), [resource-advisor](../components/integrity-resource-advisor/README.md) |
+| Operator tools | [home](../components/integrity-home/README.md), [space](../components/integrity-space/README.md), [humanx](../components/integrity-humanx/README.md), [resource-advisor](../components/integrity-resource-advisor/README.md) |
 
 ## Design notes and history
 

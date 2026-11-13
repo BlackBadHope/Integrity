@@ -58,6 +58,12 @@ handler, the systemd sandbox and multi-host operation are not verified.
   remote-change lock guard, a rule guard with a device command registry, a
   rules drift check, compiled routes and a repeat hook. Host tables, device
   registries and routes are yours to write; the examples are invented.
+- **`integrity-humanx` 0.1.0a1**: a room for a human operator - a small web
+  page, room agents of four vendors woken over the bus and held read-only by
+  hooks, a read-only gateway, and ring and storm screens rendered without a
+  model. Every site value comes from a configuration file. It is a port of a
+  working pilot; the ported form has had no live run, and its README lists
+  the defects carried over.
 
 ### Linux core deployment scripts
 
@@ -77,6 +83,16 @@ states what is verified.
 
 ### Documentation
 
+- **The documentation set was reworked for the current functionality.** The
+  README was rewritten around what Integrity does today, with generated
+  diagrams in light and dark variants (`docs/assets/build_assets.py`). New
+  pages: a documentation map ([docs/README.md](docs/README.md)), what is
+  verified ([docs/STATUS.md](docs/STATUS.md)) and an install guide
+  ([docs/INSTALL.md](docs/INSTALL.md)). The roadmap and the architecture
+  page were brought up to date, every page got a navigation line, and test
+  counts and skip reasons now come from a CI run.
+- Corrected: Seed events are not signed. The Ledger, turn receipts, grants
+  and cloud journals are.
 - A personal device nickname was replaced by a generic description in the
   README, one embedded client comment and one test docstring. The affected
   client resource pins were refreshed.

@@ -12,8 +12,8 @@ acceptance.
 
 - **Stable:** `v7.0.1`, Guardian 7.0.0 with memory MCP facade API 2.11.0.
 - **On `main`, not tagged:** core fixes carried over from a running release,
-  agent bus 1.1.0 with a hub, `integrity-killswitch`, `integrity-guards`, and
-  the Linux core deployment scripts.
+  agent bus 1.1.0 with a hub, `integrity-killswitch`, `integrity-guards`,
+  `integrity-humanx`, and the Linux core deployment scripts.
 
 ## Verification still owed
 
@@ -26,6 +26,7 @@ These ship today. What is missing is evidence.
 | Cloud agents | A live Codex Cloud acceptance; CI covers the journal and the import |
 | Agent bus hub | The socket handler, the systemd sandbox and operation across several hosts |
 | Guards and kill switch | A live acceptance from this repository; both are alpha |
+| Human operator room | A live run of the ported form; tests for the waker loops, the supervisor, Max Reasoning and the quota readers |
 | Mode B tunnels | Whether a third party can connect through their own tunnel at all |
 | macOS | 105 failing tests in the informational job (50 core, 55 client-memory); most need Linux `/proc` custody |
 

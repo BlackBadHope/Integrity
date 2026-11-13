@@ -1,5 +1,7 @@
 # integrity-humanx
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 HumanX is a room for a human operator. The operator writes in a small web page. The page sends each
 message over the LLM bus to one room vendor (claude, codex, gemini or grok). One vendor is the room
 Arbiter. Each vendor runs read-only and is started by a waker only when a message arrives. Vendors read
@@ -89,8 +91,9 @@ uses `human-<operator_id>`, so it matches `room_acl.py`.
 
 ## What is verified
 
-On Windows 11 with Python 3.12 (`python -B -m pytest --import-mode=importlib components/integrity-humanx/tests`),
-with a synthetic configuration in a temporary folder and no network:
+By public CI on Ubuntu and Windows with Python 3.11 and 3.12
+(`python -B -m pytest --import-mode=importlib components/integrity-humanx/tests`), with a synthetic
+configuration in a temporary folder and no network:
 
 - configuration contract, address helpers and launcher `--list` / `--preflight`;
 - delivery health (back-off, crash loop, stuck and hung detection, healer policy), notice de-duplication,
@@ -107,7 +110,8 @@ with a synthetic configuration in a temporary folder and no network:
 
 ## What is not verified
 
-- Nothing was run on Linux. The unix socket, `SO_PEERCRED`, systemd units and file ownership were not exercised.
+- On Linux only these unit tests ran. The unix socket, `SO_PEERCRED`, systemd units and file ownership were
+  not exercised.
 - No live acceptance: no real bus, vendor agent, switch, database, SSH host or browser took part.
 - The waker loops, the supervisor, Max Reasoning and the quota readers are not covered by the tests.
 

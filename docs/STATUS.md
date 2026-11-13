@@ -112,6 +112,19 @@ is cooperative: it does not terminate processes. Host tables, device registries
 and routes for the guards are yours to write; the shipped examples are
 invented.
 
+### A human operator room
+
+*CI; alpha.* [`integrity-humanx`](../components/integrity-humanx/README.md) is a
+port of a working pilot. A person writes in a small web page; a room agent of
+one vendor is woken over the bus, held read-only by hooks, and reads
+production through a read-only gateway. Its unit tests run in public CI with a
+synthetic configuration. The port changes the bus addresses and takes every
+site value from a configuration file, so the ported form has had no live run:
+no real bus, agent, switch, database or browser took part. The waker loops,
+the supervisor, the mode where several vendors answer together and the quota
+readers have no tests. The component README lists the defects carried over
+from the pilot.
+
 ### Event-driven runbooks
 
 *Roadmap.* The plan is for an infrastructure event, such as a syslog line, to
