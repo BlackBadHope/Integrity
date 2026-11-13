@@ -172,7 +172,7 @@
     "path": "src/integrity_client_memory/resources/claude/admission.py",
     "source": "clients/claude/admission.py",
     "source_sha256": "87972c08f3ce1cbe1bfd6a020de5af61eec534ad948252ba734b5510d3125816",
-    "sha256": "a13e906358be24b87d4dd4a38ba1507842ff248ea088f213a36b0cae14f7d4b2"
+    "sha256": "f3bbbf2dd22518ebab2b10f5b7b754eeceb4516373b0ab33d5327f661490fba1"
   },
   {
     "path": "src/integrity_client_memory/resources/common/generation_launcher.py",

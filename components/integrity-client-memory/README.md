@@ -115,6 +115,17 @@ integrity-client-memory --config /absolute/path/to/own-config.json --preflight
 integrity-client-memory --config /absolute/path/to/own-config.json ENTRYPOINT [its arguments]
 ```
 
+Optional, Claude standalone hook (`resources/claude/admission.py`) only: an
+owner who wants every event summary to end with a keywords line can set
+`values.event_summary_keywords_line` to an object, for example
+`{"label": "Keywords:", "min_items": 5, "max_items": 8}`. Add
+`"script": "cyrillic"` (or `"latin"`) and `"min_script_share": 0.5` to require
+that share of items to contain letters of that script. The check is advisory:
+the append is never refused. A malformed or missing line produces a warning
+for the model, and counts go to `keywords-line-health.json` next to the hook
+state. Without this value, or with an invalid one, the check is off. The other
+hooks do not read it.
+
 The launcher uses a fresh subprocess per profile so private top-level names cannot
 collide with other installed components. It does not install hooks, register MCP,
 mint identity, initialize databases, start background processes or contact services
