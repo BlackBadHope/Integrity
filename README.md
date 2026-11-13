@@ -45,6 +45,15 @@ so a plan or a remembered note can never stand in for permission.
 This page says only what the repository ships. Where something is not verified,
 it says so; [what is verified](docs/STATUS.md) has the full list.
 
+> **In one real deployment, measured 13 Nov 2026:** 10,524 events in one Seed ·
+> 10,784 agent turns registered, 10,341 of them closed with a signed receipt and
+> 443 still open, visible as debt · in operation since June 2026; turn
+> registration was added later and was in place by September 2026 · agents of
+> three clients have written to it: Claude Code, Codex, Antigravity.
+>
+> <sub>A dated measurement from our own deployment. It cannot be checked from
+> this repository, and it is not updated.</sub>
+
 ## Why
 
 AI agents now read logs, remember past work and change real systems. Three

@@ -9679,11 +9679,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 47547,
+      "bytes": 47841,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "49873beca34d8702e3c01fb9a76e3678c921c5a2fb86d5fb4dac33266e380f29"
+      "sha256": "130057337f24df4f4db90f0ef51ef8aeaffe05e74cf97ef63ca43c2055fccfdf"
     },
     {
       "bytes": 775,
@@ -9721,11 +9721,11 @@
       "sha256": "c773a85da94e9edf0b2b10e60fd43b00fe4f90e345ec0d958e6c5b4d0d405e8e"
     },
     {
-      "bytes": 24108,
+      "bytes": 24619,
       "mode": "0o644",
       "path": "README.md",
       "sanitization_edits": 0,
-      "sha256": "a24cf60c2424d0b054e8e428c07c0304d1f8de567d56afa87b47f1ca318245a3"
+      "sha256": "2f7212652a24ed0a5d3f1c09ccb7829e243f1f444da9f284c03a42699be19930"
     },
     {
       "bytes": 13444,
@@ -10302,7 +10302,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:43a56376143a3c9edd6b821b8b6e3c5ce4b0bc0529a86ea45e90c6be060585f1",
+  "projection_digest": "sha256:393528d2928723efc925f4be59614e9ef24a5dc0e91fd2859cec4e6e1d702a26",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

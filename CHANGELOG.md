@@ -163,6 +163,10 @@ states what is verified.
   signature is on the turn close receipt), scene 2 is a recall and not the
   admission context of a hooked client, and scene 4 reads the turn store
   through a one-tool stand-in server.
+- The README carries a dated block of figures from one real deployment
+  (13 Nov 2026): events in the Seed, agent turns registered, closed and still
+  open, and the clients whose agents have written to it. It is a measurement
+  of our own deployment and cannot be checked from this repository.
 
 ### Documentation
 
