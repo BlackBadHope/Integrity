@@ -77,7 +77,8 @@ journal usage per key and account.
 
 ## Verified / not verified
 
-Verified on Windows 11 with Python 3.12 (`python -B -m pytest --import-mode=importlib components/integrity-llm-bus/tests`):
+Verified by public CI on Ubuntu and Windows with Python 3.11 and 3.12
+(`python -B -m pytest --import-mode=importlib components/integrity-llm-bus/tests`):
 
 - the 1.0.0 component tests;
 - `tests/live/`: the bus script tests of the source tree, run against a synthetic configuration in a
@@ -90,8 +91,8 @@ Verified on Windows 11 with Python 3.12 (`python -B -m pytest --import-mode=impo
 
 Not verified here:
 
-- nothing was run on Linux; the unix-socket handler (`SO_PEERCRED`), the systemd sandbox, `chattr`
-  sealing, the SSH gateway and forced-command shell were not exercised;
+- on Linux only these unit tests ran; the unix-socket handler (`SO_PEERCRED`), the systemd sandbox,
+  `chattr` sealing, the SSH gateway and forced-command shell were not exercised;
 - no multi-host operation (hub plus clients over SSH, replica sync stream) is claimed;
 - the native Codex peer, Grok webhook, Claude/Codex/ChatGPT harnesses and Windows Hello signing were
   exercised only through mocks in the tests.

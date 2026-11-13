@@ -27,7 +27,7 @@ These ship today. What is missing is evidence.
 | Agent bus hub | The socket handler, the systemd sandbox and operation across several hosts |
 | Guards and kill switch | A live acceptance from this repository; both are alpha |
 | Mode B tunnels | Whether a third party can connect through their own tunnel at all |
-| macOS | About a hundred failing tests that need Linux `/proc` custody |
+| macOS | 105 failing tests in the informational job (50 core, 55 client-memory); most need Linux `/proc` custody |
 
 ## Missing pieces
 
