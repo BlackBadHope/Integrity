@@ -18,6 +18,8 @@ Commands:
   check [--vendor V]   Exit 0 if allowed, exit 3 if blocked (for scripts/gates)
   serve [--port PORT]  Start local web UI dashboard with interactive toggles
   sync-bus [--apply]   Mirror the switch state to bus principals on a bus host
+  doctor [--json]      Read-only self-check of this installation
+  uninstall [--yes]    Remove this user's switch state and audit log
 
 Security model (read before trusting it):
   * The caller is identified by its process ancestry. Git's msys ssh breaks the
@@ -1242,6 +1244,134 @@ def cmd_serve(args: argparse.Namespace) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- self-check and removal
+
+
+def owned_files(state_file: Path, log_file: Path) -> list[Path]:
+    """Every file this tool writes: the state, its temporary file, the log and its rotated copy."""
+    return [state_file, state_file.with_suffix(".tmp"), log_file, log_file.with_name(log_file.name + ".1")]
+
+
+def stored_restrictions(state_file: Path) -> list[str] | None:
+    """What the stored state blocks; None when it cannot be read (every check then fails closed)."""
+    try:
+        data = json.loads(_read_text_retry(state_file))
+        found = ["master panic"] if data.get("master_panic") else []
+        found += [f"vendor {name}" for name, meta in data.get("vendors", {}).items()
+                  if not meta.get("enabled", True)]
+        found += [f"scope {name}" for name, enabled in data.get("scopes", {}).items() if not enabled]
+        return found
+    except Exception:
+        return None
+
+
+def doctor_report(state_arg: str | None = None, config_source: str | None = None,
+                  config_error: str | None = None) -> dict[str, Any]:
+    """Read-only self-check: creates no state file, writes no log line, opens no connection."""
+    from . import __version__
+
+    checks: list[dict[str, str]] = []
+
+    def add(name: str, result: str, detail: str) -> None:
+        checks.append({"check": name, "result": result, "detail": detail})
+
+    version = ".".join(str(part) for part in sys.version_info[:3])
+    add("package", "ok", f"integrity-killswitch {__version__} on Python {version} ({sys.platform})")
+
+    if config_error is not None:
+        add("configuration", "fail", f"{config_source}: {config_error}")
+    elif config_source:
+        add("configuration", "ok", f"{config_source} ({len(KNOWN_VENDORS)} vendors)")
+    else:
+        add("configuration", "ok", f"none, built-in defaults ({len(KNOWN_VENDORS)} vendors)")
+
+    state_file = state_path(state_arg)
+    if not state_file.exists():
+        add("state", "ok", f"{state_file}: not created yet; the first command creates it with every vendor enabled")
+    else:
+        blocked = stored_restrictions(state_file)
+        if blocked is None:
+            add("state", "fail", f"{state_file}: unreadable; every check fails closed until the operator runs resume")
+        else:
+            add("state", "ok", f"{state_file}: readable; blocked now: {', '.join(blocked) or 'nothing'}")
+
+    folder = state_file.parent
+    while not folder.exists() and folder != folder.parent:
+        folder = folder.parent
+    if os.access(folder, os.W_OK):
+        add("state folder", "ok", f"{folder} is writable")
+    else:
+        add("state folder", "fail", f"{folder} is missing or not writable; off, panic and the audit log cannot be saved")
+
+    log_file = log_path()
+    add("audit log", "ok", f"{log_file}: " + (f"{log_file.stat().st_size} bytes" if log_file.exists()
+                                             else "not created yet"))
+
+    if os.name != "nt":
+        add("caller", "warn", "process ancestry is not read on this system: off, panic and check work, "
+                              "on and resume are always refused; restore access by editing the state file")
+    else:
+        actor = detect_vendor()
+        if actor == "owner":
+            add("caller", "ok", "this shell is the operator: on and resume are allowed from here")
+        else:
+            add("caller", "ok", f"caller detected as {actor}: on and resume are refused from here; "
+                                "off, panic and check work")
+
+    if CONFIG.get("bus_sync"):
+        add("bus sync", "ok", "configured; not contacted by this check")
+    else:
+        add("bus sync", "ok", "not configured; the switch is local only")
+
+    failed = sum(1 for item in checks if item["result"] == "fail")
+    return {"schema": "integrity-killswitch/doctor/v1", "passed": failed == 0, "checks": checks}
+
+
+def cmd_doctor(args: argparse.Namespace) -> int:
+    source = args.config or os.environ.get(ENV_CONFIG)
+    report = doctor_report(args.state, source, getattr(args, "config_error", None))
+    if args.json:
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    else:
+        for item in report["checks"]:
+            print(f"[{item['result']:<4}] {item['check']}: {item['detail']}")
+        print("doctor: " + ("PASS" if report["passed"] else "FAIL"))
+    return 0 if report["passed"] else 1
+
+
+def cmd_uninstall(args: argparse.Namespace) -> int:
+    """Removes the files this tool wrote for this user. Without --yes it only lists them."""
+    state_file = state_path(args.state)
+    present = [path for path in owned_files(state_file, log_path()) if path.exists()]
+    for path in present:
+        print(f"  {path}")
+    if not present:
+        print("killswitch: no state or log files exist for this user. To remove the program itself: "
+              "python -m pip uninstall integrity-killswitch")
+        return 0
+    if not args.yes:
+        print("Dry run: nothing was removed. Add --yes to remove the files listed above.")
+        return 0
+    if state_file.exists() and stored_restrictions(state_file) != []:
+        # Deleting a state that blocks something restores access, so it follows the rule for on and resume.
+        if admin_actor("uninstall", owner_only=True) is None:
+            if os.name != "nt":
+                print("killswitch: on this system the operator removes the files listed above by hand.",
+                      file=sys.stderr)
+            return EXIT_REFUSED
+    for path in present:
+        path.unlink(missing_ok=True)
+    folder = default_state_dir()
+    try:
+        if state_file.parent == folder and folder.is_dir() and not any(folder.iterdir()):
+            folder.rmdir()
+    except OSError:
+        pass
+    print(f"Removed {len(present)} file(s). To remove the program itself: "
+          "python -m pip uninstall integrity-killswitch")
+    return 0
+
+
 # --------------------------------------------------------------------------- CLI parser
 
 
@@ -1293,6 +1423,14 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--apply", action="store_true", help="apply changes remotely (default: dry-run inspection)")
     p.set_defaults(func=cmd_sync_bus)
 
+    p = sub.add_parser("doctor", help="read-only self-check of this installation (exit 1 when a check fails)")
+    p.add_argument("--json", action="store_true", help="print the report as JSON")
+    p.set_defaults(func=cmd_doctor)
+
+    p = sub.add_parser("uninstall", help="remove this user's switch state and audit log (dry run without --yes)")
+    p.add_argument("--yes", action="store_true", help="remove the listed files")
+    p.set_defaults(func=cmd_uninstall)
+
     return parser
 
 
@@ -1302,6 +1440,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         configure(load_config(args.config))
     except (OSError, ValueError) as exc:
+        if args.cmd == "doctor":
+            configure({})
+            args.config_error = f"{type(exc).__name__}: {exc}"
+            return args.func(args)
         print(f"killswitch: configuration error: {exc}", file=sys.stderr)
         return 2
     return args.func(args)
