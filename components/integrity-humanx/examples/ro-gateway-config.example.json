@@ -1,0 +1,21 @@
+{
+  "_comment": "Value of ro_gateway_config for humanx_ro_gw.py. Every key except mysql is required. Invented values.",
+  "socket": "/run/<humanx-ro>/gw.sock",
+  "socket_group": "<socket group>",
+  "gateway_user": "<bus gateway account>",
+  "web_user": "<web account>",
+  "vendors": ["claude", "codex", "gemini", "grok"],
+  "mysql": "/usr/bin/mariadb",
+  "mysql_defaults_file": "/etc/<humanx-ro>/my.cnf",
+  "integrity_snapshot": "/var/lib/<humanx-ro>/integrity/seed.sqlite3",
+  "log": "/var/log/<humanx-ro>/gw.jsonl",
+  "switch_nets": ["198.51.100.0/24"],
+  "switch_cred": "/etc/<humanx-ro>/switch.cred",
+  "sw_share_off": "/etc/<humanx-ro>/sw-share.off",
+  "web_rings_ips": ["192.0.2.1", "192.0.2.2"],
+  "web_rings_off": "/etc/<humanx-ro>/web-rings.off",
+  "web_storm_off": "/etc/<humanx-ro>/web-storm.off",
+  "storm_key": "/etc/<humanx-ro>/storm_ro_ed25519",
+  "storm_known_hosts": "/etc/<humanx-ro>/known_hosts.storm",
+  "storm_host": "reader@192.0.2.50"
+}

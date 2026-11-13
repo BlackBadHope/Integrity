@@ -1,0 +1,15 @@
+# Example systemd unit for the read-only gateway. Placeholders in <...>; adapt before use.
+[Unit]
+Description=HumanX read-only gateway (example)
+
+[Service]
+User=<gateway account>
+Environment=INTEGRITY_HUMANX_CONFIG=/etc/<humanx>/configuration.json
+RuntimeDirectory=<humanx-ro>
+ExecStart=<venv>/bin/integrity-humanx humanx-ro-gateway
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+{
+  "_comment": "Value of ring_map_file for rings_screen and storm_screen. Invented values.",
+  "source": "invented example map",
+  "cores": ["192.0.2.1", "192.0.2.2"],
+  "not_polled": [{"ring": "300", "core": "192.0.2.3"}],
+  "access_prefix": "198.51",
+  "rings": [
+    {"ring": "100", "core": "192.0.2.1", "ports": [1, 2], "class": "A"},
+    {"ring": "101", "core": "192.0.2.1", "ports": [3], "class": "B"},
+    {"ring": "200", "core": "192.0.2.2", "ports": [5, 6, 7], "class": "A"}
+  ]
+}

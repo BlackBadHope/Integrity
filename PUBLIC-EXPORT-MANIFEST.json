@@ -1,5 +1,5 @@
 {
-  "file_count": 1179,
+  "file_count": 1220,
   "files": [
     {
       "bytes": 3435,
@@ -72,11 +72,11 @@
       "sha256": "bf23ba02498540d50a6eb700f5382a02160c20d66ba5ce754f2535158bce7cba"
     },
     {
-      "bytes": 11649,
+      "bytes": 12108,
       "mode": "0o644",
       "path": "COMPONENTS.json",
       "sanitization_edits": 0,
-      "sha256": "804d09a81889c20044fbf44eb1a4ed4a4eebd45411016b5fc0d1adf1df467c46"
+      "sha256": "b057737ac4ddf73f13244bf2520ef87afd947bd1995f099c38dca747c244a4f7"
     },
     {
       "bytes": 1797,
@@ -2781,6 +2781,293 @@
       "sha256": "2c3dac3d9d1817f0deb653c1a2a95d152db5f1f9225b33bdf674f71f38bd52fb"
     },
     {
+      "bytes": 4444,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/CONFIGURATION-VALUES.json",
+      "sanitization_edits": 0,
+      "sha256": "7c61436efb7d010bd45eebe172c05a3de365ce6585398465a388d345ded1fd50"
+    },
+    {
+      "bytes": 8660,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/SOURCE-MAP.json",
+      "sanitization_edits": 0,
+      "sha256": "156304f892839059b50b3adeacbcf951cf751afc6142f6b418ce69aaca1953f3"
+    },
+    {
+      "bytes": 152,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/__init__.py",
+      "sanitization_edits": 0,
+      "sha256": "619c097632bf5324649e296623c04e2d0d0b21fb713012851cb7def9f678a5b5"
+    },
+    {
+      "bytes": 52,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/__main__.py",
+      "sanitization_edits": 0,
+      "sha256": "c1554a8e837884415f2bb1e626ab5b874c0adb9efbe15c6cc56647e9c7877959"
+    },
+    {
+      "bytes": 3064,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/configuration.py",
+      "sanitization_edits": 0,
+      "sha256": "3038eba8a064ade9155c372d7914d07a52091aea2e1b776277c000d00a466bb3"
+    },
+    {
+      "bytes": 2291,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/launcher.py",
+      "sanitization_edits": 0,
+      "sha256": "6aa1660764766ccaa00a93a6db1c5aa788236c67dfd54f3319e83dff578b6827"
+    },
+    {
+      "bytes": 197,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources.json",
+      "sanitization_edits": 0,
+      "sha256": "a05fb05127aaa37a498d9b18cdd50811aaa76c14dd165a7fe5f253de504f665d"
+    },
+    {
+      "bytes": 3228,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/client/antigravity_quota.py",
+      "sanitization_edits": 0,
+      "sha256": "33337f6c05df78191147e848cd05de168d561c62b7e5b577c8d5a3d442b07bc8"
+    },
+    {
+      "bytes": 8749,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/client/humanx_attach.py",
+      "sanitization_edits": 0,
+      "sha256": "6b110e17667df94bf02e9f5262893c88f7d3c9a8258329e167045b9d20b85620"
+    },
+    {
+      "bytes": 16235,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/client/humanx_codexquota.py",
+      "sanitization_edits": 0,
+      "sha256": "5ff7eab2fcc20e1771479d448a5e654ed7974856dd7dd2a2e74eda1391e45911"
+    },
+    {
+      "bytes": 10614,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/client/humanx_context.py",
+      "sanitization_edits": 0,
+      "sha256": "fea0d9312e02004737e39ad136f733ad00cf00556296aa95519e3fd05f6f2fff"
+    },
+    {
+      "bytes": 26363,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/client/humanx_delivery.py",
+      "sanitization_edits": 0,
+      "sha256": "3464f267c44dd6f9da32d8f7301bfa9396cc913f80e234b5171c458c1475d573"
+    },
+    {
+      "bytes": 3738,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/client/humanx_kparts.py",
+      "sanitization_edits": 0,
+      "sha256": "7acbb80a7c00ba2725c7de6670f398f567e7785009bdf1285b3b636c5eff5271"
+    },
+    {
+      "bytes": 54297,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/client/humanx_maxreason.py",
+      "sanitization_edits": 0,
+      "sha256": "c9762296abf6814ec981eacc5e189903dd03bb0bc7c13aa75a3d50e009bd8f58"
+    },
+    {
+      "bytes": 9694,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/client/humanx_topics.py",
+      "sanitization_edits": 0,
+      "sha256": "3b19267bf2eaac41fffda3eacfb2bf7fae04516cbd5854162377a2e929ed5e44"
+    },
+    {
+      "bytes": 3816,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/client/humanx_wake_launch.py",
+      "sanitization_edits": 0,
+      "sha256": "9403abfc7bf8403f97d942845f500685bd024d41c269b98a997591368739cba8"
+    },
+    {
+      "bytes": 25088,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/client/humanx_wakers_supervisor.py",
+      "sanitization_edits": 0,
+      "sha256": "aed72dfcd3ba84e834610e8b19505ffd194acfab5cabb64f3ff6ddb8412f97df"
+    },
+    {
+      "bytes": 24036,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/client/room_claude_wake.py",
+      "sanitization_edits": 0,
+      "sha256": "46f21eef129abcf693165d148f56d4502f443c58af93ac28aebd245197da4abe"
+    },
+    {
+      "bytes": 37154,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/client/room_codex_waker.py",
+      "sanitization_edits": 0,
+      "sha256": "905cf01f2dcc5b20602386246f2e821129d5173f2d00c826a3e9deb5db443682"
+    },
+    {
+      "bytes": 22238,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/client/room_gemini_waker.py",
+      "sanitization_edits": 0,
+      "sha256": "c382fd1c885a878339805f56113ceb12ef37b8f0ef5e5b0d130c0f5cbda194e4"
+    },
+    {
+      "bytes": 26355,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/client/room_grok_waker.py",
+      "sanitization_edits": 0,
+      "sha256": "4fee8592b4ade9cdf07c328f9a79c124fe395a1522622e0fce65e4a4842b9d66"
+    },
+    {
+      "bytes": 12440,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/client/vendor_room_guard.py",
+      "sanitization_edits": 0,
+      "sha256": "0f13677d95626e000275304f23111f8d6874295158ea0b45377efa5e4b6e5ae4"
+    },
+    {
+      "bytes": 29220,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/ro/dlinkcli.py",
+      "sanitization_edits": 0,
+      "sha256": "aafee8f822fd8a828cb6bd852a4e867b1ab33bc104ecf5a5bd95ce7884ebb81d"
+    },
+    {
+      "bytes": 22064,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/ro/humanx_ro_gw.py",
+      "sanitization_edits": 0,
+      "sha256": "5e485e9b99b0eb0fba4b54ce57d0e9527616ba0f78f1adc3d569be9738a71baa"
+    },
+    {
+      "bytes": 1507,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/ro/humanx_ro_snapshot.py",
+      "sanitization_edits": 0,
+      "sha256": "6d091c4860c1357cecb61e1c92389a3abcbace6f6517cd4cc9e9a7806614d443"
+    },
+    {
+      "bytes": 134,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/room/codex-room-mcp.json",
+      "sanitization_edits": 0,
+      "sha256": "a43e1cd31c7a15c239a011c430a9122b1226ea8e1da6361f1109f6308978cdeb"
+    },
+    {
+      "bytes": 13667,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/room/humanx_room_ro_mcp.py",
+      "sanitization_edits": 0,
+      "sha256": "4356df8ea9320ec4dcd6cee1d593ca3083fabce7c68520c1faca41d5d68e3986"
+    },
+    {
+      "bytes": 5794,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/room/room_ro_guard.py",
+      "sanitization_edits": 0,
+      "sha256": "3b6557e1748240b739a62c06b548b05bcfd6734c7fcc886c8bbcf5e4942bbc31"
+    },
+    {
+      "bytes": 39962,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/room/room_tool.py",
+      "sanitization_edits": 0,
+      "sha256": "2100c569395e25259c6ab0d764158851b9592706c5c5fbb1374b5a311fad0520"
+    },
+    {
+      "bytes": 47734,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/web/humanx_web.py",
+      "sanitization_edits": 0,
+      "sha256": "8d96758f5fc8672eb64e7fa9eff60cf59d9ae4614d26dcb92fef98e6d2da16f1"
+    },
+    {
+      "bytes": 25354,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/web/rings_screen.py",
+      "sanitization_edits": 0,
+      "sha256": "cd03865e445f2898884c2b4cc0fd45f4937b94ee5d24ce07eff586e84c6892f7"
+    },
+    {
+      "bytes": 34475,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/resources/web/storm_screen.py",
+      "sanitization_edits": 0,
+      "sha256": "f7f1f9b483525a182ee0834e3b9f122b646dc1a24f8a9c1dc955387a852bfe04"
+    },
+    {
+      "bytes": 8444,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/tests/conftest.py",
+      "sanitization_edits": 0,
+      "sha256": "000e38d2e7ee238c923c159ea4770a17be0b827abf7f5f502444d1e5679b839d"
+    },
+    {
+      "bytes": 3124,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/tests/test_configuration.py",
+      "sanitization_edits": 0,
+      "sha256": "c1ebd991dd1efcc3b789275b75ac47a8a4f648ad31c4d77889f27e4c31e05cbe"
+    },
+    {
+      "bytes": 12843,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/tests/test_delivery.py",
+      "sanitization_edits": 0,
+      "sha256": "47f0ee0fde33390780360d65c89c5fb8de0a0a889441ae6632d4f4ac2bfd6a87"
+    },
+    {
+      "bytes": 5810,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/tests/test_dlinkcli.py",
+      "sanitization_edits": 0,
+      "sha256": "5c5710ddd5603b02585c0cc69ced044cd9a99105ed641c0feb7fd8527b5129c2"
+    },
+    {
+      "bytes": 5842,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/tests/test_gateway.py",
+      "sanitization_edits": 0,
+      "sha256": "120cf9b44964ff30fff3763175df3725820754c964dfcd0093c166af45ea2e45"
+    },
+    {
+      "bytes": 3608,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/tests/test_room_mcp_and_guards.py",
+      "sanitization_edits": 0,
+      "sha256": "c07355ff971460e2bd896cb83449a99ba233b3ee4c598931b2874cb3b94dc325"
+    },
+    {
+      "bytes": 9999,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/tests/test_room_tool.py",
+      "sanitization_edits": 0,
+      "sha256": "52cfaa300887b17e7e87da2e8b68df8800f8f06de8dc14d26be56888c8288bc7"
+    },
+    {
+      "bytes": 6645,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/tests/test_screens.py",
+      "sanitization_edits": 0,
+      "sha256": "e1bae818a576b32ddf28a4662992959f486e74bd42a72b0bf7b54791855a3760"
+    },
+    {
+      "bytes": 5599,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/tests/test_web.py",
+      "sanitization_edits": 0,
+      "sha256": "00734fcdef56820de29222921a82836ae173593a97890d53e0870f1947514151"
+    },
+    {
       "bytes": 17,
       "mode": "0o644",
       "path": "components/integrity-installed-runtime/.gitattributes",
@@ -2795,11 +3082,11 @@
       "sha256": "9b6cfa9dde51133a7a386637497cf3bb17d279b8fce45899759d5123b9a569dd"
     },
     {
-      "bytes": 3665,
+      "bytes": 3782,
       "mode": "0o644",
       "path": "components/integrity-installed-runtime/VARIANTS.json",
       "sanitization_edits": 0,
-      "sha256": "e1f184a741a85b8a6de94968a8640a417d3bdc03843dada6a15a26cd985b15ed"
+      "sha256": "4ac787c159e570a53d74267cc48e7380c2906b28e62d074f99f5cf53e6c39040"
     },
     {
       "bytes": 2090,
@@ -8255,7 +8542,7 @@
       "sha256": "178e2f0d53cb7fecb5fd2b422e2aa2db22c268d809b820399f35c7a9bcccc9b9"
     }
   ],
-  "generated_file_count": 69,
+  "generated_file_count": 85,
   "generated_files": [
     {
       "bytes": 1041,
@@ -8384,11 +8671,11 @@
       "sha256": "c773a85da94e9edf0b2b10e60fd43b00fe4f90e345ec0d958e6c5b4d0d405e8e"
     },
     {
-      "bytes": 38936,
+      "bytes": 39104,
       "mode": "0o644",
       "path": "README.md",
       "sanitization_edits": 0,
-      "sha256": "5aa6267eeeb4be13d8e2984b9f843512c938bdcd24fe6018d69688dddabdcf82"
+      "sha256": "e337a26091e0d6d2403df06ac195baa0dfa404e1b8996c0e812250c68d777478"
     },
     {
       "bytes": 13466,
@@ -8473,6 +8760,118 @@
       "path": "components/integrity-guards/pyproject.toml",
       "sanitization_edits": 0,
       "sha256": "0ab15b10da222bf8cdecfa738a3f1f1f1a311eae69dc07dff68439966ac85d84"
+    },
+    {
+      "bytes": 7132,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/LICENSE",
+      "sanitization_edits": 0,
+      "sha256": "fa7a8cdcc5fb5671d3ead0045b5acef283956eb8c8a1623559f36be9a1c8ad91"
+    },
+    {
+      "bytes": 381,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/NOTICE",
+      "sanitization_edits": 0,
+      "sha256": "3eec9e223327757ef5bac5e7a4d61bba0c16f8ec2336f26465a9a853c210fa8b"
+    },
+    {
+      "bytes": 9702,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/README.md",
+      "sanitization_edits": 0,
+      "sha256": "6543d3a442bd997e3b74c7c2f23a88050a8f9c56b38b82fcbf02322169225000"
+    },
+    {
+      "bytes": 787,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/configuration.example.json",
+      "sanitization_edits": 0,
+      "sha256": "15ef443b726a4c364e9af54df0028aecabbff157b2e7325f08efd9364d18b1ee"
+    },
+    {
+      "bytes": 349,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/examples/hosts.example.json",
+      "sanitization_edits": 0,
+      "sha256": "9ee06dbd910db1cf5b0d0adc9b1233077cfc823bc085fc4352f5a78c659cb051"
+    },
+    {
+      "bytes": 427,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/examples/humanx-ro-gw.service.example",
+      "sanitization_edits": 0,
+      "sha256": "1ee70843b02f921cda1a2fc33aaa918a74f04a1d9493a05f39f5f1f0c8e64044"
+    },
+    {
+      "bytes": 485,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/examples/humanx-web.service.example",
+      "sanitization_edits": 0,
+      "sha256": "c4c2b4c957ec8518d01576e37f5529c8b741ceb65df109289abfe6cc04de99f9"
+    },
+    {
+      "bytes": 490,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/examples/ring-map.example.json",
+      "sanitization_edits": 0,
+      "sha256": "9b923699abaf08ac7bf40479df6b5fd1b31d698a9a3853ed478d7cb8c87e688c"
+    },
+    {
+      "bytes": 959,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/examples/ro-gateway-config.example.json",
+      "sanitization_edits": 0,
+      "sha256": "c82da82024b50f13cf2fdbdd5c3132934eada22c74ccd29349e89dbba6486571"
+    },
+    {
+      "bytes": 18621,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/examples/room-instructions/AGENTS.example.md",
+      "sanitization_edits": 0,
+      "sha256": "06ab16c5d18612ed9c3d05882779617d4909f99744fa650bc0777e7abd51144b"
+    },
+    {
+      "bytes": 17955,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/examples/room-instructions/CLAUDE.example.md",
+      "sanitization_edits": 0,
+      "sha256": "0bc3fe32111d41ad468b9080dac6de93b016a5218fba82e34bcdd558abe5bb55"
+    },
+    {
+      "bytes": 21228,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/examples/room-instructions/GEMINI.example.md",
+      "sanitization_edits": 0,
+      "sha256": "693793b704368ea38a1113d0f43d0f3a461c8501d16d85736508414592e3c391"
+    },
+    {
+      "bytes": 20505,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/examples/room-instructions/GROK.example.md",
+      "sanitization_edits": 0,
+      "sha256": "7a47d6189e37942c74955ffe3e86235d1d83d6b348270af09a509854f8a48db6"
+    },
+    {
+      "bytes": 302,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/examples/room.example.json",
+      "sanitization_edits": 0,
+      "sha256": "def7bee4ebfbb49935957d4185776693c4e4a007b19a5bf5518173d8944222c5"
+    },
+    {
+      "bytes": 234,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/examples/web-config.example.json",
+      "sanitization_edits": 0,
+      "sha256": "0631d6325a529b7aa7bdb1cd36040fdb80b8565be0b16b2f20342c5bf4e1f7f8"
+    },
+    {
+      "bytes": 769,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/pyproject.toml",
+      "sanitization_edits": 0,
+      "sha256": "970e1a9193ec4c6a09c413e0d8a87640206fe8102199ebf5659844367aaf8175"
     },
     {
       "bytes": 7132,
@@ -8741,7 +9140,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:d7a03b30960b2af54ff0a07d2cf688ca5d83ff45e23de66d520c3656b4c20dd1",
+  "projection_digest": "sha256:6a8392d23f04cf7cccf9d2355dcafbb7c2c4bcbdb4c6ba68b2c3b1cfa2626b40",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
