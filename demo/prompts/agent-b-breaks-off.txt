@@ -1,0 +1,7 @@
+You are agent B. Use only the integrity_local_memory tools.
+The task id is "demo-task". Do this in order:
+1. Open a turn: declared_agent "agent-b", declared_client "claude-code".
+2. Claim the task.
+3. Write one event for this task. Its summary is exactly: Result: X
+Then stop at once, as if your process had been killed: do not release the
+claim and do not close the turn. Reply with the event_uid and nothing else.

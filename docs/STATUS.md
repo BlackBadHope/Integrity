@@ -46,13 +46,15 @@ Linux and Windows, and it prints PASS for all three clients.
 To let your own agents write and claim tasks on one machine, use the
 [local memory profile](LOCAL_MEMORY.md) (`guardian-local-memory`). CI runs its
 tests and its `init`, `doctor` and `uninstall` on Linux and Windows. It is not
-the core write path, agent names in it are declared and not verified, and it
-has not been run with a real agent client yet.
+the core write path, and agent names in it are declared and not verified.
+*Once:* it was run with Claude Code on Windows, and with no other client.
 
-The four-scene demo at the top of the [README](../README.md#the-demo-step-by-step)
-(`demo/run.py`) is run by `tests/test_demo.py` in CI on Linux and Windows. It
-runs no model, and its scene 2 is a recall, not the context a hooked client
-receives.
+The demo at the top of the [README](../README.md#the-demo-step-by-step) is
+that run: three Claude Code processes on one task, recorded on 13 Nov 2026
+([`demo/README.md`](../demo/README.md)). `tests/test_demo.py` runs in CI on
+Linux and Windows without a model; it replays the recorded tool calls and
+compares the answers. Agents of two vendors on one task, a real client on
+Linux and a killed agent process were not run.
 
 ### Linux workstations and servers
 

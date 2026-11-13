@@ -8,14 +8,15 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/demo-dark.svg">
-    <img src="docs/assets/demo-light.svg" alt="Four scenes recorded from demo/run.py. One: an agent records a decision and closes its turn with a signed receipt. Two: a second agent in a new session recalls the decision with its origin. Three: acting on memory is refused, a one-use owner grant passes once, a repeat is refused. Four: a turn left open shows up in integrity-doctor as 1 of 2 turns closed." width="100%">
+    <img src="docs/assets/demo-light.svg" alt="Four scenes drawn from the records of a real run with Claude Code. One: agent A claims a task, writes a result and closes its turn with a signed receipt. Two: agent B claims the same task and writes another result. Three: agent C does not ask agent B; from memory it reads what B wrote, who B says it is, what B claimed, and that the turn of B closed with a signed receipt. Four: in a second run B stops early, and C sees a claim that was never released and a turn with no closing receipt." width="100%">
   </picture>
 </p>
 
 <p align="center"><sub>
-  Recorded from <a href="demo/run.py"><code>demo/run.py</code></a>: one machine, synthetic data, no network, no account.
-  Repeat it yourself after the <a href="#quick-start">install</a>: <code>python demo/run.py</code> ·
-  <a href="#the-demo-step-by-step">what each scene runs</a>
+  Drawn from two recorded runs: three Claude Code processes and one <code>guardian-local-memory</code> on a Windows machine, 13 Nov 2026.
+  The agent client, the account and the model are the user's own.
+  <a href="demo/README.md">Repeat it with your agent</a> ·
+  <a href="#the-demo-step-by-step">what each scene shows</a>
 </sub></p>
 
 <p align="center">
@@ -74,48 +75,60 @@ alike:
 
 ## The demo, step by step
 
-The picture at the top is the output of [`demo/run.py`](demo/run.py). After the
-[quick start](#quick-start) install, run it from the clone:
+Three agents work on one task and share one memory. Agent A writes a result.
+Agent B writes another. Agent C has to continue, and nobody can ask B what it
+did. C gets the answer from memory:
 
-```bash
-python demo/run.py
-```
+- what B wrote, word for word;
+- who B says it is, and that nothing verified it;
+- what B claimed, and whether B released the claim;
+- how B's turn ended: with a signed receipt that lists the event, with a
+  recorded gap, or not at all.
 
-It needs no network, no account and no model. It writes to a temporary
-directory and removes it.
+The agents are not played by a script. They are processes of an agent client
+that you already use, with your account and your model. Integrity adds the
+memory server; the client starts it over MCP. The picture at the top is drawn
+from the records of two such runs with Claude Code, kept in
+[`demo/recorded`](demo/recorded). [`demo/README.md`](demo/README.md) has the
+commands and the prompts for A, B and C.
 
 ```mermaid
 flowchart LR
-  record["1 Record<br/>an event in Seed,<br/>a signed close receipt"]
-  recall["2 Recall<br/>another agent reads it,<br/>with its origin"]
-  grant["3 Grant<br/>memory is refused,<br/>one owner grant passes once"]
-  close["4 Close<br/>a signed receipt, or a gap<br/>that the doctor reports"]
-  record --> recall --> grant --> close
+  a["A writes<br/>claim, event,<br/>signed close"]
+  b["B writes<br/>claim, event,<br/>signed close or nothing"]
+  c["C reads<br/>B's event, claim<br/>and turn end"]
+  memory[("one local memory<br/>events · turns · claims")]
+  a --> memory
+  b --> memory
+  memory --> c
 ```
 
-| Scene | What happens | The code that runs |
+| Scene | What happens | The tools the agent calls |
 | --- | --- | --- |
-| 1 Record | Agent A appends a decision and closes its turn. The close receipt names the event and is signed. | `SeedCatalog`, `TurnMemoryStore.close_turn`, `verify_turn_terminal_receipt` |
-| 2 Recall | Agent B starts a new process and asks the memory server. It gets the event, who wrote it and when, and a recall receipt. | [`examples/local-memory/memory_server.py`](examples/local-memory/memory_server.py), `integrity_seed_recall` |
-| 3 Grant | Agent B presents an intent it signed itself and is refused. The owner signs a one-use grant; it passes once; the repeat is refused. | `IntentCustody.reserve`, `IntentCustody.consume`, `verify_consumption_receipt` |
-| 4 Close | Agent B stops without a close. The gap is recorded and signed, and `integrity-doctor` reports 1 of 2 turns closed. | `TurnMemoryStore.observe_gap`, `integrity_client_memory.doctor.probe` |
+| 1 A writes | Agent A opens a turn, claims the task, writes `Result: 2`, releases the claim and closes the turn. The receipt is signed and lists the event. | `integrity_turn_memory_open`, `integrity_work_claim`, `integrity_append_event`, `integrity_work_release`, `integrity_turn_memory_close` |
+| 2 B writes | Agent B does the same and writes `Result: X`. | the same five |
+| 3 C reads | Agent C recalls the events of the task, then asks for the turn behind B's event. It gets B's event as written, B's declared names, B's claim with its release, and B's signed receipt. | `integrity_seed_recall`, `integrity_turn_receipt_by_event`, `integrity_work_claims` |
+| 4 B broke off | A second run. B stops after writing: no release, no close. C sees a claim that was never released and a turn that is still open. | the same three |
 
 What the demo is not:
 
-- No model runs. The two agents are played by the script. The memory, the
-  receipts and the checks are the code of this repository.
-- Seed events are not signed, here or anywhere else. In scene 1 the signature
-  is on the turn close receipt that names the event.
-- Scene 2 is a recall through the read-only memory server. The context that a
-  hooked client receives at the start of a turn needs the memory core and is
-  not shown.
-- In scene 4 the doctor reads the turn store through a stand-in server with
-  one tool (`--serve-coverage` in the script). The full memory server serves
-  turn coverage only with a signed write plane.
-- The keys are derived from a public string. They protect nothing.
+- It is the [local memory profile](docs/LOCAL_MEMORY.md), not the core write
+  path. There is no Action Log, no custody ledger and no admission of actions.
+- One machine. Every agent reaches the same private folder.
+- Agent, client and machine names are declared by the writer. Nothing verifies
+  them, and the answer to C says so.
+- The signing key lies beside the data. A valid signature shows that a record
+  was not changed, not who wrote it. Claims are not signed; their log is a
+  hash chain.
+- In scene 4 agent B stops because its prompt tells it to. A killed process
+  was not tried with a real client.
+- The records come from Claude Code on Windows. No other client was run
+  against this server; [`demo/README.md`](demo/README.md) lists what was run.
 
-`tests/test_demo.py` runs the four scenes in CI on Linux and Windows and fails
-when the pictures differ from the run. To redraw them:
+`tests/test_demo.py` runs in CI on Linux and Windows without a model. It
+replays the recorded tool calls against a new instance and fails when this
+code answers differently, when a published prompt differs from the one that
+was run, or when the pictures differ from the records. To redraw them:
 `python demo/run.py --svg docs/assets`.
 
 ## How it works
@@ -174,10 +187,10 @@ Marks used on this page and in [what is verified](docs/STATUS.md):
 
 ## Quick start
 
-You need Git and Python 3.11 or newer. On Debian or Ubuntu install
-`git python3 python3-venv python3-pip` first and use `python3` to create the
-virtualenv. Create it **outside** the clone: the repository's own checks scan
-the whole tree.
+You need Git, Python 3.11 or newer, and an agent client that speaks MCP. On
+Debian or Ubuntu install `git python3 python3-venv python3-pip` first and use
+`python3` to create the virtualenv. Create it **outside** the clone: the
+repository's own checks scan the whole tree.
 
 ```bash
 git clone https://github.com/BlackBadHope/Integrity.git
@@ -186,17 +199,45 @@ python -m venv ../integrity-venv
 ```
 
 Activate it (Linux: `. ../integrity-venv/bin/activate`, Windows PowerShell:
-`..\integrity-venv\Scripts\Activate.ps1`), then install Guardian:
+`..\integrity-venv\Scripts\Activate.ps1`), then install Guardian and create a
+memory instance for your client:
 
 ```bash
 python -m pip install .
-guardian version --all
-guardian platform-profile
+guardian-local-memory init --client claude-code
+guardian-local-memory doctor
 ```
 
-**First exercise, about a minute.** In an empty directory outside the checkout,
-ask Guardian for the canonical form and the domain-separated digest of an
-unordered JSON observation:
+`init` creates a private folder in your user account and prints an MCP block
+with two paths of your machine. `--client` accepts `claude-code`, `codex` and
+`antigravity`. Save the block where your client reads it
+([the table](docs/LOCAL_MEMORY.md#where-the-block-goes)), then give your agent
+the three prompts of the [demo](demo/README.md): A writes, B writes, C reads
+from memory what B did. With Claude Code, in a folder that holds the block as
+`.mcp.json`:
+
+```bash
+claude -p --mcp-config .mcp.json --strict-mcp-config --allowedTools mcp__integrity_local_memory < ../Integrity/demo/prompts/agent-a.txt
+claude -p --mcp-config .mcp.json --strict-mcp-config --allowedTools mcp__integrity_local_memory < ../Integrity/demo/prompts/agent-b.txt
+claude -p --mcp-config .mcp.json --strict-mcp-config --allowedTools mcp__integrity_local_memory < ../Integrity/demo/prompts/agent-c.txt
+```
+
+Integrity takes no vendor key and calls no model: the client does, with your
+account. This was run with Claude Code on Windows. Codex and Antigravity get a
+block of the same format as in the read-only example below, but were not run
+against this server. To remove everything: `guardian-local-memory uninstall --yes`.
+
+This is install stage 1, one machine. It is not the core write path; the
+[local memory page](docs/LOCAL_MEMORY.md) says what it does not prove.
+
+### Without an agent client
+
+Two smaller exercises need no client. `guardian version --all` and
+`guardian platform-profile` report what is installed.
+
+**Canonical form.** In an empty directory outside the checkout, ask Guardian
+for the canonical form and the domain-separated digest of an unordered JSON
+observation:
 
 ```bash
 echo '{"b":2,"a":1}' > observation.json
@@ -209,9 +250,9 @@ guardian digest demo observation.json
 sha256:642c2d4d9286b31e56f6090f47b0435de8b034e713fe160d5ba51457138954b8
 ```
 
-**Second exercise: memory for three clients, read-only.** Back in the checkout,
-build a disposable catalog and client configurations. Each configuration
-should print PASS:
+**Memory for three clients, read-only.** Back in the checkout, build a
+disposable catalog and client configurations. Each configuration should print
+PASS:
 
 ```bash
 CASE="${TMPDIR:-/tmp}/integrity-case"

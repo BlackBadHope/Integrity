@@ -7,6 +7,30 @@ All notable public changes are recorded here.
 Changes on `main` after 7.0.1. Nothing here is tagged, and the distribution
 versions are unchanged unless an entry says otherwise.
 
+### The demo is a run of real agents
+
+- The demo at the top of the README is now three agents on one task and one
+  local memory: A writes, B writes, and C reads from memory what B wrote, who
+  B says it is, what B claimed and how B's turn ended. A second run shows B
+  stopping early: C sees a claim that was never released and a turn with no
+  closing receipt.
+- The agents are processes of the user's own agent client. `demo/README.md`
+  has the commands and `demo/prompts` the prompts. `demo/recorded` holds the
+  records of two runs with Claude Code on Windows; the pictures are drawn from
+  them.
+- `demo/run.py` no longer plays agents. It prints the records, draws the
+  pictures and builds a record from a user's own run. The four-scene script
+  that it replaces is gone, together with its scenes for the one-use grant and
+  the doctor.
+- `tests/test_demo.py` replays the recorded tool calls against a new instance
+  without a model and fails when this code answers differently, when a
+  published prompt differs from the one that was run, or when the pictures
+  differ from the records.
+- The README quick start begins with `guardian-local-memory init` and the
+  three prompts. The two exercises that need no agent client follow it.
+- Not run: any client other than Claude Code, a real client on Linux, agents
+  of two vendors on one task.
+
 ### Local memory on one machine
 
 - **`guardian-local-memory`**: a new command in `integrity-guardian`
@@ -183,6 +207,9 @@ states what is verified.
   it, including `rebuild`.
 
 ### A demo at the top of the README
+
+Replaced by "The demo is a run of real agents" above; kept as the record of
+what was on `main` before.
 
 - **`demo/run.py`** runs four scenes on one machine with synthetic data, no
   network and no account: an agent records a decision and closes its turn with

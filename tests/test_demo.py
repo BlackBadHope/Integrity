@@ -1,16 +1,21 @@
 # SPDX-License-Identifier: BUSL-1.1
-"""The README demo: the four scenes hold, and the committed pictures are this run."""
+"""The README demo: the records of a real run hold, this code gives the same answers, the pictures are the records."""
 from __future__ import annotations
 
+import copy
 import importlib.util
-import re
+import json
 import sys
 from pathlib import Path
 
 import pytest
 
+from integrity_guardian import local_memory as lm
+
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "docs" / "assets"
+STABLE = ("recalled", "event_id", "summary", "author", "author_note", "claim_kinds", "claim_resources",
+          "claim_fence", "release_names_event", "turn_status", "listed", "gap_recorded")
 
 
 @pytest.fixture(scope="module")
@@ -24,45 +29,82 @@ def demo():
 
 
 @pytest.fixture(scope="module")
-def scenes(demo):
-    return demo.run_scenes()
+def records(demo) -> dict:
+    return {name: demo.load_record(path) for name, path in demo.RECORDS.items()}
 
 
-def lines_of(scene: dict) -> list[str]:
-    return [text for _, text in scene["lines"]]
+def test_records_use_only_tools_the_server_offers(records) -> None:
+    offered = {tool["name"] for tool in lm.TOOLS}
+    for record in records.values():
+        for agent in record["agents"]:
+            assert {call["tool"] for call in agent["calls"]} <= offered
+            assert not any(call.get("is_error") for call in agent["calls"])
 
 
-def test_scene_one_closes_the_turn_with_a_signed_receipt(scenes) -> None:
-    text = "\n".join(lines_of(scenes[0]))
-    assert "event 1 stored, catalog verified" in text
-    assert re.search(r"close receipt sha256:[0-9a-f]{12}\.\.\.  signature ed25519: valid", text)
+def test_the_published_prompts_are_the_ones_that_were_run(records, demo) -> None:
+    for record in records.values():
+        for agent in record["agents"]:
+            assert demo.prompt_digest(ROOT / agent["prompt"]) == agent["prompt_sha256"], agent["prompt"]
 
 
-def test_scene_two_recalls_the_decision_with_its_origin(scenes, demo) -> None:
-    text = "\n".join(lines_of(scenes[1]))
-    assert "event 1  by agent-a  at " + demo.DECISION["ts_utc"] in text
-    assert demo.DECISION["summary"] in text
-    assert "production_authority=false" in text
+def test_c_read_what_b_wrote_claimed_and_how_b_closed(records, demo) -> None:
+    known = demo.facts(records["closed"])
+    assert known["recalled"] == [("agent-a", "Result: 2"), ("agent-b", "Result: X")]
+    assert known["summary"] == "Result: X" and known["author"] == ("agent-b", "claude-code", "local-machine")
+    assert "not verified" in known["author_note"]
+    assert known["claim_kinds"] == ["claim-acquired", "claim-released"] and known["release_names_event"]
+    assert known["turn_status"] == "closed" and known["listed"] and not known["gap_recorded"]
 
 
-def test_scene_three_refuses_memory_allows_one_grant_refuses_replay(scenes) -> None:
-    verdicts = [text.split()[1] for style, text in scenes[2]["lines"] if style in ("ok", "deny")]
-    assert verdicts == ["REFUSED", "ALLOWED", "REFUSED"]
-    assert "already consumed" in lines_of(scenes[2])[-1]
+def test_c_saw_that_b_broke_off(records, demo) -> None:
+    known = demo.facts(records["broken-off"])
+    assert known["summary"] == "Result: X" and known["author"][0] == "agent-b"
+    assert known["claim_kinds"] == ["claim-acquired"] and not known["release_names_event"]
+    assert known["turn_status"] == "open" and not known["listed"] and not known["gap_recorded"]
 
 
-def test_scene_four_shows_the_missing_close_in_the_doctor(scenes) -> None:
-    text = "\n".join(lines_of(scenes[3]))
-    assert re.search(r"coverage gap sha256:[0-9a-f]{12}\.\.\.  signature ed25519: valid", text)
-    assert "coverage: 1/2 registered turns closed (events 1, no-event 0, unresolved 1)" in text
+def replay(record: dict, home: Path) -> dict:
+    """Send the recorded calls to a new instance; ids of the record are replaced by the new ones."""
+    renamed: dict[str, str] = {}
+
+    def fresh(value):
+        if isinstance(value, str):
+            return renamed.get(value, value)
+        if isinstance(value, dict):
+            return {key: fresh(item) for key, item in value.items()}
+        return value
+
+    replayed = copy.deepcopy(record)
+    memory = lm.LocalMemory.create(home)
+    try:
+        for agent in replayed["agents"]:
+            for call in agent["calls"]:
+                reply = lm.dispatch(memory, {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {
+                    "name": call["tool"], "arguments": fresh(call["arguments"])}})
+                assert reply["result"]["isError"] is False, call["tool"]
+                result = json.loads(reply["result"]["content"][0]["text"])
+                for key in ("registration_id", "claim_id", "event_uid"):
+                    if isinstance(call["result"].get(key), str) and isinstance(result.get(key), str):
+                        renamed[call["result"][key]] = result[key]
+                call["result"] = result
+    finally:
+        memory.close()
+    return replayed
 
 
-def test_committed_pictures_are_this_run(scenes, demo) -> None:
-    for name, data in demo.pictures(scenes).items():
+@pytest.mark.parametrize("name", ["closed", "broken-off"])
+def test_this_code_gives_the_recorded_answers(records, demo, tmp_path, name) -> None:
+    recorded, now = demo.facts(records[name]), demo.facts(replay(records[name], tmp_path / "home"))
+    assert {key: recorded[key] for key in STABLE} == {key: now[key] for key in STABLE}
+
+
+def test_committed_pictures_are_the_records(demo) -> None:
+    for name, data in demo.pictures(demo.load_scenes()).items():
         assert (ASSETS / name).read_bytes() == data, name + " is out of date: python demo/run.py --svg docs/assets"
 
 
-def test_pictures_have_no_script_and_fit_the_width(scenes, demo) -> None:
+def test_pictures_have_no_script_and_fit_the_width(demo) -> None:
+    scenes = demo.load_scenes()
     for data in demo.pictures(scenes).values():
         text = data.decode("utf-8")
         assert "<script" not in text and "href" not in text
