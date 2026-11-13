@@ -103,12 +103,41 @@ class AutoregTest(unittest.TestCase):
 
     def test_concurrent_processes_one_entry_each(self):
         cmd = [sys.executable, "-B", str(HERE / "autoreg.py"), "--state-dir", str(self.state), "ensure", "--harness", "codex"]
+        identities = (A, B, A, B)
         for _ in range(3):
-            procs = [subprocess.Popen(cmd + ["--identity", i], stdout=subprocess.PIPE, stderr=subprocess.PIPE) for i in (A, B, A, B)]
+            procs = [subprocess.Popen(cmd + ["--identity", i], stdout=subprocess.PIPE, stderr=subprocess.PIPE) for i in identities]
             outs = [p.communicate(timeout=30) for p in procs]
-            self.assertTrue(all(p.returncode == 0 for p in procs), outs)
+            self.assertTrue(any(p.returncode == 0 for p in procs), outs)
+            for identity, proc, (_, err) in zip(identities, procs, outs):
+                if proc.returncode == 0:
+                    continue
+                # ensure waits LOCK_WAIT_MS for the registry lock and then gives up by design: a hook
+                # must not hold a turn. A process that lost the wait exits with 2 and says so; nothing
+                # else may fail. Its caller repeats it until the identity has its entry.
+                self.assertEqual((proc.returncode, json.loads(err)), (2, {"error": "registry busy"}), outs)
+                for _attempt in range(5):
+                    again = subprocess.run(cmd + ["--identity", identity], capture_output=True, timeout=30, check=False)
+                    if again.returncode == 0:
+                        break
+                    self.assertEqual(json.loads(again.stderr), {"error": "registry busy"})
+                self.assertEqual(again.returncode, 0, again.stderr)
         agents = ar.load(self.state)
         self.assertEqual(sorted(e["thread"] for e in agents.values()), sorted([A, B]))
+
+    def test_ensure_command_reports_a_held_registry_as_busy(self):
+        cmd = [sys.executable, "-B", str(HERE / "autoreg.py"), "--state-dir", str(self.state), "ensure",
+               "--harness", "codex", "--identity", A]
+        con = rdb.connect(self.state, timeout_ms=2000)
+        con.execute("BEGIN IMMEDIATE")
+        try:
+            held = subprocess.run(cmd, capture_output=True, timeout=30, check=False)
+        finally:
+            con.execute("ROLLBACK")
+            con.close()
+        self.assertEqual((held.returncode, json.loads(held.stderr)), (2, {"error": "registry busy"}))
+        self.assertEqual(ar.load(self.state), {})
+        free = subprocess.run(cmd, capture_output=True, timeout=30, check=False)
+        self.assertEqual(free.returncode, 0, free.stderr)
 
     def test_hook_timeout_is_bounded_and_fail_open(self):
         with patch("autoreg.ensure", side_effect=lambda *a, **k: time.sleep(2)):
