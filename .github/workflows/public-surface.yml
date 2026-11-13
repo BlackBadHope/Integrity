@@ -72,6 +72,22 @@ jobs:
           guardian-local-memory doctor --home "$RUNNER_TEMP/local-memory-instance"
           guardian-local-memory uninstall --home "$RUNNER_TEMP/local-memory-instance" --yes
           test ! -e "$RUNNER_TEMP/local-memory-instance"
+      - name: Create, check and remove a core instance (install stage 2)
+        # The installed command; Linux only. Its sessions are driven by tests/test_core_instance.py.
+        if: runner.os == 'Linux'
+        run: |
+          guardian-core-instance init --home "$RUNNER_TEMP/core-instance"
+          guardian-core-instance doctor --home "$RUNNER_TEMP/core-instance"
+          guardian-core-instance server-json --home "$RUNNER_TEMP/core-instance"
+          guardian-core-instance uninstall --home "$RUNNER_TEMP/core-instance" --yes
+          test ! -e "$RUNNER_TEMP/core-instance"
+      - name: Core instance tests run, not skip
+        if: runner.os == 'Linux'
+        run: >-
+          python .github/scripts/native_skip_guard.py "$RUNNER_TEMP/root-junit.xml"
+          --require test_init_makes_a_private_instance_that_doctor_accepts
+          --require test_a_second_session_reads_what_the_first_one_wrote
+          --require test_two_sessions_open_at_once_both_write
       - name: Verify the local read-only MCP walkthrough
         # No vendor/model call; generated state stays in runner-owned temporary paths.
         env:

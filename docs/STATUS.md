@@ -74,6 +74,13 @@ The server side of that transport is in
 [`deploy/linux-core`](../deploy/linux-core/README.md). Its README lists what
 was run; the scripts carry placeholders that you fill for your own host.
 
+*CI.* `guardian-core-instance` creates a [core instance](CORE_INSTANCE.md) in
+one private folder of one Linux account, without root: the Action Log, its
+witness, the Seed catalog, native trust with file keys and Turn Memory. CI on
+Ubuntu starts its server, writes from two sessions, and reaches it through a
+forced command. It is not the hardened layout, and no real agent client wrote
+to such an instance: the producer envelope in the tests is synthetic.
+
 ### A multi-vendor team on one infrastructure
 
 *Daily use.* Our own setup: one operator, and agents from Claude Code and
@@ -194,6 +201,9 @@ that host binding, credentials or production actions are configured.
 - Live acceptance with a model on a fresh install is not yet published for any
   vendor.
 - macOS is not supported yet.
+- The core runs on Linux only. `guardian-core-instance` refuses Windows and
+  macOS; a machine with those systems is a client of a Linux core, or uses the
+  [local memory profile](LOCAL_MEMORY.md).
 - Mode B tunnels are unverified.
 - Hooks are project-scoped unless you merge them into user settings by hand.
   That merge is tested on Linux; there is no command for it yet.

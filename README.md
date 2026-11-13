@@ -278,7 +278,7 @@ CI runs the second one on Linux and Windows.
 | Install components, build wheels, run the test suite | [Install and test](docs/INSTALL.md) |
 | Create an isolated local instance | [Clean bootstrap](BOOTSTRAP.md) |
 | Connect Claude Code, Codex or Antigravity with lifecycle hooks | [Native onboarding](docs/native-onboarding.md), [Linux clients](docs/linux-native-clients.md) |
-| Put the core on one machine and clients on another | [Two-machine quickstart](docs/CROSS_MACHINE_QUICKSTART.md), [Linux core scripts](deploy/linux-core/README.md) |
+| Put the core on one machine and clients on another | [A core instance on one Linux account](docs/CORE_INSTANCE.md), [Two-machine quickstart](docs/CROSS_MACHINE_QUICKSTART.md), [Linux core scripts](deploy/linux-core/README.md) |
 | Share one core between two to five people | [Team quickstart](docs/QUICKSTART_TEAM.md) |
 | Record work from a cloud agent | [Cloud agents](docs/CLOUD_AGENTS.md) |
 | Find out why a session has no memory | [Hooks troubleshooting](docs/hooks-troubleshooting.md) |

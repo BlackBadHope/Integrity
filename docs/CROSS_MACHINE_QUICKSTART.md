@@ -69,7 +69,9 @@ try, use **user mode** (step 2b) under your own account.
 **Full Native lifecycle.** Point `argv` at your owner-operated Memory instance.
 That is `guardian-memory-synapse-mcp --trust-profile personal-native …`, with
 the paths described in [native-onboarding.md](native-onboarding.md#supported-owner-routes-and-prerequisites).
-A source checkout is not such an instance. If each device has its own Native
+A source checkout is not such an instance. To make one in a single folder of
+your account, without root, see [a core instance](CORE_INSTANCE.md); its
+`server-json` command prints this file. If each device has its own Native
 device enrollment, pass it as, for example, `--native-device-id device:{device_id}`.
 
 Do not put secrets in `server.json`. It is world-readable inside the release.

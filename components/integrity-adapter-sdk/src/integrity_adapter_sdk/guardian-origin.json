@@ -1,8 +1,8 @@
 {
   "distribution": "integrity-guardian",
-  "file_count": 357,
+  "file_count": 358,
   "package_root": "integrity_guardian",
   "protocol": "integrity-adapter-sdk/guardian-origin-manifest/v1",
-  "tree_sha256": "sha256:dcf088ec665a5f3fc12c4e574f7ebe5c31ac0d4291bd139a4ec4511c8c74c940",
+  "tree_sha256": "sha256:f022ddb1a8047e347702fad0235de224dedccb2b6ed49ba2b4342090913d308e",
   "version": "7.0.0"
 }

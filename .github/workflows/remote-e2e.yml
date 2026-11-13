@@ -36,9 +36,10 @@ jobs:
       - name: Two-machine forced-command test (required, never skipped)
         env:
           INTEGRITY_REMOTE_E2E_REQUIRED: "1"
+          INTEGRITY_CORE_INSTANCE_REQUIRED: "1"
           PYTHONDONTWRITEBYTECODE: "1"
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
-        run: python -B -m pytest -q -p no:cacheprovider -rs tests/test_two_machine_ssh.py
+        run: python -B -m pytest -q -p no:cacheprovider -rs tests/test_two_machine_ssh.py tests/test_core_instance.py
       - name: integrity-remote unit tests on Linux
         env:
           PYTHONDONTWRITEBYTECODE: "1"

@@ -1,5 +1,5 @@
 {
-  "file_count": 1384,
+  "file_count": 1387,
   "files": [
     {
       "bytes": 3435,
@@ -51,11 +51,11 @@
       "sha256": "ca1e616f0064f8da6bf50010068bcede45918f3fe301e20898aa3f3217309c3e"
     },
     {
-      "bytes": 1740,
+      "bytes": 1816,
       "mode": "0o644",
       "path": ".github/workflows/remote-e2e.yml",
       "sanitization_edits": 0,
-      "sha256": "ee5524337ab4d1610794fb82e7fedf1082871e823be2e7a68619d713d5cfdb70"
+      "sha256": "e326d8c5d7efec7b3c9c8950707aaa01a3d90a8c8340f214d43a00aae59ace08"
     },
     {
       "bytes": 782,
@@ -79,11 +79,11 @@
       "sha256": "bf23ba02498540d50a6eb700f5382a02160c20d66ba5ce754f2535158bce7cba"
     },
     {
-      "bytes": 12181,
+      "bytes": 12256,
       "mode": "0o644",
       "path": "COMPONENTS.json",
       "sanitization_edits": 0,
-      "sha256": "7a93f447780c4fa8ccaa1f47c967d56c3da91148d2cae9aa7bdc40d6776b9a00"
+      "sha256": "fdf334fb0d016dc2c2240a8685d0247501b96dff747c7c4381f7b633272103ef"
     },
     {
       "bytes": 1797,
@@ -419,7 +419,7 @@
       "mode": "0o644",
       "path": "components/integrity-adapter-sdk/src/integrity_adapter_sdk/guardian-origin.json",
       "sanitization_edits": 2,
-      "sha256": "e7e125b814e6af2e582a0400262e52ed805bc45e839b2c18d2f78e49d70f773b"
+      "sha256": "64b6dad993d00566b253b60e54a5ba8fc6e61633c505e55da304cbdb7c77a6ea"
     },
     {
       "bytes": 632,
@@ -5763,11 +5763,18 @@
       "sha256": "9f6a3de86912dcd9192d5fc9440c66697fda0384fae6dce8139b5c2d01912234"
     },
     {
-      "bytes": 10162,
+      "bytes": 7646,
+      "mode": "0o644",
+      "path": "docs/CORE_INSTANCE.md",
+      "sanitization_edits": 0,
+      "sha256": "eef3bf6855b80ef12050132e638e21fda15990d93cb32b6fd109da97a45534ee"
+    },
+    {
+      "bytes": 10309,
       "mode": "0o644",
       "path": "docs/CROSS_MACHINE_QUICKSTART.md",
       "sanitization_edits": 0,
-      "sha256": "30235c3658dc88f722a50c4a85208840ef04433c49dcf4ed19e8404fc5e4010e"
+      "sha256": "8d5a103b409bbd1d812a1d6d1ffddb86e595229cde28633722195dfacf4f5ac9"
     },
     {
       "bytes": 5226,
@@ -6587,6 +6594,13 @@
       "path": "src/integrity_guardian/context_delivery.py",
       "sanitization_edits": 0,
       "sha256": "ba152acf8567c62341ef40de5790570d3f052e743f9497d89346ac398860d967"
+    },
+    {
+      "bytes": 24168,
+      "mode": "0o644",
+      "path": "src/integrity_guardian/core_instance.py",
+      "sanitization_edits": 0,
+      "sha256": "f93020a645136871d4a663c83675ab42c590d4ada919f61f7b1f3cdf6b245c32"
     },
     {
       "bytes": 1289,
@@ -8857,6 +8871,13 @@
       "sha256": "6c2a83fe3fa69822a9694cc07154a34f6d341449658fab0ce8d30ae2625e9580"
     },
     {
+      "bytes": 14405,
+      "mode": "0o644",
+      "path": "tests/test_core_instance.py",
+      "sanitization_edits": 0,
+      "sha256": "ffedb2e90e9a9c7ec6133516cdcb00733251c077af7ccec59e2d4a8a5a77eb22"
+    },
+    {
       "bytes": 8484,
       "mode": "0o644",
       "path": "tests/test_core_protocol.py",
@@ -9742,11 +9763,11 @@
       "sha256": "c7febfedca7cf8e16f62f00b6af65808b633dc1ba26351c7b1ada8de2946e222"
     },
     {
-      "bytes": 8301,
+      "bytes": 9279,
       "mode": "0o644",
       "path": ".github/workflows/public-surface.yml",
       "sanitization_edits": 0,
-      "sha256": "0422d989a21685cdf6ad2265bb06e924dd4cfc73533fd8bf0573241b5a03c88f"
+      "sha256": "8f6eba480ca6f96a6f8821626b7c8b556fe5bbbb0d3509dfea8b96d68abb2506"
     },
     {
       "bytes": 132,
@@ -9777,11 +9798,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 52387,
+      "bytes": 53908,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "424b563f509a68d7751bc1fc1373bbab6319f323a983ce7f735fdeb06d646c45"
+      "sha256": "24c7ed547d436b9d3bb0d0e50680ecb7e9eb14aa9e08ded75ecaab2f96fbde57"
     },
     {
       "bytes": 775,
@@ -9819,11 +9840,11 @@
       "sha256": "c773a85da94e9edf0b2b10e60fd43b00fe4f90e345ec0d958e6c5b4d0d405e8e"
     },
     {
-      "bytes": 27367,
+      "bytes": 27430,
       "mode": "0o644",
       "path": "README.md",
       "sanitization_edits": 0,
-      "sha256": "0f47a5392c359a046e4bdc4d4caeead0993ddd74434c21cf0be2c6148223f9c6"
+      "sha256": "71f8c96694f30c47f1c0f66ae4f865a3d56af4e24d0177be164be04920a06b4a"
     },
     {
       "bytes": 13444,
@@ -10155,18 +10176,18 @@
       "sha256": "e03cd2506f026c9e618ee2035b2676fb52369982e79e9df6eba0d3f5c1df5465"
     },
     {
-      "bytes": 6734,
+      "bytes": 6936,
       "mode": "0o644",
       "path": "docs/README.md",
       "sanitization_edits": 0,
-      "sha256": "5743af190d4699d77fa561f02881e2003426027d83dba13d53091f0f85fb5e63"
+      "sha256": "d5ba00fcd9968cc19546d2576c8fa668c958fd2c2fa44cd9821817a76d22ddde"
     },
     {
-      "bytes": 11164,
+      "bytes": 11819,
       "mode": "0o644",
       "path": "docs/STATUS.md",
       "sanitization_edits": 0,
-      "sha256": "fb63f8fa1663ddf7b7ce17294fef51dd71395515d5e6bb62bdaeca0ded4184f9"
+      "sha256": "5e46af0ae44de1e737a8e9162efa5f9168017715851ea8d33768eca33f1a9ee0"
     },
     {
       "bytes": 8620,
@@ -10386,11 +10407,11 @@
       "sha256": "90c65124e71bba9a456fd8202098dcbf34ba12c23e9a76069b2667fc36372ecf"
     },
     {
-      "bytes": 1612,
+      "bytes": 1677,
       "mode": "0o644",
       "path": "pyproject.toml",
       "sanitization_edits": 0,
-      "sha256": "52244cb65aa416d448f922f95aa9ce02c7b29c54ecae1d4ce04e3685e970b990"
+      "sha256": "c0ea4bc9cdab23535c290221231aafe81b521666da05ca9ddb3666f081229692"
     },
     {
       "bytes": 432,
@@ -10400,7 +10421,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:6b4f849e2ef02d7bcc029249b942d4dd51e15d3b31fb68c9182b991d91c2cc06",
+  "projection_digest": "sha256:ec75f57c64feb755439a0043396550f6c49fc10ae8869c9555f3cd06f9423ce3",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
