@@ -121,6 +121,28 @@ jobs:
         working-directory: components/integrity-space
         run: npm test
 
+  bus-hub:
+    # Install stage 3, bus part: the hub with real accounts on one Linux machine, without
+    # systemd and without the SSH gateway. sudo is used inside this runner only.
+    name: bus hub (ubuntu, real accounts)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build the bus wheel alone
+        run: |
+          python -m pip install "build>=1.2,<2"
+          python -m build --wheel --outdir "$RUNNER_TEMP/bus-dist" components/integrity-llm-bus
+      - name: Install the hub, use it over its socket from three accounts, remove it
+        run: python .github/scripts/bus_hub_accounts_check.py --wheel "$(ls "$RUNNER_TEMP"/bus-dist/integrity_llm_bus-*.whl)"
+
   macos:
     # Core and client-memory on macOS. The README marks macOS as CI-tested only for
     # what this job runs; POSIX custody that needs bubblewrap is Linux-only.
