@@ -3,12 +3,18 @@
 import assert from 'node:assert/strict';
 import {createInterface} from 'node:readline';
 import {createPreviewClient} from '../ui/preview-client.js';
+// Progress marks go to stderr; the test prints them when the bridge ends early.
+const mark = text => process.stderr.write(`mark ${text}\n`);
+mark('node up');
 const input = createInterface({input:process.stdin});
 const lines = input[Symbol.asyncIterator]();
 const first = JSON.parse((await lines.next()).value);
+mark('token read');
 const client = createPreviewClient(async (path, options) => {
   process.stdout.write(JSON.stringify({path, ...options})+'\n');
+  mark(`waiting for the answer to ${path}`);
   const response = JSON.parse((await lines.next()).value);
+  mark(`answer ${response.status}`);
   return {ok:response.status>=200&&response.status<300, status:response.status, json:async()=>response.data};
 });
 await assert.rejects(()=>client.connect('synthetic-invalid-local-code-at-least-32-characters'), error=>error.code==='access_denied');
@@ -24,4 +30,5 @@ assert.equal(source.events[0].event_id, 2);
 client.clear();
 await assert.rejects(()=>client.call('integrity_projects'), /код подключения/);
 process.stdout.write(JSON.stringify({done:true})+'\n');
+mark('done written');
 input.close();

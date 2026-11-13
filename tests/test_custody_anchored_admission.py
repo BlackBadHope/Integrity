@@ -283,7 +283,7 @@ def test_tail_with_ledger_sequence_gap_behaves_like_full_verify(tmp_path):
 
 
 # --------------------------------------------------------------------------- hold
-def test_lock_hold_below_half_second_at_16600(tmp_path):
+def test_lock_hold_below_half_second_at_16600(tmp_path, record_testsuite_property):
     service = _service(tmp_path / "arch", _keys())
     t = time.perf_counter()
     _bulk(service, 16_600)
@@ -311,6 +311,10 @@ def test_lock_hold_below_half_second_at_16600(tmp_path):
     admission_holds = list(holds)  # full_verify() below also takes the lock; not an admission
     print(f"\nhold16600 build={build:.1f}s holds={[round(h, 3) for h in admission_holds]} "
           f"totals={[round(x, 3) for x in totals]}")
+    # kept in the junit file of every run, green or red, to see the margin to 0.5 s
+    record_testsuite_property("hold16600_build_s", f"{build:.3f}")
+    record_testsuite_property("hold16600_holds_s", ",".join(f"{h:.3f}" for h in admission_holds))
+    record_testsuite_property("hold16600_totals_s", ",".join(f"{x:.3f}" for x in totals))
     _check_consistent(service)
     assert len(admission_holds) == 4 and max(admission_holds) < 0.5, admission_holds
 

@@ -180,6 +180,24 @@ def main() -> int:
     except subprocess.TimeoutExpired:
         raise SystemExit("the daemon did not stop") from None
 
+    # a process of the gateway account stops the removal too, before anything is removed
+    holder = subprocess.Popen(["sudo", "-n", "-u", GATEWAY, "sleep", "300"])
+    try:
+        for _ in range(100):
+            if subprocess.run(["pgrep", "-u", GATEWAY], capture_output=True, check=False).returncode == 0:
+                break
+            time.sleep(0.1)
+        else:
+            raise SystemExit("the gateway account process did not start")
+        refused, code = hub("uninstall", "--etc", str(ETC), "--yes", expect=(3,))
+        kept = sudo("test", "-d", str(STATE), expect=(0, 1)).returncode == 0 and exists("passwd", BUS)
+        if refused["status"] != "refused" or GATEWAY not in refused["reason"] or not kept:
+            raise SystemExit(f"uninstall while a gateway process runs must refuse and keep everything: {refused}")
+        results["uninstall while a gateway account process runs"] = "refused, nothing removed"
+    finally:
+        sudo("pkill", "-KILL", "-u", GATEWAY, expect=(0, 1))
+        holder.wait(timeout=30)
+
     # requests that reached the hub: 9 answered above, plus the service-start record
     chain = json.loads(sudo("-u", BUS, "env", "-i", *environment, PYTHON, "-I", "-B",
                             str(Path(start["argv"][-1]).with_name("bus_journal.py")), str(STATE / "journal")).stdout)
