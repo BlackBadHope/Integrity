@@ -358,7 +358,7 @@ THEMES = {
              "cmd": "#79B8FF", "ok": "#3FCF9F", "deny": "#FF7B72", "step": "#1C222B", "step_on": "#0E2A22"},
 }
 STEPS = ("1 record", "2 recall", "3 grant", "4 close")
-WIDTH, LINE, TOP, SCENE_SECONDS, MAX_CHARS = 880, 22, 96, 9.0, 100
+WIDTH, LINE, TOP, SCENE_SECONDS, LINE_SECONDS, MAX_CHARS = 880, 22, 96, 12.0, 0.7, 100
 
 
 def _fade(start: float, end: float, total: float) -> str:
@@ -410,7 +410,7 @@ def render_svg(scenes: list[dict], theme: dict) -> str:
             shown = ("$ " if style == "cmd" else "  ") + text if row else text
             if len(shown) > MAX_CHARS:
                 raise DemoFailure(f"line too long for the picture ({len(shown)}): {shown}")
-            appear = begin + 0.3 + row * 0.85
+            appear = begin + 0.3 + row * LINE_SECONDS
             parts.append(f'<text x="24" y="{TOP + row * LINE}" font-size="13" xml:space="preserve" '
                          f'fill="{colors[style]}" opacity="{base}">{escape(shown)}'
                          + _fade(appear, finish, total) + '</text>')

@@ -5595,11 +5595,11 @@
       "sha256": "119cd311d32d3d96cb5d5039c8d38c667fdbc0c4cad152ea46842174db527753"
     },
     {
-      "bytes": 22578,
+      "bytes": 22606,
       "mode": "0o644",
       "path": "demo/run.py",
       "sanitization_edits": 0,
-      "sha256": "7dfcde755d12c19040ebd92c1a29063bd748c148e5bf5c16f00b17b6f936014c"
+      "sha256": "6933f2c8b501cda61433c9c7c9d896e55d0f15a41e79758eb2214c7c251f4d48"
     },
     {
       "bytes": 13097,
@@ -5760,14 +5760,14 @@
       "mode": "0o644",
       "path": "docs/assets/demo-dark.svg",
       "sanitization_edits": 0,
-      "sha256": "c0b5ecb5a95a48f87ea51b0675552e2a78b8b0e7892e60e6e766412280881ed1"
+      "sha256": "89bc3ee77739074225f128aebd0f3608c015af0c2d443a847c47949eb8e15ccd"
     },
     {
       "bytes": 11068,
       "mode": "0o644",
       "path": "docs/assets/demo-light.svg",
       "sanitization_edits": 0,
-      "sha256": "0cc3875d3c797b0d5581557d7ce1f892ed681096332d1e8c8e82bddffd976b92"
+      "sha256": "ec931e4c82b62fe36795f80bfafdcf3803e5af094c853b7038e914ebdb1c340e"
     },
     {
       "bytes": 2963,
@@ -10302,7 +10302,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:baf5f0d763d0e5f905a26996b8190ebe0ee7ca48ab74b1d59c898488bb628360",
+  "projection_digest": "sha256:43a56376143a3c9edd6b821b8b6e3c5ce4b0bc0529a86ea45e90c6be060585f1",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
