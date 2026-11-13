@@ -1,5 +1,5 @@
 {
-  "file_count": 1381,
+  "file_count": 1383,
   "files": [
     {
       "bytes": 3435,
@@ -51,11 +51,11 @@
       "sha256": "ca1e616f0064f8da6bf50010068bcede45918f3fe301e20898aa3f3217309c3e"
     },
     {
-      "bytes": 1740,
+      "bytes": 1816,
       "mode": "0o644",
       "path": ".github/workflows/remote-e2e.yml",
       "sanitization_edits": 0,
-      "sha256": "ee5524337ab4d1610794fb82e7fedf1082871e823be2e7a68619d713d5cfdb70"
+      "sha256": "e326d8c5d7efec7b3c9c8950707aaa01a3d90a8c8340f214d43a00aae59ace08"
     },
     {
       "bytes": 782,
@@ -79,11 +79,11 @@
       "sha256": "bf23ba02498540d50a6eb700f5382a02160c20d66ba5ce754f2535158bce7cba"
     },
     {
-      "bytes": 12181,
+      "bytes": 12256,
       "mode": "0o644",
       "path": "COMPONENTS.json",
       "sanitization_edits": 0,
-      "sha256": "7a93f447780c4fa8ccaa1f47c967d56c3da91148d2cae9aa7bdc40d6776b9a00"
+      "sha256": "fdf334fb0d016dc2c2240a8685d0247501b96dff747c7c4381f7b633272103ef"
     },
     {
       "bytes": 1797,
@@ -419,7 +419,7 @@
       "mode": "0o644",
       "path": "components/integrity-adapter-sdk/src/integrity_adapter_sdk/guardian-origin.json",
       "sanitization_edits": 2,
-      "sha256": "ce008345106696f4854a6afdfda2fd0e04397cb7807fa53aed028fdb90fa455a"
+      "sha256": "9b8a82644d9f427be589e6474a6a672777d10569da348a1372fb1fbdd6ed97a2"
     },
     {
       "bytes": 632,
@@ -6575,6 +6575,13 @@
       "sha256": "ba152acf8567c62341ef40de5790570d3f052e743f9497d89346ac398860d967"
     },
     {
+      "bytes": 22793,
+      "mode": "0o644",
+      "path": "src/integrity_guardian/core_instance.py",
+      "sanitization_edits": 0,
+      "sha256": "83d7ea8701ddb7fd423fa88581eef7b654e1fb5bc4f422575cae7869863953b5"
+    },
+    {
       "bytes": 1289,
       "mode": "0o644",
       "path": "src/integrity_guardian/cross_agent_acceptance_cli.py",
@@ -8843,6 +8850,13 @@
       "sha256": "6c2a83fe3fa69822a9694cc07154a34f6d341449658fab0ce8d30ae2625e9580"
     },
     {
+      "bytes": 10943,
+      "mode": "0o644",
+      "path": "tests/test_core_instance.py",
+      "sanitization_edits": 0,
+      "sha256": "a3857bc78dc3d5bf5b6a95dca782d59dde6410b9982725291dbb57fbbb163bee"
+    },
+    {
       "bytes": 8484,
       "mode": "0o644",
       "path": "tests/test_core_protocol.py",
@@ -9721,11 +9735,11 @@
       "sha256": "c7febfedca7cf8e16f62f00b6af65808b633dc1ba26351c7b1ada8de2946e222"
     },
     {
-      "bytes": 8301,
+      "bytes": 9279,
       "mode": "0o644",
       "path": ".github/workflows/public-surface.yml",
       "sanitization_edits": 0,
-      "sha256": "0422d989a21685cdf6ad2265bb06e924dd4cfc73533fd8bf0573241b5a03c88f"
+      "sha256": "8f6eba480ca6f96a6f8821626b7c8b556fe5bbbb0d3509dfea8b96d68abb2506"
     },
     {
       "bytes": 132,
@@ -10365,11 +10379,11 @@
       "sha256": "90c65124e71bba9a456fd8202098dcbf34ba12c23e9a76069b2667fc36372ecf"
     },
     {
-      "bytes": 1612,
+      "bytes": 1677,
       "mode": "0o644",
       "path": "pyproject.toml",
       "sanitization_edits": 0,
-      "sha256": "52244cb65aa416d448f922f95aa9ce02c7b29c54ecae1d4ce04e3685e970b990"
+      "sha256": "c0ea4bc9cdab23535c290221231aafe81b521666da05ca9ddb3666f081229692"
     },
     {
       "bytes": 432,
@@ -10379,7 +10393,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:9bc25fefb33536a1273f1c725fc24976b063cd382c2971ab1c414753455bd646",
+  "projection_digest": "sha256:e704a4faa2fa22d29c2a1f3498ef94363ee8408275e8e8f6a83caa879615021e",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

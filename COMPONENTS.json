@@ -8,6 +8,7 @@
       "distribution": "integrity-guardian",
       "entry_points": {
         "guardian": "integrity_guardian.cli:main",
+        "guardian-core-instance": "integrity_guardian.core_instance:main",
         "guardian-cross-agent-continuity-acceptance": "integrity_guardian.cross_agent_acceptance_cli:main",
         "guardian-galaxy-ppv4-bridge": "integrity_guardian.galaxy_ppv4_bridge:main",
         "guardian-local-memory": "integrity_guardian.local_memory:main",

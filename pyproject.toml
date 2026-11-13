@@ -38,6 +38,7 @@ guardian = "integrity_guardian.cli:main"
 guardian-cross-agent-continuity-acceptance = "integrity_guardian.cross_agent_acceptance_cli:main"
 guardian-memory-synapse-mcp = "integrity_guardian.memory_synapse_mcp_protocol:main"
 guardian-local-memory = "integrity_guardian.local_memory:main"
+guardian-core-instance = "integrity_guardian.core_instance:main"
 guardian-galaxy-ppv4-bridge = "integrity_guardian.galaxy_ppv4_bridge:main"
 
 [tool.hatch.build.targets.wheel]
