@@ -68,22 +68,37 @@ Server (Linux), after the bus hub (`integrity-llm-bus-hub install`):
    integrity-humanx-server install --etc /etc/<humanx> --state /var/lib/<humanx> --runtime /run/<humanx> \
      --web-user <web account> --gateway-user <gateway account> --socket-group <gateway socket group> \
      --bus-group <hub socket group> --bus-gateway-user <hub SSH gateway account> --bus-socket <hub socket> \
-     --web-key <key file> --operator-id <operator_id> --vendor claude --bind 127.0.0.1 --port 8890 --allow 127.0.0.1
+     --web-key <key file> --operator-id <operator_id> --vendor claude --port 8890 --allow 127.0.0.1
    ```
 
    It creates the web account, the gateway account and the gateway socket group. It adds the web account
    to the hub's socket group and the hub's SSH gateway account to the gateway socket group. It writes the
    configuration (`configuration.json`, `web.json`, `gateway.json`, the key file readable by the web
    account only). It prints the commands that start the web and the gateway as their accounts.
+
+   - It refuses an account, group or folder that already exists under a name it would create; it does not
+     take over existing ones.
+   - Before each step it writes the step to its record (`<etc>/humanx-server.json`). The record lists
+     what install created and what was there before: the hub's socket group and SSH gateway account,
+     whose only change is one group membership.
+   - The key file must be a regular file (not a symbolic link), mode 600 or stricter, owned by root or by
+     the user who runs `install` (through `sudo`). The copy is written to a temporary file that has mode
+     400 and the web account as owner before any byte, then renamed.
+   - The web listens on `--bind`, 127.0.0.1 by default. `0.0.0.0` or `::` are refused unless you add
+     `--allow-any-address`.
 4. Enable the room on the hub: `<hub state>/state/room.json` with `human`, `vendors` and `arbiters`
    (see below). `install` does not write it.
 5. For SQL, switch reads, the storm reader, the snapshot job and the ring screens, add the files they need
    (`my.cnf`, `switch.cred`, `storm.key`, `storm.known_hosts`, the ring map) and their values in
    `gateway.json` and `configuration.json` yourself. Until then they refuse, and the ring and storm
    screens stay off (`web-rings.off`, `web-storm.off`).
-6. `integrity-humanx-server doctor --etc /etc/<humanx>` only reads. `uninstall --etc /etc/<humanx>` lists what
-   it would remove; with `--yes` it removes it. It refuses while a process of the web or gateway account
-   runs, or while the configuration folder holds a file it did not write.
+6. `integrity-humanx-server doctor --etc /etc/<humanx>` only reads. It checks the hub's SSH gateway
+   account is in the gateway socket group and names the web's address. An install that stopped half way
+   is reported as `partial`. `uninstall --etc /etc/<humanx>` lists what it would remove; with `--yes` it
+   removes what the record lists as created, newest first, and nothing else. It takes the hub's SSH gateway
+   account out of the gateway socket group (`gpasswd --delete`) before it deletes the group. It refuses
+   while a process of the web or gateway account runs, or while the configuration folder holds a file it
+   did not write, and it removes nothing from a configuration folder without the record.
 7. For a service, adapt the example units in `examples/`, replacing their `<...>` placeholders. Limit the
    web to the `allow` addresses in the firewall and in `IPAddressAllow`.
 
@@ -134,22 +149,37 @@ configuration in a temporary folder and no network:
 - gateway caller checks, SQL and `show` whitelists, web screen rights and Integrity snapshot reads. The gateway
   is Linux-only; the tests use fake `pwd`/`grp` and a fake connection, and no socket server is started;
 - `dlinkcli` whitelist and parsers on invented transcripts;
-- `integrity-humanx-server` argument checks, the configuration it writes and its record handling, without root.
+- `integrity-humanx-server` argument checks (including the `--bind` default and `0.0.0.0`), the configuration
+  it writes, its record handling, the key file checks (symbolic link, modes 644, 640, 604 and 620, owner;
+  POSIX only) and `uninstall --yes` against invented accounts: it removes only what the record lists as
+  created, takes the membership out before the group goes, and removes a partial install by its record;
+- a refused SQL statement never starts the database client (the gateway reaches the database only through
+  that client process).
 
 By the public CI job `humanx server (ubuntu, real accounts)` (`.github/scripts/humanx_server_check.py`), on
 Ubuntu with sudo inside the runner, with keys generated in the job and a synthetic Integrity snapshot:
 
-- `install` with real accounts and groups next to the installed bus hub, a refused second install, `doctor`;
+- refused installs that create nothing: an existing account named like the web account (and `uninstall
+  --yes` afterwards leaves that account alone), a key file given as a symbolic link, a key file with mode 644,
+  and `--bind 0.0.0.0` without `--allow-any-address`;
+- an install killed at the membership step and one killed while writing the key file (no rollback runs):
+  `doctor` reports `partial`, `uninstall --yes` removes it by its record, and the hub's SSH gateway account
+  keeps the groups it had before;
+- `install` with real accounts and groups next to the installed bus hub, a refused second install, `doctor`
+  (web on 127.0.0.1, the hub's SSH gateway account in the gateway socket group; a key file set to mode 644
+  fails it);
 - the gateway on its unix socket as its own account, with callers told apart by `SO_PEERCRED`. The hub's SSH
   gateway account reads the snapshot. Refused: a vendor outside the room, the web account, another account of
-  the socket group, and a non-read SQL statement (refused before any database client starts). Accounts outside
-  the socket group cannot connect. The gateway log holds request hashes and no request text;
+  the socket group, and `DROP TABLE` (the answer is the gateway policy's refusal, with none of the fields a
+  run of the database client adds; no database server runs in the job). Accounts outside the socket group
+  cannot connect. The gateway log holds request hashes and no request text;
 - the web on 127.0.0.1 as its own account: the page (the key is not in it), a refusal from 127.0.0.2, a
   refusal without the `X-HumanX` header, the state API;
 - one question sent from the page through the real bus hub to the room vendor's address, read there with the
   vendor's key, and the vendor's answer shown under it on the page;
 - `uninstall` refused while the web and the gateway run, and while an owner file is in the configuration folder;
-  then `uninstall --yes`, `doctor` reporting `not-installed`, no accounts, groups or folders left.
+  then `uninstall --yes`, `doctor` reporting `not-installed`, no accounts, groups or folders left, and the
+  hub's SSH gateway account there with the groups it had before install.
 
 ## What is not verified
 
@@ -160,6 +190,12 @@ Ubuntu with sudo inside the runner, with keys generated in the job and a synthet
 - No live acceptance: no vendor agent, switch, database, SSH host or browser took part. The vendor side in CI
   is a script holding the vendor's key, not an agent.
 - The waker loops, the supervisor, Max Reasoning and the quota readers are not covered by the tests.
+- The web does not check the `Host` header. A page whose name is pointed at the web's address (DNS
+  rebinding) and opened in a browser on an allowed address can then reach it. This is read from the code
+  and not tested; keep the web on loopback or behind a proxy that checks `Host`.
+- A kill between creating the configuration folder and writing the record's first line leaves the folder
+  without a record; `doctor` reports `broken` and `uninstall` removes nothing. Not tested.
+- Two machines (web on one, hub on another) were not run.
 
 ## Known problems carried over from the pilot
 

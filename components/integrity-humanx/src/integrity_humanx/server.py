@@ -6,8 +6,14 @@
              account to the gateway socket group; writes the configuration folder, the state
              folder and the socket folder (run as root)
   doctor     only reads: accounts and groups, owners and modes, the values install wrote,
-             the web key file (never its content), installed files against the wheel record
-  uninstall  says what it would remove; with --yes removes what install created
+             the web key file (never its content), installed files against the wheel record;
+             an install that stopped half way is reported as partial
+  uninstall  says what it would remove; with --yes removes what the install record lists as
+             created by install, and nothing else
+
+install refuses any account, group or folder that already exists under a name it would create.
+Before each step it writes the step to its record (<etc>/humanx-server.json), so an install that
+was killed half way can still be removed by uninstall --yes.
 
 It starts no service and installs no systemd unit. The bus hub (integrity-llm-bus-hub) must be
 installed first: its socket group and its SSH gateway account are named here, not created.
@@ -18,6 +24,7 @@ screens stay off.
 from __future__ import annotations
 
 import argparse
+import errno
 import hashlib
 import ipaddress
 import json
@@ -36,6 +43,9 @@ RECORD_PROTOCOL = "integrity-humanx/server-install/v1"
 CONFIGURATION, WEB, GATEWAY, WEB_KEY = "configuration.json", "web.json", "gateway.json", "web.key"
 STOP_FILES = ("web-rings.off", "web-storm.off")
 FILES = (CONFIGURATION, WEB, GATEWAY, WEB_KEY, *STOP_FILES, RECORD)
+# A file is written to .<name>.tmp with its final owner and mode, then renamed; a killed install
+# can leave one behind.
+TEMPORARY = tuple(f".{name}.tmp" for name in FILES)
 # Files the owner adds for the parts install leaves unconfigured. doctor accepts them;
 # uninstall refuses while they are there, so it never deletes a credential it did not write.
 OWNER_FILES = ("my.cnf", "switch.cred", "storm.key", "storm.known_hosts", "sw-share.off")
@@ -44,6 +54,7 @@ NOT_CONFIGURED = ["sql (my.cnf)", "switch reads (switch_nets, switch.cred)", "st
 NAME = re.compile(r"[a-z_][a-z0-9_-]{0,31}\Z")
 VENDOR = re.compile(r"[a-z][a-z0-9-]{0,31}\Z")
 KEY_MAX = 4096
+DEFAULT_BIND = "127.0.0.1"
 
 
 class ServerError(Exception):
@@ -90,7 +101,9 @@ def check_install_args(args) -> list[str]:
     if not _OPERATOR_ID.fullmatch(args.operator_id or ""):
         problems.append(f"operator id must match {_OPERATOR_ID.pattern}")
     try:
-        ipaddress.ip_address(args.bind)
+        if ipaddress.ip_address(args.bind).is_unspecified and not getattr(args, "allow_any_address", False):
+            problems.append(f"--bind {args.bind} listens on every address of the machine; "
+                            "give --allow-any-address if that is meant")
     except ValueError:
         problems.append(f"--bind {args.bind!r}: use an IP address")
     if not 1 <= args.port <= 65535:
@@ -110,12 +123,44 @@ def check_install_args(args) -> list[str]:
     return problems
 
 
-def read_web_key(path: str) -> str:
-    """The web's bus key from the owner's file. It is never printed; only the file is checked."""
+def key_owners() -> set[int]:
+    """Who may own the web key file: root and the user who runs install (through sudo, SUDO_UID)."""
+    owners = {0, os.getuid()}
+    sudo_uid = os.environ.get("SUDO_UID", "")
+    if sudo_uid.isdigit():
+        owners.add(int(sudo_uid))
+    return owners
+
+
+def read_web_key(path: str, owners: set[int] | None = None) -> str:
+    """The web's bus key from the owner's file. It is never printed; only the file is checked.
+
+    The file is opened without following a symbolic link and must be a regular file that neither
+    the group nor others can read or write; with owners given, its owner must be one of them."""
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NOCTTY", 0) | getattr(os, "O_NONBLOCK", 0)
     try:
-        text = Path(path).read_text(encoding="utf-8").strip()
-    except (OSError, UnicodeError) as exc:
+        fd = os.open(path, flags)
+    except OSError as exc:
+        if exc.errno == errno.ELOOP:
+            raise ServerError("web key file is a symbolic link; give the file itself") from None
         raise ServerError(f"web key file: {type(exc).__name__}") from None
+    try:
+        info = os.fstat(fd)
+        if not stat.S_ISREG(info.st_mode):
+            raise ServerError("web key file must be a regular file")
+        if stat.S_IMODE(info.st_mode) & 0o077:
+            raise ServerError(f"web key file has mode {stat.S_IMODE(info.st_mode):o}: the group or others can "
+                              "read or write it; use chmod 600")
+        if owners is not None and info.st_uid not in owners:
+            raise ServerError(f"web key file is owned by uid {info.st_uid}; it must belong to root "
+                              "or to the user who runs install")
+        data = os.read(fd, KEY_MAX + 2)
+    finally:
+        os.close(fd)
+    try:
+        text = data.decode("utf-8").strip()
+    except UnicodeError:
+        raise ServerError("web key file: UnicodeDecodeError") from None
     if not text or len(text) > KEY_MAX or any(c.isspace() for c in text):
         raise ServerError("web key file must hold one key on one line")
     return text
@@ -167,11 +212,21 @@ def start_commands(record: dict) -> dict:
 
 
 def _write(path: Path, text: str, mode: int, uid: int, gid: int) -> None:
-    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
-    with os.fdopen(fd, "w", encoding="utf-8") as handle:
-        handle.write(text)
-    os.chown(path, uid, gid)
-    os.chmod(path, mode)
+    """Write through .<name>.tmp that has its final owner and mode before any byte, then rename."""
+    temporary = path.with_name(f".{path.name}.tmp")
+    if os.path.lexists(temporary):
+        os.unlink(temporary)   # left by a killed run; the folder is install's own
+    fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, mode)
+    try:
+        os.fchown(fd, uid, gid)
+        os.fchmod(fd, mode)
+        data = text.encode("utf-8")
+        while data:
+            data = data[os.write(fd, data):]
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+    os.rename(temporary, path)
 
 
 def _mkdir(path: Path, mode: int, uid: int, gid: int) -> None:
@@ -182,6 +237,29 @@ def _mkdir(path: Path, mode: int, uid: int, gid: int) -> None:
 
 def _json(document) -> str:
     return json.dumps(document, indent=1, ensure_ascii=False) + "\n"
+
+
+def _save(record: dict) -> None:
+    _write(Path(record["etc"]) / RECORD, _json(record), 0o600, 0, 0)
+
+
+def _step(record: dict, entry: dict, action) -> None:
+    """Record the step as planned, carry it out, record it as created."""
+    entry = {**entry, "state": "planned"}
+    record["created"].append(entry)
+    _save(record)
+    action()
+    entry["state"] = "created"
+    _save(record)
+
+
+def _exists(kind: str, name: str) -> bool:
+    pwd, grp = _accounts()
+    try:
+        (pwd.getpwnam if kind == "user" else grp.getgrnam)(name)
+        return True
+    except KeyError:
+        return False
 
 
 def install(args) -> dict:
@@ -198,64 +276,71 @@ def install(args) -> dict:
         if os.path.lexists(path):
             raise ServerError(f"{path} exists; install creates it and refuses to reuse it")
     for user in (args.web_user, args.gateway_user):
-        try:
-            pwd.getpwnam(user)
-            raise ServerError(f"account {user} exists; install creates its own accounts")
-        except KeyError:
-            pass
+        if _exists("user", user):
+            raise ServerError(f"account {user} exists; install creates its own accounts and does not take over "
+                              "existing ones")
     for group in (args.socket_group, args.web_user, args.gateway_user):
-        try:
-            grp.getgrnam(group)
-            raise ServerError(f"group {group} exists; install creates its own groups")
-        except KeyError:
-            pass
+        if _exists("group", group):
+            raise ServerError(f"group {group} exists; install creates its own groups and does not take over "
+                              "existing ones")
     try:
         grp.getgrnam(args.bus_group)
         pwd.getpwnam(args.bus_gateway_user)
     except KeyError as exc:
         raise ServerError(f"{exc.args[0]}: install the bus hub first (integrity-llm-bus-hub)") from None
-    key = read_web_key(args.web_key)
+    key = read_web_key(args.web_key, key_owners())
 
     nologin = _tool("nologin")
     record = {
-        "protocol": RECORD_PROTOCOL, "web_user": args.web_user, "gateway_user": args.gateway_user,
+        "protocol": RECORD_PROTOCOL, "complete": False, "web_user": args.web_user, "gateway_user": args.gateway_user,
         "socket_group": args.socket_group, "bus_group": args.bus_group, "bus_gateway_user": args.bus_gateway_user,
         "bus_socket": args.bus_socket, "operator_id": args.operator_id, "vendors": sorted(set(args.vendor)),
         "bind": args.bind, "port": args.port, "allow": list(args.allow),
         "etc": str(etc), "state": str(state), "runtime": str(runtime), "python": sys.executable,
+        # What was there before install; uninstall never removes these.
+        "existed": {"bus_group": args.bus_group, "bus_gateway_user": args.bus_gateway_user,
+                    "bus_gateway_groups": sorted(_groups_of(args.bus_gateway_user, pwd, grp))},
+        # What install created, in order; uninstall removes these in reverse order.
+        "created": [{"kind": "dir", "name": str(etc), "state": "created"}],
     }
-    done: list[tuple[str, str]] = []
+    _mkdir(etc, 0o755, 0, 0)
     try:
-        _run([_tool("groupadd"), "--system", args.socket_group])
-        done.append(("group", args.socket_group))
+        _save(record)
+        _step(record, {"kind": "group", "name": args.socket_group},
+              lambda: _run([_tool("groupadd"), "--system", args.socket_group]))
         for user, groups in ((args.web_user, f"{args.socket_group},{args.bus_group}"),
                              (args.gateway_user, args.socket_group)):
-            done.append(("group-if-left", user))   # undone after the account: userdel may remove it
-            _run([_tool("useradd"), "--system", "--user-group", "--groups", groups, "--no-create-home",
-                  "--home-dir", "/nonexistent", "--shell", nologin, user])
-            done.append(("user", user))
-        _run([_tool("usermod"), "--append", "--groups", args.socket_group, args.bus_gateway_user])
-        # no undo entry: groupdel of the socket group drops this membership
+            _step(record, {"kind": "user", "name": user, "user_group": True},
+                  lambda user=user, groups=groups: _run([
+                      _tool("useradd"), "--system", "--user-group", "--groups", groups, "--no-create-home",
+                      "--home-dir", "/nonexistent", "--shell", nologin, user]))
+        _step(record, {"kind": "membership", "name": args.bus_gateway_user, "group": args.socket_group},
+              lambda: _run([_tool("usermod"), "--append", "--groups", args.socket_group, args.bus_gateway_user]))
         web, gateway = pwd.getpwnam(args.web_user), pwd.getpwnam(args.gateway_user)
         socket_gid = grp.getgrnam(args.socket_group).gr_gid
-        _mkdir(etc, 0o755, 0, 0)
-        done.append(("dir", str(etc)))
-        _mkdir(state, 0o755, 0, 0)
-        done.append(("dir", str(state)))
-        _mkdir(state / "web", 0o700, web.pw_uid, web.pw_gid)
-        _mkdir(state / "gateway", 0o700, gateway.pw_uid, gateway.pw_gid)
-        _mkdir(state / "gateway" / "integrity", 0o750, 0, gateway.pw_gid)
-        _mkdir(runtime, 0o750, gateway.pw_uid, socket_gid)
-        done.append(("dir", str(runtime)))
+
+        def state_folders():
+            _mkdir(state, 0o755, 0, 0)
+            _mkdir(state / "web", 0o700, web.pw_uid, web.pw_gid)
+            _mkdir(state / "gateway", 0o700, gateway.pw_uid, gateway.pw_gid)
+            _mkdir(state / "gateway" / "integrity", 0o750, 0, gateway.pw_gid)
+
+        _step(record, {"kind": "dir", "name": str(state)}, state_folders)
+        _step(record, {"kind": "dir", "name": str(runtime)},
+              lambda: _mkdir(runtime, 0o750, gateway.pw_uid, socket_gid))
         _write(etc / CONFIGURATION, _json(component_configuration(record)), 0o644, 0, 0)
         _write(etc / WEB, _json(web_configuration(record)), 0o640, 0, web.pw_gid)
         _write(etc / GATEWAY, _json(gateway_configuration(record)), 0o640, 0, gateway.pw_gid)
         _write(etc / WEB_KEY, key + "\n", 0o400, web.pw_uid, web.pw_gid)
         for name in STOP_FILES:
             _write(etc / name, "off\n", 0o644, 0, 0)
-        _write(etc / RECORD, _json(record), 0o600, 0, 0)
+        record["complete"] = True
+        _save(record)
     except BaseException:
-        _undo(done)
+        try:
+            _remove(record)
+        except (OSError, ServerError):
+            pass   # what is left stays in the record; doctor reports it as partial
         raise
     finally:
         key = None
@@ -263,26 +348,41 @@ def install(args) -> dict:
             "not_installed": ["systemd units", "firewall rules", "the bus room file (<hub state>/state/room.json)"]}
 
 
-def _undo(done: list[tuple[str, str]]) -> None:
-    for kind, value in reversed(done):
-        try:
-            if kind == "dir":
-                shutil.rmtree(value)
-            elif kind == "user":
-                _run([_tool("userdel"), value])
-            else:
-                _remove_group(value)
-        except (OSError, ServerError):
-            pass
+def _remove(record: dict) -> None:
+    """Remove what the record lists as created, newest first, and nothing else.
+
+    A step recorded as planned is removed when it is there: install checked that the name was
+    free right before the step. Each removal is written to the record, so a removal that stops
+    half way can be run again. The configuration folder, which holds the record, goes last."""
+    etc = record["etc"]
+    for entry in reversed(record["created"]):
+        if entry.get("state") == "removed":
+            continue
+        kind, name = entry["kind"], entry["name"]
+        if kind == "dir":
+            if os.path.lexists(name):
+                shutil.rmtree(name)
+            if name == etc:
+                return
+        elif kind == "membership":
+            pwd, grp = _accounts()
+            if _exists("user", name) and _exists("group", entry["group"]) and name in grp.getgrnam(entry["group"]).gr_mem:
+                _run([_tool("gpasswd"), "--delete", name, entry["group"]])
+        elif kind == "user":
+            if _exists("user", name):
+                _run([_tool("userdel"), name])
+            if entry.get("user_group"):
+                _remove_group(name)
+        elif kind == "group":
+            _remove_group(name)
+        entry["state"] = "removed"
+        _save(record)
 
 
 def _remove_group(name: str) -> None:
     """Remove a group if it still exists (userdel removes a user's own group on most systems)."""
-    try:
-        _accounts()[1].getgrnam(name)
-    except KeyError:
-        return
-    _run([_tool("groupdel"), name])
+    if _exists("group", name):
+        _run([_tool("groupdel"), name])
 
 
 def read_record(etc: Path) -> dict | None:
@@ -293,7 +393,8 @@ def read_record(etc: Path) -> dict | None:
         record = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
         raise ServerError(f"{path}: {type(exc).__name__}") from None
-    if not isinstance(record, dict) or record.get("protocol") != RECORD_PROTOCOL:
+    if (not isinstance(record, dict) or record.get("protocol") != RECORD_PROTOCOL
+            or not isinstance(record.get("created"), list) or record.get("etc") != str(etc)):
         raise ServerError(f"{path}: not a HumanX server install record")
     return record
 
@@ -336,6 +437,11 @@ def _groups_of(name: str, pwd, grp) -> set[str]:
     return found
 
 
+def _pending(record: dict) -> list[str]:
+    return [f"{e['kind']} {e['name']}" + (f" in {e['group']}" if e.get("group") else "")
+            for e in reversed(record["created"]) if e.get("state") != "removed"]
+
+
 def doctor(args) -> tuple[dict, int]:
     etc = Path(args.etc)
     record = read_record(etc)
@@ -344,11 +450,16 @@ def doctor(args) -> tuple[dict, int]:
             return {"status": "broken", "checks": [{"check": "record", "ok": False,
                                                     "detail": f"{etc} exists without {RECORD}"}]}, 1
         return {"status": "not-installed", "checks": []}, 3
+    if not record.get("complete"):
+        return {"status": "partial", "checks": [{
+            "check": "install", "ok": False,
+            "detail": "install did not finish; uninstall --yes removes what it created: " + ", ".join(_pending(record))}],
+        }, 1
     pwd, grp = _accounts()
     checks = []
 
-    def add(name, problem=None, warning=False):
-        checks.append({"check": name, "ok": problem is None or warning, "detail": problem or "ok",
+    def add(name, problem=None, warning=False, detail=None):
+        checks.append({"check": name, "ok": problem is None or warning, "detail": problem or detail or "ok",
                        **({"warning": True} if problem and warning else {})})
 
     try:
@@ -362,8 +473,7 @@ def doctor(args) -> tuple[dict, int]:
         return {"status": "failed", "checks": checks}, 1
     problems = []
     for user, needed in ((record["web_user"], {record["socket_group"], record["bus_group"]}),
-                         (record["gateway_user"], {record["socket_group"]}),
-                         (record["bus_gateway_user"], {record["socket_group"]})):
+                         (record["gateway_user"], {record["socket_group"]})):
         missing = needed - _groups_of(user, pwd, grp)
         if missing:
             problems.append(f"{user} is not in {sorted(missing)}")
@@ -371,6 +481,18 @@ def doctor(args) -> tuple[dict, int]:
         if not account.pw_shell.endswith("nologin"):
             problems.append(f"{account.pw_name} has a login shell")
     add("accounts", "; ".join(problems) or None)
+
+    bus_gateway = record["bus_gateway_user"]
+    add("bus gateway membership",
+        None if record["socket_group"] in _groups_of(bus_gateway, pwd, grp)
+        else f"{bus_gateway} is not in {record['socket_group']}: the bus cannot reach the read-only gateway",
+        detail=f"{bus_gateway} is in {record['socket_group']} (added by install; uninstall takes it out)")
+
+    bind = ipaddress.ip_address(record["bind"])
+    add("web address", None if bind.is_loopback else
+        f"the web listens on {record['bind']}:{record['port']}, not on loopback; only the allow list "
+        f"{record['allow']} and your firewall limit who reaches it", warning=True,
+        detail=f"{record['bind']}:{record['port']}, loopback")
 
     problems = [p for p in (_mode_check(etc, 0, 0, 0o755, stat.S_ISDIR),
                             _mode_check(etc / CONFIGURATION, 0, 0, 0o644, stat.S_ISREG),
@@ -444,45 +566,39 @@ def uninstall(args) -> tuple[dict, int]:
     etc = Path(args.etc)
     record = read_record(etc)
     if record is None:
+        if os.path.lexists(etc):
+            return {"status": "refused", "reason": f"{etc} exists without {RECORD}; with no record of what install "
+                                                   "created, nothing is removed"}, 3
         return {"status": "not-installed", "removed": []}, 0
-    targets = [record["runtime"], record["state"], str(etc), f"account {record['web_user']}",
-               f"account {record['gateway_user']}", f"group {record['socket_group']} "
-               f"(and the membership of {record['bus_gateway_user']} in it)"]
+    targets = _pending(record)
+    kept = sorted({record["existed"]["bus_group"], record["existed"]["bus_gateway_user"]})
     if not args.yes:
-        return {"status": "dry-run", "would_remove": targets,
+        return {"status": "dry-run", "would_remove": targets, "kept": kept,
                 "note": "--yes deletes the room's sent messages, replies, attachments and the gateway log"}, 0
     if os.geteuid() != 0:
         raise ServerError("uninstall --yes needs root")
     pwd, _grp = _accounts()
-    # Both accounts are checked before anything is removed: userdel refuses an account with a
+    # The accounts are checked before anything is removed: userdel refuses an account with a
     # running process, and by then the folders would already be gone.
-    for user in (record["web_user"], record["gateway_user"]):
-        try:
-            running = _processes_of(pwd.getpwnam(user).pw_uid)
-        except KeyError:
-            running = []
-        if running:
-            return {"status": "refused", "reason": f"{len(running)} process(es) of {user} run; stop them first"}, 3
-    extra = sorted(set(os.listdir(etc)) - set(FILES))
+    for entry in record["created"]:
+        if entry["kind"] == "user" and entry.get("state") != "removed":
+            try:
+                running = _processes_of(pwd.getpwnam(entry["name"]).pw_uid)
+            except KeyError:
+                running = []
+            if running:
+                return {"status": "refused",
+                        "reason": f"{len(running)} process(es) of {entry['name']} run; stop them first"}, 3
+    extra = sorted(set(os.listdir(etc)) - set(FILES) - set(TEMPORARY))
     if extra:
         return {"status": "refused", "reason": f"{etc} holds files install did not write: {extra}; "
                                                "move or delete them yourself first"}, 3
-    for folder in (record["runtime"], record["state"], str(etc)):
-        if os.path.lexists(folder):
-            shutil.rmtree(folder)
-    for user in (record["web_user"], record["gateway_user"]):
-        try:
-            pwd.getpwnam(user)
-            _run([_tool("userdel"), user])
-        except KeyError:
-            pass
-    for group in (record["web_user"], record["gateway_user"], record["socket_group"]):
-        _remove_group(group)
-    return {"status": "removed", "removed": targets,
+    _remove(record)
+    return {"status": "removed", "removed": targets, "kept": kept,
             "left": "the integrity-humanx wheel: remove it with pip uninstall integrity-humanx"}, 0
 
 
-def main(argv=None) -> int:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="integrity-humanx-server", description=__doc__.split("\n\n")[0])
     commands = parser.add_subparsers(dest="command", required=True)
     step = commands.add_parser("install", help="create accounts, folders and configuration (root)")
@@ -495,10 +611,14 @@ def main(argv=None) -> int:
     step.add_argument("--bus-group", required=True, help="socket group of the installed bus hub")
     step.add_argument("--bus-gateway-user", required=True, help="SSH gateway account of the installed bus hub")
     step.add_argument("--bus-socket", required=True, help="socket of the bus hub")
-    step.add_argument("--web-key", required=True, help="file with the web's bus key (the hub has its sha256)")
+    step.add_argument("--web-key", required=True,
+                      help="file with the web's bus key (the hub has its sha256): a regular file, mode 600 or "
+                           "stricter, owned by root or by you")
     step.add_argument("--operator-id", required=True)
     step.add_argument("--vendor", action="append", help="bus vendor id of a room Arbiter the gateway serves")
-    step.add_argument("--bind", required=True, help="address the web listens on")
+    step.add_argument("--bind", default=DEFAULT_BIND, help=f"address the web listens on (default {DEFAULT_BIND})")
+    step.add_argument("--allow-any-address", action="store_true",
+                      help="allow --bind 0.0.0.0 or ::, which listens on every address of the machine")
     step.add_argument("--port", required=True, type=int)
     step.add_argument("--allow", action="append", help="client address the web accepts")
     step = commands.add_parser("doctor", help="read-only check")
@@ -506,7 +626,11 @@ def main(argv=None) -> int:
     step = commands.add_parser("uninstall", help="remove what install created")
     step.add_argument("--etc", required=True)
     step.add_argument("--yes", action="store_true")
-    args = parser.parse_args(argv)
+    return parser
+
+
+def main(argv=None) -> int:
+    args = build_parser().parse_args(argv)
     try:
         if args.command == "install":
             report, code = install(args), 0

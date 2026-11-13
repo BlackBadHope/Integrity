@@ -58,6 +58,29 @@ while not buf.endswith(b"\n"):
 print(buf.decode())
 """
 
+# integrity-humanx-server install that is killed at one step (os._exit: no rollback runs).
+KILLED_INSTALL = r"""
+import os, sys
+from pathlib import Path
+from integrity_humanx import server
+where = sys.argv[1]
+if where == "membership":
+    real_run = server._run
+    def run(argv):
+        if argv[0].endswith("usermod"):
+            os._exit(137)
+        real_run(argv)
+    server._run = run
+else:
+    real_write = server._write
+    def write(path, *rest):
+        if Path(path).name == server.WEB_KEY:
+            os._exit(137)
+        real_write(path, *rest)
+    server._write = write
+sys.exit(server.main(sys.argv[2:]))
+"""
+
 
 def run(argv, expect=(0,), stdin=None, timeout=300):
     done = subprocess.run(argv, input=stdin, capture_output=True, text=True, timeout=timeout, check=False)
@@ -88,6 +111,19 @@ def ask(user, sock, request):
 def expect_error(answer, text, case):
     if answer.get("ok") is not False or text not in str(answer.get("error", "")):
         raise SystemExit(f"{case}: expected a refusal containing {text!r}, got {answer}")
+
+
+def groups_of(user):
+    return sorted(run(["id", "-nG", user]).stdout.split())
+
+
+def nothing_left(case):
+    """After a refused or removed install: no folder, account or group of HumanX is left."""
+    left = [str(p) for p in (ETC, STATE, RUNTIME) if sudo("test", "-e", str(p), expect=(0, 1)).returncode == 0]
+    left += [f"account {n}" for n in (WEB, GATEWAY) if exists("passwd", n)]
+    left += [f"group {n}" for n in (GROUP, WEB, GATEWAY) if exists("group", n)]
+    if left:
+        raise SystemExit(f"{case}: left behind {left}")
 
 
 def http_call(method, path, body=None, headers=None, source=None):
@@ -208,12 +244,59 @@ def main() -> int:
     install_args = ["--etc", str(ETC), "--state", str(STATE), "--runtime", str(RUNTIME), "--web-user", WEB,
                     "--gateway-user", GATEWAY, "--socket-group", GROUP, "--bus-group", BUS_GROUP,
                     "--bus-gateway-user", BUS_GATEWAY, "--bus-socket", str(HUB_RUNTIME / "core.sock"),
-                    "--operator-id", OPERATOR, "--vendor", "claude", "--bind", HOST, "--port", str(PORT),
-                    "--allow", HOST]
+                    "--operator-id", OPERATOR, "--vendor", "claude", "--port", str(PORT), "--allow", HOST]
+    bus_gateway_groups = groups_of(BUS_GATEWAY)
     with tempfile.TemporaryDirectory() as work:
         key_file = Path(work) / "web.key"
         key_file.write_text(keys["web"] + "\n", encoding="utf-8")
         os.chmod(key_file, 0o600)
+
+        # Refusals before anything is created.
+        sudo("useradd", "--system", "--no-create-home", "--shell", "/usr/sbin/nologin", WEB)
+        refused, _ = tool(TOOL, "install", *install_args, "--web-key", str(key_file), expect=(2,))
+        if f"account {WEB} exists" not in refused["error"] or sudo("test", "-e", str(ETC), expect=(0, 1)).returncode == 0:
+            raise SystemExit(f"install over an existing account named like the web account must refuse: {refused}")
+        removed, _ = tool(TOOL, "uninstall", "--etc", str(ETC), "--yes")
+        if removed["status"] != "not-installed" or not exists("passwd", WEB):
+            raise SystemExit(f"uninstall after the refused install must not touch the existing account: {removed}")
+        sudo("userdel", WEB)
+        nothing_left("install over an existing account")
+        results["install over an existing account named like the web account"] = \
+            "refused; uninstall --yes left that account alone"
+        link = Path(work) / "link.key"
+        link.symlink_to(key_file)
+        wide = Path(work) / "wide.key"
+        wide.write_text(keys["web"] + "\n", encoding="utf-8")
+        os.chmod(wide, 0o644)
+        for case, extra, text in (
+            ("web key file given as a symbolic link", ["--web-key", str(link)], "symbolic link"),
+            ("web key file readable by others (0644)", ["--web-key", str(wide)], "group or others"),
+            ("web bound to 0.0.0.0 without --allow-any-address", ["--web-key", str(key_file), "--bind", "0.0.0.0"],
+             "--allow-any-address"),
+        ):
+            refused, _ = tool(TOOL, "install", *install_args, *extra, expect=(2,))
+            if text not in refused["error"] or keys["web"] in json.dumps(refused):
+                raise SystemExit(f"{case}: expected a refusal naming {text!r}, got {refused['status']}")
+            nothing_left(case)
+            results[f"install: {case}"] = f"refused: {text}; nothing created"
+
+        # An install killed half way (no rollback runs) is partial; uninstall --yes removes it by its record.
+        for where in ("membership", "web-key"):
+            killed = sudo(PYTHON, "-I", "-c", KILLED_INSTALL, where, "install", *install_args,
+                          "--web-key", str(key_file), expect=(137,))
+            partial, _ = tool(TOOL, "doctor", "--etc", str(ETC), expect=(1,))
+            if killed.stdout or partial["status"] != "partial":
+                raise SystemExit(f"install killed at {where}: doctor {partial}")
+            removed, _ = tool(TOOL, "uninstall", "--etc", str(ETC), "--yes")
+            gone, _ = tool(TOOL, "doctor", "--etc", str(ETC), expect=(3,))
+            if removed["status"] != "removed" or gone["status"] != "not-installed":
+                raise SystemExit(f"uninstall after the install killed at {where}: {removed} {gone}")
+            nothing_left(f"install killed at {where}")
+            if groups_of(BUS_GATEWAY) != bus_gateway_groups:
+                raise SystemExit(f"install killed at {where}: the bus gateway account's groups changed")
+            results[f"install killed at the {where} step"] = \
+                "doctor: partial; uninstall --yes removed it; bus gateway account's groups as before"
+
         report, _ = tool(TOOL, "install", *install_args, "--web-key", str(key_file))
         again, _ = tool(TOOL, "install", *install_args, "--web-key", str(key_file), expect=(2,))
     if report["status"] != "installed" or not all(exists("passwd", u) for u in (WEB, GATEWAY)) or not exists("group", GROUP):
@@ -222,9 +305,17 @@ def main() -> int:
         raise SystemExit(f"a second install must refuse: {again}")
     results["second install"] = "refused: exists"
     doctor, _ = tool(TOOL, "doctor", "--etc", str(ETC))
-    if doctor["status"] != "passed":
+    named = {c["check"]: c for c in doctor["checks"]}
+    if (doctor["status"] != "passed" or "loopback" not in named["web address"]["detail"]
+            or not named["bus gateway membership"]["ok"]):
         raise SystemExit(f"doctor after install: {doctor}")
-    results["doctor after install"] = "passed"
+    sudo("chmod", "0644", str(ETC / "web.key"))
+    loose, _ = tool(TOOL, "doctor", "--etc", str(ETC), expect=(1,))
+    sudo("chmod", "0400", str(ETC / "web.key"))
+    if not any(c["check"] == "web key file" and not c["ok"] for c in loose["checks"]):
+        raise SystemExit(f"doctor must fail a web key file with mode 644: {loose['status']}")
+    results["doctor after install"] = "passed; web on 127.0.0.1 by default (loopback); bus gateway membership; " \
+                                      "a web key file with mode 644 fails"
 
     with tempfile.TemporaryDirectory() as work:
         snapshot = Path(work) / "seed.sqlite3"
@@ -264,14 +355,19 @@ def main() -> int:
          "only the bus gateway may call"),
         ("another account in the socket group", GATEWAY, {"vendor": "claude", "op": "integrity", "args": {"q": "stats"}},
          "only the bus gateway may call"),
-        ("SQL that is not a read", BUS_GATEWAY, {"vendor": "claude", "op": "sql", "args": {"query": "DROP TABLE example"}},
+        ("SQL DROP", BUS_GATEWAY, {"vendor": "claude", "op": "sql", "args": {"query": "DROP TABLE example"}},
          "Отказ шлюза"),
         ("switch outside the configured networks", BUS_GATEWAY,
          {"vendor": "claude", "op": "switch", "args": {"ip": "192.0.2.1", "cmds": ["show switch"]}},
          "не из сети управления"),
     ):
-        expect_error(ask(user, sock, request), text, case)
-        results[f"gateway: {case}"] = f"refused: {text}"
+        answer = ask(user, sock, request)
+        expect_error(answer, text, case)
+        if request["op"] == "sql" and set(answer) != {"ok", "error"}:
+            # rows_tsv and truncated come only from a run of the database client
+            raise SystemExit(f"{case}: the answer has client fields {sorted(answer)}")
+        results[f"gateway: {case}"] = f"refused: {text}" + (
+            "; by the gateway's policy, before any database client starts" if request["op"] == "sql" else "")
     for user in (OUTSIDER, BUS):
         answer = ask(user, sock, {"vendor": "claude", "op": "integrity", "args": {"q": "stats"}})
         if answer.get("connect_error") != "PermissionError":
@@ -302,7 +398,12 @@ def main() -> int:
         results[f"web: {case}"] = f"HTTP {status}"
     state = http_json("GET", "/api/state")
     if state["arbiter"] is not None or [c["vendor"] for c in state["cards"]] != ["claude"]:
-        raise SystemExit(f"web state before an Arbiter is chosen: arbiter={state['arbiter']} cards={state['cards']}")
+        direct = ask(WEB, HUB_RUNTIME / "core.sock", {"v": 1, "op": "vendor-cards", "token": keys["web"],
+                                                      "args": {"days": 7}})
+        cards = [c.get("vendor") for c in (direct.get("result") or {}).get("cards", [])]
+        raise SystemExit(f"web state before an Arbiter is chosen: arbiter={state['arbiter']} cards={state['cards']}; "
+                         f"the hub asked directly as {WEB}: ok={direct.get('ok')} error={direct.get('error')} "
+                         f"connect_error={direct.get('connect_error')} cards={cards}")
     results["web: state"] = "200, no Arbiter yet, one vendor card"
     header = {"X-HumanX": "1"}
     answer = http_json("POST", "/api/send", {"body": "invented question", "page": build}, header)
@@ -367,7 +468,12 @@ def main() -> int:
     member = GROUP in run(["id", "-nG", BUS_GATEWAY]).stdout.split()
     if removed["status"] != "removed" or doctor["status"] != "not-installed" or left or accounts or member:
         raise SystemExit(f"after uninstall: {removed} {doctor} left={left} accounts={accounts} member={member}")
-    results["uninstall"] = "removed; doctor: not-installed; no accounts, groups or folders left"
+    if not exists("passwd", BUS_GATEWAY) or groups_of(BUS_GATEWAY) != bus_gateway_groups:
+        raise SystemExit("after uninstall the bus gateway account must be there with the groups it had before install")
+    if sorted(removed["kept"]) != sorted([BUS_GROUP, BUS_GATEWAY]):
+        raise SystemExit(f"uninstall must name what it kept: {removed['kept']}")
+    results["uninstall"] = "removed; doctor: not-installed; no accounts, groups or folders left; " \
+                           "the bus gateway account is there with the groups it had before install"
     hub_doctor, _ = tool(HUB_TOOL, "doctor", "--etc", str(HUB_ETC))
     if hub_doctor["status"] != "passed":
         raise SystemExit(f"the bus hub after HumanX was removed: {hub_doctor}")
