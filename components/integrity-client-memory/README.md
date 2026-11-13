@@ -184,6 +184,9 @@ For use in real clients, see
 - Live acceptance with a model on a fresh install is not published for any vendor.
 - The hook patch series in `hook-series/claude-windows/` was not installed or run in its
   published form; its README lists what was changed against the installed bytes.
+- Antigravity gate v2 (uncovered turn, automatic model, prompt wrapper, resume after Stop,
+  superseded registration, worker bound) is covered by tests with a fake upstream only;
+  the published form was not run inside a live Antigravity session.
 
 ## Limits
 

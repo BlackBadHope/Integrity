@@ -47,6 +47,28 @@ They are now in `src/integrity_guardian`:
   were replaced, so the build differs from the installed bytes in 33 + 5
   lines. The published build was not installed or run. It is not part of any
   launcher profile, and the two Claude hooks are not merged.
+- **Antigravity gate v2 (uncovered turn).** With the admission-first gate on,
+  a turn whose admission failed, or whose turn-memory registration could not
+  be opened, can no longer change state: state-changing tools and
+  `call_mcp_tool` to other servers are denied; reads and Integrity calls stay
+  open. Before the broker verifies an admission, other MCP servers now wait too.
+- **Antigravity: automatic model selection.** A `modelName` of `auto` or empty
+  is treated as `gemini-default` (vendor Google) instead of failing the
+  PreInvocation hook.
+- **Antigravity: the `<USER_REQUEST>` wrapper** is stripped from the prompt
+  that admission binds; the turn fingerprint still uses the full text.
+- **Antigravity: a new invocation after Stop** for the same owner message
+  resumes that turn; a turn that never attempted admission gets a fresh
+  turn_ref.
+- **Antigravity: superseded registration.** When a new owner turn replaces a
+  turn whose registration is still open, the broker records a `notify`-stage
+  gap for the old registration before opening the new one (best effort).
+- **Antigravity broker:** at most four conversation workers (least recently
+  used one is shut down), and `not` is removed from model-facing tool schemas,
+  which Antigravity does not accept; the server still validates the full schema.
+  These six Antigravity changes are covered by tests with a fake upstream
+  (`tests/test_antigravity_gate.py`, `tests/test_antigravity_gate_v2.py`);
+  the published form was not run inside a live Antigravity session.
 
 ### Agent bus 1.1.0
 

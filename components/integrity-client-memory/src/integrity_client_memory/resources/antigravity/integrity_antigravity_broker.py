@@ -13,6 +13,7 @@ import sys
 import antigravity_state as store
 import turn_broker_core as core
 HERE=Path(__file__).resolve().parent
+MAX_CONVERSATION_WORKERS=4
 
 APPEND_COMPACT_PROTOCOL = "integrity-append-compact/v1"
 APPEND_COMPACT_LIMIT = 1024
@@ -190,11 +191,17 @@ class ConversationBroker:
         self.snapshot_tools=snapshot_bound_tools(contract)
 
     def worker(self,conversation,state):
-        if conversation not in self.contexts:
+        # At most MAX_CONVERSATION_WORKERS upstream workers; the least recently used one is shut
+        # down (unless it still owes a public delivery) before a new conversation gets its own.
+        if conversation in self.contexts:
+            worker=self.contexts.pop(conversation)
+        else:
+            while len(self.contexts)>=MAX_CONVERSATION_WORKERS:
+                evicted=self.contexts.pop(next(iter(self.contexts)))
+                if evicted not in self.pending:evicted.shutdown()
             worker=self.factory();worker.initialize_params=self.control.initialize_params.copy()
             worker.envelopes=store.EnvelopeStore(self.root/'turn-envelopes'/conversation)
-            self.contexts[conversation]=worker
-        worker=self.contexts[conversation];worker.model_name=state['model_name']
+        self.contexts[conversation]=worker;worker.model_name=state['model_name']
         return worker
 
     def dispatch(self,message,*,defer_replay_ack_until_public_delivery=False):
@@ -203,7 +210,10 @@ class ConversationBroker:
             if message.get('method')=='tools/list' and response and 'result' in response:
                 response=copy.deepcopy(response)
                 for tool in response['result'].get('tools',[]):
-                    tool['inputSchema'].setdefault('properties',{})[store.ROUTE_FIELD]={'type':'string','description':'Reserved local hook route; supplied by PreToolUse, never by the model.'}
+                    # Antigravity's function schema has no 'not'; the server still validates it.
+                    schema=tool.setdefault('inputSchema',{})
+                    schema.pop('not',None)
+                    schema.setdefault('properties',{})[store.ROUTE_FIELD]={'type':'string','description':'Reserved local hook route; supplied by PreToolUse, never by the model.'}
             return response
         request=copy.deepcopy(message);params=request.get('params',{});name=params.get('name');arguments=params.get('arguments',{})
         try:
@@ -230,7 +240,12 @@ class ConversationBroker:
                     if not store.DIGEST.fullmatch(str(admission.get('context_admission_id',''))) or not store.DIGEST.fullmatch(str(snapshot_id or '')):raise ValueError('admission-receipt-invalid')
                     state.update(admission_verified=True,admission_id=admission['context_admission_id'],snapshot_id=snapshot_id)
                     opened_args={k:state[k] for k in ('machine_id','turn_id','prompt_sha256')};opened_args['thread_id']=conversation
+                    superseded=state.pop('superseded_registration_id',None)
                     state['registration_open_attempted']=True;store.save(self.root,conversation,state)
+                    if superseded:
+                        # Best effort: the previous owner turn's open registration becomes signed debt.
+                        try:worker._standalone_turn_memory_call('integrity_turn_memory_gap',{'registration_id':superseded,'stage':'notify'})
+                        except Exception:pass
                     try:
                         opened=store.unwrap(worker._standalone_turn_memory_call('integrity_turn_memory_open',opened_args));receipt=opened.get('receipt',{})
                         identity={k:opened_args[k] for k in ('machine_id','thread_id','turn_id')}

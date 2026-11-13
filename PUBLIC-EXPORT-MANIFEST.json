@@ -1,5 +1,5 @@
 {
-  "file_count": 1257,
+  "file_count": 1258,
   "files": [
     {
       "bytes": 3435,
@@ -982,18 +982,18 @@
       "sha256": "3f879f4afab75da179d721350d088aa0f172a216b1f723b97921ff4e82a38359"
     },
     {
-      "bytes": 11461,
+      "bytes": 11708,
       "mode": "0o644",
       "path": "components/integrity-client-memory/README.md",
       "sanitization_edits": 0,
-      "sha256": "0903421819cbab7782ddeedfbeb4132e6fb8a550e2ab1fdb2368c2a1632eefdb"
+      "sha256": "98a411d555767bb4a46bb90720f0fdedc81c911a2cc490ad2903b57f10d42f14"
     },
     {
-      "bytes": 31487,
+      "bytes": 31937,
       "mode": "0o644",
       "path": "components/integrity-client-memory/SOURCE-MAP.json",
       "sanitization_edits": 0,
-      "sha256": "bfde46344558a174e6e073dae7aa365298f85e58486fee252132e2151b1e9160"
+      "sha256": "6059df7365ab8f5c8ee5371531e72266dc84afe9c501e34dcea516ccde67e1a2"
     },
     {
       "bytes": 2713,
@@ -1416,11 +1416,11 @@
       "sha256": "4bb74a788768904499b2abdbc15c38144093a7710e394910e25669d74190dcb4"
     },
     {
-      "bytes": 15080,
+      "bytes": 18354,
       "mode": "0o644",
       "path": "components/integrity-client-memory/src/integrity_client_memory/resources/antigravity/antigravity_hook.py",
       "sanitization_edits": 0,
-      "sha256": "31f41b89e30c8cf5f2668aaac065cf2dc1b85b92f84f3dde2f36c5c6b2151220"
+      "sha256": "aeeee6d4b6a99e857b43825a6d9138aef8442543d72444a53a2870e9381394f5"
     },
     {
       "bytes": 4513,
@@ -1430,11 +1430,11 @@
       "sha256": "dd5270625946880d77e0734574409c6fbf558a9833d79714a7b6291096e80bf1"
     },
     {
-      "bytes": 17968,
+      "bytes": 18991,
       "mode": "0o644",
       "path": "components/integrity-client-memory/src/integrity_client_memory/resources/antigravity/integrity_antigravity_broker.py",
       "sanitization_edits": 0,
-      "sha256": "971a273b4e54d42c6b334e76ad22f8f3be5bc9fae370c2edcaecf1cf20447fe5"
+      "sha256": "c68c25190791647cbfd70776a0455607872449019488eb72620e65b8c073d1e3"
     },
     {
       "bytes": 283,
@@ -1787,11 +1787,18 @@
       "sha256": "b7f1004e5a98ae69ec2fc5563d554132862266f07e71a545fbe7e648825eb11c"
     },
     {
-      "bytes": 6647,
+      "bytes": 7120,
       "mode": "0o644",
       "path": "components/integrity-client-memory/tests/test_antigravity_gate.py",
       "sanitization_edits": 0,
-      "sha256": "66416e14e0af0bef063069818fea7e0127ff3804b63e5803d32069f052f7bb0f"
+      "sha256": "5faae6d23da015d95310d7a69672122c4f7e5143e97cfc5cb02681b592538de4"
+    },
+    {
+      "bytes": 13667,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/tests/test_antigravity_gate_v2.py",
+      "sanitization_edits": 0,
+      "sha256": "fdda12659b4148bafd2d893f9c3e3325b0c5d8f4eeaf8947ce13cf4ac72338b2"
     },
     {
       "bytes": 925,
@@ -8888,11 +8895,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 43559,
+      "bytes": 45097,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "cdda1a8ef366a46c3ad233093a62fca41e652cda17796f643736087973f3c9b1"
+      "sha256": "70e55eac18628847d5e76907e6604108376493c976778df1267ad8ef45e0d28e"
     },
     {
       "bytes": 775,
@@ -9511,7 +9518,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:0f61b71369357c5fa236b98aef890f09b14942b374db9ed21fabeb5e152225b0",
+  "projection_digest": "sha256:c1661d402f86bc0dad8d0c9c6af7d13144de7060dc430730109280458524996c",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
