@@ -1,0 +1,204 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -25,6 +25,12 @@
+ from typing import Any
+ 
+ import integrity_client_turn_envelope as turn_envelope
++
++try:
++    # Turn-close guard, integrity-next v7.0.0-beta.3 (client-memory 1.11.0), vendored beside this hook.
++    import integrity_turn_guard as _turn_guard
++except Exception:  # noqa: BLE001 - a missing guard must never break the lifecycle hook
++    _turn_guard = None
+ 
+ EXPECTED_TOOLS = [
+     "integrity_read_events",
+@@ -98,6 +104,8 @@
+     r"|\[Cross-session (?:idle|delivery) notice\])",
+     re.DOTALL,
+ )
++# The MCP server name users see in /mcp.
++MCP_SERVER_LABEL = "integrity-local-memory"
+ TRANSCRIPT_TAIL_BYTES = 256 * 1024
+ PREVIOUS_PROMPT_TAIL_BYTES = 4 * 1024 * 1024
+ PREVIOUS_PROMPT_WINDOW_SECONDS = 60
+@@ -790,43 +798,53 @@
+         return None
+ 
+ 
++def probe_memory_server() -> tuple[bool, str]:
++    """Hook-side probe with upstream evidence: one read-only coverage call.
++
++    A local turn broker answers initialize and tools/list by itself and opens
++    its upstream lazily, so a handshake alone would not show memory is reachable.
++    """
++
++    global LIFECYCLE_DEADLINE
++    previous = LIFECYCLE_DEADLINE
++    LIFECYCLE_DEADLINE = time.monotonic() + 20
++    client = None
++    try:
++        client = McpClient()
++        client.call("integrity_turn_memory_coverage", {"limit": 1})
++        return True, "read-only coverage call answered"
++    except Exception as exc:  # noqa: BLE001 - the probe reports, never raises
++        return False, f"{type(exc).__name__}: {str(exc)[:160]}"
++    finally:
++        if client is not None:
++            try:
++                client.close()
++            except Exception:  # noqa: BLE001
++                pass
++        LIFECYCLE_DEADLINE = previous
++
++
+ def admission_offline_notice(state: dict[str, Any]) -> str | None:
+-    """Say clearly that memory is offline instead of PENDING forever.
+-
+-    The previous turn's state is inspected before it is reset: if the model
+-    never attempted the current-turn admission for OFFLINE_STREAK_THRESHOLD
+-    consecutive turns, its MCP server is almost certainly not connected.
++    """Explain a run of turns without admission from evidence, not a guess.
++
++    The previous turn's state is inspected before it is reset. When the
++    server answered in this session (a model tool call or the hook probe), the
++    notice says the call was skipped. The server is called unreachable only
++    when the hook probe or the broker start actually failed.
+     """
+ 
+     try:
+-        if state.get("turn_kind") == NOTIFICATION_TURN_KIND:
+-            # A probable harness notification proves nothing about the MCP
+-            # connection either way: leave the streak exactly as it was.
++        if _turn_guard is None:
+             return None
+-        never = (
+-            isinstance(state.get("turn_ref"), str)
+-            and state.get("model_mcp_admission_attempted") is not True
+-            and state.get("model_mcp_admission_status") == "required"
+-        )
+-        streak = state.get("admission_unattempted_streak")
+-        streak = streak if isinstance(streak, int) and streak >= 0 else 0
+-        streak = streak + 1 if never else 0
+-        state["admission_unattempted_streak"] = streak
++        streak = _turn_guard.unattempted_streak(state)
+         if streak < OFFLINE_STREAK_THRESHOLD:
+             return None
+-        reason = (
+-            f"integrity_context_admission_current_turn was not called in the last {streak} "
+-            "turns, so the integrity-local-memory MCP server is most likely not connected "
+-            "in this session"
+-        )
+         failure = last_broker_failure()
+-        if failure:
+-            reason += f"; last MCP broker startup failure {failure}"
+-        return (
+-            f"Integrity memory offline: {reason}. Nothing is being written to memory "
+-            "(canonical_writes=0). Tell the owner; run /mcp and reconnect "
+-            "integrity-local-memory or restart the session. If the tool is in fact "
+-            "available, call it as instructed below."
++        if not failure and not state.get("mcp_answered_utc") and _turn_guard.probe_due(state):
++            ok, detail = probe_memory_server()
++            _turn_guard.record_probe(state, ok, detail)
++        return _turn_guard.memory_status_notice(
++            state, streak, server_name=MCP_SERVER_LABEL, broker_failure=failure
+         )
+     except Exception:  # noqa: BLE001 - advisory only
+         return None
+@@ -1703,6 +1721,8 @@
+     )
+     preserve_turn_memory_recovery_handle(state)
+     clear_turn_memory_registration(state)
++    if _turn_guard is not None:
++        _turn_guard.reset_turn(state)
+     state.update(
+         {
+             "admission_status": "provisional",
+@@ -1788,6 +1808,9 @@
+     encoded = compact(arguments)
+     if re.search(r"(?is)\bdelete\s+from\s+.{0,64}\bevents\b", encoded):
+         deny("canonical Action Log events are immutable")
++    if _turn_guard is not None and _turn_guard.note_tool(state, name):
++        # The Stop guard needs to know that this turn attempted a state change.
++        save_state(identity, state)
+     retry_pending = state.get("retry_disposition") in {
+         "exact-envelope-after-supported-read-seal",
+         "exact-envelope-after-pre-send-transport",
+@@ -2039,6 +2062,11 @@
+ ) -> None:
+     name = tool_name(payload)
+     response = payload.get("tool_response", {})
++    if _turn_guard is not None and INTEGRITY_TOOL_RE.search(name):
++        # Evidence for the status notice (the server answered) and the Stop guard (closed).
++        _turn_guard.note_mcp_answer(state, name, response)
++        _turn_guard.note_close(state, name, response)
++        save_state(identity, state)
+     if CONTEXT_TOOL_RE.search(name):
+         completed = tool_input(payload)
+         if CURRENT_CONTEXT_TOOL_RE.search(name):
+@@ -2345,7 +2373,35 @@
+             output_context(event, semantic_context(state))
+ 
+ 
+-def handle_stop(event: str, identity: str, state: dict[str, Any]) -> None:
++def guard_stop(event: str, payload: dict[str, Any], identity: str, state: dict[str, Any]):
++    """Turn-close guard. Returns (policy, decision); a block is printed and saved here."""
++
++    if _turn_guard is None:
++        return {"mode": "off"}, {"action": "none", "reason": "", "why": "guard-module-unavailable"}
++    policy = _turn_guard.load_policy(state_root().parent)
++    notification_now = False
++    if event == "Stop" and state.get("turn_kind") != NOTIFICATION_TURN_KIND:
++        # At Stop the current prompt row is in the transcript; classify it now.
++        notification_now = previous_prompt_origin(payload, state) in NON_OWNER_PROMPT_ORIGINS
++        if notification_now:
++            state["turn_kind"] = NOTIFICATION_TURN_KIND
++    decision = _turn_guard.stop_decision(
++        state, payload, policy, event=event, notification_now=notification_now
++    )
++    if decision["action"] == "block":
++        # Keep the turn_ref and registration live: the model continues this turn.
++        _turn_guard.mark_blocked(state)
++        save_state(identity, state)
++        print(compact(_turn_guard.stop_output(decision)))
++    return policy, decision
++
++
++def handle_stop(
++    event: str, identity: str, state: dict[str, Any], payload: dict[str, Any] | None = None
++) -> None:
++    policy, decision = guard_stop(event, payload or {}, identity, state)
++    if decision["action"] == "block":
++        return
+     current_turn_ref = state.get("turn_ref")
+     if isinstance(current_turn_ref, str):
+         try:
+@@ -2443,11 +2499,19 @@
+     cadence = semantic_cadence(state)
+     if cadence["open"]:
+         context += "\n" + semantic_context(state)
++    if decision["action"] == "advise" and decision.get("reason"):
++        # Operator-visible: a skipped close is no longer silent coverage debt.
++        context += "\n" + decision["reason"]
++    if event == "Stop" and _turn_guard is not None:
++        _turn_guard.record_turn(
++            _turn_guard.guard_root(state_root().parent), _turn_guard.turn_record(state, decision, vendor="hook"), policy
++        )
+     if (
+         state.get("turn_memory_status") == "closed"
+         and state.get("append_outcome") != "unknown-outcome"
+         and state.get("unresolved_mutation") is not True
+         and not cadence["open"]
++        and decision["action"] != "advise"
+     ):
+         # A verified terminal receipt needs no operator-visible message on every stop.
+         return
+@@ -2557,7 +2621,7 @@
+         elif args.event == "PostToolUse":
+             handle_post_tool(args.event, payload, identity, state)
+         else:
+-            handle_stop(args.event, identity, state)
++            handle_stop(args.event, identity, state, payload)
+     return 0
+ 
+ 

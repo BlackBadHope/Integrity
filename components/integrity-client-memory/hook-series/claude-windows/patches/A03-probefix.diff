@@ -1,0 +1,97 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -798,16 +798,17 @@
+         return None
+ 
+ 
+-def probe_memory_server() -> tuple[bool, str]:
++def probe_memory_server(timeout: float = 40.0) -> tuple[bool, str]:
+     """Hook-side probe with upstream evidence: one read-only coverage call.
+ 
+     A local turn broker answers initialize and tools/list by itself and opens
+     its upstream lazily, so a handshake alone would not show memory is reachable.
++    ``timeout`` must cover a cold broker start (about 21 s over SSH).
+     """
+ 
+     global LIFECYCLE_DEADLINE
+     previous = LIFECYCLE_DEADLINE
+-    LIFECYCLE_DEADLINE = time.monotonic() + 20
++    LIFECYCLE_DEADLINE = time.monotonic() + timeout
+     client = None
+     try:
+         client = McpClient()
+@@ -824,13 +825,28 @@
+         LIFECYCLE_DEADLINE = previous
+ 
+ 
+-def admission_offline_notice(state: dict[str, Any]) -> str | None:
++def read_hook_health() -> dict[str, Any] | None:
++    """This hook's own lifecycle health record (hook-health.json), if any."""
++
++    try:
++        path = state_root().parent / HEALTH_FILE
++        if not path.is_file() or path.is_symlink() or path.stat().st_size > 16384:
++            return None
++        record = json.loads(path.read_text(encoding="utf-8"))
++        return record if isinstance(record, dict) else None
++    except Exception:  # noqa: BLE001
++        return None
++
++
++def admission_offline_notice(state: dict[str, Any], current_notification: bool = False) -> str | None:
+     """Explain a run of turns without admission from evidence, not a guess.
+ 
+     The previous turn's state is inspected before it is reset. When the
+-    server answered in this session (a model tool call or the hook probe), the
+-    notice says the call was skipped. The server is called unreachable only
+-    when the hook probe or the broker start actually failed.
++    server answered in this session (a model tool call, the hook's own
++    lifecycle call or the hook probe), the notice says the call was skipped.
++    The server is called unreachable only when the broker start failed or a
++    probe made now was refused twice; a timeout is inconclusive, and a cached
++    failure is never shown again. Notification turns get no notice and no probe.
+     """
+ 
+     try:
+@@ -839,12 +855,28 @@
+         streak = _turn_guard.unattempted_streak(state)
+         if streak < OFFLINE_STREAK_THRESHOLD:
+             return None
++        if current_notification or state.get("turn_kind") == NOTIFICATION_TURN_KIND:
++            # A harness notification proves nothing about the connection either way.
++            return None
+         failure = last_broker_failure()
+-        if not failure and not state.get("mcp_answered_utc") and _turn_guard.probe_due(state):
+-            ok, detail = probe_memory_server()
+-            _turn_guard.record_probe(state, ok, detail)
++        lifecycle_ok = _turn_guard.lifecycle_evidence(read_hook_health())
++        fresh = False
++        if (
++            not failure
++            and not lifecycle_ok
++            and not state.get("mcp_answered_utc")
++            and _turn_guard.probe_due(state)
++        ):
++            ok, detail, failures, conclusive = _turn_guard.run_probe(probe_memory_server)
++            _turn_guard.record_probe(state, ok, detail, failures=failures, conclusive=conclusive)
++            fresh = True
+         return _turn_guard.memory_status_notice(
+-            state, streak, server_name=MCP_SERVER_LABEL, broker_failure=failure
++            state,
++            streak,
++            server_name=MCP_SERVER_LABEL,
++            broker_failure=failure,
++            fresh_probe=fresh,
++            lifecycle_ok_utc=lifecycle_ok,
+         )
+     except Exception:  # noqa: BLE001 - advisory only
+         return None
+@@ -1704,7 +1736,7 @@
+         # Retroactive, diagnostic only: the finished previous turn was a harness
+         # notification, so it says nothing about the MCP connection.
+         state["turn_kind"] = NOTIFICATION_TURN_KIND
+-    offline_notice = admission_offline_notice(state)
++    offline_notice = admission_offline_notice(state, probable_notification)
+     generation = next_turn_memory_generation(state)
+     prior_turn_ref = state.get("turn_ref")
+     if isinstance(prior_turn_ref, str):

@@ -1,0 +1,87 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -139,6 +139,9 @@
+ EVENT_UID_RE = re.compile(r"^client:[A-Za-z0-9][A-Za-z0-9._:-]{7,154}$")
+ DIGEST_RE = re.compile(r"^sha256:[a-f0-9]{64}$")
+ MEANINGFUL_TOOL_RE = re.compile(r"(?i)(?:apply_patch|\bEdit\b|\bWrite\b|NotebookEdit)")
++# ISS-049: Claude Code sets hook input `agent_id` only inside a subagent (2.1.321 schema:
++# "Absent for the main thread, even in --agent sessions"). Strict shape; anything else = parent.
++SUBAGENT_ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}")
+ MUTATION_TEXT_RE = re.compile(
+     r"(?i)\b(?:apply_patch|rm|mv|cp|install|chmod|chown|setfacl|git\s+(?:commit|push)|"
+     r"systemctl\s+(?:start|stop|restart|enable|disable)|sed\s+-i|tee)\b"
+@@ -475,6 +478,21 @@
+         if name in payload:
+             return payload[name]
+     return default
++
++
++def subagent_id(payload: dict[str, Any]) -> str | None:
++    """ISS-049: the subagent marker, or None. Only an explicit, well-formed `agent_id` counts.
++
++    A subagent shares the parent's session_id and therefore its hook state, turn_ref and MCP
++    logical context. A parent misread as a subagent would lose the admission-first gate (a hole);
++    a subagent misread as the parent only keeps the pre-ISS-049 behaviour. So on any doubt the
++    call is the parent's.
++    """
++
++    value = payload.get("agent_id")
++    if isinstance(value, str) and SUBAGENT_ID_RE.fullmatch(value):
++        return value
++    return None
+ 
+ 
+ def session_id(payload: dict[str, Any]) -> str:
+@@ -2085,6 +2103,20 @@
+     encoded = compact(arguments)
+     if re.search(r"(?is)\bdelete\s+from\s+.{0,64}\bevents\b", encoded):
+         deny("canonical Action Log events are immutable")
++    agent = subagent_id(payload)
++    if agent is not None:
++        # ISS-049: the parent's admission-first gate, single-shot flags, retry state and MCP
++        # logical context are not the subagent's. Its Integrity calls would consume or rotate
++        # them, so they are refused; its other tools still count as the parent turn's actions.
++        if INTEGRITY_TOOL_RE.search(name):
++            deny(
++                f"subagent {agent} shares the parent session; {name.rsplit('__', 1)[-1]} belongs "
++                "to the parent's turn. Return your result to the parent agent; the parent records "
++                "it in Integrity (ISS-049)."
++            )
++        if _turn_guard is not None and _turn_guard.note_tool(state, name):
++            save_state(identity, state)
++        return
+     gate = admission_gate_reason(state, name)
+     if gate:
+         save_state(identity, state)
+@@ -2465,6 +2497,8 @@
+     """
+ 
+     name = tool_name(payload)
++    if subagent_id(payload) is not None:
++        return  # ISS-049: a subagent never arms the parent's admission retry
+     if not CURRENT_CONTEXT_TOOL_RE.search(name):
+         return
+     if tool_input(payload).get("turn_ref") != state.get("turn_ref"):
+@@ -2486,6 +2520,8 @@
+ ) -> None:
+     name = tool_name(payload)
+     response = payload.get("tool_response", {})
++    if subagent_id(payload) is not None and INTEGRITY_TOOL_RE.search(name):
++        return  # ISS-049: refused in PreToolUse; never bind a subagent result to the parent turn
+     if _turn_guard is not None and INTEGRITY_TOOL_RE.search(name):
+         # Evidence for the status notice (the server answered) and the Stop guard (closed).
+         _turn_guard.note_mcp_answer(state, name, response)
+@@ -2995,6 +3031,13 @@
+             + "INTEGRITY client SESSION PENDING INTENT ADMISSION. No Seed snapshot was opened at startup.",
+         )
+         return 0
++    if args.event in {"SubagentStart", "SubagentStop"} or (
++        args.event == "Stop" and subagent_id(payload) is not None
++    ):
++        # ISS-049: these carry the parent's session_id. Run as before they restaged the parent's
++        # envelope (SubagentStart -> handle_prompt) or ran the parent's Stop guard and declined-close
++        # bookkeeping on a subagent's finish (SubagentStop -> handle_stop). Neither is the parent's.
++        return 0
+     with session_state_lock(identity):
+         if args.event in {"UserPromptSubmit", "SubagentStart"}:
+             handle_prompt(args.event, payload, identity)

@@ -1,0 +1,32 @@
+--- a/integrity_turn_guard.py
++++ b/integrity_turn_guard.py
+@@ -346,7 +346,12 @@
+     if event != "Stop":
+         return {"action": "none", "why": "not-top-level-stop"}
+     exempt = is_exempt(state, notification_now=notification_now)
+-    if exempt:
++    if exempt and not (
++        # ISS-011: a notification/peer turn that changed state owes
++        # registration and close like an owner turn; read-only ones stay exempt.
++        exempt == "harness-notification-or-peer-event"
++        and state.get("turn_guard_state_changed") is True
++    ):
+         return {"action": "none", "why": "exempt:" + exempt}
+     if state.get("turn_guard_state_changed") is not True:
+         return {"action": "none", "why": "read-only-turn"}
+@@ -814,7 +819,14 @@
+     if name in GATE_ALLOWED_TOOLS or INTEGRITY_TOOL_RE.search(name):
+         return None
+     owner_turn = state.get("turn_kind") == "owner" or state.get("turn_guard_interrupted_owner") is True
+-    if not owner_turn or is_exempt(state):
++    # ISS-011: in a notification/peer turn only the first state-changing
++    # tool is gated; read-only notification turns stay exempt per the owner rule.
++    notification_write = (
++        not owner_turn
++        and is_exempt(state) == "harness-notification-or-peer-event"
++        and classify_tool(name) == "write"
++    )
++    if not notification_write and (not owner_turn or is_exempt(state)):
+         return None
+     if state.get("model_mcp_admission_attempted") is True:
+         return None

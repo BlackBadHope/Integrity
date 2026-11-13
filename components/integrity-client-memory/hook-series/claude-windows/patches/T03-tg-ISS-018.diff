@@ -1,0 +1,51 @@
+--- a/integrity_turn_guard.py
++++ b/integrity_turn_guard.py
+@@ -373,11 +373,22 @@
+         and state.get("model_mcp_admission_attempted") is not True
+         and (expires is None or expires > now)
+     )
+-    if live:
++    appended = state.get("append_outcome") in {"created", "duplicate"}
++    if live and appended:
+         instruction = (
+-            f"call integrity_turn_memory_close with registration_id={registration} - "
+-            "outcome=events with the receipts of the events you appended in this turn, otherwise "
+-            "outcome=no-event with an honest no_event_reason (read-only if nothing durable changed)"
++            f"call integrity_turn_memory_close with registration_id={registration}, "
++            f"outcome=events and the receipt of event {state.get('append_event_id')} you appended"
++        )
++    elif live:
++        # ISS-018: a model with no event and a real change picked a third option,
++        # "do not close". Name the honest path explicitly.
++        instruction = (
++            "this turn changed state and has no event yet: (1) call integrity_append_event once "
++            "with kind=thought and a short summary of what this turn changed or found, then "
++            f"(2) call integrity_turn_memory_close with registration_id={registration}, "
++            "outcome=events and that event's receipt (event_uid, event_id, request_sha256). "
++            "Skipping the close is not an option. Use outcome=no-event only if nothing durable "
++            "changed (for example a shell call that only read)"
+         )
+     elif ref_usable:
+         instruction = (
+@@ -406,15 +417,17 @@
+     if mode != "block":
+         return {"action": "advise", "why": "policy-advise", "reason": reason}
+     if payload.get("stop_hook_active") is True or payload.get("stopHookActive") is True:
+-        return {"action": "advise", "why": "stop-hook-active", "reason": _after_block(tool, live)}
++        return {"action": "advise", "why": "stop-hook-active", "reason": _after_block(tool, live, registration)}
+     if already:
+-        return {"action": "advise", "why": "already-blocked-once", "reason": _after_block(tool, live)}
++        return {"action": "advise", "why": "already-blocked-once", "reason": _after_block(tool, live, registration)}
+     return {"action": "block", "why": "missing-close", "reason": reason}
+ 
+ 
+-def _after_block(tool: str, live: bool = True) -> str:
++def _after_block(tool: str, live: bool = True, registration: object = None) -> str:
+     ending = (
+-        "The turn ends now; the hook records the coverage gap for its registration."
++        "The turn ends now; the hook records the signed coverage gap for its registration "
++        "(model-declined). Next turn: append the outcome event and close "
++        f"{registration} with it (a close after a gap is accepted)."
+         if live
+         else "The turn ends now uncovered: no admission was made, so no registration exists and "
+         "nothing is recorded on the server; the local turn log counts it."

@@ -1,0 +1,83 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -540,6 +540,54 @@
+     return state_root() / f"{sha256_text(identity)}.json"
+ 
+ 
++# Option 4 (owner decision): the model's warm broker opens the turn registration right after
++# admission. The hook leaves the identity hint the broker needs (the broker only sees the
++# hashed thread id) and later accepts the broker's receipt, validated exactly like its own.
++def _turn_hint_path(turn_ref_digest: str) -> Path:
++    return state_root() / f"turn-hint-{turn_ref_digest.split(':')[-1]}.json"
++
++
++def _turn_registration_path(turn_ref_digest: str) -> Path:
++    return state_root() / f"turn-reg-{turn_ref_digest.split(':')[-1]}.json"
++
++
++def write_turn_hint(identity: str, state: dict[str, Any]) -> None:
++    try:
++        digest = state.get("turn_ref_digest")
++        if not isinstance(digest, str) or not re.fullmatch(r"sha256:[a-f0-9]{64}", digest):
++            return
++        machine = re.sub(r"[^a-z0-9._-]", "-", socket.gethostname().lower())
++        hint = {"protocol": "integrity-client/claude-turn-hint/v1", "machine_id": f"machine:{machine}",
++                "thread_id": identity, "turn_id": state.get("turn_memory_intent_id"),
++                "prompt_sha256": state.get("prompt_sha256"), "created_utc": utc_now()}
++        path = _turn_hint_path(digest)
++        temporary = path.with_name(path.name + f".{os.getpid()}.tmp")
++        temporary.write_text(json.dumps(hint), encoding="utf-8")
++        os.replace(temporary, path)
++        for old in state_root().glob("turn-hint-*.json"):
++            if old != path and time.time() - old.stat().st_mtime > 6 * 3600:
++                old.unlink(missing_ok=True)
++    except Exception:  # noqa: BLE001 - advisory: the hook still opens the registration itself
++        return
++
++
++def take_broker_registration(state: dict[str, Any]) -> dict[str, Any] | None:
++    digest = state.get("turn_ref_digest")
++    if not isinstance(digest, str):
++        return None
++    path = _turn_registration_path(digest)
++    try:
++        value = json.loads(path.read_text(encoding="utf-8"))
++    except (OSError, ValueError):
++        return None
++    finally:
++        try:
++            path.unlink(missing_ok=True)
++        except OSError:
++            pass
++    return value if isinstance(value, dict) and isinstance(value.get("receipt"), dict) else None
++
++
+ @contextlib.contextmanager
+ def session_state_lock(identity: str):
+     """Serialize hook state transactions, never the model-owned MCP request."""
+@@ -1547,10 +1595,15 @@
+         "generation": state.get("turn_memory_generation"),
+     }
+     LIFECYCLE_DEADLINE = time.monotonic() + LIFECYCLE_BUDGET_SECONDS
++    brokered = take_broker_registration(state)
+     try:
+-        try:
++        if brokered is not None:
++            opened = brokered  # validated below exactly like a hook-opened receipt
++            state["turn_memory_opened_by"] = "broker"
++        else:
++          try:
+             opened = lifecycle_call("integrity_turn_memory_open", arguments)
+-        except HookTransportError:
++          except HookTransportError:
+             remaining_lifecycle_seconds(1)
+             opened = lifecycle_call("integrity_turn_memory_open", arguments)
+     finally:
+@@ -1826,6 +1879,7 @@
+             "prompt_kind": prompt_kind(payload) if event == "UserPromptSubmit" else "subagent",
+         }
+     )
++    write_turn_hint(identity, state)
+     state.pop("model_mcp_expected_context_protocol", None)
+     state.pop("model_mcp_selection_receipt_id", None)
+     state.pop("retry_disposition", None)

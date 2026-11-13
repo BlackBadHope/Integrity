@@ -1,5 +1,5 @@
 {
-  "file_count": 1222,
+  "file_count": 1257,
   "files": [
     {
       "bytes": 3435,
@@ -9,11 +9,11 @@
       "sha256": "d0ef275640d2e477677a37da8afc942763ffe87784afdd5e73a4265c8e72fa2a"
     },
     {
-      "bytes": 19,
+      "bytes": 75,
       "mode": "0o644",
       "path": ".gitattributes",
       "sanitization_edits": 0,
-      "sha256": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c"
+      "sha256": "8797b9ab0e4690a46440be4b288894109817810e7a0656c902ec8bedd3362fa4"
     },
     {
       "bytes": 2396,
@@ -982,11 +982,11 @@
       "sha256": "3f879f4afab75da179d721350d088aa0f172a216b1f723b97921ff4e82a38359"
     },
     {
-      "bytes": 10916,
+      "bytes": 11461,
       "mode": "0o644",
       "path": "components/integrity-client-memory/README.md",
       "sanitization_edits": 0,
-      "sha256": "3b0c01a203afb5438b4c5dc3415af92fd777a5ba48b11dd469aa9def1aefc0f3"
+      "sha256": "0903421819cbab7782ddeedfbeb4132e6fb8a550e2ab1fdb2368c2a1632eefdb"
     },
     {
       "bytes": 31487,
@@ -1008,6 +1008,237 @@
       "path": "components/integrity-client-memory/docs/COHORT_ROOTS.md",
       "sanitization_edits": 0,
       "sha256": "e5c73381ad5f02e15e5d8d20d4d62d69149645780d6516f6ee196f1df89cdd87"
+    },
+    {
+      "bytes": 5807,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/README.md",
+      "sanitization_edits": 0,
+      "sha256": "6709121e4b29fa760d59cd23ba0bafbe354b8a7a0424b735de3d4f0e0ceedd86"
+    },
+    {
+      "bytes": 10116,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/SERIES.json",
+      "sanitization_edits": 0,
+      "sha256": "3172e0bb51bab91f67974b173ac3cf6af9ab84b21795ded58256c35cc1b90112"
+    },
+    {
+      "bytes": 124717,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/base/integrity-client-admission.py",
+      "sanitization_edits": 0,
+      "sha256": "faa5c618e1d21f61f0a223de7d9ebded20d2b4267d4c594ac531f850e9f34606"
+    },
+    {
+      "bytes": 32433,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/base/integrity_turn_guard.py",
+      "sanitization_edits": 0,
+      "sha256": "2cf45e51c56b4e96c239590949c50545e32c5c619648a766a54e373105e0d041"
+    },
+    {
+      "bytes": 5202,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/build_hook.py",
+      "sanitization_edits": 0,
+      "sha256": "05e565b3c2b75019e1f851b3780b8323d06046099643b651438afe614c4d116e"
+    },
+    {
+      "bytes": 174743,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/built/integrity-client-admission.py",
+      "sanitization_edits": 0,
+      "sha256": "dc02a1f33d84ebce187eb9a9ba56dc6cb24def938eb5c9230e917f4f06de6bad"
+    },
+    {
+      "bytes": 38108,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/built/integrity_turn_guard.py",
+      "sanitization_edits": 0,
+      "sha256": "f18047d6f45122f84641be8fdd37c2d886df7342bc96d8f43f05d7cabcfd1d93"
+    },
+    {
+      "bytes": 9493,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/helpers/claude_delivery_evidence.py",
+      "sanitization_edits": 0,
+      "sha256": "ab3fa53b0804ef7f8f63c322411c9fcec30a88642f53fe9e21cd8cc983e94572"
+    },
+    {
+      "bytes": 3922,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/helpers/claude_prepare.py",
+      "sanitization_edits": 0,
+      "sha256": "cf9abd42cf41149b4a146169e0004f8eef6b6959e97456253ed2b95895adae4f"
+    },
+    {
+      "bytes": 5341,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/make_series.py",
+      "sanitization_edits": 0,
+      "sha256": "85b3519b4e69798f0594980cd085e522742d13097a1e2db082ffa55cd5ce525b"
+    },
+    {
+      "bytes": 2292,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A01-notif-exemption.diff",
+      "sanitization_edits": 0,
+      "sha256": "f138d1ea337cfa0cf770ffbe21bf3ddb67cef49f08ad0e4ed89d5de1e6b0b764"
+    },
+    {
+      "bytes": 8801,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A02-turn-guard-beta3.diff",
+      "sanitization_edits": 0,
+      "sha256": "a50a31847203857706a5949f5c182730d1a87c85023c8f38f65b2be6928f6a20"
+    },
+    {
+      "bytes": 4286,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A03-probefix.diff",
+      "sanitization_edits": 0,
+      "sha256": "9438c3f4bc5ea6976be5e2a53a61674ebecb2fd243d14685adee4c8d2efc251c"
+    },
+    {
+      "bytes": 3802,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A04-livefix.diff",
+      "sanitization_edits": 0,
+      "sha256": "e2e2964f2acc49010ea87ea734df1a9cbe0975859e1a9266b7ebd7594dad1f64"
+    },
+    {
+      "bytes": 1145,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A05-interruptmsg.diff",
+      "sanitization_edits": 0,
+      "sha256": "9b6b790aed8706a95da6b8b3ee00ae0d3e3f3adf6f96f6159155d031111170b4"
+    },
+    {
+      "bytes": 1578,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A06-admission-gate.diff",
+      "sanitization_edits": 0,
+      "sha256": "2382764cd90c666511a2b23c626ae858b0554142255168e57a62c4b8df46a07f"
+    },
+    {
+      "bytes": 3591,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A07-broker-registration.diff",
+      "sanitization_edits": 0,
+      "sha256": "485dbc8a001116d8d0b58da8250fe82d5481297869e48cd89ab052741a4b8589"
+    },
+    {
+      "bytes": 3117,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A08-ISS-007-009.diff",
+      "sanitization_edits": 0,
+      "sha256": "978c258146f5ebb6f83c6112bd0f1553373c7664e569e5ba450c1d5eae406706"
+    },
+    {
+      "bytes": 1164,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A09-ISS-011.diff",
+      "sanitization_edits": 0,
+      "sha256": "85b112c47c7067439775dc271d6f459ecb0df701079c40bc163a1428afd9691a"
+    },
+    {
+      "bytes": 1232,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A10-ISS-017.diff",
+      "sanitization_edits": 0,
+      "sha256": "a1cb28015118a419e3c0c311f874811a45a884bb9f41363ae7b8bd3ec4f8b5b6"
+    },
+    {
+      "bytes": 1779,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A11-ISS-018.diff",
+      "sanitization_edits": 0,
+      "sha256": "69c5a74016fc16dc360a26025405b0d8e6715c0d52d185f2a9c5593eac3d9770"
+    },
+    {
+      "bytes": 1191,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A12-ISS-019.diff",
+      "sanitization_edits": 0,
+      "sha256": "1fb8de805900d3401fc304fd3c282aa1418db72ddcee35e7b9c316bb35757289"
+    },
+    {
+      "bytes": 1179,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A13-ISS-013.diff",
+      "sanitization_edits": 0,
+      "sha256": "3bb48237e6465a9da4dabfc10af1f6a32a1d86d7751ff8bfc0ee27eef4bab84b"
+    },
+    {
+      "bytes": 635,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A14-ISS-023.diff",
+      "sanitization_edits": 0,
+      "sha256": "b41c35e439fc6bbe04e93a4fcd3ca3edbeb300b4f319c374d2b514ebcc36a9b0"
+    },
+    {
+      "bytes": 4881,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A15-ISS-028.diff",
+      "sanitization_edits": 0,
+      "sha256": "9e4771cbd1c8a6e8728d415011099ab86f69852439482dc7c14dd9fc2be89aa9"
+    },
+    {
+      "bytes": 10477,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A16-ISS-042.diff",
+      "sanitization_edits": 0,
+      "sha256": "0c25b339b4025828bb27d3832a59d8f7184089631e668b649e934bea69dfa43b"
+    },
+    {
+      "bytes": 4246,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A17-ISS-049.diff",
+      "sanitization_edits": 0,
+      "sha256": "9d817f73407a81f9c399c691f9a9252422b7f342d9844cd159ec090d160d27ce"
+    },
+    {
+      "bytes": 30575,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A18-ISS-050.diff",
+      "sanitization_edits": 0,
+      "sha256": "3105165e550042949661aa8d5afac4568757297326a910bb38f7f8180f99a3bf"
+    },
+    {
+      "bytes": 4473,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A19-keywords-line.diff",
+      "sanitization_edits": 0,
+      "sha256": "2c94f1b9f7d0c33bca8639885752e8489013b41e4f5d4e77809fe6dbfc2a8f3e"
+    },
+    {
+      "bytes": 4276,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/A20-ISS066.diff",
+      "sanitization_edits": 0,
+      "sha256": "b99cfba14d04f45e036676b28846b48c28667c5716208f5977a4ebea58c6ee7f"
+    },
+    {
+      "bytes": 4594,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/T01-tg-to-ISS-011.diff",
+      "sanitization_edits": 0,
+      "sha256": "7e3d4f61002d3dd2bbd47823a398f6b3a837787312576fbd248367ddff03c8e9"
+    },
+    {
+      "bytes": 1498,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/T02-tg-ISS-011-to-ISS-018.diff",
+      "sanitization_edits": 0,
+      "sha256": "fc11e872fff39db79760603dbb3c462a9bb4a444e065e5c43ce76f3943157ee8"
+    },
+    {
+      "bytes": 3037,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/hook-series/claude-windows/patches/T03-tg-ISS-018.diff",
+      "sanitization_edits": 0,
+      "sha256": "b2949f262153dff58e59b5fee88b99db3578111cce417fc74b1ddf7d5b48452b"
     },
     {
       "bytes": 1030,
@@ -1589,6 +1820,13 @@
       "path": "components/integrity-client-memory/tests/test_catalogue.py",
       "sanitization_edits": 0,
       "sha256": "f71e05745a55e36b07e33313c44827d576a5d64b7c2015e192932f161a467f08"
+    },
+    {
+      "bytes": 6502,
+      "mode": "0o644",
+      "path": "components/integrity-client-memory/tests/test_claude_hook_series.py",
+      "sanitization_edits": 0,
+      "sha256": "0ebd8bc3c01ae827479cfc2c77ef18f9f85381da783364351b01df001fe4a84a"
     },
     {
       "bytes": 3654,
@@ -8346,6 +8584,13 @@
       "sha256": "45f293e80d7544241783a16692c688424d770a89c781df080f058e7652fb386b"
     },
     {
+      "bytes": 5092,
+      "mode": "0o644",
+      "path": "tests/test_seed_catalog_single_verifier_race.py",
+      "sanitization_edits": 0,
+      "sha256": "4f31f20549901f0d5831bae76262a7415f16f8be21c37d63b5801c55eb083c2e"
+    },
+    {
       "bytes": 4825,
       "mode": "0o644",
       "path": "tests/test_seed_runtime_process_boundary.py",
@@ -8643,11 +8888,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 42753,
+      "bytes": 43559,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "3540f3e54dd704166d0fe042e9faf17426af29416b9d13f4672d70a5a51a4a15"
+      "sha256": "cdda1a8ef366a46c3ad233093a62fca41e652cda17796f643736087973f3c9b1"
     },
     {
       "bytes": 775,
@@ -9266,7 +9511,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:9c8e48527736332b02d0c270718de87ef3f5c68688a825e9673398a95125a1a5",
+  "projection_digest": "sha256:0f61b71369357c5fa236b98aef890f09b14942b374db9ed21fabeb5e152225b0",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

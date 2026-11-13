@@ -1,0 +1,20 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -1850,8 +1850,15 @@
+             "unsigned). Owner rule: do NOT call integrity_context_admission_current_turn "
+             "for this turn unless you must append an Integrity event in it; no close is owed when "
+             "no admission was made. The turn_ref below is for that exception only.\n"
+-            if probable_notification
+-            else ""
++            if probable_notification and state.get("turn_guard_interrupted_owner") is not True
++            else (
++                "INTEGRITY client: this notification arrived inside an unfinished owner turn. The "
++                "owner's work continues in this turn, so the notification exemption does not apply: "
++                "call integrity_context_admission_current_turn with the turn_ref below and close the "
++                "turn before finishing.\n"
++                if probable_notification
++                else ""
++            )
+         )
+         + f"INTEGRITY client READ PLANE PENDING v3\n"
+         "No hook-owned Seed admission/snapshot process was opened. No canonical Turn Memory "

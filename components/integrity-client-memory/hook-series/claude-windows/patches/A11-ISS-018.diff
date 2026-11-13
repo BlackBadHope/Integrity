@@ -1,0 +1,32 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -1863,6 +1863,15 @@
+     offline_notice = admission_offline_notice(state, probable_notification)
+     interrupted = _turn_guard.interrupted_owner_turn(state) if _turn_guard is not None else None
+     interrupted_gap = record_interrupted_gap(interrupted, state)
++    declined = state.pop("turn_guard_declined_registration", None)
++    if isinstance(declined, str) and declined.startswith("sha256:"):
++        notice = (
++            f"TURN MEMORY DECLINED CLOSE (ISS-018): the previous turn changed state and ended without "
++            f"closing registration {declined}; a signed gap was recorded. In this turn call admission, "
++            "append one event with that turn's outcome, and close both that registration and this "
++            "turn's registration with the event's receipt."
++        )
++        interrupted_gap = (interrupted_gap + chr(10) + notice) if interrupted_gap else notice
+     generation = next_turn_memory_generation(state)
+     prior_turn_ref = state.get("turn_ref")
+     if isinstance(prior_turn_ref, str):
+@@ -2600,6 +2609,13 @@
+     policy, decision = guard_stop(event, payload or {}, identity, state)
+     if decision["action"] == "block":
+         return
++    if (
++        decision.get("why") in {"stop-hook-active", "already-blocked-once"}
++        and state.get("turn_memory_close_observed") is not True
++        and isinstance(state.get("turn_memory_registration_id"), str)
++    ):
++        # ISS-018: remember the declined registration for the next prompt of this session.
++        state["turn_guard_declined_registration"] = state["turn_memory_registration_id"]
+     current_turn_ref = state.get("turn_ref")
+     if isinstance(current_turn_ref, str):
+         try:

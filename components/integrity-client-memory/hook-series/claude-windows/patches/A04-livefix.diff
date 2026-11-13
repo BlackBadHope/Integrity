@@ -1,0 +1,82 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -798,12 +798,12 @@
+         return None
+ 
+ 
+-def probe_memory_server(timeout: float = 40.0) -> tuple[bool, str]:
++def probe_memory_server(timeout: float = 50.0) -> tuple[bool, str]:
+     """Hook-side probe with upstream evidence: one read-only coverage call.
+ 
+     A local turn broker answers initialize and tools/list by itself and opens
+     its upstream lazily, so a handshake alone would not show memory is reachable.
+-    ``timeout`` must cover a cold broker start (about 21 s over SSH).
++    ``timeout`` must cover a cold broker start (31-38 s measured over SSH).
+     """
+ 
+     global LIFECYCLE_DEADLINE
+@@ -836,6 +836,37 @@
+         return record if isinstance(record, dict) else None
+     except Exception:  # noqa: BLE001
+         return None
++
++
++def record_interrupted_gap(interrupted: dict[str, Any] | None) -> str | None:
++    """Record coverage debt for a registration a new prompt cuts off before Stop.
++
++    Without this the registration was dropped from hook state while still open:
++    no close, no gap, invisible until a manual reconciliation.
++    """
++
++    registration = (interrupted or {}).get("registration_id")
++    if not isinstance(registration, str):
++        return None
++    try:
++        coverage = lifecycle_call(
++            "integrity_turn_memory_gap", {"registration_id": registration, "stage": "reconciliation"}
++        )
++    except Exception as exc:  # noqa: BLE001 - advisory; the prompt must still get its turn_ref
++        return (
++            f"TURN MEMORY INTERRUPTED: the previous turn's registration {registration} was still open "
++            f"when this prompt arrived, and recording its gap failed ({type(exc).__name__}). "
++            "Do not claim it is covered."
++        )
++    gap = coverage.get("receipt", {}) if isinstance(coverage, dict) else {}
++    terminal = coverage.get("terminal_receipt") if isinstance(coverage, dict) else None
++    if isinstance(terminal, dict):
++        return None  # it was closed after all
++    return (
++        f"TURN MEMORY INTERRUPTED: this prompt arrived before the previous turn stopped; its open "
++        f"registration {registration} was recorded as coverage debt (gap_receipt_id="
++        f"{gap.get('receipt_id')}). Work continued in this turn still needs its own admission and close."
++    )
+ 
+ 
+ def admission_offline_notice(state: dict[str, Any], current_notification: bool = False) -> str | None:
+@@ -1737,6 +1768,8 @@
+         # notification, so it says nothing about the MCP connection.
+         state["turn_kind"] = NOTIFICATION_TURN_KIND
+     offline_notice = admission_offline_notice(state, probable_notification)
++    interrupted = _turn_guard.interrupted_owner_turn(state) if _turn_guard is not None else None
++    interrupted_gap = record_interrupted_gap(interrupted)
+     generation = next_turn_memory_generation(state)
+     prior_turn_ref = state.get("turn_ref")
+     if isinstance(prior_turn_ref, str):
+@@ -1755,6 +1788,9 @@
+     clear_turn_memory_registration(state)
+     if _turn_guard is not None:
+         _turn_guard.reset_turn(state)
++        if probable_notification:
++            # The model continues the owner's work inside this notification turn.
++            _turn_guard.carry_interrupted(state, interrupted)
+     state.update(
+         {
+             "admission_status": "provisional",
+@@ -1801,6 +1837,7 @@
+     output_context(
+         event,
+         (offline_notice + "\n" if offline_notice else "")
++        + (interrupted_gap + "\n" if interrupted_gap else "")
+         + (
+             f"INTEGRITY LATE ADMISSION RESULT: background task {late_admission} field-matched its own "
+             "earlier intent (diagnostic, not cryptographic verification, not native admission) and is "

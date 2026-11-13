@@ -80,6 +80,12 @@ retain an already admitted request so the broker can deliver it again after a tr
 fault. A lost response stays unknown; a missing local record is not proof that the server did
 not commit.
 
+**Claude hook patch series.** [hook-series/claude-windows/](hook-series/claude-windows/README.md)
+holds a second Claude Code hook lineage as a base file, 23 strict patches, a builder and
+the full build. The package does not install it, and no launcher profile uses it.
+`tests/test_claude_hook_series.py` rebuilds it and compares every step sha and the result
+with `built/`.
+
 ## Install
 
 Install from source together with Guardian and the Action Log; see
@@ -176,6 +182,8 @@ For use in real clients, see
   needs its own lifecycle check.
 - `--preflight` does not check runtime bindings.
 - Live acceptance with a model on a fresh install is not published for any vendor.
+- The hook patch series in `hook-series/claude-windows/` was not installed or run in its
+  published form; its README lists what was changed against the installed bytes.
 
 ## Limits
 

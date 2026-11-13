@@ -1,0 +1,25 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -2607,7 +2607,21 @@
+         except (OSError, turn_envelope.TurnEnvelopeError):
+             pass
+     registration = state.get("turn_memory_registration_id")
+-    if isinstance(registration, str) and registration:
++    verified_at_close = (
++        isinstance(registration, str)
++        and bool(registration)
++        and state.get("turn_memory_close_observed") is True
++        and state.get("turn_memory_status") in {"open", "closed"}
++    )
++    if verified_at_close:
++        # ISS-017: PostToolUse already saw the signed terminal receipt of this
++        # registration (turn_guard.note_close). Re-verifying it at Stop costs a cold
++        # local broker start (31-38 s against a 35 s read budget) and produced
++        # coverage-unobservable without any coverage loss, so it is skipped here.
++        state["turn_memory_status"] = "closed"
++        state["turn_memory_queue"] = "archive"
++        context = "TURN MEMORY TERMINAL RECEIPT OBSERVED at close; Stop re-verification skipped."
++    elif isinstance(registration, str) and registration:
+         try:
+             coverage = lifecycle_call(
+                 "integrity_turn_memory_gap",

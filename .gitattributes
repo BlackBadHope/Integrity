@@ -1,1 +1,2 @@
 * text=auto eol=lf
+components/integrity-client-memory/hook-series/** -text

@@ -1,0 +1,84 @@
+--- a/integrity-client-admission.py
++++ b/integrity-client-admission.py
+@@ -2105,6 +2105,64 @@
+     raise SystemExit(2)
+ 
+ 
++# A19 (owner decision): every Integrity event summary ends with a separate last line
++# «Ключевые слова: …» — 5-8 Russian words or short phrases, the way the owner would name the subject.
++# ADVISORY ONLY: the event is never refused because of this line; the model gets a warning and
++# keywords-line-health.json counts the results. Codex has its own hook (ProgramData) and is not changed here.
++KEYWORDS_HEALTH_FILE = "keywords-line-health.json"  # A19 counters: own file next to hook-health.json, never that file
++KEYWORDS_LINE_RE = re.compile(r"^\s*Ключевые слова:\s*(.*?)\s*$")
++KEYWORDS_CYRILLIC_RE = re.compile(r"[А-Яа-яЁё]")
++
++
++def keyword_line_problem(summary: Any) -> str | None:
++    """None when the last non-empty line is «Ключевые слова: a; b; …» with 5-8 items, at least half of them Cyrillic."""
++    if not isinstance(summary, str):
++        return "summary is not text"
++    lines = [line for line in summary.splitlines() if line.strip()]
++    if not lines:
++        return "summary is empty"
++    match = KEYWORDS_LINE_RE.match(lines[-1])
++    if match is None:
++        return "the last non-empty line of summary is not «Ключевые слова: …»"
++    items = [item.strip() for item in re.split(r"[;,]", match.group(1)) if item.strip()]
++    if not 5 <= len(items) <= 8:
++        return f"«Ключевые слова» has {len(items)} items, expected 5-8"
++    russian = sum(1 for item in items if KEYWORDS_CYRILLIC_RE.search(item))
++    if russian * 2 < len(items):  # names like HOST1, NODE2, ISS-051 are fine as a minority
++        return f"only {russian} of {len(items)} keywords contain Russian (Cyrillic) letters, expected at least half"
++    return None
++
++
++def record_keyword_line(problem: str | None, path: Path | None = None) -> None:
++    """Count keyword-line results in keywords-line-health.json (own file; hook-health.json is never read or written)."""
++    try:
++        target = path if path is not None else state_root().parent / KEYWORDS_HEALTH_FILE
++        health: dict[str, Any] = {}
++        if target.is_file() and not target.is_symlink():
++            loaded = json.loads(target.read_text(encoding="utf-8"))
++            health = loaded if isinstance(loaded, dict) else {}
++        key = "keywords_line_missing" if problem is not None else "keywords_line_ok"
++        previous = health.get(key)
++        health[key] = previous + 1 if isinstance(previous, int) and previous >= 0 else 1
++        if problem is not None:
++            health["keywords_line_last_missing_utc"] = utc_now()
++            health["keywords_line_last_problem"] = problem[:120]
++        health.setdefault("protocol", "integrity-memory/keywords-line-health/v1")
++        temporary = target.with_name(f".keywords-health-{uuid.uuid4().hex}.tmp")
++        try:
++            descriptor = os.open(temporary, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
++            with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
++                stream.write(compact(health) + "\n")
++            os.replace(temporary, target)
++        finally:
++            try:
++                temporary.unlink()
++            except FileNotFoundError:
++                pass
++    except Exception:  # noqa: BLE001 - advisory, never blocks a turn
++        return
++
++
+ def handle_pre_tool(payload: dict[str, Any], identity: str, state: dict[str, Any]) -> None:
+     name = tool_name(payload)
+     arguments = tool_input(payload)
+@@ -2225,6 +2283,16 @@
+             }
+         )
+         save_state(identity, state)
++        problem = keyword_line_problem(tool_input(payload).get("summary"))
++        record_keyword_line(problem)
++        if problem is not None:
++            output_context(
++                "PreToolUse",
++                "INTEGRITY KEYWORDS LINE WARNING (advisory; this event is NOT refused): " + problem
++                + ". End every event summary with a separate last line «Ключевые слова: …» — 5-8 Russian"
++                " words or short phrases, as the owner would say. Do not retry this append; add the line"
++                " in the next event.",
++            )
+         return
+     # Cadence tracks local progress; it must not spend the sole append attempt
+     # before a terminal result exists. Admission/append/unknown-outcome guards
