@@ -1,5 +1,5 @@
 {
-  "file_count": 1366,
+  "file_count": 1370,
   "files": [
     {
       "bytes": 3435,
@@ -5595,6 +5595,13 @@
       "sha256": "119cd311d32d3d96cb5d5039c8d38c667fdbc0c4cad152ea46842174db527753"
     },
     {
+      "bytes": 22606,
+      "mode": "0o644",
+      "path": "demo/run.py",
+      "sanitization_edits": 0,
+      "sha256": "6933f2c8b501cda61433c9c7c9d896e55d0f15a41e79758eb2214c7c251f4d48"
+    },
+    {
       "bytes": 13097,
       "mode": "0o644",
       "path": "deploy/linux-core/README.md",
@@ -5747,6 +5754,20 @@
       "path": "docs/architecture/chronicle/SORTING-AND-INDEXING-PIPELINE.md",
       "sanitization_edits": 0,
       "sha256": "6b519adff898d7a10eae7b4a034342c63024f70981a065daba6fb08ddccdba44"
+    },
+    {
+      "bytes": 11068,
+      "mode": "0o644",
+      "path": "docs/assets/demo-dark.svg",
+      "sanitization_edits": 0,
+      "sha256": "89bc3ee77739074225f128aebd0f3608c015af0c2d443a847c47949eb8e15ccd"
+    },
+    {
+      "bytes": 11068,
+      "mode": "0o644",
+      "path": "docs/assets/demo-light.svg",
+      "sanitization_edits": 0,
+      "sha256": "ec931e4c82b62fe36795f80bfafdcf3803e5af094c853b7038e914ebdb1c340e"
     },
     {
       "bytes": 2963,
@@ -8780,6 +8801,13 @@
       "sha256": "fa34f7e18fd83a8d673f4fe8ddbb01e026bc4f8080196a66a42423fbf752c377"
     },
     {
+      "bytes": 2529,
+      "mode": "0o644",
+      "path": "tests/test_demo.py",
+      "sanitization_edits": 0,
+      "sha256": "31b4c33bcfd2f599605a4bf320e296b0ae01e7ca3bd0f4217571401e49cea68e"
+    },
+    {
       "bytes": 14988,
       "mode": "0o644",
       "path": "tests/test_deployment_profile.py",
@@ -9651,11 +9679,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 46418,
+      "bytes": 47841,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "a22d528c57604fcb1626f735452acb1f788708a8e0b7d542cad3ae2f3e025199"
+      "sha256": "130057337f24df4f4db90f0ef51ef8aeaffe05e74cf97ef63ca43c2055fccfdf"
     },
     {
       "bytes": 775,
@@ -9693,11 +9721,11 @@
       "sha256": "c773a85da94e9edf0b2b10e60fd43b00fe4f90e345ec0d958e6c5b4d0d405e8e"
     },
     {
-      "bytes": 20746,
+      "bytes": 24619,
       "mode": "0o644",
       "path": "README.md",
       "sanitization_edits": 0,
-      "sha256": "f0d18a82c2ec1e205a0d6ef3163b75a12b4d6cbd9247842b41e61188c372b5fe"
+      "sha256": "2f7212652a24ed0a5d3f1c09ccb7829e243f1f444da9f284c03a42699be19930"
     },
     {
       "bytes": 13444,
@@ -10029,18 +10057,18 @@
       "sha256": "eff98088fe823c01627c345f0d125f8b52bc91d0212c2e5a0e9c3daf905f0aa0"
     },
     {
-      "bytes": 6080,
+      "bytes": 6255,
       "mode": "0o644",
       "path": "docs/README.md",
       "sanitization_edits": 0,
-      "sha256": "13c8b81d2612cd1dc99ba31bab918d12eaedddc301079dfd719534877421c5e9"
+      "sha256": "8d5de0b4d2f900e81eb9d21f3f4b23c01d69e62b86942c7fb613668aeb9c08f3"
     },
     {
-      "bytes": 10154,
+      "bytes": 10402,
       "mode": "0o644",
       "path": "docs/STATUS.md",
       "sanitization_edits": 0,
-      "sha256": "519702917bbb72d24cd58bff05f7c6b5678d5944bd91bd74ef55faa498a137b4"
+      "sha256": "fa124cc91354a20fe32dc6aa2dfb3c9fa30759fa14f15a458e47bd96c526c95b"
     },
     {
       "bytes": 8620,
@@ -10274,7 +10302,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:33a3af0fcf99e26808900148fe7ae55c1684f6dbe015113460eb2ae0302cfd8e",
+  "projection_digest": "sha256:393528d2928723efc925f4be59614e9ef24a5dc0e91fd2859cec4e6e1d702a26",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

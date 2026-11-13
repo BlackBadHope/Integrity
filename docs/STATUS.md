@@ -43,6 +43,11 @@ To try memory without hooks, use the read-only
 [local-memory walkthrough](../examples/local-memory/README.md). CI runs it on
 Linux and Windows, and it prints PASS for all three clients.
 
+The four-scene demo at the top of the [README](../README.md#the-demo-step-by-step)
+(`demo/run.py`) is run by `tests/test_demo.py` in CI on Linux and Windows. It
+runs no model, and its scene 2 is a recall, not the context a hooked client
+receives.
+
 ### Linux workstations and servers
 
 *CI. Also run on a clean Debian VM (beta.3).* Codex and Claude Code Native
