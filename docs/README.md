@@ -29,6 +29,7 @@ and what was not.
 
 | Page | What it gives you |
 | --- | --- |
+| [A core instance on one Linux account](CORE_INSTANCE.md) | Install stage 2: the core write path in one private folder, without root; clients reach it over the forced command; what it does not prove |
 | [Two-machine quickstart](CROSS_MACHINE_QUICKSTART.md) | The core on machine A, clients on machine B, over an OpenSSH forced command |
 | [Linux core scripts](../deploy/linux-core/README.md) | The server side of that transport, with the placeholders you fill |
 | [Deployment identity profile](DEPLOYMENT_PROFILE.md) | A pinned JSON file with your deployment's own identity values, for state created under non-public values |

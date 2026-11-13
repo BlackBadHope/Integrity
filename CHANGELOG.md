@@ -7,6 +7,26 @@ All notable public changes are recorded here.
 Changes on `main` after 7.0.1. Nothing here is tagged, and the distribution
 versions are unchanged unless an entry says otherwise.
 
+### A core instance on one Linux account
+
+- **`guardian-core-instance`**: a new command in `integrity-guardian`
+  (`integrity_guardian.core_instance`), Linux only. `init` creates one private
+  folder with an Action Log database, a Seed catalog, native trust with file
+  keys, the custody ledger and Turn Memory; `serve` is the Guardian Memory MCP
+  server for it; `server-json` prints the server description for
+  `integrity-remote core init`; `doctor` checks the instance read-only;
+  `uninstall` removes it. No root, sudo, systemd or network listener.
+- Each `serve` process runs the Action Log service on a loopback port with a
+  token of its own and imports new events into the catalog before every
+  request, so sessions of one instance see each other's writes.
+- It needs `integrity-action-log` 2.11.0 installed and refuses another
+  version. On Windows and macOS it refuses and points to the local memory
+  profile.
+- `tests/test_core_instance.py` runs in CI on Ubuntu: two sessions in a row,
+  two at once, and one through an OpenSSH forced command. `docs/CORE_INSTANCE.md`
+  lists what is not verified: a real agent client, two separate hosts, the
+  hardened release mode, an upgrade over an existing instance.
+
 ### The demo is a run of real agents
 
 - The demo at the top of the README is now three agents on one task and one

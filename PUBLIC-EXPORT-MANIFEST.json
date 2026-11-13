@@ -1,5 +1,5 @@
 {
-  "file_count": 1383,
+  "file_count": 1384,
   "files": [
     {
       "bytes": 3435,
@@ -5763,11 +5763,18 @@
       "sha256": "9f6a3de86912dcd9192d5fc9440c66697fda0384fae6dce8139b5c2d01912234"
     },
     {
-      "bytes": 10162,
+      "bytes": 7121,
+      "mode": "0o644",
+      "path": "docs/CORE_INSTANCE.md",
+      "sanitization_edits": 0,
+      "sha256": "3c4e46403a2f1c339ac99bd8d64c8acca7a2ab82433db60aec7411a6a2699e0c"
+    },
+    {
+      "bytes": 10309,
       "mode": "0o644",
       "path": "docs/CROSS_MACHINE_QUICKSTART.md",
       "sanitization_edits": 0,
-      "sha256": "30235c3658dc88f722a50c4a85208840ef04433c49dcf4ed19e8404fc5e4010e"
+      "sha256": "8d5a103b409bbd1d812a1d6d1ffddb86e595229cde28633722195dfacf4f5ac9"
     },
     {
       "bytes": 5226,
@@ -9770,11 +9777,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 51236,
+      "bytes": 52457,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "19b22140075662d6ba3669532f56ea2f6b06c6b917068f2a20f3896e7751d878"
+      "sha256": "6ef84cbdddf16ccba50e40d5e2c122a5782eb74a0d3d178d10de1fd978c5c89e"
     },
     {
       "bytes": 775,
@@ -9812,11 +9819,11 @@
       "sha256": "c773a85da94e9edf0b2b10e60fd43b00fe4f90e345ec0d958e6c5b4d0d405e8e"
     },
     {
-      "bytes": 27063,
+      "bytes": 27126,
       "mode": "0o644",
       "path": "README.md",
       "sanitization_edits": 0,
-      "sha256": "e131d3d8ff8f2cd805fabbead8b42fbbd98a01ae18521729dee2a186bfe0245a"
+      "sha256": "43af10b179ec845eac1084a7f49aec22c92e46600fdbb3a2b8c5dc8d97671d48"
     },
     {
       "bytes": 13444,
@@ -10148,18 +10155,18 @@
       "sha256": "e03cd2506f026c9e618ee2035b2676fb52369982e79e9df6eba0d3f5c1df5465"
     },
     {
-      "bytes": 6491,
+      "bytes": 6693,
       "mode": "0o644",
       "path": "docs/README.md",
       "sanitization_edits": 0,
-      "sha256": "99ffce954ff408837fdce465340dfd305f074d2d1fdcd1cd23b8caadb7c6b137"
+      "sha256": "2f339c42a30d972aa20f873daac48edef49418be868206f8d485887a1f25ccd9"
     },
     {
-      "bytes": 11113,
+      "bytes": 11768,
       "mode": "0o644",
       "path": "docs/STATUS.md",
       "sanitization_edits": 0,
-      "sha256": "2bb63e6ed1fbc9d4b6f2069c161aefebcd0d51509080e62a1e8e12a119588895"
+      "sha256": "af5f02e180f912ed3d9effe386207e237ffbc480465beec42a98641c72eccc5e"
     },
     {
       "bytes": 8620,
@@ -10393,7 +10400,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:e704a4faa2fa22d29c2a1f3498ef94363ee8408275e8e8f6a83caa879615021e",
+  "projection_digest": "sha256:2589882505f76cd69c9cd4c7b551d88735340cd60040e12a7ed25256006536a8",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
