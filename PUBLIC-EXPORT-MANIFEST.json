@@ -419,7 +419,7 @@
       "mode": "0o644",
       "path": "components/integrity-adapter-sdk/src/integrity_adapter_sdk/guardian-origin.json",
       "sanitization_edits": 2,
-      "sha256": "ce008345106696f4854a6afdfda2fd0e04397cb7807fa53aed028fdb90fa455a"
+      "sha256": "e7e125b814e6af2e582a0400262e52ed805bc45e839b2c18d2f78e49d70f773b"
     },
     {
       "bytes": 632,
@@ -5735,11 +5735,11 @@
       "sha256": "e84ea9e8ec62645612d0550ee4d6c4a7af2f7b4243891225bb364bb08a20bd8b"
     },
     {
-      "bytes": 6072,
+      "bytes": 6514,
       "mode": "0o644",
       "path": "docs/LOCAL_MEMORY.md",
       "sanitization_edits": 0,
-      "sha256": "b2e175a58b35a49722dccf53e31ac381caf34f8c07a51a2eef71b3f5f128aafd"
+      "sha256": "b5e43cc2f687e7ecd76a05229ba66f0e8ca14abf09e4bc97ea5d4b752f598e36"
     },
     {
       "bytes": 1314,
@@ -6736,11 +6736,11 @@
       "sha256": "e565623f856f242a366d1a3cc761a0d54f54690dc09db8d70088ba32bbe9a93b"
     },
     {
-      "bytes": 38371,
+      "bytes": 38233,
       "mode": "0o644",
       "path": "src/integrity_guardian/local_memory.py",
       "sanitization_edits": 0,
-      "sha256": "983836c580bbf6dde7cb039987f5ba2bf9f6e0656244deec0e612db03e49d01c"
+      "sha256": "d97638b76c3418beb4c499f352a83ea043d29d406614086069daac696e736fc8"
     },
     {
       "bytes": 6140,
@@ -8913,11 +8913,11 @@
       "sha256": "cf5213b135142a33e80ce394a2a9c804b9ca41643d78eb9ffa715b660d7d8bd1"
     },
     {
-      "bytes": 12614,
+      "bytes": 14086,
       "mode": "0o644",
       "path": "tests/test_local_memory.py",
       "sanitization_edits": 0,
-      "sha256": "59e4b967af4faeeb2901796ab79cf6a62b3e6c39c434ea0382c911678e9397b2"
+      "sha256": "141376e8cbe8398ade8a8067a70f2a3843e53a2f34446eef597f669d41248912"
     },
     {
       "bytes": 17413,
@@ -9707,11 +9707,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 49782,
+      "bytes": 50097,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "6a71105910f3dce8f3a101bc5777ef14e2c5654bc48da710e113991b5a8ab346"
+      "sha256": "ed90111bfe1469163becb213e47ca2a53bc4bf722140ba5f564f7105bb813764"
     },
     {
       "bytes": 775,
@@ -10330,7 +10330,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:34eaac07b6e19becd94a33ed078feb27a3073a6e6a2e768130694e7d9d7f8530",
+  "projection_digest": "sha256:1e6935e9409bb8f6b058d47b3126e289e7d1edd7150773a3e6865e6c60a02ad5",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

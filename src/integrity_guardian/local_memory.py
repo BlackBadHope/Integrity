@@ -492,15 +492,15 @@ def _tool(name: str, description: str, properties: dict[str, Any], required: lis
             "annotations": {"readOnlyHint": read_only, "destructiveHint": False}}
 
 
-_REG = {"type": "string", "pattern": _DIGEST, "description": "registration_id from integrity_turn_memory_open"}
+_REG = {"type": "string", "pattern": _DIGEST, "description": "registration_id from lm_turn_open"}
 _UID = {"type": "string", "pattern": _EVENT_UID}
 _TASK_FIELD = {"type": "string", "pattern": _TASK, "description": "short task name, for example demo-task"}
 _NAME_FIELD = {"type": "string", "pattern": _NAME}
 
 TOOLS: list[dict[str, Any]] = [
-    _tool("integrity_memory_capabilities",
+    _tool("lm_capabilities",
           "What this local memory is and what it does not prove. Read this once.", {}, [], True),
-    _tool("integrity_turn_memory_open",
+    _tool("lm_turn_open",
           "Start a turn before you write. Returns a signed registration_id. The names you give are "
           "recorded as declared, not verified.",
           {"declared_agent": {**_NAME_FIELD, "description": "your name in this work, for example agent-a"},
@@ -509,7 +509,7 @@ TOOLS: list[dict[str, Any]] = [
            "intent": {"type": "string", "maxLength": 4000, "description": "what you were asked; only its hash is kept"},
            "thread_id": _NAME_FIELD, "turn_id": _NAME_FIELD},
           ["declared_agent"], False),
-    _tool("integrity_work_claim",
+    _tool("lm_work_claim",
           "Claim a task for your open turn. Status acquired means you hold it; waiting means another "
           "agent holds it and blocked_by names that claim. To ask again about a waiting claim, give "
           "claim_id instead of task.",
@@ -517,69 +517,69 @@ TOOLS: list[dict[str, Any]] = [
            "claim_id": {"type": "string", "minLength": 1, "maxLength": 128},
            "ttl_seconds": {"type": "integer", "minimum": 1, "maximum": 86400}},
           ["registration_id"], False),
-    _tool("integrity_append_event",
+    _tool("lm_append_event",
           "Write one event under your open turn. Put the task name in task so others can find it.",
           {"registration_id": _REG, "kind": {"enum": list(KINDS)},
            "summary": {"type": "string", "minLength": 1, "maxLength": 2000},
            "details": {"type": "object"}, "task": _TASK_FIELD, "event_uid": _UID,
            "tags": {"type": "array", "maxItems": 20, "items": {"type": "string", "maxLength": 64}}},
           ["registration_id", "kind", "summary"], False),
-    _tool("integrity_work_release",
+    _tool("lm_work_release",
           "Release your claim and name the event that is its result.",
           {"registration_id": _REG, "claim_id": {"type": "string", "minLength": 1, "maxLength": 128},
            "fence_token": {"type": "integer", "minimum": 1}, "result_event_uid": _UID},
           ["registration_id", "claim_id", "fence_token", "result_event_uid"], False),
-    _tool("integrity_turn_memory_close",
+    _tool("lm_turn_close",
           "End your turn. Returns a signed receipt that lists the events this turn wrote, or says it "
           "wrote none.",
           {"registration_id": _REG, "outcome": {"enum": ["events", "no-event"]},
            "no_event_reason": {"enum": ["no-durable-state-change", "read-only", "repetition",
                                         "social-response", "user-cancelled"]}},
           ["registration_id"], False),
-    _tool("integrity_seed_recall",
+    _tool("lm_seed_recall",
           "Read events: all events of one task in the order they were written, or a text search. "
           "Give exactly one of task and query.",
           {"task": _TASK_FIELD, "query": {"type": "string", "minLength": 1, "maxLength": 400},
            "limit": {"type": "integer", "minimum": 1, "maximum": 100}}, [], True),
-    _tool("integrity_turn_receipt_by_event",
+    _tool("lm_turn_receipt_by_event",
           "From one event_uid: the event as written, who declared it, the signed turn it belongs to, "
           "how that turn ended (signed receipt, recorded gap, or never closed) and the claims of that turn.",
           {"event_uid": _UID}, ["event_uid"], True),
-    _tool("integrity_work_claims",
+    _tool("lm_work_claims",
           "The claim log, optionally for one task: who claimed, who waited, who released with which "
           "result. The hash chain is verified on every call.",
           {"task": _TASK_FIELD}, [], True),
-    _tool("integrity_turn_memory_coverage",
+    _tool("lm_turn_coverage",
           "How many turns were opened, closed, and left without a closing receipt.",
           {"limit": {"type": "integer", "minimum": 1, "maximum": 500}}, [], True),
-    _tool("integrity_turn_memory_gap",
+    _tool("lm_turn_gap",
           "Record, signed, that a turn had no closing receipt when you looked. It does not close the turn.",
           {"registration_id": _REG}, ["registration_id"], False),
 ]
 _VALIDATORS = {tool["name"]: Draft202012Validator(tool["inputSchema"]) for tool in TOOLS}
 
 INSTRUCTIONS = (
-    "Integrity local memory. Order of work: integrity_turn_memory_open, then integrity_work_claim "
-    "for the task, integrity_append_event for each result, integrity_work_release, and "
-    "integrity_turn_memory_close last. To continue someone else's work, read with "
-    "integrity_seed_recall and integrity_turn_receipt_by_event before you write. "
+    "Integrity local memory. Order of work: lm_turn_open, then lm_work_claim "
+    "for the task, lm_append_event for each result, lm_work_release, and "
+    "lm_turn_close last. To continue someone else's work, read with "
+    "lm_seed_recall and lm_turn_receipt_by_event before you write. "
     "Names are declared, not verified; nothing here grants authority to act."
 )
 
 
 def call_tool(memory: LocalMemory, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
     handlers = {
-        "integrity_memory_capabilities": lambda: memory.capabilities(),
-        "integrity_turn_memory_open": lambda: memory.open_turn(**arguments),
-        "integrity_work_claim": lambda: memory.claim(**arguments),
-        "integrity_append_event": lambda: memory.append_event(**arguments),
-        "integrity_work_release": lambda: memory.release(**arguments),
-        "integrity_turn_memory_close": lambda: memory.close_turn(**arguments),
-        "integrity_seed_recall": lambda: memory.recall(**arguments),
-        "integrity_turn_receipt_by_event": lambda: memory.receipt_by_event(**arguments),
-        "integrity_work_claims": lambda: memory.claim_log(**arguments),
-        "integrity_turn_memory_coverage": lambda: memory.coverage(**arguments),
-        "integrity_turn_memory_gap": lambda: memory.observe_gap(**arguments),
+        "lm_capabilities": lambda: memory.capabilities(),
+        "lm_turn_open": lambda: memory.open_turn(**arguments),
+        "lm_work_claim": lambda: memory.claim(**arguments),
+        "lm_append_event": lambda: memory.append_event(**arguments),
+        "lm_work_release": lambda: memory.release(**arguments),
+        "lm_turn_close": lambda: memory.close_turn(**arguments),
+        "lm_seed_recall": lambda: memory.recall(**arguments),
+        "lm_turn_receipt_by_event": lambda: memory.receipt_by_event(**arguments),
+        "lm_work_claims": lambda: memory.claim_log(**arguments),
+        "lm_turn_coverage": lambda: memory.coverage(**arguments),
+        "lm_turn_gap": lambda: memory.observe_gap(**arguments),
     }
     if name not in handlers:
         raise LocalMemoryError(f"unknown tool: {name[:120]}")
@@ -663,8 +663,10 @@ def client_config(client: str, home: Path) -> str:
     entry = {"command": str(Path(sys.executable).absolute()),
              "args": ["-m", "integrity_guardian.local_memory", "serve", "--home", str(Path(home).absolute())]}
     if client == "codex":
+        # Without the approval line a non-interactive `codex exec` refuses every tool of the server.
         return ("[mcp_servers.integrity_local_memory]\ncommand = " + json.dumps(entry["command"])
-                + "\nargs = " + json.dumps(entry["args"]) + "\nstartup_timeout_sec = 30\ntool_timeout_sec = 60\n")
+                + "\nargs = " + json.dumps(entry["args"]) + "\nstartup_timeout_sec = 30\ntool_timeout_sec = 60\n"
+                + 'default_tools_approval_mode = "approve"\n')
     if client in ("claude-code", "antigravity"):
         return json.dumps({"mcpServers": {"integrity_local_memory": entry}}, indent=2) + "\n"
     raise LocalMemoryError(f"no configuration block for {client!r}; known: {', '.join(CLIENTS)}")

@@ -72,6 +72,12 @@ with access for your account only; on Linux with mode 0700.
 
 Gemini CLI has no block here: it was not run.
 
+The Codex block ends with `default_tools_approval_mode = "approve"`. With it
+Codex calls the tools of this one server without asking you first. A
+non-interactive `codex exec` cannot ask, and without the line it refuses
+every tool of the server. Remove the line if you work interactively and want
+to approve each call.
+
 ## Check
 
 ```bash
@@ -85,32 +91,36 @@ report as JSON.
 
 ## How an agent uses it
 
-The server offers eleven tools. An agent that writes follows this order:
+The server offers eleven tools. Their names start with `lm_`, and none of them
+is a tool name of the core. This is on purpose: a Native lifecycle hook
+recognises the core's tools by name, and with the same names it would apply
+the core's rules to calls of this server.
 
-1. `integrity_turn_memory_open` - start a turn; returns a signed
-   `registration_id`.
-2. `integrity_work_claim` - claim the task. `acquired` means the agent holds
+An agent that writes follows this order:
+
+1. `lm_turn_open` - start a turn; returns a signed `registration_id`.
+2. `lm_work_claim` - claim the task. `acquired` means the agent holds
    it; `waiting` means another agent holds it, and `blocked_by` names that
    claim.
-3. `integrity_append_event` - write a result under the open turn.
-4. `integrity_work_release` - release the claim and name the result event.
-5. `integrity_turn_memory_close` - end the turn; returns a signed receipt that
+3. `lm_append_event` - write a result under the open turn.
+4. `lm_work_release` - release the claim and name the result event.
+5. `lm_turn_close` - end the turn; returns a signed receipt that
    lists the events the turn wrote.
 
 An agent that continues someone else's work reads first:
 
-- `integrity_seed_recall` with `task` returns every event of a task in the
+- `lm_seed_recall` with `task` returns every event of a task in the
   order written.
-- `integrity_turn_receipt_by_event` takes one `event_uid` and returns the
+- `lm_turn_receipt_by_event` takes one `event_uid` and returns the
   event as written, the declared author, the signed turn it belongs to, how
   that turn ended (a signed receipt, a recorded gap, or never closed) and the
   claims of that turn.
-- `integrity_work_claims` returns the claim log and verifies its hash chain.
-- `integrity_turn_memory_coverage` counts opened, closed and unclosed turns.
-- `integrity_turn_memory_gap` records, signed, that a turn had no closing
+- `lm_work_claims` returns the claim log and verifies its hash chain.
+- `lm_turn_coverage` counts opened, closed and unclosed turns.
+- `lm_turn_gap` records, signed, that a turn had no closing
   receipt when the agent looked. It does not close the turn.
 
-`integrity_memory_capabilities` returns the limits listed above.
+`lm_capabilities` returns the limits listed above.
 
 A turn that was closed cannot be written to again. An `event_uid` that already
 exists is accepted only with identical content.
