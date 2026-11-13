@@ -136,11 +136,18 @@ They are now in `src/integrity_guardian`:
   any other server is an ordinary action. A test takes the functions out of
   both published files with the PowerShell parser and runs them on Linux,
   Windows and macOS; the comparisons in the main flow are checked in the
-  text. Not verified: neither hook was installed or run inside a live Codex
-  session after the change, and the form in which Codex passes a tool name to
-  a hook was not taken from its documentation. The two files are public
-  copies of an export; `SOURCE-MAP.json` records that they now differ from
-  the source named there.
+  text. The form of the name is taken from the source of Codex 0.163.0: a
+  hook gets an MCP tool as `mcp__<server>__<tool>`, with every character
+  outside `[A-Za-z0-9_]` replaced by `_`, and the hook input has no separate
+  field for the server (`hook_tool_name` in `core/src/tools/handlers/mcp.rs`,
+  the input in `hooks/src/schema.rs`). The Codex hooks page gives the same
+  form in its examples, and the names a hook of the earlier version recorded
+  on one Windows machine have it. Not verified: neither hook was installed
+  or run inside a live Codex session after the change; other versions of
+  Codex were not read; two servers whose names differ only in characters
+  that Codex replaces were not tried. The two files are public copies of an
+  export; `SOURCE-MAP.json` records that they now differ from the source
+  named there.
 - **Opt-in keywords-line advisory** in the Claude standalone hook
   (`resources/claude/admission.py`). With `values.event_summary_keywords_line`
   configured, the hook checks that an event summary ends with a keywords line.

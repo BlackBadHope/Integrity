@@ -1206,17 +1206,24 @@ function Get-OwnMemoryToolName {
     # ends like a tool of the core: such a call is a separate action, and the
     # rules of the core are not applied to it. A name that carries no server is
     # returned as it is.
+    # Codex gives a hook the name of an MCP tool as mcp__<server>__<tool>, with
+    # every character outside [A-Za-z0-9_] replaced by "_", and has no separate
+    # field for the server (Codex 0.163.0: hook_tool_name in
+    # core/src/tools/handlers/mcp.rs, the hook input in hooks/src/schema.rs).
     param($Payload)
     $name = [string](Get-Value -Object $Payload -Name 'tool_name' -Default '')
     $qualified = $name -match '(?i)^mcp__(.+)$'
     if ($qualified) { $name = $Matches[1] }
     $cut = $name.IndexOf('__', [StringComparison]::Ordinal)
     if ($cut -lt 0) {
-        if ($qualified -or $name.Contains('.')) { return '' }
+        if ($qualified) { return '' }
         return $name
     }
     if ($name.Substring(0, $cut) -ine 'integrity_client_memory') { return '' }
-    return $name.Substring($cut + 2)
+    $tool = $name.Substring($cut + 2)
+    # No tool of the core has "__" in its name; the server part was longer.
+    if ($tool.Contains('__')) { return '' }
+    return $tool
 }
 
 function Is-MeaningfulMutation {

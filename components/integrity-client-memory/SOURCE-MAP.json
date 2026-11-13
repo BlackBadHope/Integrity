@@ -314,14 +314,14 @@
     "path": "src/integrity_client_memory/resources/windows/admission-system.ps1",
     "source": "clients/windows/admission-system.ps1",
     "source_sha256": "5e881d2fb4c04e42023639fbab3836c0ded72cca4e2181cd30fbbd7178a37ce5",
-    "sha256": "b057a9dd8b4812f54d70c43a4b4880a3e03f61ca2064347fe1d66218ac3c2d8e",
+    "sha256": "19b63718bea959f433b8a419a8c557b999345b1758918e2e76db3f9a43e62855",
     "projection": "Changed in the public copy after export: a core tool is recognised by its name together with its server. The source named here does not have this change."
   },
   {
     "path": "src/integrity_client_memory/resources/windows/admission.ps1",
     "source": "clients/windows/admission.ps1",
     "source_sha256": "9bb1a203e5c0219005fa062f4eec1391b8d8ad61d25fd5abf9af2acfe6830a6a",
-    "sha256": "488147cd5d136a1cb25c8cd9a77cdcea037088602ad1c7812673b83538f2ab3b",
+    "sha256": "3f676a2aff59284a7e5f5d14c42b03e27ab5c79bfbb4eac80e55b214ff296fa5",
     "projection": "Changed in the public copy after export: a core tool is recognised by its name together with its server. The source named here does not have this change."
   },
   {

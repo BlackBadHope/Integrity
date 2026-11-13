@@ -118,14 +118,66 @@ def test_a_tool_of_another_server_is_an_action_whatever_its_name(tmp_path, hook)
         "mcp__integrity_client_memory_copy__integrity_append_event",
         "mcp__copy__integrity_client_memory__integrity_append_event",
         "mcp__integrity_append_event",
-        "other.integrity_append_event",
+        # The server part is longer than the own server name.
+        "mcp__integrity_client_memory__x__integrity_append_event",
+        "mcp__integrity_client_memory__integrity__append_event",
     ]
-    rows = run_hook_functions(tmp_path, hook, foreign)
+    rows = run_hook_functions(tmp_path, hook, foreign + ["other.integrity_append_event"])
     for name in foreign:
         assert rows[name] == {
             "name": name, "own": "", "memory": False, "append": False, "admission": False,
             "current": False, "archive": False, "action": True,
         }, rows[name]
+    # Codex does not form such a name for an MCP tool. It carries no server, so it is compared
+    # whole, and no pattern matches it.
+    assert rows["other.integrity_append_event"] == {
+        "name": "other.integrity_append_event", "own": "other.integrity_append_event", "memory": False,
+        "append": False, "admission": False, "current": False, "archive": False, "action": True,
+    }
+
+
+def codex_hook_tool_name(server, tool, prefixed=True):
+    """The name Codex 0.163.0 gives a hook for an MCP tool, repeated from its source.
+
+    codex-mcp/src/tools.rs and codex-mcp/src/mcp/mod.rs: the namespace is the server name with
+    every character outside [A-Za-z0-9_] replaced by "_", with "mcp__" in front unless the
+    prefix is switched off. core/src/tools/handlers/mcp.rs, hook_tool_name: the namespace
+    without trailing "_", then "__", then the tool name without leading "_", and "mcp__" in
+    front if it is not there yet. The hook input (hooks/src/schema.rs) has tool_name and no
+    field for the server.
+    """
+    def sanitize(value):
+        return re.sub(r"[^A-Za-z0-9_]", "_", value) or "_"
+
+    namespace = sanitize(server) + "__"
+    if prefixed and not namespace.startswith("mcp__"):
+        namespace = "mcp__" + namespace
+    joined = namespace.rstrip("_") + "__" + sanitize(tool).lstrip("_")
+    return joined if joined.startswith("mcp__") else "mcp__" + joined
+
+
+def test_the_name_codex_forms_is_the_form_the_hook_takes_apart():
+    assert codex_hook_tool_name("memory", "create_entities") == "mcp__memory__create_entities"
+    assert codex_hook_tool_name("foo", "exec_command", prefixed=False) == "mcp__foo__exec_command"
+    assert codex_hook_tool_name("integrity_client_memory", "integrity_append_event") == (
+        OWN + "integrity_append_event"
+    )
+    assert codex_hook_tool_name("file.system", "read-file") == "mcp__file_system__read_file"
+
+
+@pytest.mark.parametrize("hook", sorted(HOOKS))
+def test_names_as_codex_forms_them(tmp_path, hook):
+    names = core_tool_names()
+    own = {codex_hook_tool_name("integrity_client_memory", name, prefixed): name
+           for name in names for prefixed in (True, False)}
+    servers = ["integrity_local_memory", "integrity", "integrity_client_memory2", "memory", "integrity.client"]
+    other = [codex_hook_tool_name(server, name, prefixed)
+             for server in servers for name in names for prefixed in (True, False)]
+    rows = run_hook_functions(tmp_path, hook, sorted(set(own) | set(other)))
+    for shown, name in own.items():
+        assert (rows[shown]["own"], rows[shown]["memory"], rows[shown]["action"]) == (name, True, False)
+    for shown in other:
+        assert (rows[shown]["own"], rows[shown]["memory"], rows[shown]["action"]) == ("", False, True)
 
 
 @pytest.mark.parametrize("hook", sorted(HOOKS))
