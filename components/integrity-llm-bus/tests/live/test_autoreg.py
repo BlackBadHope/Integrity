@@ -103,20 +103,24 @@ class AutoregTest(unittest.TestCase):
 
     def test_concurrent_processes_one_entry_each(self):
         cmd = [sys.executable, "-B", str(HERE / "autoreg.py"), "--state-dir", str(self.state), "ensure", "--harness", "codex"]
+        identities = (A, B, A, B)
         for _ in range(3):
-            procs = [subprocess.Popen(cmd + ["--identity", i], stdout=subprocess.PIPE, stderr=subprocess.PIPE) for i in (A, B, A, B)]
+            procs = [subprocess.Popen(cmd + ["--identity", i], stdout=subprocess.PIPE, stderr=subprocess.PIPE) for i in identities]
             outs = [p.communicate(timeout=30) for p in procs]
-            # ensure waits LOCK_WAIT_MS for the registry lock and then gives up by design.
-            # A process that lost the wait exits with 2 and says so; nothing else may fail.
-            for proc, (_, err) in zip(procs, outs):
+            self.assertTrue(any(p.returncode == 0 for p in procs), outs)
+            for identity, proc, (_, err) in zip(identities, procs, outs):
                 if proc.returncode == 0:
                     continue
+                # ensure waits LOCK_WAIT_MS for the registry lock and then gives up by design: a hook
+                # must not hold a turn. A process that lost the wait exits with 2 and says so; nothing
+                # else may fail. Its caller repeats it until the identity has its entry.
                 self.assertEqual((proc.returncode, json.loads(err)), (2, {"error": "registry busy"}), outs)
-            self.assertTrue(any(p.returncode == 0 for p in procs), outs)
-        # Without contention every identity registers; the registry holds one entry for each.
-        for identity in (A, B):
-            done = subprocess.run(cmd + ["--identity", identity], capture_output=True, timeout=30, check=False)
-            self.assertEqual(done.returncode, 0, done.stderr)
+                for _attempt in range(5):
+                    again = subprocess.run(cmd + ["--identity", identity], capture_output=True, timeout=30, check=False)
+                    if again.returncode == 0:
+                        break
+                    self.assertEqual(json.loads(again.stderr), {"error": "registry busy"})
+                self.assertEqual(again.returncode, 0, again.stderr)
         agents = ar.load(self.state)
         self.assertEqual(sorted(e["thread"] for e in agents.values()), sorted([A, B]))
 

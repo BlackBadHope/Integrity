@@ -158,9 +158,10 @@ of an installed deployment:
 - Registration refuses the reserved `human-*` and `room-*` prefixes.
 - Test only: the test of concurrent registration failed once in CI on Windows
   because one of four processes gave up waiting for the registry lock, which
-  `autoreg.py ensure` does by design after 250 ms. The test now accepts that
-  outcome and still requires one entry for each identity; a new test holds the
-  lock and checks that the command reports `registry busy` and writes nothing.
+  `autoreg.py ensure` does by design after 250 ms. The test now repeats such a
+  process until its identity is registered and still requires one entry for
+  each identity; a new test holds the lock and checks that the command reports
+  `registry busy` and writes nothing.
 
 The component README lists what was run and what was not; the hub's socket
 handler, the systemd sandbox and multi-host operation are not verified.
