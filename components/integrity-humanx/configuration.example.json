@@ -1,0 +1,30 @@
+{
+  "schema": "integrity/component-config/v1",
+  "component": "integrity-humanx",
+  "configured": false,
+  "guardian_version": "6.1.0",
+  "memory_api_version": "2.11.0",
+  "owner_local_catalogue": null,
+  "values": {
+    "operator_id": null,
+    "python": null,
+    "bus_replica": null,
+    "antigravity_wake_dir": null,
+    "hosts_file": null,
+    "host_ssh_key": null,
+    "ssh_config": null,
+    "web_url": null,
+    "host_label": null,
+    "integrity_mcp_server": null,
+    "antigravity_steps_root": null,
+    "antigravity_language_server": null,
+    "web_config": null,
+    "web_state_dir": null,
+    "ring_map_file": null,
+    "ro_gateway_socket": null,
+    "ro_gateway_config": null,
+    "integrity_action_log": null,
+    "ro_integrity_snapshot": null,
+    "ro_group": null
+  }
+}

@@ -575,6 +575,7 @@ different interfaces and deliberately do not all match the Guardian version.
 | [`integrity-remote`](components/integrity-remote/README.md) | 0.1.0b1 | Cross-machine core access over an OpenSSH forced command |
 | [`integrity-cloud`](components/integrity-cloud/README.md) | 0.1.0b1 | Signed turn journals for cloud agents without local hooks |
 | [`integrity-guards`](components/integrity-guards/README.md) | 0.1.0a1 | Hook-side guards: remote-change locks, forgotten-rule checks, compiled routes |
+| [`integrity-humanx`](components/integrity-humanx/README.md) | 0.1.0a1 | Human operator room: web page, read-only room vendors woken over the bus, read-only gateway |
 | [`integrity-killswitch`](components/integrity-killswitch/README.md) | 0.1.0a1 | Per-vendor and global switch for agent access on one workstation |
 
 `components/integrity-seed` and `plugins/` also retain their specific plugin

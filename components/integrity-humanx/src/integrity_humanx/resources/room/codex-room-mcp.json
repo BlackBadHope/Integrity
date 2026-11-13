@@ -1,0 +1,8 @@
+{
+ "required": true,
+ "default_tools_approval_mode": "approve",
+ "tools": {
+  "room_reply": "prompt",
+  "room_escalate": "prompt"
+ }
+}

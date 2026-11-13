@@ -1,0 +1,18 @@
+# Example systemd unit for the room web. Placeholders in <...>; adapt before use.
+[Unit]
+Description=HumanX room web (example)
+After=network-online.target
+
+[Service]
+User=<web account>
+Environment=INTEGRITY_HUMANX_CONFIG=/etc/<humanx>/configuration.json
+StateDirectory=<humanx-web>
+ExecStart=<venv>/bin/integrity-humanx humanx-web
+IPAddressDeny=any
+IPAddressAllow=<allowed client addresses>
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target

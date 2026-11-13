@@ -1,0 +1,170 @@
+{
+  "operator_id": {
+    "kind": "identifier",
+    "used_by": [
+      "humanx/client/humanx_context.py:13",
+      "humanx/client/humanx_context.py:70",
+      "humanx/client/humanx_delivery.py:195",
+      "humanx/client/humanx_delivery.py:315",
+      "humanx/client/humanx_wakers_supervisor.py:73",
+      "humanx/client/humanx_wakers_supervisor.py:74",
+      "humanx/client/humanx_wakers_supervisor.py:75",
+      "humanx/client/humanx_wakers_supervisor.py:76",
+      "humanx/client/room_claude_wake.py:21",
+      "humanx/client/room_claude_wake.py:117",
+      "humanx/client/room_codex_waker.py:24",
+      "humanx/client/room_codex_waker.py:136",
+      "humanx/client/room_codex_waker.py:155",
+      "humanx/client/room_codex_waker.py:162",
+      "humanx/client/room_codex_waker.py:328",
+      "humanx/client/room_gemini_waker.py:34",
+      "humanx/client/room_gemini_waker.py:110",
+      "humanx/client/room_grok_waker.py:37",
+      "humanx/client/room_grok_waker.py:321",
+      "humanx/room/room_tool.py:33",
+      "humanx/room/room_tool.py:151",
+      "humanx/room/room_tool.py:321",
+      "humanx/room/room_tool.py:343",
+      "humanx/room/room_tool.py:344",
+      "humanx/room/room_tool.py:474",
+      "humanx/room/room_tool.py:558",
+      "humanx/room/room_tool.py:560",
+      "humanx/room/room_tool.py:561",
+      "humanx/room/room_tool.py:563",
+      "humanx/room/room_tool.py:595",
+      "humanx/room/room_tool.py:613",
+      "humanx/server/web/humanx_web.py:168",
+      "humanx/server/web/humanx_web.py:562"
+    ]
+  },
+  "python": {
+    "kind": "path",
+    "used_by": [
+      "humanx/client/humanx_wakers_supervisor.py:54",
+      "humanx/client/room_claude_wake.py:25",
+      "humanx/client/room_codex_waker.py:28",
+      "humanx/client/room_gemini_waker.py:36",
+      "humanx/client/room_grok_waker.py:39",
+      "humanx/client/vendor_room_guard.py:74",
+      "humanx/room/room_tool.py:49"
+    ]
+  },
+  "bus_replica": {
+    "kind": "path",
+    "used_by": [
+      "humanx/client/humanx_wakers_supervisor.py:55",
+      "humanx/client/room_claude_wake.py:22",
+      "humanx/client/room_codex_waker.py:25",
+      "humanx/client/room_gemini_waker.py:35",
+      "humanx/client/room_grok_waker.py:38",
+      "humanx/room/room_tool.py:50"
+    ]
+  },
+  "antigravity_wake_dir": {
+    "kind": "path",
+    "used_by": [
+      "humanx/client/room_gemini_waker.py:21",
+      "humanx/room/room_tool.py:132"
+    ]
+  },
+  "hosts_file": {
+    "kind": "path",
+    "used_by": [
+      "humanx/room/room_tool.py:214"
+    ]
+  },
+  "host_ssh_key": {
+    "kind": "path",
+    "used_by": [
+      "humanx/room/room_tool.py:220"
+    ]
+  },
+  "ssh_config": {
+    "kind": "path",
+    "used_by": [
+      "humanx/room/room_tool.py:221"
+    ]
+  },
+  "web_url": {
+    "kind": "endpoint",
+    "used_by": [
+      "humanx/client/humanx_attach.py:14"
+    ]
+  },
+  "host_label": {
+    "kind": "label",
+    "used_by": [
+      "humanx/client/room_grok_waker.py:104",
+      "humanx/client/room_grok_waker.py:271"
+    ]
+  },
+  "integrity_mcp_server": {
+    "kind": "identifier",
+    "used_by": [
+      "humanx/room/room_ro_guard.py:22",
+      "humanx/room/room_ro_guard.py:23"
+    ]
+  },
+  "antigravity_steps_root": {
+    "kind": "path",
+    "used_by": [
+      "humanx/client/vendor_room_guard.py:56"
+    ]
+  },
+  "antigravity_language_server": {
+    "kind": "path",
+    "used_by": [
+      "humanx/client/room_gemini_waker.py:278"
+    ]
+  },
+  "web_config": {
+    "kind": "path",
+    "used_by": [
+      "humanx/server/web/humanx_web.py:16"
+    ]
+  },
+  "web_state_dir": {
+    "kind": "path",
+    "used_by": [
+      "humanx/server/web/humanx_web.py:19"
+    ]
+  },
+  "ring_map_file": {
+    "kind": "path",
+    "used_by": [
+      "humanx/server/web/rings_screen.py:32",
+      "humanx/server/web/storm_screen.py:22"
+    ]
+  },
+  "ro_gateway_socket": {
+    "kind": "path",
+    "used_by": [
+      "humanx/server/web/rings_screen.py:25",
+      "humanx/server/web/storm_screen.py:447"
+    ]
+  },
+  "ro_gateway_config": {
+    "kind": "path",
+    "used_by": [
+      "humanx/server/ro/humanx_ro_gw.py:28"
+    ]
+  },
+  "integrity_action_log": {
+    "kind": "path",
+    "used_by": [
+      "humanx/server/ro/humanx_ro_snapshot.py:10"
+    ]
+  },
+  "ro_integrity_snapshot": {
+    "kind": "path",
+    "used_by": [
+      "humanx/server/ro/humanx_ro_snapshot.py:11"
+    ]
+  },
+  "ro_group": {
+    "kind": "identifier",
+    "used_by": [
+      "humanx/server/ro/humanx_ro_snapshot.py:26"
+    ]
+  }
+}

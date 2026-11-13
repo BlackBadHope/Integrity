@@ -62,6 +62,10 @@
       "path": "components/integrity-home/src/integrity_home"
     },
     {
+      "component": "integrity-humanx",
+      "path": "components/integrity-humanx/src/integrity_humanx"
+    },
+    {
       "component": "integrity-killswitch",
       "path": "components/integrity-killswitch/src/integrity_killswitch"
     },
