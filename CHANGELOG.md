@@ -41,9 +41,12 @@ versions are unchanged unless an entry says otherwise.
 - `demo/run.py` no longer plays agents. It prints the records, draws the
   pictures and builds a record from a user's own run: from the output of
   `claude -p --output-format stream-json` or of `codex exec --json`, with one
-  client name or one for each agent. The four-scene script
-  that it replaces is gone, together with its scenes for the one-use grant and
-  the doctor.
+  client name or one for each agent.
+- The four-scene script that the demo replaces is now a separate example,
+  [`examples/scripted-scenes`](examples/scripted-scenes/README.md): record,
+  recall, a one-use owner grant, and a missing close in the doctor. It says
+  that a script plays the agents, and it draws no picture.
+  `tests/test_example_scripted_scenes.py` runs it.
 - `tests/test_demo.py` replays the recorded tool calls against a new instance
   without a model and fails when this code answers differently, when a
   published prompt differs from the one that was run, or when the pictures

@@ -56,6 +56,7 @@ These folders are examples. They are starting points, not parts of a release.
 | --- | --- |
 | [Starter pack of owner rules](../examples/owner-rules-starter/README.md) | 20 generic behaviour rules in English and Russian that the memory server can offer to an agent before it acts |
 | [Two-session tasks that need memory](../examples/memory-carryover-tasks/README.md) | Six small coding tasks whose second session depends on what the first one decided, with reference solutions and tests |
+| [Four scripted scenes](../examples/scripted-scenes/README.md) | A script plays two agents and an owner: record, recall, a one-use owner grant, a missing close in the doctor. No agent client and no model; this is not the demo |
 | [Lab tools](../tools/lab/README.md) | Operator scripts for an isolated two-VM lab, configured from one `lab.json`. Checked statically only; not run in this form |
 
 ## Components
