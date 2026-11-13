@@ -1,0 +1,5 @@
+{
+  "humanx-ro-gateway": {"path": "resources/ro/humanx_ro_gw.py"},
+  "humanx-ro-snapshot": {"path": "resources/ro/humanx_ro_snapshot.py"},
+  "humanx-web": {"path": "resources/web/humanx_web.py"}
+}

@@ -1,0 +1,8 @@
+{
+  "_comment": "Value of web_config for humanx_web.py. Invented values.",
+  "bind": "192.0.2.30",
+  "port": 8890,
+  "allow": ["192.0.2.40", "192.0.2.41"],
+  "socket": "/run/<bus>/bus.sock",
+  "token_file": "/etc/<humanx-web>/token"
+}

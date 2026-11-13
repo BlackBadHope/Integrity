@@ -268,6 +268,25 @@
     },
     {
       "dependencies": [],
+      "distribution": "integrity-humanx",
+      "entry_points": {
+        "integrity-humanx": "integrity_humanx.launcher:main"
+      },
+      "import_roots": [
+        "integrity_humanx"
+      ],
+      "license": "BUSL-1.1",
+      "optional_dependencies": {
+        "dev": [
+          "pytest>=8.2,<10"
+        ]
+      },
+      "path": "components/integrity-humanx",
+      "python": ">=3.11",
+      "version": "0.1.0a1"
+    },
+    {
+      "dependencies": [],
       "distribution": "integrity-killswitch",
       "entry_points": {
         "integrity-killswitch": "integrity_killswitch.killswitch:main"
