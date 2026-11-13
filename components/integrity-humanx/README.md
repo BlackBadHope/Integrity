@@ -54,14 +54,38 @@ Keep tokens, passwords and SSH keys in your own credential store. The configurat
 
 ## Setting up on a clean machine
 
-Server (Linux):
+Server (Linux), after the bus hub (`integrity-llm-bus-hub install`):
 
-1. Install this distribution for the interpreter the units use. The units run the `integrity-humanx` launcher;
-   `--list` shows `humanx-web`, `humanx-ro-gateway` and `humanx-ro-snapshot`.
-2. Create separate accounts for the web and the gateway, and the group that may use the gateway socket.
-3. Write the web configuration, the gateway configuration and the ring map from `examples/`.
-4. Install the example units after replacing their `<...>` placeholders. Limit the web to the `allow`
-   addresses in the firewall and in `IPAddressAllow`.
+1. Install this distribution for the interpreter that will run the web and the gateway. The launcher
+   `integrity-humanx --list` shows `humanx-web`, `humanx-ro-gateway` and `humanx-ro-snapshot`.
+2. Write the web's bus key to a file of your own; the hub's keys file holds only its sha256, with the
+   `human-<operator_id>` address and the room operations (`send`, `poll`, `get`, `ack`, `status`,
+   `room-arbiter`, `room-arbiter-set`, `vendor-cards`, `status-batch`).
+3. As root, run `integrity-humanx-server install`. It needs new folders and new names, and it names the
+   hub's socket group, SSH gateway account and socket:
+
+   ```bash
+   integrity-humanx-server install --etc /etc/<humanx> --state /var/lib/<humanx> --runtime /run/<humanx> \
+     --web-user <web account> --gateway-user <gateway account> --socket-group <gateway socket group> \
+     --bus-group <hub socket group> --bus-gateway-user <hub SSH gateway account> --bus-socket <hub socket> \
+     --web-key <key file> --operator-id <operator_id> --vendor claude --bind 127.0.0.1 --port 8890 --allow 127.0.0.1
+   ```
+
+   It creates the web account, the gateway account and the gateway socket group. It adds the web account
+   to the hub's socket group and the hub's SSH gateway account to the gateway socket group. It writes the
+   configuration (`configuration.json`, `web.json`, `gateway.json`, the key file readable by the web
+   account only). It prints the commands that start the web and the gateway as their accounts.
+4. Enable the room on the hub: `<hub state>/state/room.json` with `human`, `vendors` and `arbiters`
+   (see below). `install` does not write it.
+5. For SQL, switch reads, the storm reader, the snapshot job and the ring screens, add the files they need
+   (`my.cnf`, `switch.cred`, `storm.key`, `storm.known_hosts`, the ring map) and their values in
+   `gateway.json` and `configuration.json` yourself. Until then they refuse, and the ring and storm
+   screens stay off (`web-rings.off`, `web-storm.off`).
+6. `integrity-humanx-server doctor --etc /etc/<humanx>` only reads. `uninstall --etc /etc/<humanx>` lists what
+   it would remove; with `--yes` it removes it. It refuses while a process of the web or gateway account
+   runs, or while the configuration folder holds a file it did not write.
+7. For a service, adapt the example units in `examples/`, replacing their `<...>` placeholders. Limit the
+   web to the `allow` addresses in the firewall and in `IPAddressAllow`.
 
 Client (the machine that runs the vendors):
 
@@ -75,9 +99,12 @@ Client (the machine that runs the vendors):
 
 ## How the room is enabled
 
-The room exists only on a bus that has it enabled. In `integrity-llm-bus`, the installer writes
-`<state>/room.json` with `{"human": "human-<operator_id>", "vendors": ["room-<operator_id>-claude", ...]}`
-(`room_acl.py`). The bus then lets the operator write only to room vendors and the owner, and lets vendors
+The room exists only on a bus that has it enabled: `<state>/room.json` in the bus state folder
+(`room_acl.py`), with `{"human": "human-<operator_id>", "vendors": ["room-<operator_id>-claude", ...]}`. With
+the hub, the folder is `<hub state>/state`; neither `integrity-llm-bus-hub` nor `integrity-humanx-server` writes
+the file, so the operator writes it as the bus account. The web picks the room Arbiter from its `arbiters`
+object, for example `{"claude": {"address": "room-<operator_id>-claude", "ro": "<how it is read-only>",
+"ro_verified": true}}`; the hub refuses a candidate without `ro_verified`. The bus then lets the operator write only to room vendors and the owner, and lets vendors
 answer only the operator and the owner. The pilot used `humanx-<name>` for the operator address. This port
 uses `human-<operator_id>`, so it matches `room_acl.py`.
 
@@ -106,13 +133,32 @@ configuration in a temporary folder and no network:
 - ring and storm screens with an invented ring map, including the storm page-size limit;
 - gateway caller checks, SQL and `show` whitelists, web screen rights and Integrity snapshot reads. The gateway
   is Linux-only; the tests use fake `pwd`/`grp` and a fake connection, and no socket server is started;
-- `dlinkcli` whitelist and parsers on invented transcripts.
+- `dlinkcli` whitelist and parsers on invented transcripts;
+- `integrity-humanx-server` argument checks, the configuration it writes and its record handling, without root.
+
+By the public CI job `humanx server (ubuntu, real accounts)` (`.github/scripts/humanx_server_check.py`), on
+Ubuntu with sudo inside the runner, with keys generated in the job and a synthetic Integrity snapshot:
+
+- `install` with real accounts and groups next to the installed bus hub, a refused second install, `doctor`;
+- the gateway on its unix socket as its own account, with callers told apart by `SO_PEERCRED`. The hub's SSH
+  gateway account reads the snapshot. Refused: a vendor outside the room, the web account, another account of
+  the socket group, and a non-read SQL statement (refused before any database client starts). Accounts outside
+  the socket group cannot connect. The gateway log holds request hashes and no request text;
+- the web on 127.0.0.1 as its own account: the page (the key is not in it), a refusal from 127.0.0.2, a
+  refusal without the `X-HumanX` header, the state API;
+- one question sent from the page through the real bus hub to the room vendor's address, read there with the
+  vendor's key, and the vendor's answer shown under it on the page;
+- `uninstall` refused while the web and the gateway run, and while an owner file is in the configuration folder;
+  then `uninstall --yes`, `doctor` reporting `not-installed`, no accounts, groups or folders left.
 
 ## What is not verified
 
-- On Linux only these unit tests ran. The unix socket, `SO_PEERCRED`, systemd units and file ownership were
-  not exercised.
-- No live acceptance: no real bus, vendor agent, switch, database, SSH host or browser took part.
+- systemd units, the firewall, and the SSH forced command in front of the bus gateway account were not
+  exercised. The CI job calls the gateway from that account directly.
+- SQL against a database server, switch reads, the storm reader, the snapshot job and the ring and storm
+  screens were not run against a real service.
+- No live acceptance: no vendor agent, switch, database, SSH host or browser took part. The vendor side in CI
+  is a script holding the vendor's key, not an agent.
 - The waker loops, the supervisor, Max Reasoning and the quota readers are not covered by the tests.
 
 ## Known problems carried over from the pilot

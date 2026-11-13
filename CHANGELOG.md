@@ -15,7 +15,8 @@ versions are unchanged unless an entry says otherwise.
   folder, the state folder and the socket folder, and writes the
   configuration. It refuses names and folders that exist. It also refuses a
   keys file in which an entry has a field whose name contains `token`,
-  `secret`, `password`, `passwd` or `private` (`key_sha256` aside), or a
+  `secret`, `password`, `passwd` or `private` in any letter case
+  (`key_sha256` aside), or a
   `key_sha256` that is not 64 lowercase hexadecimal characters; an entry
   without a key is accepted. If a step fails, it removes what it made.
   `doctor` only reads: accounts, owners and modes, configuration, keys, the
@@ -34,6 +35,48 @@ versions are unchanged unless an entry says otherwise.
   `uninstall` refused while the daemon runs and while a process of the
   gateway account runs, with nothing removed, then `uninstall --yes`,
   `doctor` reporting `not-installed`, and pip uninstall.
+
+### The HumanX server side on one Linux machine, with real accounts
+
+- **`integrity-humanx-server`**: a new command in `integrity-humanx`
+  (`integrity_humanx.server`), Linux only. `install`, run as root after the
+  bus hub, creates the web account, the read-only gateway account and the
+  gateway socket group. It adds the web account to the bus socket group and
+  the bus SSH gateway account to the gateway socket group. It writes the
+  configuration folder, the state folder and the socket folder. The web's bus
+  key is copied from the owner's file into a file only the web account can
+  read, and is never printed. It refuses names and folders that exist, and a
+  bus group or bus gateway account that does not. If a step fails, it removes
+  what it made.
+- `install` configures the web and the gateway's reads of an Integrity
+  snapshot. SQL, switch reads, the storm reader, the snapshot job and the
+  ring map are listed as not configured; the ring and storm screens stay off.
+  `doctor` only reads: accounts and group membership, owners and modes, the
+  values install wrote, the web key file's owner and mode, and the installed
+  files against the wheel record. `uninstall` lists what it would remove; with
+  `--yes` it removes it, and refuses, before removing anything, while a
+  process of the web account or of the gateway account runs, or while the
+  configuration folder holds a file install did not write.
+- It starts nothing and installs no systemd unit or firewall rule, and it does
+  not write the bus room file. `install` and `doctor` print the commands that
+  start the web and the gateway as their accounts.
+- A new CI job, `humanx server (ubuntu, real accounts)`, runs it on Ubuntu with
+  sudo inside the runner (`.github/scripts/humanx_server_check.py`):
+  - the bus and HumanX wheels alone, the hub with the room enabled, then
+    `install`, a refused second install and `doctor`;
+  - the gateway as its account: the bus gateway account reads a synthetic
+    snapshot; a vendor outside the room, the web account, another account of
+    the socket group and a non-read SQL statement are refused; accounts
+    outside the group cannot connect; the gateway log holds request hashes
+    and no request text;
+  - the web on 127.0.0.1: the page, a refusal from 127.0.0.2 (outside the
+    allow list), a refusal without the `X-HumanX` header, the state API;
+  - a question sent from the page reaches the room vendor over the bus from
+    the operator address, and the vendor's answer shows under it;
+  - `uninstall` refused while the web and the gateway run and while an owner
+    file is in the configuration folder, then `uninstall --yes`, `doctor`
+    reporting `not-installed`, the bus hub's `doctor` still passing, and pip
+    uninstall.
 
 ### Timing evidence kept in every CI run
 

@@ -1,5 +1,5 @@
 {
-  "file_count": 1391,
+  "file_count": 1393,
   "files": [
     {
       "bytes": 3435,
@@ -86,11 +86,11 @@
       "sha256": "bf23ba02498540d50a6eb700f5382a02160c20d66ba5ce754f2535158bce7cba"
     },
     {
-      "bytes": 12319,
+      "bytes": 12386,
       "mode": "0o644",
       "path": "COMPONENTS.json",
       "sanitization_edits": 0,
-      "sha256": "4e423f2f9e0369996a4f2de4071020b20f8e3de804703691b818156099566c61"
+      "sha256": "d1801acc8a723e268b2f5a44f33d8362dd410ba7dcca5ed01198a785af42d498"
     },
     {
       "bytes": 1797,
@@ -3278,6 +3278,13 @@
       "sha256": "f7f1f9b483525a182ee0834e3b9f122b646dc1a24f8a9c1dc955387a852bfe04"
     },
     {
+      "bytes": 24897,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/src/integrity_humanx/server.py",
+      "sanitization_edits": 0,
+      "sha256": "538356c4a08beb7ec7a2ba6170285f9dcdae99942fff77035727caac616dde06"
+    },
+    {
       "bytes": 8444,
       "mode": "0o644",
       "path": "components/integrity-humanx/tests/conftest.py",
@@ -3332,6 +3339,13 @@
       "path": "components/integrity-humanx/tests/test_screens.py",
       "sanitization_edits": 0,
       "sha256": "e1bae818a576b32ddf28a4662992959f486e74bd42a72b0bf7b54791855a3760"
+    },
+    {
+      "bytes": 6715,
+      "mode": "0o644",
+      "path": "components/integrity-humanx/tests/test_server.py",
+      "sanitization_edits": 0,
+      "sha256": "fc9c99c3332813efb233e32a5dafabb14e396a48d6a55df77f62da92038f5a72"
     },
     {
       "bytes": 5599,
@@ -9739,7 +9753,7 @@
       "sha256": "c088a0394890fd3661a86c0f0a8e6e716ad3b6c51b5728c032b12663af6420f9"
     }
   ],
-  "generated_file_count": 101,
+  "generated_file_count": 102,
   "generated_files": [
     {
       "bytes": 1041,
@@ -9770,6 +9784,13 @@
       "sha256": "6b22c93da8a2518152bff798ca4d50ac247072c6b7baa20d353d5d52658f19d9"
     },
     {
+      "bytes": 21737,
+      "mode": "0o644",
+      "path": ".github/scripts/humanx_server_check.py",
+      "sanitization_edits": 0,
+      "sha256": "e9768e93ad488cb179d6e5aa4dd3570ede26ccbd3ac3af693f9a477326772db2"
+    },
+    {
       "bytes": 2889,
       "mode": "0o644",
       "path": ".github/scripts/native_skip_guard.py",
@@ -9791,11 +9812,11 @@
       "sha256": "c7febfedca7cf8e16f62f00b6af65808b633dc1ba26351c7b1ada8de2946e222"
     },
     {
-      "bytes": 10167,
+      "bytes": 11283,
       "mode": "0o644",
       "path": ".github/workflows/public-surface.yml",
       "sanitization_edits": 0,
-      "sha256": "0ba32550594be70699d009e458102239f10090ad49075a8677785f35de01e0c2"
+      "sha256": "7761b5046efe8baea4bf4c4a9ffbfdfda75e869897e7d234257b33da7332c649"
     },
     {
       "bytes": 132,
@@ -9826,11 +9847,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 58179,
+      "bytes": 60961,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "f6708beda172bb27b191d60eb736cb1363ad76009f48496a943a671aa2324c13"
+      "sha256": "66559be6223cdd34df3a252140f83fc989705ecba7ee3d8ddc0d5afbf78a3b9f"
     },
     {
       "bytes": 775,
@@ -9973,11 +9994,11 @@
       "sha256": "3eec9e223327757ef5bac5e7a4d61bba0c16f8ec2336f26465a9a853c210fa8b"
     },
     {
-      "bytes": 9864,
+      "bytes": 13895,
       "mode": "0o644",
       "path": "components/integrity-humanx/README.md",
       "sanitization_edits": 0,
-      "sha256": "11e0b5efc692ae00704b700026d472d455b7dfdf4023d7630d8ccc6b77cccc5d"
+      "sha256": "fa478c77b575d413b332e3391cf18a45f839c4058b78ab1b2fc48a48b2f208af"
     },
     {
       "bytes": 787,
@@ -10064,11 +10085,11 @@
       "sha256": "0631d6325a529b7aa7bdb1cd36040fdb80b8565be0b16b2f20342c5bf4e1f7f8"
     },
     {
-      "bytes": 769,
+      "bytes": 826,
       "mode": "0o644",
       "path": "components/integrity-humanx/pyproject.toml",
       "sanitization_edits": 0,
-      "sha256": "970e1a9193ec4c6a09c413e0d8a87640206fe8102199ebf5659844367aaf8175"
+      "sha256": "d5b41a80c9e4e5ab03f32d2a68f671891d30bea06e843625273d35fa10258546"
     },
     {
       "bytes": 7132,
@@ -10449,7 +10470,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:867a335619e35b6735188cbb9a74fd022b2d03709edef1ea5a1b54d024dd1cbd",
+  "projection_digest": "sha256:7258dadf7a6f24d19520fd538bb82b9730766d2c1a6d838993144bd7c58dead4",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

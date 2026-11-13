@@ -272,7 +272,8 @@
       "dependencies": [],
       "distribution": "integrity-humanx",
       "entry_points": {
-        "integrity-humanx": "integrity_humanx.launcher:main"
+        "integrity-humanx": "integrity_humanx.launcher:main",
+        "integrity-humanx-server": "integrity_humanx.server:main"
       },
       "import_roots": [
         "integrity_humanx"
