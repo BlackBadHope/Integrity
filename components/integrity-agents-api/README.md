@@ -1,120 +1,95 @@
-# Integrity Agents API — 0.1.0rc2
+# integrity-agents-api
 
 [Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
 
-**September integration successor — ChangeIntent #201.** See UPDATE-RC.md (not included in public source) for fixes, journal compatibility and exact evidence boundaries. Original RC evidence is historical, not a claim about this successor.
+A client library for the OpenAI Agents API (`agents=v1`, beta) in which every HTTP request
+must pass the Integrity Adapter SDK gate first. It is for host developers who want to run an
+Agents API session under Integrity custody: request shape checks, a crash-safe local journal,
+budget reservations and recovery of session history.
 
-An optional executor adapter in the canonical Integrity monorepo. Implements
-ChangeIntent #199 from exact base
-`e40b9973fb8864fed29297a8dc61ba41111f5dbf`. This is a separate component/version,
-not a Guardian, Seed, Adapter SDK or LTS release. Experience Adapters PR #198 is
-untouched. No live provider request, credentials, deployment, merge or signed
-release is performed by the development/test workflow.
+## Status
 
-**This is executable lifecycle/recovery code, not a claim of production
-admission.** The HTTP wire is tested with a mocked HTTPS peer. The real SDK
-bridge is implemented but its signed grant/permit lifecycle is not certified
-for this new component. An application must supply the existing trusted host
-coordinator, exact permits, API credentials and independent outcome observer.
+- Version `0.1.0rc2`, a release candidate.
+- Python 3.11 or newer. No declared runtime dependencies.
+- Optional. Disabled until a host builds the objects described below. The command-line tool
+  is offline only.
+- `GuardianGate` imports `integrity_adapter_sdk` at run time and calls `require_guardian()`.
+  You must install `integrity-adapter-sdk` yourself; it pins `integrity-guardian==7.0.0`.
+  Without it, the gate refuses with `exact_sdk_unavailable`.
 
-## Implemented surfaces
+## What it does
 
-| Surface | Implementation | Important boundary |
-|---|---|---|
-| Provider lifecycle | `Sessions.start/snapshot/message/cancel/delete` | Actual agents=v1 request construction; no automatic model loop |
-| Environment lifecycle | `Sessions.environment_state`, configuration compiler | Session and environment IDs are distinct; no automatic reconstruction of files or exec-server launch |
-| Recovery | `Sessions.pages/recover`, `sse_events`, `reconcile` | Full bounded pages, gap awareness, terminal-state protection; provider snapshot is not atomic |
-| Functions | `execute_function`, `submit_retained_result` | Only current required_actions, schema-checked arguments, existing SDK gate and retained outputs |
-| Crash/replay | `Journal.run_once` | Real SQLite claim-before-call and cached result; unknown outcomes never execute again automatically |
-| Export privacy | `context_capsule`, `ExportPolicy` | Exact reviewed bytes and explicit US/non-ZDR opt-in; no PII-detection guarantee |
-| Tools/subagents | `compile_session`, `observer_separation` | PTC explicitly disabled by default and for write/approval sessions; no functions in subagents |
-| Budget | Journal reservations, `aggregate_usage`, `watchdog_tick` | Unknown usage blocks new billable work; not a provider-enforced dollar ceiling |
-| Provider handoff | `handoff_candidate` | Canonical snapshot remains source; no automatic handoff or task closure |
-| First workload | `audit_snapshot`, offline demo | Explicit hash-bound files and version/documentation drift; no filesystem crawl or Git-authenticity claim |
+| Part | Module | Behaviour |
+| --- | --- | --- |
+| Session lifecycle | `lifecycle.Sessions` | `start`, `snapshot`, `message`, `cancel`, `delete`, `environment_state`. No model loop and no background thread. |
+| Recovery | `Sessions.pages`, `Sessions.recover`, `lifecycle.reconcile` | Reads saved items and turns in pages of 100 and reconciles them with buffered stream events. |
+| Function calls | `Sessions.execute_function`, `Sessions.submit_retained_result` | Runs only a call that the session currently lists in `required_actions`, checks its arguments against the declared schema, passes a second SDK gate, and stores the output before it is submitted. |
+| Journal | `journal.Journal` | SQLite file. An operation is recorded as claimed before the call. A finished result is cached and returned again; an unknown outcome is never run again. At most 1024 operations. |
+| Budget | `Journal` reservations, `contracts.aggregate_usage`, `Sessions.watchdog_tick` | Billable work needs a reservation. While usage is unknown, new billable work is refused. The watchdog only requests cancellation after a deadline. |
+| Export | `contracts.ExportPolicy`, `contracts.context_capsule` | A request body is sent only if its SHA-256 is on the host's reviewed list and the host opted in to cloud retention. The capsule holds at most 32 extracts classified `synthetic`, `public` or `reviewed_project_extract`. |
+| Session config | `contracts.compile_session` | Builds the Agents API request. No environment by default. Programmatic tool calling only for read-only tool sets. No subagents with functions or write tools. MCP tools only as admitted read-only HTTPS servers; stdio MCP is rejected. |
+| Transport | `transport.OpenAIHTTP`, `transport.sse_events` | HTTPS to `api.openai.com` with an explicitly passed server key. Only documented session, item, turn, event and environment routes. One overall deadline per request, no retries. Bounded server-sent events. |
+| Handoff | `Sessions.handoff_candidate` | Describes a handoff to another executor once the session is idle. Executes nothing. |
+| Snapshot audit | `audit.audit_snapshot` | Hash-checks up to 32 supplied files and reports when the `pyproject.toml` version is missing from `README.md`. |
 
-`coverage.json` maps every recommendation to code, regression tests and remaining
-acceptance. API product comparisons and security tradeoffs are in RUNBOOK.md.
-There is no second model SDK/agent loop, no second MCP server and no canonical
-memory store. The journal holds operational identities and bounded pending tool
-results only, with no authority of its own.
+Messages are capped at 256 KiB. Duplicate JSON keys and non-finite numbers are rejected.
 
-## Run offline
+## Install
 
-Python 3.11+ and its standard library are sufficient for source tests:
+Install from source as described in [BOOTSTRAP.md](../../BOOTSTRAP.md#install-functional-components):
 
-```text
-python tools/run_checks.py
+```bash
+python -m pip install . ./components/integrity-adapter-sdk ./components/integrity-agents-api
 ```
 
-For the CLI, from this component directory set `PYTHONPATH=src` on POSIX or
-`$env:PYTHONPATH = 'src'` on native PowerShell, then run:
+The SDK and Guardian are needed only for the gated calls, not for the offline CLI.
 
-```text
-python -m integrity_agents_api capabilities
-python -m integrity_agents_api demo
+## Use
+
+The console script is `integrity-agents` (also `python -m integrity_agents_api`):
+
+```bash
+integrity-agents capabilities   # static description of the library, as JSON
+integrity-agents demo           # audit of a built-in synthetic snapshot
 ```
 
-The demo finds deliberately mismatched version documentation in a synthetic
-snapshot. It does not contact OpenAI, read the user's repository, create a
-session, spend tokens or claim AI reasoning. CLI exit zero means the offline
-transform ran, not that any task was completed by an independent observer.
+Both commands are offline. They read no key, open no connection and create no session. The
+demo reports a `version_not_documented` finding on purpose.
 
-The separate wheel exposes `integrity-agents`, has no default runtime package
-dependencies, and never overwrites/imports the Guardian package during metadata
-or offline CLI access. Its build backend is pinned to setuptools 82.0.1.
-To verify a wheel from two fresh copies, run `python tools/build_verify.py
---output /absolute/empty/output` with the pinned backend already installed.
-No build dependency is downloaded by that script.
+A host integration, in outline:
 
-## Host integration
+1. Build a capsule with `context_capsule` and a session config with `compile_session`.
+2. Create a `Journal` with `Journal.create(path, identity, namespace, budget_microusd=...)`
+   outside the agent workspace.
+3. Create `OpenAIHTTP(server_key, namespace, export_policy, gate_factory)`. The factory must
+   return a `GuardianGate` built from a genuine SDK envelope, verification context and
+   `AdapterDispatchPermit` for the exact request.
+4. Create `Sessions(transport, journal, configuration, catalog)` and call its methods.
 
-1. Build a minimal capsule from a verified canonical snapshot. Approve each exact
-   final request body for export under the host's data policy. Do not export raw
-   Home, the full Action Log, private user data or a broad filesystem by default.
-2. Use `compile_session` for an explicit model and a closed tool catalog.
-   Default: no environment, no delegation, no PTC. The returned object uses
-   documented Agents API fields, not Responses-only `allowed_callers`.
-3. Create a `Journal` in a protected directory OUTSIDE the agent workspace and
-   bind its identity/namespace through host configuration. Journal snapshots or
-   alternate paths cannot grant another execution: the existing durable SDK
-   permit and its pinned authority journal are still required.
-4. Construct `OpenAIHTTP` with an explicitly injected server secret, reviewed
-   ExportPolicy and host-owned `GuardianGate` factory. The factory must obtain
-   genuine SDK proof and a durable permit for the exact request descriptor.
-   The library has no fallback signing key, permission boolean or key loader.
-5. Construct `Sessions(transport, journal, configuration, catalog)`. Explicitly
-   create the session with a bounded local reservation. Read current
-   required_actions; dispatch each registered function with another exact SDK
-   gate; retain output BEFORE submitting it. No automatic replay exists.
-6. Follow events or recover using saved items/turns. For a live UI, open the new
-   stream first and buffer bounded events, fetch saved pages, then reconcile.
-   The caller owns its event loop; this component starts no background service.
-7. Obtain independent target-result evidence through the existing a14 observer.
-   Only the existing canonical append process may record completion. No method
-   in this component upgrades provider self-report into that state.
+## What is verified
 
-Read RUNBOOK.md before enabling an environment, MCP, PTC or subagents. These
-options require separate host admission and actual deployment acceptance.
+- Public CI builds this distribution as a wheel, checks the wheel contents and installs it
+  together with all other distributions (`pip check`) on Ubuntu and Windows with Python 3.11
+  and 3.12.
+- There are no behaviour tests: the component has no `tests/` folder, and no test elsewhere in
+  the repository imports it.
 
-## Known limits, not hidden readiness claims
+## What is not verified
 
-Real provider/SDK admission, target OS isolation, live environment/MCP testing,
-independent security review and owner-signed release are not established by
-synthetic tests. The policy compiler deliberately rejects raw stdio MCP and
-MCP writes in RC1; use a separately admitted narrow HTTPS read gateway or direct
-functions. It does not pretend an unguarded remote MCP call passes through a
-local function permit. No automatic exec-server installer/launcher is shipped.
+- Every behaviour described above is read from the source code only.
+- Any request to the real Agents API, with a real key or a real SDK permit.
+- Environments, MCP servers, programmatic tool calling and subagents in a live session.
+- Whether the beta API still accepts the request shapes built here.
 
-The provider API is beta. Unsupported JSON Schema features, oversized histories,
-unknown status/attribution, path ambiguity and unsupported stream events fail
-closed or remain explicitly unknown. Run-to-completion, long-term session
-retention and reconnect do not restore lost environment side effects.
+## Limits
 
-Local reservations limit this client's admitted *new* work but do not meter or
-terminate every internal model/tool/subagent step. API billing is separate from
-ChatGPT subscriptions. Unknown usage is never treated as zero. Independent
-provider-side spend controls and actual cancellation observation remain needed.
+- Local reservations limit new work started by this client. They do not meter or stop work
+  inside the provider, and they are not a spending cap.
+- `cancel` and the watchdog send a cancel request; they do not prove that work stopped.
+- Journal file permissions are checked on POSIX only.
+- Reconnecting or recovering a session does not restore lost side effects of an environment.
+- The library creates no grant, key or permit, and never records task completion.
 
-Tests are self-authored and synthetic; Linux/Windows CI checks portability, not
-independent security certification. Historical local reports remain unsigned.
-No task completion or stable track activation is claimed by this candidate.
+## License
+
+Business Source License 1.1. See [LICENSE](LICENSE) and the project [NOTICE](../../NOTICE).

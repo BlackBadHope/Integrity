@@ -1,169 +1,112 @@
-# Integrity Active Inquiry 0.1.0rc2
+# integrity-active-inquiry
 
 [Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
 
-**A development-ready source candidate for asking the next useful question.**
-Candidate ID: `2026.09.17-active-inquiry.2`. Authority: ChangeIntent #209.
-This is optional, offline, and independently packaged. Guardian remains 5.5.1;
-no existing product or signed LTS identity is changed.
+An offline planner that picks the next useful question to settle one goal, for example "does
+the deployed version match?", from a finite model that the developer supplies. It is meant for
+developers who build read-only probing on top of the Guardian Synapse kernel.
 
-## RC2 continuation and integration
+## Status
 
-Read MERGE-HANDOFF.md (not included in public source) before integrating this PR. The RC1
-history and evidence remain unchanged. RC2 fixes a reproduced simulation gap:
-a native-filtered proposal could be followed by ungated reselection. Use
-`begin_from_synapse(inquiry, kernel, context, expected_view_digest=view["view_digest"])`
-to refresh the exact native view before reserving the selected simulation. A
-changed view, revoked choice or unknown outcome cannot spend another attempt.
-This remains offline: it does not implement W1 SDK dispatch.
+- Version `0.1.0rc2`, a release candidate.
+- Python 3.11 or newer. No runtime dependencies.
+- Optional. Nothing else in the repository depends on it.
+- The Synapse bridge functions expect a Guardian Synapse kernel object from the host. The
+  package does not import Guardian and does not declare it as a dependency.
 
-`tools/merge_preflight.py` is a SOURCE-ONLY developer diagnostic, not packaged
-runtime code. It reads explicitly pinned Git objects using a bounded Git child;
-it does not merge, fetch, checkout, alter refs, run hooks or authorize a merge.
-The component runtime remains dependency-free and without a target executor.
+## What it does
 
-Current verification is in `evidence/rc2-verification.json`. The reports below
-with 61 tests and the 18,706-byte wheel are historical RC1 evidence, NOT RC2.
+You describe a `Goal` (subject, environment, revision, predicate, context digest, required
+evidence basis and budgets), a table of possible worlds with the goal answer in each, and a set
+of `Probe`s. Each probe predicts the token it would return in every world. `Inquiry.plan()`
+then returns one versioned, hashed document with a status:
 
-## Start here
+| Status | Meaning |
+| --- | --- |
+| `PROPOSED` | A probe is selected. Nothing is sent anywhere. |
+| `WAITING` | A simulated attempt is open. |
+| `ANSWERED_IN_MODEL` | All remaining worlds agree on the answer. This is an answer inside the model, not a confirmed real-world fact. |
+| `EXTERNAL_EVIDENCE_REQUIRED` | The model has an answer, but the goal asked for `reported` or `witnessed` evidence. |
+| `NEEDS_OBSERVATION` | Even all eligible probes together cannot separate the remaining answers. |
+| `BUDGET_EXHAUSTED` | Eligible probes exist, but none fits the remaining budget. |
+| `TASK_DENIED` | The task is not allowed. Human questions are refused too. |
+| `*_NO_RETRY` | An unknown outcome, a model mismatch, an oversized response or the event limit stopped the session. |
 
-From the repository root, without installing this component:
+Selection first excludes probes that are unavailable, denied, only proposed, already used or
+that cannot change the goal answer. Among the rest it orders by safety rank, then by the worst
+case number of remaining disagreeing worlds, then by gain per cost and a stable id. No
+probabilities are estimated.
 
-```text
-python -I components/integrity-active-inquiry/tests/run_suite.py
-python -m pytest tests/test_active_inquiry_component.py -q
+`begin_simulation()` and `receive_simulation()` reserve budget and record an in-memory attempt
+bound to the exact session, probe, operation and contracts. `ack`, `ready` and `completed`
+never narrow the answer; only a `synthetic-fact` token does. These are simulation methods, not
+a dispatch path.
+
+The bridge in `bridge.py` reads a host-supplied Synapse kernel:
+
+- `capture_context(kernel, context)` reuses the native zero-hop route and its context digest.
+- `select_from_synapse(inquiry, kernel, context)` keeps only probes whose edge is in
+  `available_moves`, matches `explain_edge`, is read-only (`observe`, `analyze`, `plan`,
+  `verify`) and has no production authority. It returns a view with `execution_authority`
+  set to false.
+- `begin_from_synapse(..., expected_view_digest=...)` refreshes that view and starts the
+  simulation only if the view is unchanged.
+
+Inert helper documents: `observation_request()`, `human_question()`, `human_report()`,
+`recipe_candidate()`, `recipe_compatibility()` and `capsule()`. A compatible recipe only means
+it may be planned again; it is not trusted or executable. A capsule that does not fit its byte
+limit fails instead of being truncated.
+
+Input limits enforced in code: at most 64 worlds and 32 probes; JSON input up to 256 KiB;
+duplicate keys, non-finite numbers and unknown fields are rejected; 256 events per session.
+`schemas/inquiry.schema.json` describes the input structure.
+
+## Install
+
+Install from source as described in [BOOTSTRAP.md](../../BOOTSTRAP.md#install-functional-components):
+
+```bash
+python -m pip install ./components/integrity-active-inquiry
 ```
 
-Build from a disposable clean copy of this component using the pinned local
-build dependency, without an index or runtime dependency installation:
+## Use
 
-```text
-python -m pip wheel --no-deps --no-build-isolation --no-index . -w dist
+The console script is `integrity-inquiry` (also `python -m integrity_active_inquiry`):
+
+```bash
+integrity-inquiry demo                  # six synthetic scenarios
+integrity-inquiry fixture > inquiry.json   # a complete valid input document
+integrity-inquiry plan < inquiry.json   # plan one input read from stdin
 ```
 
-After installing the resulting wheel in a disposable test environment:
+`demo` is the default command. Output is JSON on stdout. A rejected input prints
+`Inquiry rejected: <type>` on stderr and exits 2. No command contacts a service, reads
+credentials or starts a program.
 
-```text
-python -m integrity_active_inquiry demo
-python -m integrity_active_inquiry fixture
-python -m integrity_active_inquiry plan < inquiry.json
-python -I tests/run_suite.py --installed
-```
+## What is verified
 
-The CLI reads only its explicitly supplied, bounded stdin document. `fixture`
-prints a complete valid input. `demo` runs six synthetic conditions. No command
-contacts a service, discovers credentials, emits HID input or executes a target
-program. The shell redirection above is the caller's ordinary CLI usage, not a
-shell launched by this package.
+- Public CI builds this distribution as a wheel, checks the wheel contents and installs it
+  together with all other distributions (`pip check`) on Ubuntu and Windows with Python 3.11
+  and 3.12.
+- There are no behaviour tests: the component has no `tests/` folder, and no test elsewhere in
+  the repository imports it.
 
-## One useful question, not full machine inventory
+## What is not verified
 
-The example model contains four worlds: old/new version times healthy/broken.
-The goal is whether the version matches. A structured version response and a
-one-bit version predicate can settle it; a health indicator cannot. Two worlds
-may remain after answering the goal. This is intentional: full state recovery
-is neither needed nor claimed.
+- Every behaviour described above is read from the source code only.
+- Use with a real Guardian Synapse kernel.
+- Any real probe, target or independent witness. None is implemented here.
 
-The model is supplied by the developer. Predictions are not discovered facts.
-A token that is compatible with an incomplete model may still describe a
-previously unmodeled real system. The component therefore reports
-`ANSWERED_IN_MODEL`, not confirmed real-world success. Even a requested
-`witnessed` basis cannot be satisfied by local synthetic observations.
+## Limits
 
-## Five capabilities, one narrow component
+- Predictions come from the developer's model. They are not discovered facts, and a model
+  can be incomplete.
+- Budgets are in-memory reservations. They are not a running timeout or a transport limit,
+  and nothing is refunded when a result is missing.
+- There is no durable crash or replay record. A same-process caller can corrupt state.
+- A digest proves a stable identity, not truth.
+- No method dispatches anything or grants authority.
 
-| Direction | Executable source foundation | Still requires separate integration |
-| --- | --- | --- |
-| Learn how to ask | Finite model, goal-relative disagreement ranking, reasons for exclusion, adaptive next step | Discovery of real application contracts and evidence of model adequacy |
-| Compute near data | Fixed predicate/manifest/response references; aggregate cost, reserved time and token-byte budgets | Admitted fixed executor, real deadline/transport enforcement and private custody |
-| Add observability | Inert predicate/readback request; exact unknown operation reference | Separate approval, implementation and verification of the new readback channel |
-| Reuse experience | Conditional recipe candidate, environment/catalog expiry and compatibility checks | Existing a7/a8 Toolz feedback, real witnessed evidence and multi-agent acceptance |
-| Ask a person narrowly | Exact subject/predicate question and attributed, bounded human report | UI delivery and policy-approved use of that report as evidence |
+## License
 
-## Public source APIs
-
-`Goal` binds goal, tenant, subject, environment/revision, predicate, current
-context digest, required basis and budgets. `Probe` binds the reviewed catalog
-entry to a native edge/capability, adapter manifest, fixed operation and response
-contract. None of these references are a permit or an authenticated signature.
-
-`Inquiry.plan()` returns a versioned, hashed proposal or a terminal explanation.
-With no supplied gate it uses declared synthetic fixture availability. The
-actual read-only integration is `capture_context(kernel, context)` followed by
-`select_from_synapse(inquiry, kernel, context)`: it reuses the existing native
-zero-hop route's context digest, consumes `available_moves`, cross-checks
-`explain_edge`, and preserves native risk/authority ordering. It cannot dispatch.
-The host must supply a trusted actual Synapse instance. A Python Protocol and
-matching strings do not authenticate the host or a remote response.
-
-`begin_simulation()` and `receive_simulation()` are deliberately named synthetic
-methods. They reserve budgets before recording an in-memory start, bind every
-response to the exact session, request, operation, model and contracts, and
-keep ACK/ready/completed distinct from an observed fact. They are NOT alternate
-SDK lifecycle methods. All canonical stores, one-use grants and witnesses
-remain outside this component.
-
-`observation_request()`, `human_question()`, `human_report()`,
-`recipe_candidate()`, `recipe_compatibility()` and `capsule()` create inert
-views. Recipes contain conditions and evidence references, not permanent
-instructions. Compatible means eligible for fresh planning checks, not true,
-trusted, admitted or executable. Capsules never truncate unknown status or
-reconciliation identity to fit a byte limit; they fail explicitly instead.
-
-## Deterministic choice and bounded resources
-
-At most 64 model worlds and 32 probes are accepted. JSON is capped at 256 KiB;
-duplicate keys, including escaped duplicates, nonfinite numbers, extra fields,
-invalid digests, booleans posing as integers and incomplete model tables are
-rejected. `schemas/inquiry.schema.json` supplies the closed structural grammar;
-runtime also enforces cross-field invariants and UTF-8 byte limits.
-
-Candidate selection first excludes unavailable, denied, undeclared/proposed,
-already observed and non-discriminating probes. The Synapse bridge additionally
-restricts candidates to current native eligibility and read-only transition
-classes. Among remaining candidates, native safety/authority ordering dominates
-minimax remaining goal disagreement, gain/cost and stable identity. No estimated
-probability or claimed POMDP optimum is used. The union of eligible probe
-signatures is checked before starting: indistinguishable opposite answers
-produce `NEEDS_OBSERVATION` rather than blind attempts.
-
-Budgets cover count, integer cost, reserved worst-case duration and response
-TOKEN payload bytes. They are conservative in-memory reservations; there is no
-refund on missing results. They are not a running I/O watchdog or a complete
-transport-frame budget. Actual SDK host budgets and cumulative disclosure
-policy are mandatory before any real probe is admitted.
-
-## Outcomes and limits
-
-`PROPOSED` is not dispatched. `WAITING` is not success. `TASK_DENIED` cannot be
-circumvented via another probe or human delegation. `NEEDS_OBSERVATION` means
-the supplied eligible model cannot settle the predicate. `BUDGET_EXHAUSTED`
-is distinct from denial. ACK, executor readiness and completion never narrow
-the fact set. Unknown, model-mismatch, payload-limit and event-limit outcomes
-retain the current operation identity and stop this simulation without retry.
-Real reconciliation must use the SDK's existing exact operation path; it must
-not rerun this in-memory simulation as permission to repeat a target action.
-
-No durable crash/replay registry, real target or real independent witness is
-implemented here. Deliberate corruption by same-process Python callers is not
-contained. A digest proves stable identity, not factual truth. A separate
-process or another agent name does not alone prove independent administration.
-
-See DEVELOPMENT.md for complete acceptance gates, THREAT-MODEL.md for adverse
-cases and coverage.json for the mapping of all requirements. Actual local
-commands and input hashes are in evidence/source-verification.json. Hosted
-results must be attached to the exact Git head in the PR; predecessor tests
-must never certify successor bytes.
-
-## Integration anchors at the input pin
-
-Input: `integrity-project/integrity-guardian@d6b57bed832401690628a03c78e9552c03dabc68`.
-Read root AGENTS.md and DESIGN-PHILOSOPHY.md, then `src/integrity_guardian/synapse.py`,
-`docs/SYNAPSE-KERNEL.md`, `docs/ADAPTER-SDK.md`, the closed
-`adapter-capability-manifest.schema.json` and `toolz-route-memory-receipt.schema.json`.
-The native route-memory schema read at this pin has synthetic-only scope;
-it cannot be relabeled as a live universal memory contract.
-
-Rollback affects only this uninstalled new component and its root index/test.
-Keep the PR draft. No merge, Stable activation, tag, signature, deployment,
-paid review, provider call, public release or canonical completion is implied.
+Business Source License 1.1. See [LICENSE](LICENSE) and the project [NOTICE](../../NOTICE).

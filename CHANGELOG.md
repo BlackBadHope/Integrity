@@ -27,6 +27,16 @@ They are now in `src/integrity_guardian`:
 - **Owner-rule selector** in the admission capsule (`owner_rules.py`), opt-in
   and off by default.
 
+### Client memory
+
+- **Opt-in keywords-line advisory** in the Claude standalone hook
+  (`resources/claude/admission.py`). With `values.event_summary_keywords_line`
+  configured, the hook checks that an event summary ends with a keywords line.
+  It warns and counts; it never refuses an append. Off by default; the other
+  hooks do not read the value.
+- A test now checks that the shipped tools catalogue lists every tool of the
+  facade's current profile.
+
 ### Agent bus 1.1.0
 
 `integrity-llm-bus` moves from 1.0.0 to 1.1.0 and now matches the bus scripts
