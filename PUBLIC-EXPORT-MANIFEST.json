@@ -8671,11 +8671,11 @@
       "sha256": "6639d1e4ee25ae2d24a514d32388f749e1eb4e4080f031ee27ce363e7e844101"
     },
     {
-      "bytes": 17168,
+      "bytes": 17429,
       "mode": "0o644",
       "path": "docs/assets/build_assets.py",
       "sanitization_edits": 0,
-      "sha256": "aebcd685e695d5e358acca7d77ac2cef75985514b8ff702033f1a7dd0084981a"
+      "sha256": "033e602e4781a19f912f50028dcc31a7d8bd97f53a3987a5ad8d0bc945237ce9"
     },
     {
       "bytes": 5027,
@@ -8692,18 +8692,18 @@
       "sha256": "78c127b626764e5498905dba42c9922b46040f742b791ffd186b4a652f80b2e6"
     },
     {
-      "bytes": 13042,
+      "bytes": 14190,
       "mode": "0o644",
       "path": "docs/assets/overview-dark.svg",
       "sanitization_edits": 0,
-      "sha256": "6439a7f7274a34a905cc93496a55201b509126b9bb80f1b9215ba39015623479"
+      "sha256": "01eb9223eefbf0f1d2341f39d9bd9610ab222fb2c19ce38d1c12c01590dc5141"
     },
     {
-      "bytes": 13042,
+      "bytes": 14190,
       "mode": "0o644",
       "path": "docs/assets/overview-light.svg",
       "sanitization_edits": 0,
-      "sha256": "614f4758b50db98d894f7be7048a605b9510bcd8227ad1a34236e94ca6cc0105"
+      "sha256": "74f082f1b4f3b49a43084f20b616c25584ef35bb7f5749e0cd32118c226681b5"
     },
     {
       "bytes": 5438,
@@ -8853,7 +8853,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:85bad19698f9f79712dc4a087f4a1a0c777d95f0d56bdc714b9652d3a8865db3",
+  "projection_digest": "sha256:86af1d03aa0c75979cccd69f04810b5324557c27e91568814e8404c47bd5ecfe",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

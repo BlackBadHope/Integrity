@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 846" width="1280" height="846" role="img" aria-labelledby="t d" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 874" width="1280" height="874" role="img" aria-labelledby="t d" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
 <title id="t">How Integrity fits together</title>
 <desc id="d">Agents reach the core through client hooks and an MCP facade. The core keeps the signed record; coordination, reach and operator tools sit around it.</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6E7681"/></marker><linearGradient id="hero" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0D1117"/><stop offset="1" stop-color="#0E2A22"/></linearGradient></defs>
-<rect x="1" y="1" width="1278" height="844" rx="16" fill="#0D1117" stroke="#30363D"/>
+<rect x="1" y="1" width="1278" height="872" rx="16" fill="#0D1117" stroke="#30363D"/>
 <rect x="24" y="24" width="1232" height="132" rx="12" fill="#10151C" stroke="#30363D" stroke-dasharray="2 5"/>
 <text x="44" y="50" font-size="12" font-weight="700" text-anchor="start" fill="#9198A1" letter-spacing="1.2">AGENTS</text>
 <text x="1236" y="50" font-size="12" font-weight="400" text-anchor="end" fill="#9198A1">any mix of vendors, one shared record</text>
@@ -75,27 +75,37 @@
 <text x="986" y="555" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Independent observers verify.</text>
 <path d="M294 512L332 512" stroke="#6E7681" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
 <path d="M620 512L658 512" stroke="#6E7681" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
-<rect x="24" y="634" width="1232" height="188" rx="12" fill="#10151C" stroke="#30363D" stroke-dasharray="2 5"/>
+<rect x="24" y="634" width="1232" height="216" rx="12" fill="#10151C" stroke="#30363D" stroke-dasharray="2 5"/>
 <text x="44" y="660" font-size="12" font-weight="700" text-anchor="start" fill="#9198A1" letter-spacing="1.2">AROUND THE CORE</text>
 <text x="1236" y="660" font-size="12" font-weight="400" text-anchor="end" fill="#9198A1">optional components</text>
-<rect x="44" y="674" width="388" height="128" rx="10" fill="#161B22" stroke="#30363D"/>
+<rect x="44" y="674" width="289" height="156" rx="10" fill="#161B22" stroke="#30363D"/>
 <text x="62" y="701" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Coordination</text>
 <text x="62" y="721" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">integrity-llm-bus  integrity-bridges</text>
-<text x="62" y="741" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Local queue, registry, relay and a hub for</text>
-<text x="62" y="759" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">a shared bus; delegation and peer</text>
-<text x="62" y="777" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">transports; fenced work claims.</text>
-<rect x="446" y="674" width="388" height="128" rx="10" fill="#161B22" stroke="#30363D"/>
-<text x="464" y="701" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Reach</text>
-<text x="464" y="721" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">integrity-remote  integrity-cloud</text>
-<text x="464" y="741" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Core access from other machines over an</text>
-<text x="464" y="759" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">OpenSSH forced command; offline import</text>
-<text x="464" y="777" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">of cloud-agent journals.</text>
-<rect x="848" y="674" width="388" height="128" rx="10" fill="#161B22" stroke="#30363D"/>
-<text x="866" y="701" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Operator tools</text>
-<text x="866" y="721" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">integrity-home  integrity-space</text>
-<text x="866" y="741" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Seats console and private archive;</text>
-<text x="866" y="759" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">read-only lab and workbench UI;</text>
-<text x="866" y="777" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">resource and usage projections.</text>
+<text x="62" y="741" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Local queue, registry, relay,</text>
+<text x="62" y="759" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">a hub for a shared bus;</text>
+<text x="62" y="777" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">delegation, peer transports,</text>
+<text x="62" y="795" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">fenced work claims.</text>
+<rect x="345" y="674" width="289" height="156" rx="10" fill="#161B22" stroke="#30363D"/>
+<text x="363" y="701" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Reach</text>
+<text x="363" y="721" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">integrity-remote  integrity-cloud</text>
+<text x="363" y="741" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Core access from other</text>
+<text x="363" y="759" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">machines over an OpenSSH</text>
+<text x="363" y="777" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">forced command; offline</text>
+<text x="363" y="795" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">import of cloud journals.</text>
+<rect x="646" y="674" width="289" height="156" rx="10" fill="#161B22" stroke="#30363D"/>
+<text x="664" y="701" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Operator room</text>
+<text x="664" y="721" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">integrity-humanx</text>
+<text x="664" y="741" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">A web page for a human</text>
+<text x="664" y="759" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">operator; room agents are</text>
+<text x="664" y="777" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">woken over the bus</text>
+<text x="664" y="795" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">and held read-only.</text>
+<rect x="947" y="674" width="289" height="156" rx="10" fill="#161B22" stroke="#30363D"/>
+<text x="965" y="701" font-size="15" font-weight="600" text-anchor="start" fill="#E6EDF3">Operator tools</text>
+<text x="965" y="721" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">integrity-home  integrity-space</text>
+<text x="965" y="741" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">Seats console and private</text>
+<text x="965" y="759" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">archive; read-only lab and</text>
+<text x="965" y="777" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">workbench UI;</text>
+<text x="965" y="795" font-size="13" font-weight="400" text-anchor="start" fill="#9198A1">resource projections.</text>
 <path d="M640 156L640 188" stroke="#6E7681" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
 <text x="650.0" y="168.0" font-size="12" font-weight="400" text-anchor="start" fill="#9198A1">a hook runs at every prompt, tool call and stop</text>
 <path d="M264 342L264 432" stroke="#6E7681" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>

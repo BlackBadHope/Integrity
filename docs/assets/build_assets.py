@@ -144,7 +144,7 @@ def banner(theme: dict) -> str:
 
 
 def overview(theme: dict) -> str:
-    c = Canvas(theme, 1280, 846, "How Integrity fits together",
+    c = Canvas(theme, 1280, 874, "How Integrity fits together",
                "Agents reach the core through client hooks and an MCP facade. The core keeps the signed "
                "record; coordination, reach and operator tools sit around it.")
     c.card()
@@ -180,16 +180,18 @@ def overview(theme: dict) -> str:
     c.arrow(294, 512, 332, 512)
     c.arrow(620, 512, 658, 512)
     # Lane 4: around the core.
-    c.lane(634, 188, "Around the core", "optional components")
-    c.box(44, 674, 388, 128, "Coordination",
-          ("Local queue, registry, relay and a hub for", "a shared bus; delegation and peer",
-           "transports; fenced work claims."), "panel", "integrity-llm-bus  integrity-bridges")
-    c.box(446, 674, 388, 128, "Reach",
-          ("Core access from other machines over an", "OpenSSH forced command; offline import",
-           "of cloud-agent journals."), "panel", "integrity-remote  integrity-cloud")
-    c.box(848, 674, 388, 128, "Operator tools",
-          ("Seats console and private archive;", "read-only lab and workbench UI;",
-           "resource and usage projections."), "panel", "integrity-home  integrity-space")
+    c.lane(634, 216, "Around the core", "optional components")
+    for index, (title, lines, mono) in enumerate((
+            ("Coordination", ("Local queue, registry, relay,", "a hub for a shared bus;",
+                              "delegation, peer transports,", "fenced work claims."),
+             "integrity-llm-bus  integrity-bridges"),
+            ("Reach", ("Core access from other", "machines over an OpenSSH", "forced command; offline",
+                       "import of cloud journals."), "integrity-remote  integrity-cloud"),
+            ("Operator room", ("A web page for a human", "operator; room agents are", "woken over the bus",
+                               "and held read-only."), "integrity-humanx"),
+            ("Operator tools", ("Seats console and private", "archive; read-only lab and", "workbench UI;",
+                                "resource projections."), "integrity-home  integrity-space"))):
+        c.box(44 + index * 301, 674, 289, 156, title, lines, "panel", mono)
     # Connectors between lanes.
     c.arrow(640, 156, 640, 188, "a hook runs at every prompt, tool call and stop", label_dy=-4)
     c.arrow(264, 342, 264, 432, "MCP tools: admission, append, close", label_dy=-22)
