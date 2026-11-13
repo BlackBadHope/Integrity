@@ -107,11 +107,11 @@
       "sha256": "fa5bbe7390459e79b01ebd4b38be7800e7da186e86e9a65fa9e9b1b9666b142f"
     },
     {
-      "bytes": 2481,
+      "bytes": 2601,
       "mode": "0o644",
       "path": "components/integrity-action-log/README.md",
       "sanitization_edits": 0,
-      "sha256": "0d119b81d7c4aef95ab7e9eb6fb97dd5917570bd70697397d55bcd7f0632c25e"
+      "sha256": "383ac4706aba7265a0178dd3bae82e0df9dc96463def9c750008d5f9af2fab70"
     },
     {
       "bytes": 872,
@@ -254,11 +254,11 @@
       "sha256": "fa7a8cdcc5fb5671d3ead0045b5acef283956eb8c8a1623559f36be9a1c8ad91"
     },
     {
-      "bytes": 9511,
+      "bytes": 5447,
       "mode": "0o644",
       "path": "components/integrity-active-inquiry/README.md",
       "sanitization_edits": 2,
-      "sha256": "dc11571c05123ce956ed2296ce34f640a2e43b8eb335aaaf7e0782e077095fd7"
+      "sha256": "3f4aad9344a330710601a48963e9b704b4c656e8a03131fec73253eb9d8c8f0b"
     },
     {
       "bytes": 6646,
@@ -359,11 +359,11 @@
       "sha256": "33ff6c6f4f46dc11891ccd032b64a17e17f536664f69af4373cfe64ca65442ec"
     },
     {
-      "bytes": 6256,
+      "bytes": 6376,
       "mode": "0o644",
       "path": "components/integrity-adapter-sdk/README.md",
       "sanitization_edits": 2,
-      "sha256": "bc7eb90fe9f9720381b811a04ec7444345f6236211cd01d6a3613c697167eb1f"
+      "sha256": "095eae1adc736f900a5eab80c3bddeab6f61d71b1da74648c2210a01bb6ac009"
     },
     {
       "bytes": 1180,
@@ -443,11 +443,11 @@
       "sha256": "fa7a8cdcc5fb5671d3ead0045b5acef283956eb8c8a1623559f36be9a1c8ad91"
     },
     {
-      "bytes": 7507,
+      "bytes": 5814,
       "mode": "0o644",
       "path": "components/integrity-agents-api/README.md",
       "sanitization_edits": 1,
-      "sha256": "b2e310e09f80f04b0a72f0043a1e37deaafb9fe07c6dc23ceaab79b68647d092"
+      "sha256": "847e873d5763d1c9b09a37e60941b37d21562673402b054bbd7132f4681d1bbd"
     },
     {
       "bytes": 6765,
@@ -541,11 +541,11 @@
       "sha256": "609eda82d2b6d4d6652ef63eb8e8ff0a021093ec20af519913b644bfce7730e8"
     },
     {
-      "bytes": 3591,
+      "bytes": 3711,
       "mode": "0o644",
       "path": "components/integrity-bridges/README.md",
       "sanitization_edits": 0,
-      "sha256": "fccd37aaca7d4b6bfa178fd76b74a71dd73048ae81e1268283f1e26066e54621"
+      "sha256": "822dccb948ed1dff0a1ffbf3703259eb28e9b620abe83a224097d190086d885e"
     },
     {
       "bytes": 3984,
@@ -779,11 +779,11 @@
       "sha256": "7dfaf21a1f4a88feeb2dd09f14b02c53d37c0055f150c6fb2c6aa715c51c4c58"
     },
     {
-      "bytes": 2378,
+      "bytes": 5972,
       "mode": "0o644",
       "path": "components/integrity-claude-code/README.md",
       "sanitization_edits": 0,
-      "sha256": "d1a84e4d2b061030403a1e2591d9ebed194cf2526d3a236229c6005819307466"
+      "sha256": "c13c6f9037606fba70bc5b2f284940cc58978eb65f97575e6516c606c17e65de"
     },
     {
       "bytes": 561,
@@ -982,11 +982,11 @@
       "sha256": "3f879f4afab75da179d721350d088aa0f172a216b1f723b97921ff4e82a38359"
     },
     {
-      "bytes": 13123,
+      "bytes": 10916,
       "mode": "0o644",
       "path": "components/integrity-client-memory/README.md",
       "sanitization_edits": 0,
-      "sha256": "c2f8a66db93a60c0442bf2529b2ad73175a8e9d245cd334aee26166ba4a27a75"
+      "sha256": "3b0c01a203afb5438b4c5dc3415af92fd777a5ba48b11dd469aa9def1aefc0f3"
     },
     {
       "bytes": 31487,
@@ -1808,11 +1808,11 @@
       "sha256": "b305b016f86f1c29cf4b0befe3e47fb640a276e77691f8f814cd7b950ec94d25"
     },
     {
-      "bytes": 3069,
+      "bytes": 3189,
       "mode": "0o644",
       "path": "components/integrity-cloud/README.md",
       "sanitization_edits": 0,
-      "sha256": "b70060bfbfd916e2d609f8580b6063bab675ccce9814d969e215499a0496056f"
+      "sha256": "ea71f2c489ddd5fbbddba479ae4df979fdf2c2b176c7462e0a39629b20d6ffca"
     },
     {
       "bytes": 589,
@@ -1892,11 +1892,11 @@
       "sha256": "fa7a8cdcc5fb5671d3ead0045b5acef283956eb8c8a1623559f36be9a1c8ad91"
     },
     {
-      "bytes": 11207,
+      "bytes": 5610,
       "mode": "0o644",
       "path": "components/integrity-codex-persistent/README.md",
       "sanitization_edits": 0,
-      "sha256": "e460d93545005c6e9cd8058d3eb2db6206f1892efa17eff5998674ae51052556"
+      "sha256": "ef95fd7dfa4fddaff9aa86a44c6b10933ce09e9ce301b11c8bb6b3b577b7245d"
     },
     {
       "bytes": 3789,
@@ -1948,11 +1948,11 @@
       "sha256": "fa7a8cdcc5fb5671d3ead0045b5acef283956eb8c8a1623559f36be9a1c8ad91"
     },
     {
-      "bytes": 13747,
+      "bytes": 6032,
       "mode": "0o644",
       "path": "components/integrity-execution-bridge/README.md",
       "sanitization_edits": 0,
-      "sha256": "53e69ad150327d03d5b40a758016b898b5db10c62738f77171524a45b253b276"
+      "sha256": "2517d7c519120bb8b2ed7bf92e194be730454914bab7e1023969717ba037fd2a"
     },
     {
       "bytes": 7442,
@@ -2053,11 +2053,11 @@
       "sha256": "fa7a8cdcc5fb5671d3ead0045b5acef283956eb8c8a1623559f36be9a1c8ad91"
     },
     {
-      "bytes": 7372,
+      "bytes": 5689,
       "mode": "0o644",
       "path": "components/integrity-experience-adapters/README.md",
       "sanitization_edits": 2,
-      "sha256": "786ad30667705176c9346b86b32acf077120cf0bcfa6440edb60705658555ce2"
+      "sha256": "e202644af6490851c8968baab723bbe9189377a5bcea879e2ef0db805168cf85"
     },
     {
       "bytes": 7212,
@@ -2298,11 +2298,11 @@
       "sha256": "8f892feff7b47098db695ec752962c960b3e61882194730c9e8c5f0ae2baa071"
     },
     {
-      "bytes": 2536,
+      "bytes": 2656,
       "mode": "0o644",
       "path": "components/integrity-home/README.md",
       "sanitization_edits": 0,
-      "sha256": "724d337412be7bddad47ec13ac9c2c5ebb23a1b9f0e01002b47bbe392b765459"
+      "sha256": "c648976fe74a2e88c6807f571670a099649ce4f0100f6b26f57c887d9bd3a8b6"
     },
     {
       "bytes": 762,
@@ -3082,11 +3082,11 @@
       "sha256": "db44599b09cb542671e1042ea2824860669abc26023ffc5c5559f4be5e3562af"
     },
     {
-      "bytes": 2552,
+      "bytes": 2672,
       "mode": "0o644",
       "path": "components/integrity-installed-runtime/README.md",
       "sanitization_edits": 0,
-      "sha256": "9b6cfa9dde51133a7a386637497cf3bb17d279b8fce45899759d5123b9a569dd"
+      "sha256": "baa2eed588daa31d3c9130a9d43fd36c3d54dfe604c6b312754aee7ba2b16776"
     },
     {
       "bytes": 3782,
@@ -3187,11 +3187,11 @@
       "sha256": "a9faffe6445205b840de9ba75ac16498f48d1aaefa6c10512d44780b43eb4d98"
     },
     {
-      "bytes": 7375,
+      "bytes": 7535,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/README.md",
       "sanitization_edits": 0,
-      "sha256": "480a6a0cecd6928a27478fc1de9c1d21f3149a93ab14e7ee5fe892bdabd0add3"
+      "sha256": "13b2d58feaca0fac3fb9400d57a1ade4044cff3d91bf07f9df0812b0dd3d4f08"
     },
     {
       "bytes": 12490,
@@ -3838,11 +3838,11 @@
       "sha256": "ca147c71e6103ff6a5f8b542d4996e7c128dc23bfb763b511bc245d651340fc5"
     },
     {
-      "bytes": 3104,
+      "bytes": 3224,
       "mode": "0o644",
       "path": "components/integrity-memory-plane/README.md",
       "sanitization_edits": 0,
-      "sha256": "1bb7a620eb1f17af576257040ce60a1514e46902b8027d4e57b5f0aa17d2e521"
+      "sha256": "0d220b4aa171e637ab26bf0b8a8857682e5eac1e10bb206fbea07345baf8b176"
     },
     {
       "bytes": 36738,
@@ -4769,11 +4769,11 @@
       "sha256": "8451cbdbcd98f8298a65e6052a706f8042ad52707dd9df7141053de09b13588d"
     },
     {
-      "bytes": 1995,
+      "bytes": 2115,
       "mode": "0o644",
       "path": "components/integrity-remote/README.md",
       "sanitization_edits": 0,
-      "sha256": "b71f12854b96bae48d7ef64dc02548c3bb7be5f333fa7f2046cc5ef4ed6f3e9d"
+      "sha256": "b9ee1a52a0687ff06c2fa75a951685ddd3af55e103c3d0f1d7f62e3b9c0dc877"
     },
     {
       "bytes": 526,
@@ -4860,11 +4860,11 @@
       "sha256": "fa7a8cdcc5fb5671d3ead0045b5acef283956eb8c8a1623559f36be9a1c8ad91"
     },
     {
-      "bytes": 9662,
+      "bytes": 6262,
       "mode": "0o644",
       "path": "components/integrity-resource-advisor/README.md",
       "sanitization_edits": 6,
-      "sha256": "74fea2243471ac150e08228469e3434feefc70a94f56a339136d7ecd65b609c6"
+      "sha256": "af68f042fb0cd015941995f51c08e46f0ef6009a9b04c6d9b5824fbf74f6e501"
     },
     {
       "bytes": 737,
@@ -4986,11 +4986,11 @@
       "sha256": "b7c998f1621619e6c44acf820a6e12ef04d2881effa18fc3a44d70efad1647a5"
     },
     {
-      "bytes": 1835,
+      "bytes": 1955,
       "mode": "0o644",
       "path": "components/integrity-seed/README.md",
       "sanitization_edits": 0,
-      "sha256": "6070b499efde0109ed3733dc33950b40f6c76c041985ba50356b66b06d8807d4"
+      "sha256": "e919339bcda44c34c3e4cb3b7c5ab7cb007d4efd924576aa47385addaae143f2"
     },
     {
       "bytes": 4564,
@@ -5154,11 +5154,11 @@
       "sha256": "2b268ebff28b6ad4df5d8b461eb0bfab6e1e54d7ebaa0cb15b209c25cbb758f2"
     },
     {
-      "bytes": 5042,
+      "bytes": 5160,
       "mode": "0o644",
       "path": "components/integrity-space/README.md",
       "sanitization_edits": 0,
-      "sha256": "93e75ad0289d0a5297e9f4323e3b0962661f4c77510786c1d02d4304888a13e0"
+      "sha256": "ea120b2cd5bf7462afdcfdacdf879fcdf0aa5808e4c5b25e7ec7afe565763033"
     },
     {
       "bytes": 135298,
@@ -5343,11 +5343,11 @@
       "sha256": "119cd311d32d3d96cb5d5039c8d38c667fdbc0c4cad152ea46842174db527753"
     },
     {
-      "bytes": 13035,
+      "bytes": 13097,
       "mode": "0o644",
       "path": "deploy/linux-core/README.md",
       "sanitization_edits": 0,
-      "sha256": "be7f30b07f96e29ef498e709061eefdd63de5fd2223e2fec6523a003e9c2d489"
+      "sha256": "b0bf1b16558effff993e13ab3c064dcdd715c77f25e8dc49d68eeacb4685e1ba"
     },
     {
       "bytes": 2979,
@@ -5441,39 +5441,39 @@
       "sha256": "b547352be1a83f4e1f408437d6a5e35851d5c55f22f0fd49db0545ba487a05cd"
     },
     {
-      "bytes": 10100,
+      "bytes": 10162,
       "mode": "0o644",
       "path": "docs/CROSS_MACHINE_QUICKSTART.md",
       "sanitization_edits": 0,
-      "sha256": "a7fe83039f81810d7c383fe7f2de8c91110a6939d39be2b5caa8bcc5fe07b861"
+      "sha256": "30235c3658dc88f722a50c4a85208840ef04433c49dcf4ed19e8404fc5e4010e"
     },
     {
-      "bytes": 5164,
+      "bytes": 5226,
       "mode": "0o644",
       "path": "docs/DEPLOYMENT_PROFILE.md",
       "sanitization_edits": 0,
-      "sha256": "ba5ec6600b4924c7a56ef27466b18fdaedff45dc4bae6a4b67dae96172be5537"
+      "sha256": "9c1e4a1ffd226c49f71ee965dd1e38bfe332bb3fac08fc440237eef770fe1c3f"
     },
     {
-      "bytes": 2382,
+      "bytes": 2444,
       "mode": "0o644",
       "path": "docs/HOWTO_OPENAI_TUNNEL_SEATS.md",
       "sanitization_edits": 0,
-      "sha256": "b776b1e9c15bffee31f110d3bfd2d1b74dc35f99974cf578ea481e3b1f4b0fd5"
+      "sha256": "e84ea9e8ec62645612d0550ee4d6c4a7af2f7b4243891225bb364bb08a20bd8b"
     },
     {
-      "bytes": 1252,
+      "bytes": 1314,
       "mode": "0o644",
       "path": "docs/MIGRATION_INTEGRITY_SEATS.md",
       "sanitization_edits": 0,
-      "sha256": "b182c6f66ef158ab1250d583e1c63c37e8f49d5aed1361f2844c61b7bb4aab03"
+      "sha256": "ed8cc123ce265678da6071c38906ab75ccd42455c6fd7beb187e16148e691179"
     },
     {
-      "bytes": 1997,
+      "bytes": 2045,
       "mode": "0o644",
       "path": "docs/QUICKSTART_TEAM.md",
       "sanitization_edits": 0,
-      "sha256": "7bbf4df08c90df239de8a99478d242b545900973b83e555aff38977d4b6f0555"
+      "sha256": "6bca36b112f5ffd5677df2c55af6a02d2a04f1049dcdda0764f9feec4dd56e60"
     },
     {
       "bytes": 5935,
@@ -5490,25 +5490,25 @@
       "sha256": "6b519adff898d7a10eae7b4a034342c63024f70981a065daba6fb08ddccdba44"
     },
     {
-      "bytes": 2441,
+      "bytes": 2963,
       "mode": "0o644",
       "path": "docs/expected-test-skips.md",
       "sanitization_edits": 0,
-      "sha256": "53e67bd8e41b0894c04c9bd0631b769459d8f0b4f003956baca68aa4f9e9639c"
+      "sha256": "fc30b65458378247c117e3c0ad61d0ea27d4bf1e73e9b41d2cdfb3330daa5637"
     },
     {
-      "bytes": 6053,
+      "bytes": 6115,
       "mode": "0o644",
       "path": "docs/hooks-troubleshooting.md",
       "sanitization_edits": 0,
-      "sha256": "d432ac9145cc94213385c79ebc1cd761856dda6f70507ddde21cbcf36957b388"
+      "sha256": "3f89eb3a6839adb01df7251fdf011065617ce794988e6272104f47262c2d6c43"
     },
     {
-      "bytes": 2576,
+      "bytes": 2638,
       "mode": "0o644",
       "path": "docs/runtime-source-sync.md",
       "sanitization_edits": 0,
-      "sha256": "83ce2d026bcdb03b3b79a86fcd6f473baf45a8305e0ce2e3f6568b2e4ad369f3"
+      "sha256": "cbe3c00111b656207be12a82de144cb7165b2ff9713c23b98f218100a96092cc"
     },
     {
       "bytes": 1424,
@@ -8556,7 +8556,7 @@
       "sha256": "178e2f0d53cb7fecb5fd2b422e2aa2db22c268d809b820399f35c7a9bcccc9b9"
     }
   ],
-  "generated_file_count": 85,
+  "generated_file_count": 101,
   "generated_files": [
     {
       "bytes": 1041,
@@ -8622,11 +8622,11 @@
       "sha256": "63d0ef2b6b748fa625812ea9f35f70dd23bb17233d6ba1e25c543149e6e6d6ad"
     },
     {
-      "bytes": 13915,
+      "bytes": 16137,
       "mode": "0o644",
       "path": "ARCHITECTURE.md",
       "sanitization_edits": 0,
-      "sha256": "3870c97d753abb03cd351c1f742dd3bab9567e08563c4beb1c08f76d5f92cc85"
+      "sha256": "c2f53d0da1d5ca6f2f3557b201555229686aae64dfd8ccabf35fbfd95eaf739c"
     },
     {
       "bytes": 325,
@@ -8636,18 +8636,18 @@
       "sha256": "d7cadd9fb2cb6c9c4963392a5cc8d04e8a09fc7f7d4dbb69610b10e54f261140"
     },
     {
-      "bytes": 6439,
+      "bytes": 6513,
       "mode": "0o644",
       "path": "BOOTSTRAP.md",
       "sanitization_edits": 0,
-      "sha256": "6a035fa7fe0d28a1f1477db42895e008b0235d23b35f7a0fec3f0f98163f0908"
+      "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 41225,
+      "bytes": 42753,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "07b04a6cb2d2b7695478172b716722b104097dbf085ec5bccea900fba65c5142"
+      "sha256": "3540f3e54dd704166d0fe042e9faf17426af29416b9d13f4672d70a5a51a4a15"
     },
     {
       "bytes": 775,
@@ -8685,25 +8685,25 @@
       "sha256": "c773a85da94e9edf0b2b10e60fd43b00fe4f90e345ec0d958e6c5b4d0d405e8e"
     },
     {
-      "bytes": 39104,
+      "bytes": 20746,
       "mode": "0o644",
       "path": "README.md",
       "sanitization_edits": 0,
-      "sha256": "e337a26091e0d6d2403df06ac195baa0dfa404e1b8996c0e812250c68d777478"
+      "sha256": "f0d18a82c2ec1e205a0d6ef3163b75a12b4d6cbd9247842b41e61188c372b5fe"
     },
     {
-      "bytes": 13466,
+      "bytes": 13444,
       "mode": "0o644",
       "path": "RELEASE_NOTES.md",
       "sanitization_edits": 0,
-      "sha256": "2ed237cf9e315ce7c2123dc242287d59c7e9cc16a474da1afeac50ebb00e8383"
+      "sha256": "7f6b3e276b684153a94ab5c791da564c9deaf8614a39fe21996c167623444e07"
     },
     {
-      "bytes": 1240,
+      "bytes": 3332,
       "mode": "0o644",
       "path": "ROADMAP.md",
       "sanitization_edits": 0,
-      "sha256": "631e21d0e6616558eac4ec925c18c99b4c9ab7f2f06a1336aaa3b55964976b5d"
+      "sha256": "08312d46b930a0ac4104b9062ead060e95b013b42d54f5c585bb9860f79af1cb"
     },
     {
       "bytes": 1104,
@@ -8727,11 +8727,11 @@
       "sha256": "56d19068142031cebcb024a2f356b4a1734c7894a2039078584ca93bede2017f"
     },
     {
-      "bytes": 7003,
+      "bytes": 7119,
       "mode": "0o644",
       "path": "components/integrity-guards/README.md",
       "sanitization_edits": 0,
-      "sha256": "e430b262f20c13fa11ed994b6bd9b7509a07bd19e8961e8e55f532cb863f590e"
+      "sha256": "e10dbde73b894c766523a0ba45cec02521cd0324a074879ba43453c5b01574aa"
     },
     {
       "bytes": 1881,
@@ -8790,11 +8790,11 @@
       "sha256": "3eec9e223327757ef5bac5e7a4d61bba0c16f8ec2336f26465a9a853c210fa8b"
     },
     {
-      "bytes": 9702,
+      "bytes": 9864,
       "mode": "0o644",
       "path": "components/integrity-humanx/README.md",
       "sanitization_edits": 0,
-      "sha256": "6543d3a442bd997e3b74c7c2f23a88050a8f9c56b38b82fcbf02322169225000"
+      "sha256": "11e0b5efc692ae00704b700026d472d455b7dfdf4023d7630d8ccc6b77cccc5d"
     },
     {
       "bytes": 787,
@@ -8902,11 +8902,11 @@
       "sha256": "0b83a9fecab86745165a7f7f712a12bc9880bb1ee5c4fa3841a7c43a6fcb4f67"
     },
     {
-      "bytes": 4937,
+      "bytes": 5118,
       "mode": "0o644",
       "path": "components/integrity-killswitch/README.md",
       "sanitization_edits": 0,
-      "sha256": "47bb7b7d8fe407f6dcf16f1f41086ea5d7cce37086652418386b25122f467bd9"
+      "sha256": "f57add3b7709277b130a7230bddc8a1bd54ec507e1c85f66b5dbc54210fafe37"
     },
     {
       "bytes": 580,
@@ -9007,18 +9007,130 @@
       "sha256": "80fba0a359ecfabd9ead56e5a011fabc9cee12e3c18b9d53b320225e1fa6477d"
     },
     {
-      "bytes": 6228,
+      "bytes": 6290,
       "mode": "0o644",
       "path": "docs/CLOUD_AGENTS.md",
       "sanitization_edits": 0,
-      "sha256": "a37c5a130e2ff796b3cac4fa0d252f1c0bd0f0e06dd6bda5f65c1ee55310e903"
+      "sha256": "ede161ea2c43d847aaffe1e375bd181d6c6ff0e6c6f7cd6c99f4d9878c785b00"
     },
     {
-      "bytes": 8558,
+      "bytes": 5822,
+      "mode": "0o644",
+      "path": "docs/INSTALL.md",
+      "sanitization_edits": 0,
+      "sha256": "eff98088fe823c01627c345f0d125f8b52bc91d0212c2e5a0e9c3daf905f0aa0"
+    },
+    {
+      "bytes": 5216,
+      "mode": "0o644",
+      "path": "docs/README.md",
+      "sanitization_edits": 0,
+      "sha256": "289938f895bab51201f34adeab99bafa14097d0d6d2edbccf8283800dca051b5"
+    },
+    {
+      "bytes": 10154,
+      "mode": "0o644",
+      "path": "docs/STATUS.md",
+      "sanitization_edits": 0,
+      "sha256": "519702917bbb72d24cd58bff05f7c6b5678d5944bd91bd74ef55faa498a137b4"
+    },
+    {
+      "bytes": 8620,
       "mode": "0o644",
       "path": "docs/UROBOROS.md",
       "sanitization_edits": 0,
-      "sha256": "55210d24e3362c3f7484a243fb8b3f5bb52e6f696267fe24df35e2962ebe29b8"
+      "sha256": "ef80410cf19103df47f8904c6aa9860174f3f39ca19a0f8319325d0588ac575d"
+    },
+    {
+      "bytes": 518,
+      "mode": "0o644",
+      "path": "docs/assets/badge-license.svg",
+      "sanitization_edits": 0,
+      "sha256": "1f0b54165a8a4e3d053287b0d81f44e2fb9222f45a347beb40ca77f71a9d96f0"
+    },
+    {
+      "bytes": 550,
+      "mode": "0o644",
+      "path": "docs/assets/badge-platforms.svg",
+      "sanitization_edits": 0,
+      "sha256": "68199e25b03e6e308d3537a525eeacfad82264209cbbfbcf087f338fa4da8ea0"
+    },
+    {
+      "bytes": 527,
+      "mode": "0o644",
+      "path": "docs/assets/badge-python.svg",
+      "sanitization_edits": 0,
+      "sha256": "db37b319fa3c93befa6c3b7154f3fdd00c25a541b50ddd2414c5dae61089b42e"
+    },
+    {
+      "bytes": 512,
+      "mode": "0o644",
+      "path": "docs/assets/badge-release.svg",
+      "sanitization_edits": 0,
+      "sha256": "bb310e88b6abe11390a27b04ea42218f8881317decef49affb92178584aa3599"
+    },
+    {
+      "bytes": 3739,
+      "mode": "0o644",
+      "path": "docs/assets/banner-dark.svg",
+      "sanitization_edits": 0,
+      "sha256": "001e70f408229d0489294e3b0b51eb1a083aaab96893e29266223f35bae5b926"
+    },
+    {
+      "bytes": 3739,
+      "mode": "0o644",
+      "path": "docs/assets/banner-light.svg",
+      "sanitization_edits": 0,
+      "sha256": "6639d1e4ee25ae2d24a514d32388f749e1eb4e4080f031ee27ce363e7e844101"
+    },
+    {
+      "bytes": 17429,
+      "mode": "0o644",
+      "path": "docs/assets/build_assets.py",
+      "sanitization_edits": 0,
+      "sha256": "033e602e4781a19f912f50028dcc31a7d8bd97f53a3987a5ad8d0bc945237ce9"
+    },
+    {
+      "bytes": 5027,
+      "mode": "0o644",
+      "path": "docs/assets/deployments-dark.svg",
+      "sanitization_edits": 0,
+      "sha256": "58e6ef5a7b965dee35b83cb5b3da841a3ba91575f5083d330fde45216dbff015"
+    },
+    {
+      "bytes": 5027,
+      "mode": "0o644",
+      "path": "docs/assets/deployments-light.svg",
+      "sanitization_edits": 0,
+      "sha256": "78c127b626764e5498905dba42c9922b46040f742b791ffd186b4a652f80b2e6"
+    },
+    {
+      "bytes": 14190,
+      "mode": "0o644",
+      "path": "docs/assets/overview-dark.svg",
+      "sanitization_edits": 0,
+      "sha256": "01eb9223eefbf0f1d2341f39d9bd9610ab222fb2c19ce38d1c12c01590dc5141"
+    },
+    {
+      "bytes": 14190,
+      "mode": "0o644",
+      "path": "docs/assets/overview-light.svg",
+      "sanitization_edits": 0,
+      "sha256": "74f082f1b4f3b49a43084f20b616c25584ef35bb7f5749e0cd32118c226681b5"
+    },
+    {
+      "bytes": 5438,
+      "mode": "0o644",
+      "path": "docs/assets/turn-lifecycle-dark.svg",
+      "sanitization_edits": 0,
+      "sha256": "3c26d11e1dc1ee8f17158396d2ec63abb1ff80e23e6f83ceb0c74d764ff97d92"
+    },
+    {
+      "bytes": 5438,
+      "mode": "0o644",
+      "path": "docs/assets/turn-lifecycle-light.svg",
+      "sanitization_edits": 0,
+      "sha256": "84a493dbaf51d888b661cb63d7fe91d2540e055078dce76f9dda3cf13d616688"
     },
     {
       "bytes": 8213,
@@ -9077,25 +9189,25 @@
       "sha256": "357c939ae645c8d9d726760a9cdd732eba1aba6d029b8dbdaf3101df08e1c5dd"
     },
     {
-      "bytes": 8992,
+      "bytes": 9054,
       "mode": "0o644",
       "path": "docs/linux-native-clients.md",
       "sanitization_edits": 0,
-      "sha256": "6dcbea5072d6172730981c882dd9c91ef8ced4a94c49b350cffef7b8791bac77"
+      "sha256": "d08d7440c56c76331c6381ee89fb26fe688407a72628a31001b6a04e5dbed878"
     },
     {
-      "bytes": 23571,
+      "bytes": 23633,
       "mode": "0o644",
       "path": "docs/native-onboarding.md",
       "sanitization_edits": 0,
-      "sha256": "d1cc3a8affb63d07f3b5d54b3f44867ad2ac430eb7af97c4d2c4d7f14504bd31"
+      "sha256": "bba156feaa93182037094e952c518b4c5fbc3053a8ed8889d1bee8767c69f225"
     },
     {
-      "bytes": 9524,
+      "bytes": 9644,
       "mode": "0o644",
       "path": "examples/local-memory/README.md",
       "sanitization_edits": 0,
-      "sha256": "214475232d8288df399980d323b152ee8ef71331685166d3729a7ee6bf042903"
+      "sha256": "6ad5d2be63a1df04137838e2dca076deb11c6d997370a2014c571b13a2e6d004"
     },
     {
       "bytes": 2002,
@@ -9154,7 +9266,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:83c1a34be8c7f7565b4767b7a53aa21c84c04bc91510a310a72d3a35664a0ad3",
+  "projection_digest": "sha256:9c8e48527736332b02d0c270718de87ef3f5c68688a825e9673398a95125a1a5",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
