@@ -189,6 +189,13 @@ that host binding, credentials or production actions are configured.
   process that holds the hub CSRF token.
 - Cloud agents do not share memory live. Their signed journals are imported as
   reported evidence.
+- Five optional components have no behaviour tests: `integrity-active-inquiry`,
+  `integrity-agents-api`, `integrity-codex-persistent`,
+  `integrity-execution-bridge` and `integrity-experience-adapters`. CI only
+  builds and installs them. `integrity-execution-bridge` does not run on
+  Windows.
+- The HumanX operator room and the agent-bus hub have had no live run in their
+  published form.
 - Seed events are not signed, and an incremental catalog sync does not re-read
   earlier events; see [ARCHITECTURE.md](../ARCHITECTURE.md#seed-service-and-plugin-boundaries).
 

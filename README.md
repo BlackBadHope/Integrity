@@ -256,12 +256,12 @@ versions, dependencies, import namespaces and entry points.
 | Distribution | Version | Purpose |
 | --- | --- | --- |
 | [`integrity-adapter-sdk`](components/integrity-adapter-sdk/README.md) | 2.0.0rc3 | Guardian-bound adapter facade |
-| [`integrity-execution-bridge`](components/integrity-execution-bridge/README.md) | 0.1.0rc5 | Verified execution and observation boundaries |
-| [`integrity-agents-api`](components/integrity-agents-api/README.md) | 0.1.0rc2 | Agent API integration |
-| [`integrity-codex-persistent`](components/integrity-codex-persistent/README.md) | 0.1.0rc3 | Persistent Codex adapter |
-| [`integrity-claude-code`](components/integrity-claude-code/README.md) | 0.1.0rc3 | Separately guarded Windows CLI executor |
-| [`integrity-active-inquiry`](components/integrity-active-inquiry/README.md) | 0.1.0rc2 | Bounded active inquiry |
-| [`integrity-experience-adapters`](components/integrity-experience-adapters/README.md) | 0.1.0rc3 | Experience adapter interfaces |
+| [`integrity-execution-bridge`](components/integrity-execution-bridge/README.md) | 0.1.0rc5 | MCP bridge that lets a remote model edit files and run exact commands in one workspace through a Codex app-server; POSIX only, no tests |
+| [`integrity-agents-api`](components/integrity-agents-api/README.md) | 0.1.0rc2 | Client for the OpenAI Agents API (beta) in which every request passes the Adapter SDK gate; no tests |
+| [`integrity-codex-persistent`](components/integrity-codex-persistent/README.md) | 0.1.0rc3 | Supervisor for one admitted Codex app-server turn: deadline, token budget, owner controls; no tests |
+| [`integrity-claude-code`](components/integrity-claude-code/README.md) | 0.1.0rc3 | One governed headless Claude Code run on Windows; only its stream protocol is tested |
+| [`integrity-active-inquiry`](components/integrity-active-inquiry/README.md) | 0.1.0rc2 | Offline planner that picks the next question to settle one goal; no tests |
+| [`integrity-experience-adapters`](components/integrity-experience-adapters/README.md) | 0.1.0rc3 | Offline contracts and host backends for speech, a stdio MCP client and a voice broker; no tests |
 
 **Operator tools**
 
