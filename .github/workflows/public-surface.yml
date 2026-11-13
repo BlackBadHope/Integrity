@@ -65,6 +65,13 @@ jobs:
           PYTHONDONTWRITEBYTECODE: "1"
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
         run: python -B -m pytest -q -p no:cacheprovider --junitxml "$RUNNER_TEMP/root-junit.xml"
+      - name: Create, check and remove a local memory instance
+        # The installed command, in a runner-owned temporary folder.
+        run: |
+          guardian-local-memory init --home "$RUNNER_TEMP/local-memory-instance" --client claude-code
+          guardian-local-memory doctor --home "$RUNNER_TEMP/local-memory-instance"
+          guardian-local-memory uninstall --home "$RUNNER_TEMP/local-memory-instance" --yes
+          test ! -e "$RUNNER_TEMP/local-memory-instance"
       - name: Verify the local read-only MCP walkthrough
         # No vendor/model call; generated state stays in runner-owned temporary paths.
         env:
