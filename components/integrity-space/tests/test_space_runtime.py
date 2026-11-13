@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import secrets
 import threading
+import time
 import shlex
 import sys
 from functools import partial
@@ -173,40 +174,72 @@ def test_compiled_public_hub_workbench_bootstrap_uses_existing_business_route(ru
                 sys.modules[name] = previous[name]
 
 
-def test_actual_js_preview_client_bootstraps_and_reads_real_asgi_seed(runtime):
+def test_actual_js_preview_client_bootstraps_and_reads_real_asgi_seed(runtime, record_testsuite_property):
     node = shutil.which("node")
     if node is None:
         pytest.skip("node is required for the JS-to-ASGI integration test")
     server, backend, token_file, token = runtime
     script = Path(__file__).with_name("preview-roundtrip.mjs")
+    # Marks of progress on this side; the script writes its own to stderr. A hang then shows
+    # where it stopped: in the failure message and in the junit file of every run.
+    started, marks, timer_fired = time.monotonic(), [], threading.Event()
+
+    def mark(text):
+        marks.append(f"{time.monotonic() - started:.2f}s {text}")
+
     with TestClient(http_app(server, backend, token_file), base_url="http://127.0.0.1") as client:
+        mark("asgi client ready")
         process = subprocess.Popen([node, str(script)], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
-        deadline = threading.Timer(20, process.kill)
+        mark("node started")
+
+        def kill():
+            timer_fired.set()
+            process.kill()
+
+        def ended(what):
+            return (f"JS preview bridge {what} (20 s timer fired: {timer_fired.is_set()}; "
+                    f"marks: {'; '.join(marks)})")
+
+        def send(payload):
+            try:
+                process.stdin.write(payload + "\n")
+                process.stdin.flush()
+            except OSError as exc:  # the node process is gone, e.g. killed by the timer
+                mark("write to node failed")
+                raise RuntimeError(ended("closed its input")) from exc
+
+        deadline = threading.Timer(20, kill)
         deadline.start()
         try:
-            process.stdin.write(json.dumps({"token": token}) + "\n")
-            process.stdin.flush()
+            send(json.dumps({"token": token}))
+            mark("token sent")
             requests = []
             while True:
                 line = process.stdout.readline()
                 if not line:
+                    mark("node stdout closed")
                     detail = process.stderr.read().replace(token, "[synthetic-token]")[-1600:]
-                    raise RuntimeError("JS preview bridge ended before its terminal result: " + detail)
+                    raise RuntimeError(ended("ended before its terminal result") + ": " + detail)
                 item = json.loads(line)
                 if item.get("done"):
+                    mark("done received")
                     break
                 assert item["path"] in {"/preview/bootstrap", "/preview/tool"}
                 assert item["headers"].get("Authorization", "").startswith("Bearer ")
                 assert item["credentials"] == "omit"
                 requests.append(item["path"])
+                mark(f"request {len(requests)} {item['path']} received")
                 result = client.request(item["method"], item["path"], headers=item["headers"], content=item.get("body"))
-                process.stdin.write(json.dumps({"status": result.status_code, "data": result.json()}, ensure_ascii=True) + "\n")
-                process.stdin.flush()
+                send(json.dumps({"status": result.status_code, "data": result.json()}, ensure_ascii=True))
+                mark(f"request {len(requests)} answered {result.status_code}")
             process.stdin.close()
             assert process.wait(timeout=10) == 0
+            mark("node exited 0")
             assert requests == ["/preview/bootstrap", "/preview/bootstrap", "/preview/tool", "/preview/tool", "/preview/tool"]
         finally:
             deadline.cancel()
             if process.poll() is None:
                 process.kill()
                 process.wait(timeout=10)
+            record_testsuite_property("js_preview_marks", "; ".join(marks))
+            record_testsuite_property("js_preview_timer_fired", str(timer_fired.is_set()))

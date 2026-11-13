@@ -13,13 +13,16 @@ versions are unchanged unless an entry says otherwise.
   (`integrity_llm_bus.hub`), Linux only. `install`, run as root, creates the
   bus account, the gateway account, the socket group, the configuration
   folder, the state folder and the socket folder, and writes the
-  configuration; it refuses names and folders that exist, and a keys file
-  with anything but `key_sha256`. If a step fails, it removes what it made.
+  configuration. It refuses names and folders that exist. It also refuses a
+  keys file in which an entry has a field whose name contains `token`,
+  `secret`, `password`, `passwd` or `private` (`key_sha256` aside), or a
+  `key_sha256` that is not 64 lowercase hexadecimal characters; an entry
+  without a key is accepted. If a step fails, it removes what it made.
   `doctor` only reads: accounts, owners and modes, configuration, keys, the
   journal chain and the installed files against the wheel record.
   `uninstall` lists what it would remove; with `--yes` it removes it, and
-  refuses while a process of the bus account runs. The wheel stays; remove it
-  with pip.
+  refuses, before removing anything, while a process of the bus account or
+  of the gateway account runs. The wheel stays; remove it with pip.
 - It starts nothing and installs no systemd unit, no SSH gateway and no
   journal seal. `install` and `doctor` print the command that starts the
   daemon as the bus account.
@@ -28,8 +31,19 @@ versions are unchanged unless an entry says otherwise.
   bus wheel alone, the daemon as the bus account, nine requests over the
   socket from the gateway account and from a second account of the socket
   group, a connect from an account outside the group, the journal chain,
-  `uninstall` refused while the daemon runs, then `uninstall --yes`,
+  `uninstall` refused while the daemon runs and while a process of the
+  gateway account runs, with nothing removed, then `uninstall --yes`,
   `doctor` reporting `not-installed`, and pip uninstall.
+
+### Timing evidence kept in every CI run
+
+- Two tests that depend on timing now write what they measured into the
+  junit file of each run, green or red:
+  `test_lock_hold_below_half_second_at_16600` its lock
+  holds, call times and build time; the JavaScript preview round trip its
+  progress marks and whether its 20-second timer fired, which its failure
+  message also shows, together with the marks the script writes to stderr.
+  The 0.5-second limit and the 20-second timer are unchanged.
 
 ### A core instance on one Linux account
 

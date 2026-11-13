@@ -383,12 +383,15 @@ def uninstall(args) -> tuple[dict, int]:
     if os.geteuid() != 0:
         raise HubError("uninstall --yes needs root")
     pwd, _grp = _accounts()
-    try:
-        running = _processes_of(pwd.getpwnam(record["bus_user"]).pw_uid)
-    except KeyError:
-        running = []
-    if running:
-        return {"status": "refused", "reason": f"{len(running)} process(es) of {record['bus_user']} run; stop the hub first"}, 3
+    # Both accounts are checked before anything is removed: userdel refuses an account with a
+    # running process, and by then the folders would already be gone.
+    for user in (record["bus_user"], record["gateway_user"]):
+        try:
+            running = _processes_of(pwd.getpwnam(user).pw_uid)
+        except KeyError:
+            running = []
+        if running:
+            return {"status": "refused", "reason": f"{len(running)} process(es) of {user} run; stop them first"}, 3
     extra = sorted(set(os.listdir(etc)) - set(FILES))
     if extra:
         return {"status": "refused", "reason": f"{etc} holds files install did not write: {extra}"}, 3
