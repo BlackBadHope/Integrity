@@ -123,6 +123,24 @@ They are now in `src/integrity_guardian`:
 
 ### Client memory
 
+- **Windows hooks: a core tool is known by its name together with its
+  server** (`resources/windows/admission-system.ps1` and
+  `resources/windows/admission.ps1`). The hooks recognised the core's tools by
+  the end of the tool name alone. A tool of another MCP server with such a
+  name got the core's rules: with `admission-system.ps1` installed, a Codex
+  call of `integrity_turn_memory_open` on another server was refused, and
+  then `integrity_append_event` too. The general pattern also took a tool of
+  a server whose name starts with `integrity_` for a Memory tool. Now a
+  tool counts as a tool of the core only on the hook's own server,
+  `integrity_client_memory`, or when the name carries no server; a tool of
+  any other server is an ordinary action. A test takes the functions out of
+  both published files with the PowerShell parser and runs them on Linux,
+  Windows and macOS; the comparisons in the main flow are checked in the
+  text. Not verified: neither hook was installed or run inside a live Codex
+  session after the change, and the form in which Codex passes a tool name to
+  a hook was not taken from its documentation. The two files are public
+  copies of an export; `SOURCE-MAP.json` records that they now differ from
+  the source named there.
 - **Opt-in keywords-line advisory** in the Claude standalone hook
   (`resources/claude/admission.py`). With `values.event_summary_keywords_line`
   configured, the hook checks that an event summary ends with a keywords line.

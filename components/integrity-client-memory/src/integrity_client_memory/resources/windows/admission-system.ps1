@@ -1535,6 +1535,25 @@ function Is-DestructiveActionLogAttempt {
     return $false
 }
 
+function Get-OwnMemoryToolName {
+    # The tool name without its server, for a tool of this hook's own MCP
+    # server. A tool of another server gives an empty string even when its name
+    # ends like a tool of the core: such a call is a separate action, and the
+    # rules of the core are not applied to it. A name that carries no server is
+    # returned as it is.
+    param($Payload)
+    $name = [string](Get-Value -Object $Payload -Name 'tool_name' -Default '')
+    $qualified = $name -match '(?i)^mcp__(.+)$'
+    if ($qualified) { $name = $Matches[1] }
+    $cut = $name.IndexOf('__', [StringComparison]::Ordinal)
+    if ($cut -lt 0) {
+        if ($qualified -or $name.Contains('.')) { return '' }
+        return $name
+    }
+    if ($name.Substring(0, $cut) -ine 'integrity_client_memory') { return '' }
+    return $name.Substring($cut + 2)
+}
+
 function Is-MeaningfulMutation {
     param($Payload)
     $name = [string](Get-Value -Object $Payload -Name 'tool_name' -Default '')
@@ -1545,7 +1564,7 @@ function Is-MeaningfulMutation {
 
 function Is-ArchiveTool {
     param($Payload)
-    return [string](Get-Value -Object $Payload -Name 'tool_name' -Default '') -match '(?i)integrity_archive_(import|read)$'
+    return (Get-OwnMemoryToolName -Payload $Payload) -match '(?i)^integrity_archive_(import|read)$'
 }
 
 function Read-CanonicalToolDocument {
@@ -1837,7 +1856,7 @@ function Validate-ArchiveToolInput {
         Assert-Equal -Actual ([string]$part.details.source_sha256) -Expected ([string]$input.source_sha256) -Name 'archive_part_source'
         $previous=$index
     }
-    if([string]$Payload.tool_name -match '(?i)integrity_archive_import$'){
+    if((Get-OwnMemoryToolName -Payload $Payload) -match '(?i)^integrity_archive_import$'){
         Validate-ModelMcpAdmission -State $State
         Assert-Equal -Actual ([string](Require-Value -Object $input -Name 'registration_id')) -Expected ([string]$State.turn_memory_registration_id) -Name 'archive_own_registration'
         if([bool](Get-Value -Object $State -Name 'archive_unresolved' -Default $false)){throw 'archive_outcome_unresolved_read_before_write'}
@@ -1910,7 +1929,7 @@ function Test-ArchiveNegativeResolutionAllowed {
 
 function Complete-ArchiveToolStep {
     param($Payload,[Collections.IDictionary]$State,[string]$SessionId)
-    $import=[string]$Payload.tool_name -match '(?i)integrity_archive_import$'
+    $import=(Get-OwnMemoryToolName -Payload $Payload) -match '(?i)^integrity_archive_import$'
     $response=Get-Value -Object $Payload -Name 'tool_response' -Default @{}
     if($import){Set-ArchiveReturnedOutcome -State $State -Response $response;Save-State -SessionId $SessionId -State $State}
     $document=Read-CanonicalToolDocument -Value $response
@@ -1967,8 +1986,8 @@ function Complete-ArchiveToolStep {
 
 function Is-AppendTool {
     param($Payload)
-    $name = [string](Get-Value -Object $Payload -Name 'tool_name' -Default '')
-    return $name -match '(?i)integrity_append_event$'
+    $name = Get-OwnMemoryToolName -Payload $Payload
+    return $name -match '(?i)^integrity_append_event$'
 }
 
 function Validate-AppendToolInput {
@@ -2024,26 +2043,26 @@ function Validate-AppendToolInput {
 
 function Is-ContextAdmissionTool {
     param($Payload)
-    $name = [string](Get-Value -Object $Payload -Name 'tool_name' -Default '')
-    return $name -match '(?i)integrity_context_admission(?:_current_turn)?$'
+    $name = Get-OwnMemoryToolName -Payload $Payload
+    return $name -match '(?i)^integrity_context_admission(?:_current_turn)?$'
 }
 
 function Is-CurrentContextAdmissionTool {
     param($Payload)
-    $name = [string](Get-Value -Object $Payload -Name 'tool_name' -Default '')
-    return $name -match '(?i)integrity_context_admission_current_turn$'
+    $name = Get-OwnMemoryToolName -Payload $Payload
+    return $name -match '(?i)^integrity_context_admission_current_turn$'
 }
 
 function Is-IntegrityMemoryTool {
     param($Payload)
-    $name = [string](Get-Value -Object $Payload -Name 'tool_name' -Default '')
-    return $name -match '(?i)(?:^|__)integrity_[a-z0-9_]+$'
+    $name = Get-OwnMemoryToolName -Payload $Payload
+    return $name -match '(?i)^integrity_[a-z0-9_]+$'
 }
 
 function Is-SubstantiveAction {
     param($Payload)
     $name = [string](Get-Value -Object $Payload -Name 'tool_name' -Default '')
-    return -not [string]::IsNullOrWhiteSpace($name) -and $name -notmatch '(?i)(?:^|__)integrity_[a-z0-9_]+$' -and $name -notmatch '(?i)(?:^|__|codex_app)set_thread_title$'
+    return -not [string]::IsNullOrWhiteSpace($name) -and -not (Is-IntegrityMemoryTool -Payload $Payload) -and $name -notmatch '(?i)(?:^|__|codex_app)set_thread_title$'
 }
 
 function Resolve-CompactContextAdmission {
@@ -2661,7 +2680,7 @@ if ($Event -eq 'PreToolUse') {
     if (Is-ArchiveTool -Payload $payload) {
         try {
             $archiveInput=Validate-ArchiveToolInput -Payload $payload -State $state
-            if([string]$payload.tool_name -match '(?i)integrity_archive_import$'){
+            if((Get-OwnMemoryToolName -Payload $payload) -match '(?i)^integrity_archive_import$'){
                 $state['archive_unresolved']=$true
                 $state['archive_step_returned']=$false
                 $state['archive_step_attempt_id']=[Guid]::NewGuid().ToString('N')
@@ -2672,11 +2691,11 @@ if ($Event -eq 'PreToolUse') {
         } catch {Deny-Hook -Reason $_.Exception.Message}
         exit 0
     }
-    if([string]$payload.tool_name -match '(?i)integrity_turn_memory_open$'){
+    if((Get-OwnMemoryToolName -Payload $payload) -match '(?i)^integrity_turn_memory_open$'){
         try{Stage-OwnOpenAttempt -State $state -Payload $payload -SessionId $sessionId;Save-State -SessionId $sessionId -State $state}
         catch{Deny-Hook -Reason $_.Exception.Message}
     }
-    if([string]$payload.tool_name -match '(?i)integrity_turn_memory_(close|gap)$'){
+    if((Get-OwnMemoryToolName -Payload $payload) -match '(?i)^integrity_turn_memory_(close|gap)$'){
         $operation=$Matches[1].ToLowerInvariant()
         try{Stage-OwnTerminalAttempt -State $state -Payload $payload -SessionId $sessionId -Operation $operation;Save-State -SessionId $sessionId -State $state}
         catch{Deny-Hook -Reason $_.Exception.Message}
@@ -2704,7 +2723,7 @@ if ($Event -eq 'PreToolUse') {
 }
 
 if ($Event -eq 'PostToolUse') {
-    if([string]$payload.tool_name -match '(?i)integrity_turn_memory_coverage$'){
+    if((Get-OwnMemoryToolName -Payload $payload) -match '(?i)^integrity_turn_memory_coverage$'){
         try {
             $document=Read-CanonicalToolDocument -Value (Get-Value -Object $payload -Name 'tool_response' -Default @{})
             $observed=Bind-OwnCoverageReceipts -State $state -Document $document -SessionId $sessionId
@@ -2715,10 +2734,10 @@ if ($Event -eq 'PostToolUse') {
         } catch {Write-AdditionalContext -HookEvent $Event -Context ('TURN MEMORY READBACK UNCONFIRMED: '+$_.Exception.Message+'. UNKNOWN fences preserved.')}
         exit 0
     }
-    if([string]$payload.tool_name -match '(?i)integrity_turn_memory_(close|gap)$'){
+    if((Get-OwnMemoryToolName -Payload $payload) -match '(?i)^integrity_turn_memory_(close|gap)$'){
         $completedInput=Get-ToolInput -Payload $payload
         if([string]$completedInput.registration_id -cne [string]$state.turn_memory_registration_id){exit 0}
-        if([string]$payload.tool_name -match '(?i)integrity_turn_memory_close$'){
+        if((Get-OwnMemoryToolName -Payload $payload) -match '(?i)^integrity_turn_memory_close$'){
             try{
                 $record=New-TurnMemoryCloseRequest -InputValue $completedInput
                 $state.turn_memory_close_request=$record.arguments
@@ -2729,7 +2748,7 @@ if ($Event -eq 'PostToolUse') {
         $document=$null
         try {
             $document=Read-CanonicalToolDocument -Value (Get-Value -Object $payload -Name 'tool_response' -Default @{})
-            if([string]$payload.tool_name -match '(?i)integrity_turn_memory_gap$'){
+            if((Get-OwnMemoryToolName -Payload $payload) -match '(?i)^integrity_turn_memory_gap$'){
                 $binding=Bind-OwnGapResult -State $state -Document $document -SessionId $sessionId -GapInput $completedInput
                 $receiptId=$binding.receipt_id
                 $context=if($binding.terminal){'TURN MEMORY TERMINAL RECEIPT VERIFIED: own registration closed; receipt_id='+$receiptId+'. Stop will not resend lifecycle requests.'}else{'TURN MEMORY COVERAGE GAP VERIFIED: terminal is still missing; gap_receipt_id='+$receiptId+'. Do not claim closed or no-event.'}
@@ -2746,7 +2765,7 @@ if ($Event -eq 'PostToolUse') {
                     $failureItems=@(Get-Value -Object $failureWire -Name 'content' -Default @())
                     if($failureItems.Count -eq 1 -and [string]$failureItems[0].type -ceq 'text'){
                         $failureDoc=$failureItems[0].text|ConvertFrom-Json -DateKind String -AsHashtable -Depth 32
-                        $failureTool=if([string]$payload.tool_name -match '(?i)integrity_turn_memory_gap$'){'integrity_turn_memory_gap'}else{'integrity_turn_memory_close'}
+                        $failureTool=if((Get-OwnMemoryToolName -Payload $payload) -match '(?i)^integrity_turn_memory_gap$'){'integrity_turn_memory_gap'}else{'integrity_turn_memory_close'}
                         if([string]$failureDoc.protocol -ceq 'integrity-client/turn-broker-denial/v1' -and [string]$failureDoc.tool -ceq $failureTool){$document=$failureDoc}
                     }
                 } catch {}
@@ -2760,7 +2779,7 @@ if ($Event -eq 'PostToolUse') {
         }
         exit 0
     }
-    if([string]$payload.tool_name -match '(?i)integrity_turn_memory_open$'){
+    if((Get-OwnMemoryToolName -Payload $payload) -match '(?i)^integrity_turn_memory_open$'){
         $completedInput=Get-ToolInput -Payload $payload
         $expected=@{machine_id=Get-MachineId;thread_id=$sessionId;turn_id=[string]$state.turn_id;intent_id=[string]$state.turn_memory_intent_id;prompt_sha256=[string]$state.prompt_sha256}
         try {
@@ -2804,7 +2823,7 @@ if ($Event -eq 'PostToolUse') {
         try {
             Complete-ArchiveToolStep -Payload $payload -State $state -SessionId $sessionId
         } catch {
-            if([string]$payload.tool_name -match '(?i)integrity_archive_import$'){$state['archive_unresolved']=$true;Save-State -SessionId $sessionId -State $state}
+            if((Get-OwnMemoryToolName -Payload $payload) -match '(?i)^integrity_archive_import$'){$state['archive_unresolved']=$true;Save-State -SessionId $sessionId -State $state}
             Write-AdditionalContext -HookEvent $Event -Context ('ARCHIVE CHECKPOINT UNCONFIRMED: '+$_.Exception.Message)
         }
         exit 0
