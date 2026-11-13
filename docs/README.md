@@ -10,7 +10,7 @@ and what was not.
 | Page | What it gives you |
 | --- | --- |
 | [Project README](../README.md) | What Integrity is, the pictures, a first run with your own agent |
-| [The demo: three agents, one memory](../demo/README.md) | Commands and prompts for your agent client: A writes, B writes, C reads from memory what B wrote, claimed and how B's turn ended. Records of two runs with Claude Code |
+| [The demo: three agents, one memory](../demo/README.md) | Commands and prompts for your agent client: A writes, B writes, C reads from memory what B wrote, claimed and how B's turn ended. Records of two runs with Claude Code and Codex CLI |
 | [Install and test](INSTALL.md) | Prerequisites, a source install, the checks that public CI runs |
 | [Local memory on one machine](LOCAL_MEMORY.md) | Install stage 1: a memory server with writes and task claims for your own agents on one computer; what it does not prove |
 | [Clean bootstrap](../BOOTSTRAP.md) | Optional components, wheels, an isolated local instance |

@@ -16,10 +16,12 @@ versions are unchanged unless an entry says otherwise.
   closing receipt.
 - The agents are processes of the user's own agent client. `demo/README.md`
   has the commands and `demo/prompts` the prompts. `demo/recorded` holds the
-  records of two runs with Claude Code on Windows; the pictures are drawn from
-  them.
+  records of two runs on Windows, with agents A and C in Claude Code and
+  agent B in Codex CLI; the pictures are drawn from them.
 - `demo/run.py` no longer plays agents. It prints the records, draws the
-  pictures and builds a record from a user's own run. The four-scene script
+  pictures and builds a record from a user's own run: from the output of
+  `claude -p --output-format stream-json` or of `codex exec --json`, with one
+  client name or one for each agent. The four-scene script
   that it replaces is gone, together with its scenes for the one-use grant and
   the doctor.
 - `tests/test_demo.py` replays the recorded tool calls against a new instance
@@ -28,8 +30,8 @@ versions are unchanged unless an entry says otherwise.
   differ from the records.
 - The README quick start begins with `guardian-local-memory init` and the
   three prompts. The two exercises that need no agent client follow it.
-- Not run: any client other than Claude Code, a real client on Linux, agents
-  of two vendors on one task.
+- Not run: Antigravity, a real client on Linux, a killed agent process, and
+  Codex with its block in a config file.
 
 ### Local memory on one machine
 

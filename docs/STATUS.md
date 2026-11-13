@@ -47,14 +47,16 @@ To let your own agents write and claim tasks on one machine, use the
 [local memory profile](LOCAL_MEMORY.md) (`guardian-local-memory`). CI runs its
 tests and its `init`, `doctor` and `uninstall` on Linux and Windows. It is not
 the core write path, and agent names in it are declared and not verified.
-*Once:* it was run with Claude Code on Windows, and with no other client.
+*Once:* it was run with Claude Code and Codex CLI on Windows. Antigravity was
+not run against it.
 
 The demo at the top of the [README](../README.md#the-demo-step-by-step) is
-that run: three Claude Code processes on one task, recorded on 13 Nov 2026
+that run: three agent processes on one task, the first and the third in
+Claude Code and the second in Codex CLI, recorded on 13 Nov 2026
 ([`demo/README.md`](../demo/README.md)). `tests/test_demo.py` runs in CI on
 Linux and Windows without a model; it replays the recorded tool calls and
-compares the answers. Agents of two vendors on one task, a real client on
-Linux and a killed agent process were not run.
+compares the answers. A real client on Linux and a killed agent process were
+not run.
 
 ### Linux workstations and servers
 
