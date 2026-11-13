@@ -123,6 +123,31 @@ They are now in `src/integrity_guardian`:
 
 ### Client memory
 
+- **Windows hooks: a core tool is known by its name together with its
+  server** (`resources/windows/admission-system.ps1` and
+  `resources/windows/admission.ps1`). The hooks recognised the core's tools by
+  the end of the tool name alone. A tool of another MCP server with such a
+  name got the core's rules: with `admission-system.ps1` installed, a Codex
+  call of `integrity_turn_memory_open` on another server was refused, and
+  then `integrity_append_event` too. The general pattern also took a tool of
+  a server whose name starts with `integrity_` for a Memory tool. Now a
+  tool counts as a tool of the core only on the hook's own server,
+  `integrity_client_memory`, or when the name carries no server; a tool of
+  any other server is an ordinary action. A test takes the functions out of
+  both published files with the PowerShell parser and runs them on Linux,
+  Windows and macOS; the comparisons in the main flow are checked in the
+  text. The form of the name is taken from the source of Codex 0.163.0: a
+  hook gets an MCP tool as `mcp__<server>__<tool>`, with every character
+  outside `[A-Za-z0-9_]` replaced by `_`, and the hook input has no separate
+  field for the server (`hook_tool_name` in `core/src/tools/handlers/mcp.rs`,
+  the input in `hooks/src/schema.rs`). The Codex hooks page gives the same
+  form in its examples, and the names a hook of the earlier version recorded
+  on one Windows machine have it. Not verified: neither hook was installed
+  or run inside a live Codex session after the change; other versions of
+  Codex were not read; two servers whose names differ only in characters
+  that Codex replaces were not tried. The two files are public copies of an
+  export; `SOURCE-MAP.json` records that they now differ from the source
+  named there.
 - **Opt-in keywords-line advisory** in the Claude standalone hook
   (`resources/claude/admission.py`). With `values.event_summary_keywords_line`
   configured, the hook checks that an event summary ends with a keywords line.

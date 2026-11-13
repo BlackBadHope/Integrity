@@ -94,7 +94,9 @@ report as JSON.
 The server offers eleven tools. Their names start with `lm_`, and none of them
 is a tool name of the core. This is on purpose: a Native lifecycle hook
 recognises the core's tools by name, and with the same names it would apply
-the core's rules to calls of this server.
+the core's rules to calls of this server. The two Windows hooks published
+here now also look at the server a tool belongs to; a hook installed from an
+earlier version does not, so the names stay.
 
 An agent that writes follows this order:
 

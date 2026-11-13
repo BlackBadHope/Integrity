@@ -1200,6 +1200,32 @@ function Is-DestructiveActionLogAttempt {
     return $false
 }
 
+function Get-OwnMemoryToolName {
+    # The tool name without its server, for a tool of this hook's own MCP
+    # server. A tool of another server gives an empty string even when its name
+    # ends like a tool of the core: such a call is a separate action, and the
+    # rules of the core are not applied to it. A name that carries no server is
+    # returned as it is.
+    # Codex gives a hook the name of an MCP tool as mcp__<server>__<tool>, with
+    # every character outside [A-Za-z0-9_] replaced by "_", and has no separate
+    # field for the server (Codex 0.163.0: hook_tool_name in
+    # core/src/tools/handlers/mcp.rs, the hook input in hooks/src/schema.rs).
+    param($Payload)
+    $name = [string](Get-Value -Object $Payload -Name 'tool_name' -Default '')
+    $qualified = $name -match '(?i)^mcp__(.+)$'
+    if ($qualified) { $name = $Matches[1] }
+    $cut = $name.IndexOf('__', [StringComparison]::Ordinal)
+    if ($cut -lt 0) {
+        if ($qualified) { return '' }
+        return $name
+    }
+    if ($name.Substring(0, $cut) -ine 'integrity_client_memory') { return '' }
+    $tool = $name.Substring($cut + 2)
+    # No tool of the core has "__" in its name; the server part was longer.
+    if ($tool.Contains('__')) { return '' }
+    return $tool
+}
+
 function Is-MeaningfulMutation {
     param($Payload)
     $name = [string](Get-Value -Object $Payload -Name 'tool_name' -Default '')
@@ -1210,8 +1236,8 @@ function Is-MeaningfulMutation {
 
 function Is-AppendTool {
     param($Payload)
-    $name = [string](Get-Value -Object $Payload -Name 'tool_name' -Default '')
-    return $name -match '(?i)integrity_append_event$'
+    $name = Get-OwnMemoryToolName -Payload $Payload
+    return $name -match '(?i)^integrity_append_event$'
 }
 
 function Validate-AppendToolInput {
@@ -1267,26 +1293,26 @@ function Validate-AppendToolInput {
 
 function Is-ContextAdmissionTool {
     param($Payload)
-    $name = [string](Get-Value -Object $Payload -Name 'tool_name' -Default '')
-    return $name -match '(?i)integrity_context_admission(?:_current_turn)?$'
+    $name = Get-OwnMemoryToolName -Payload $Payload
+    return $name -match '(?i)^integrity_context_admission(?:_current_turn)?$'
 }
 
 function Is-CurrentContextAdmissionTool {
     param($Payload)
-    $name = [string](Get-Value -Object $Payload -Name 'tool_name' -Default '')
-    return $name -match '(?i)integrity_context_admission_current_turn$'
+    $name = Get-OwnMemoryToolName -Payload $Payload
+    return $name -match '(?i)^integrity_context_admission_current_turn$'
 }
 
 function Is-IntegrityMemoryTool {
     param($Payload)
-    $name = [string](Get-Value -Object $Payload -Name 'tool_name' -Default '')
-    return $name -match '(?i)(?:^|__)integrity_[a-z0-9_]+$'
+    $name = Get-OwnMemoryToolName -Payload $Payload
+    return $name -match '(?i)^integrity_[a-z0-9_]+$'
 }
 
 function Is-SubstantiveAction {
     param($Payload)
     $name = [string](Get-Value -Object $Payload -Name 'tool_name' -Default '')
-    return -not [string]::IsNullOrWhiteSpace($name) -and $name -notmatch '(?i)(?:^|__)integrity_[a-z0-9_]+$' -and $name -notmatch '(?i)(?:^|__|codex_app)set_thread_title$'
+    return -not [string]::IsNullOrWhiteSpace($name) -and -not (Is-IntegrityMemoryTool -Payload $Payload) -and $name -notmatch '(?i)(?:^|__|codex_app)set_thread_title$'
 }
 
 function Find-ContextAdmission {

@@ -314,13 +314,15 @@
     "path": "src/integrity_client_memory/resources/windows/admission-system.ps1",
     "source": "clients/windows/admission-system.ps1",
     "source_sha256": "5e881d2fb4c04e42023639fbab3836c0ded72cca4e2181cd30fbbd7178a37ce5",
-    "sha256": "48aae3565fc36cb3d73674012da8260f9f8b960722ffcbfd053ee8bf394a8af8"
+    "sha256": "19b63718bea959f433b8a419a8c557b999345b1758918e2e76db3f9a43e62855",
+    "projection": "Changed in the public copy after export: a core tool is recognised by its name together with its server. The source named here does not have this change."
   },
   {
     "path": "src/integrity_client_memory/resources/windows/admission.ps1",
     "source": "clients/windows/admission.ps1",
     "source_sha256": "9bb1a203e5c0219005fa062f4eec1391b8d8ad61d25fd5abf9af2acfe6830a6a",
-    "sha256": "db75d484ea1f54a3d5636f22c87f6e53ca9d42cb7c740fcfafc07013dcc2a753"
+    "sha256": "3f676a2aff59284a7e5f5d14c42b03e27ab5c79bfbb4eac80e55b214ff296fa5",
+    "projection": "Changed in the public copy after export: a core tool is recognised by its name together with its server. The source named here does not have this change."
   },
   {
     "path": "src/integrity_client_memory/resources/windows/admission.py",

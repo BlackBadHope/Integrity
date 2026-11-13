@@ -194,11 +194,12 @@ def test_tool_names_are_not_the_names_of_the_core() -> None:
     assert len(patterns) >= 8, patterns
     for pattern in patterns:
         assert [name for name in names if re.search(pattern, name)] == [], pattern
-    # A client shows a tool as server and name. A pattern for one tool ends with that tool's
-    # name and does not match here either. The general "integrity_..." pattern does match,
-    # because the server is called integrity_local_memory; it is left out.
+    # A client shows a tool as server and name. The hook compares its patterns with the name
+    # without the server, and only for a tool of its own server; that function is run in
+    # components/integrity-client-memory/tests/test_windows_hook_tool_names.py. No pattern
+    # matches the full name either, although the server is called integrity_local_memory.
     shown = ["mcp__integrity_local_memory__" + name for name in names]
-    for pattern in (item for item in patterns if "[a-z0-9_]" not in item):
+    for pattern in patterns:
         assert [name for name in shown if re.search(pattern, name)] == [], pattern
 
 
