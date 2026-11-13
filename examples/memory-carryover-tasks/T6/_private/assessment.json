@@ -1,0 +1,14 @@
+{
+  "task": "T6",
+  "type": "no-recall-control",
+  "s1_only_facts": [],
+  "s1_symbols_for_rework": [
+    "parse_numbers"
+  ],
+  "success": "all hidden unittest cases pass after S2",
+  "cancelled_decision_marker": null,
+  "copy_exclusions": [
+    "hidden_tests",
+    "_private"
+  ]
+}

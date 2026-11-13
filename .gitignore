@@ -6,3 +6,4 @@ __pycache__/
 .local-memory-pilot/
 build/
 *.egg-info/
+tools/lab/lab.json

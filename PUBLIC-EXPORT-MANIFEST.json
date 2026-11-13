@@ -1,5 +1,5 @@
 {
-  "file_count": 1258,
+  "file_count": 1366,
   "files": [
     {
       "bytes": 3435,
@@ -3950,6 +3950,13 @@
       "sha256": "2f20880bed2a7c688b745742835d28b85bdcbb2d0f4f2cacf5494ac09e9fc983"
     },
     {
+      "bytes": 10032,
+      "mode": "0o644",
+      "path": "components/integrity-llm-bus/tests/live/test_mesh_store_owner_answer.py",
+      "sanitization_edits": 0,
+      "sha256": "916aa5029fcf4d03033fa443c557ac7195abe1b2457bd78e32eb1c96081b685f"
+    },
+    {
       "bytes": 4192,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/tests/live/test_orphan_deferred.py",
@@ -5686,6 +5693,13 @@
       "sha256": "b547352be1a83f4e1f408437d6a5e35851d5c55f22f0fd49db0545ba487a05cd"
     },
     {
+      "bytes": 6007,
+      "mode": "0o644",
+      "path": "docs/ARBITER-ROLE.md",
+      "sanitization_edits": 0,
+      "sha256": "9f6a3de86912dcd9192d5fc9440c66697fda0384fae6dce8139b5c2d01912234"
+    },
+    {
       "bytes": 10162,
       "mode": "0o644",
       "path": "docs/CROSS_MACHINE_QUICKSTART.md",
@@ -5768,6 +5782,321 @@
       "path": "examples/cloud-agents/ensure-integrity-cloud.sh",
       "sanitization_edits": 0,
       "sha256": "5497535fa4fb4b8190c4745e6f7f9ac9908a93a2b79149b08ae4579d4e97149e"
+    },
+    {
+      "bytes": 2931,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/README.md",
+      "sanitization_edits": 0,
+      "sha256": "6dbf7874d21931ea87798fef48904971b4eafde22abdb8feaa496c74234e5585"
+    },
+    {
+      "bytes": 388,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T1/README.md",
+      "sanitization_edits": 0,
+      "sha256": "4850405dfdd09cd5882f6e334f1c318d203339852ebb66adfafa016ff9e03e99"
+    },
+    {
+      "bytes": 1310,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T1/_private/S1.txt",
+      "sanitization_edits": 0,
+      "sha256": "9a0365d336c125ec940705476b6e9c0d4e110d6b91264471ee05f7a15ef11d80"
+    },
+    {
+      "bytes": 269,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T1/_private/S2.txt",
+      "sanitization_edits": 0,
+      "sha256": "a07d499efe69e6abf79202929f0b6b1c50e2925fae8216aed3f061ff07d15139"
+    },
+    {
+      "bytes": 482,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T1/_private/assessment.json",
+      "sanitization_edits": 0,
+      "sha256": "95c9a700cbf8705f958b9ba7c85335eb18fcafff04434e231881da37c0a9e3d6"
+    },
+    {
+      "bytes": 612,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T1/_private/oracle.py",
+      "sanitization_edits": 0,
+      "sha256": "390e4abfca07f907116e6aefae0503cd6403e48e5fbf4cc08903319763f7e304"
+    },
+    {
+      "bytes": 1022,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T1/hidden_tests/test_solution.py",
+      "sanitization_edits": 0,
+      "sha256": "d84ba40f859cf4ef9b1269b191cd6e9b4663740c3750e2a90342f556eb6cb992"
+    },
+    {
+      "bytes": 60,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T1/solution.py",
+      "sanitization_edits": 0,
+      "sha256": "fc858e9d5dc6d3183b258a418cc18499f73cc63ff9255ef224646f5e92746acc"
+    },
+    {
+      "bytes": 370,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T2/README.md",
+      "sanitization_edits": 0,
+      "sha256": "65e6879db5ebaf9df78b4b9c1247cbb4df7616cc7943b98cfac85a3a5c513c4c"
+    },
+    {
+      "bytes": 1595,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T2/_private/S1.txt",
+      "sanitization_edits": 0,
+      "sha256": "212c06d02570b9fb137f8a04080195b5c854a5e9907514948a3575525d6d576a"
+    },
+    {
+      "bytes": 271,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T2/_private/S2.txt",
+      "sanitization_edits": 0,
+      "sha256": "0ba434aaee6caf261b156846831cc7b40c8940c77665b8d68c04078ed732cf03"
+    },
+    {
+      "bytes": 472,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T2/_private/assessment.json",
+      "sanitization_edits": 0,
+      "sha256": "ebfeef7690578cea8dc7146298fab39ee6df31608cad9dd0b0251c48f5422117"
+    },
+    {
+      "bytes": 690,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T2/_private/oracle.py",
+      "sanitization_edits": 0,
+      "sha256": "6b58a6fa9a21e1cee08f7d78f4bc36d50d3cfed5ed0e7c14518b2b7070046149"
+    },
+    {
+      "bytes": 966,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T2/hidden_tests/test_solution.py",
+      "sanitization_edits": 0,
+      "sha256": "471da1513d4358a1f4c6c499509e77a869490e4ead77f58315ca2cc58555a0aa"
+    },
+    {
+      "bytes": 55,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T2/solution.py",
+      "sanitization_edits": 0,
+      "sha256": "33dace0a9be1a14d03e19ee2efba491e07120fe631661d57e3d61e7ccbb05fc0"
+    },
+    {
+      "bytes": 367,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T3/README.md",
+      "sanitization_edits": 0,
+      "sha256": "d9ea856ab4d9051997ab848730da656682883131e636ce92a8e156ed06f700a1"
+    },
+    {
+      "bytes": 1444,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T3/_private/S1.txt",
+      "sanitization_edits": 0,
+      "sha256": "c8b0870b1c816a524df763b4024b7797cb1383c164815259b7fbfc256245ca7a"
+    },
+    {
+      "bytes": 224,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T3/_private/S2.txt",
+      "sanitization_edits": 0,
+      "sha256": "a71212e368fa05a4b42fccde0dafcb2d5b854a5d73de2a864bb25238a12a835d"
+    },
+    {
+      "bytes": 447,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T3/_private/assessment.json",
+      "sanitization_edits": 0,
+      "sha256": "ea21ba012cfcf6fb2b843f4a695c8f7454b604d7bc7fca848ac20ca8a4af3d29"
+    },
+    {
+      "bytes": 619,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T3/_private/oracle.py",
+      "sanitization_edits": 0,
+      "sha256": "e181b3f3d6f563a59558db0a3583b891aaa243705d635252b72bc1df830dd71d"
+    },
+    {
+      "bytes": 1204,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T3/hidden_tests/test_solution.py",
+      "sanitization_edits": 0,
+      "sha256": "0a85e291e412e45e9d92d2b2f58ac197207807ecea9075c7c38482fe566f9e38"
+    },
+    {
+      "bytes": 59,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T3/solution.py",
+      "sanitization_edits": 0,
+      "sha256": "247ab5c6b7a1f45d667ab9f2472dfd72b6360db9debe09d4b96127dd272033f7"
+    },
+    {
+      "bytes": 371,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T4/README.md",
+      "sanitization_edits": 0,
+      "sha256": "b5e8b19cef7d0fcc4daa1f65b937e98e0beabe1e771e8f1b48f80afc33e7a746"
+    },
+    {
+      "bytes": 2013,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T4/_private/S1.txt",
+      "sanitization_edits": 0,
+      "sha256": "e56b764a0cb9775121df211f8a53723e134fe7d73827c706063910b9cac54218"
+    },
+    {
+      "bytes": 271,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T4/_private/S2.txt",
+      "sanitization_edits": 0,
+      "sha256": "2fdc485f604a18ac01bb43d0ab5925b521889725fca87016081538c6c8e9be1d"
+    },
+    {
+      "bytes": 493,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T4/_private/assessment.json",
+      "sanitization_edits": 0,
+      "sha256": "41c72dc938331ebc2dfb4724695827e0d9f2d51389b85d713060de9f51a2bba4"
+    },
+    {
+      "bytes": 497,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T4/_private/oracle.py",
+      "sanitization_edits": 0,
+      "sha256": "99ee1e6633411893ab9626993a464f60cc88b5ed2137878bef7ac538ec0b1c98"
+    },
+    {
+      "bytes": 1099,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T4/hidden_tests/test_solution.py",
+      "sanitization_edits": 0,
+      "sha256": "145875b04bcaf8adeedbfe666c7e61d7f03c2e75211a30fd0d66e12742fb1375"
+    },
+    {
+      "bytes": 79,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T4/solution.py",
+      "sanitization_edits": 0,
+      "sha256": "197deec8528aae147737654ba7752ae69f71119a66a6a682d1567f7389d347c2"
+    },
+    {
+      "bytes": 369,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T5/README.md",
+      "sanitization_edits": 0,
+      "sha256": "b4af73f33a95222c48d751d9c2b91ac6d4fd46958fec8e705f67f45adcf4cf40"
+    },
+    {
+      "bytes": 1595,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T5/_private/S1.txt",
+      "sanitization_edits": 0,
+      "sha256": "c1d251690e230d13f8376f4862e1eb08caee628bd1064c5e184aa26f1cec45f3"
+    },
+    {
+      "bytes": 344,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T5/_private/S2.txt",
+      "sanitization_edits": 0,
+      "sha256": "9c66b39413437c7d8b19d8d50393cd29beb1756ffbeb1c2bb0d276e120d8a64c"
+    },
+    {
+      "bytes": 511,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T5/_private/assessment.json",
+      "sanitization_edits": 0,
+      "sha256": "e9082b308e39ed476908a10da1de6475b9d67663932e083e4efccb6756ca3da2"
+    },
+    {
+      "bytes": 550,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T5/_private/oracle.py",
+      "sanitization_edits": 0,
+      "sha256": "99a44d6e34a81d58cc2e23c6cc8e7f48d21add4ab1bf3f1909ab88896179cc66"
+    },
+    {
+      "bytes": 1322,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T5/hidden_tests/test_solution.py",
+      "sanitization_edits": 0,
+      "sha256": "5b27f442bb01b809df77fb297157157ed0f583728554bb39ac8a968a6ea60e6f"
+    },
+    {
+      "bytes": 53,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T5/solution.py",
+      "sanitization_edits": 0,
+      "sha256": "bf6559c47c805551007cfeb0fd038349a2a18efda1b484d23c98a89700673715"
+    },
+    {
+      "bytes": 1313,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T6/README.md",
+      "sanitization_edits": 0,
+      "sha256": "def2b87c2761988d490d45a18d7b33f4877a187480630d2e9a6dc72122a0e6e6"
+    },
+    {
+      "bytes": 482,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T6/_private/S1.txt",
+      "sanitization_edits": 0,
+      "sha256": "58e568e8088a08b13cbc73eae1ae75ab06f302cceaf370a2e90777aa3e77cd8d"
+    },
+    {
+      "bytes": 179,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T6/_private/S2.txt",
+      "sanitization_edits": 0,
+      "sha256": "d47f4ba0cef125413ebed673947ff783c86d147fa766e917daaf4a7db79f6fa4"
+    },
+    {
+      "bytes": 283,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T6/_private/assessment.json",
+      "sanitization_edits": 0,
+      "sha256": "cdae2c711e12acdd95864a820bd4fbfef268c49cc8248047d9e1bc7666642482"
+    },
+    {
+      "bytes": 409,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T6/_private/oracle.py",
+      "sanitization_edits": 0,
+      "sha256": "1c34c04bbc3af9210e8b937ec0926e8a2142527e1c0461cb31bd941e3e803aab"
+    },
+    {
+      "bytes": 879,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T6/hidden_tests/test_solution.py",
+      "sanitization_edits": 0,
+      "sha256": "4c6d6894a51af6ebc6bc39021e2ba38c838978d182f94cee13d0aed2aef3b86a"
+    },
+    {
+      "bytes": 55,
+      "mode": "0o644",
+      "path": "examples/memory-carryover-tasks/T6/solution.py",
+      "sanitization_edits": 0,
+      "sha256": "28688daf4ba8e75d59a28ba3247f10d6621e8cd7ca003cdf124c23627c00cc49"
+    },
+    {
+      "bytes": 4398,
+      "mode": "0o644",
+      "path": "examples/owner-rules-starter/README.md",
+      "sanitization_edits": 0,
+      "sha256": "6edd23d3dc307d9e318e6f96dea88239ef1f4ff28771dc01a3a4837b825fc6a5"
+    },
+    {
+      "bytes": 26271,
+      "mode": "0o644",
+      "path": "examples/owner-rules-starter/owner_rules.json",
+      "sanitization_edits": 0,
+      "sha256": "aaa52a169dcd238d06553288565a255d5de9964844924c6eabf5ca3d23da0728"
     },
     {
       "bytes": 1157,
@@ -8465,6 +8794,20 @@
       "sha256": "c53d759f5a69f4413ef0aef57099fdf7bade2d9af4b58d1a498fe3f7628830c6"
     },
     {
+      "bytes": 2091,
+      "mode": "0o644",
+      "path": "tests/test_example_memory_carryover_tasks.py",
+      "sanitization_edits": 0,
+      "sha256": "5558ffa4a40026862d63c646eae4c23a39f85ac50b837e8fe7b98484148c24b1"
+    },
+    {
+      "bytes": 3657,
+      "mode": "0o644",
+      "path": "tests/test_example_owner_rules_starter.py",
+      "sanitization_edits": 0,
+      "sha256": "d2da519cb268e1f42e51f32bc6c17bacd4d938134f7db97b62c4785e67e6c4da"
+    },
+    {
       "bytes": 4525,
       "mode": "0o644",
       "path": "tests/test_facade_identity.py",
@@ -8484,6 +8827,13 @@
       "path": "tests/test_intent_custody.py",
       "sanitization_edits": 0,
       "sha256": "3af81ce3549f91c60ceccfdad8e7f1f237c8bf054b9737be97fe9986354a7c98"
+    },
+    {
+      "bytes": 7978,
+      "mode": "0o644",
+      "path": "tests/test_lab_tools.py",
+      "sanitization_edits": 0,
+      "sha256": "b951e7520eeebb91eabcbe08fe850cf45258cc8e85812db9f409bee20d98c632"
     },
     {
       "bytes": 6574,
@@ -8806,6 +9156,412 @@
       "path": "tests/test_work_claims.py",
       "sanitization_edits": 0,
       "sha256": "178e2f0d53cb7fecb5fd2b422e2aa2db22c268d809b820399f35c7a9bcccc9b9"
+    },
+    {
+      "bytes": 2059,
+      "mode": "0o644",
+      "path": "tools/lab/README.md",
+      "sanitization_edits": 0,
+      "sha256": "ef32dfbaf59a4e17122d38736c0ce92561c4e036eb57f5931cc25b516dce53f3"
+    },
+    {
+      "bytes": 9359,
+      "mode": "0o644",
+      "path": "tools/lab/analyze_efficiency_smoke.py",
+      "sanitization_edits": 0,
+      "sha256": "c9172d0296bf238ed684f54a638ee873d1b09cfae7f25c7a7a0e5f129b55b036"
+    },
+    {
+      "bytes": 3404,
+      "mode": "0o644",
+      "path": "tools/lab/benchmark_recall_queries.py",
+      "sanitization_edits": 0,
+      "sha256": "124666a37e5ae8c13ba33a18c9294cf59b62f0f4e261484ca5caeb67c7c76067"
+    },
+    {
+      "bytes": 2449,
+      "mode": "0o644",
+      "path": "tools/lab/build_windows_postinstall_media.py",
+      "sanitization_edits": 0,
+      "sha256": "d69ea93176cd4406b7f1a9fdcfd94534fadb6996e50071bc2fb59c0350de02f1"
+    },
+    {
+      "bytes": 2156,
+      "mode": "0o644",
+      "path": "tools/lab/build_windows_runtime_media.py",
+      "sanitization_edits": 0,
+      "sha256": "981d79e9042ddfc9932d672d9bf2d80812a680100a92b18a6514cc307a92400d"
+    },
+    {
+      "bytes": 9154,
+      "mode": "0o644",
+      "path": "tools/lab/cases_data.py",
+      "sanitization_edits": 0,
+      "sha256": "ed3ad21df0d0a2a96ce5788a9b1d091c61113c5c7ac68ed87d958abd9c8418ae"
+    },
+    {
+      "bytes": 3132,
+      "mode": "0o644",
+      "path": "tools/lab/configure_runtime.py",
+      "sanitization_edits": 0,
+      "sha256": "34c14aab79bc4fd39955bdbfa503603bd1b61d297069fadd1846980ff3a9ead0"
+    },
+    {
+      "bytes": 16400,
+      "mode": "0o644",
+      "path": "tools/lab/episode_review.py",
+      "sanitization_edits": 0,
+      "sha256": "4153eb54cab0540e788ad67de583e684b034da14062fde70413621649e55aab5"
+    },
+    {
+      "bytes": 5848,
+      "mode": "0o644",
+      "path": "tools/lab/final_lab_readback.py",
+      "sanitization_edits": 0,
+      "sha256": "9ace48724d163d5edfb0db3c30b7e3c19caa53714d61360e5482ceda0569f612"
+    },
+    {
+      "bytes": 4948,
+      "mode": "0o644",
+      "path": "tools/lab/guard.py",
+      "sanitization_edits": 0,
+      "sha256": "7aa2f407488000d8acdbcb30d90b657ff81f344c5b5901f3b44f82795718a0f2"
+    },
+    {
+      "bytes": 3060,
+      "mode": "0o644",
+      "path": "tools/lab/lab.example.json",
+      "sanitization_edits": 0,
+      "sha256": "5e33cdaadcb20a2a88712a80020dec8b8759e8835724658a8c74d52bbb9a82f5"
+    },
+    {
+      "bytes": 2941,
+      "mode": "0o644",
+      "path": "tools/lab/lab_config.py",
+      "sanitization_edits": 0,
+      "sha256": "24b824e2768a1a0bda31652802c92a94ca26574a717060ba6c2c2d3b01116d94"
+    },
+    {
+      "bytes": 5988,
+      "mode": "0o644",
+      "path": "tools/lab/lab_egress_proxy.py",
+      "sanitization_edits": 0,
+      "sha256": "92203fcc1fc47440c1b39edd3fdedf9296ad005dfeb6dffdba7495bce23721eb"
+    },
+    {
+      "bytes": 8223,
+      "mode": "0o644",
+      "path": "tools/lab/lab_mcp_server.py",
+      "sanitization_edits": 0,
+      "sha256": "d559419438b8418d5b891a1fd1f7c03164283003cfa05f36dfd89ffc958a51ae"
+    },
+    {
+      "bytes": 1398,
+      "mode": "0o644",
+      "path": "tools/lab/labctl.py",
+      "sanitization_edits": 0,
+      "sha256": "95109aae127e9c57cb328918f3d4758ea49538b813819fb678b08b40667f19be"
+    },
+    {
+      "bytes": 7425,
+      "mode": "0o644",
+      "path": "tools/lab/linux_backend.py",
+      "sanitization_edits": 0,
+      "sha256": "ca9f942bdf00a018eb66f4708a52db9119f63e14f8c18941c1aacd57b46a596f"
+    },
+    {
+      "bytes": 3293,
+      "mode": "0o644",
+      "path": "tools/lab/linux_efficiency_recall.py",
+      "sanitization_edits": 0,
+      "sha256": "6453111155fbea233f743a6a4986b81c476d3b1ba5e53485d79a899d02d62ac3"
+    },
+    {
+      "bytes": 5118,
+      "mode": "0o644",
+      "path": "tools/lab/linux_guest_preflight.py",
+      "sanitization_edits": 0,
+      "sha256": "9ac0095cc76b07de89e1941596a84cfb43654b4b95bdc7c24fabaca98847cb17"
+    },
+    {
+      "bytes": 8440,
+      "mode": "0o644",
+      "path": "tools/lab/linux_mcp_sandbox_setup.py",
+      "sanitization_edits": 0,
+      "sha256": "233f70725b086872c7eda54317f58621979b26f3afea80ebebeddc8d75209365"
+    },
+    {
+      "bytes": 4664,
+      "mode": "0o644",
+      "path": "tools/lab/mcp_preflight.py",
+      "sanitization_edits": 0,
+      "sha256": "8620d2b2d94d7d9647e1f3ac563dec239d2100d8b46ce72c3648ea622fddd90e"
+    },
+    {
+      "bytes": 5113,
+      "mode": "0o644",
+      "path": "tools/lab/native_peer.py",
+      "sanitization_edits": 0,
+      "sha256": "540e297e8bb8d5652c922165c91bd5f7ce5824779200fc7d6378b2cc44292319"
+    },
+    {
+      "bytes": 3500,
+      "mode": "0o644",
+      "path": "tools/lab/native_preflight.py",
+      "sanitization_edits": 0,
+      "sha256": "d277c8a644ac8bda4c7a187b8ab6f68c305aab7ee35ee22dbba32f61d97d63b7"
+    },
+    {
+      "bytes": 3107,
+      "mode": "0o644",
+      "path": "tools/lab/open_lab_native_desktop.py",
+      "sanitization_edits": 0,
+      "sha256": "24d5db00f6b935fa083933064deb3366525890f982c79e495d58479747174d44"
+    },
+    {
+      "bytes": 15246,
+      "mode": "0o644",
+      "path": "tools/lab/pilot_package.py",
+      "sanitization_edits": 0,
+      "sha256": "314c2e31a034f0ec9c2f9cf8446d0e13ab15957e165d3e96154beb4acdd9256f"
+    },
+    {
+      "bytes": 12578,
+      "mode": "0o644",
+      "path": "tools/lab/prepare.py",
+      "sanitization_edits": 0,
+      "sha256": "f4acd5db4106f8af6a176511643c5a5ae553ef1229695fde643101922d87bc04"
+    },
+    {
+      "bytes": 1423,
+      "mode": "0o644",
+      "path": "tools/lab/prepare_elevated_handoff.py",
+      "sanitization_edits": 0,
+      "sha256": "c5b2ca0c7e1c8341d18d54805d3fa1bcb3bb401c449a510b067b2458aaff1735"
+    },
+    {
+      "bytes": 5540,
+      "mode": "0o644",
+      "path": "tools/lab/prepare_native_compatibility.py",
+      "sanitization_edits": 0,
+      "sha256": "b0eabb7643cd6f314b8533b27d85a618df7b7b565109582e3b40f600dfd50956"
+    },
+    {
+      "bytes": 3524,
+      "mode": "0o644",
+      "path": "tools/lab/prepare_native_envelope.py",
+      "sanitization_edits": 0,
+      "sha256": "34a5d6c3c4ddb42b6e9004075e97d1d410b156ef2a7fd95341c75506eb834063"
+    },
+    {
+      "bytes": 5048,
+      "mode": "0o644",
+      "path": "tools/lab/prepare_vm_seed.py",
+      "sanitization_edits": 0,
+      "sha256": "378d0e76ed33264411c3c680c1c7dd77aca8db2143071b06cb382a55c2d32f41"
+    },
+    {
+      "bytes": 7318,
+      "mode": "0o644",
+      "path": "tools/lab/prepare_windows_vm.py",
+      "sanitization_edits": 0,
+      "sha256": "70f8bba3b1ab300be42e7104344e14100f8c31ee86797320bca979853806880c"
+    },
+    {
+      "bytes": 3120,
+      "mode": "0o644",
+      "path": "tools/lab/readonly_mcp_host.py",
+      "sanitization_edits": 0,
+      "sha256": "640af0ec2ee2a241bb4bf117048002eba817dc6b19498747bee707837afc4510"
+    },
+    {
+      "bytes": 2022,
+      "mode": "0o644",
+      "path": "tools/lab/run_efficiency_retrieval.py",
+      "sanitization_edits": 0,
+      "sha256": "f2e5d88ae0e7776c0f3f887c2c440f1e1dbbecf88977af886e6d5d31ab6fee85"
+    },
+    {
+      "bytes": 11633,
+      "mode": "0o644",
+      "path": "tools/lab/run_native_canary.py",
+      "sanitization_edits": 0,
+      "sha256": "473246a08cbab5d2ec973d1395ae464b70419a293effb360437fbb857aeb0146"
+    },
+    {
+      "bytes": 1879,
+      "mode": "0o644",
+      "path": "tools/lab/runtime_common.py",
+      "sanitization_edits": 0,
+      "sha256": "6415a8be264266193b6e9ac17809cc298edff84f477e73394596f2ba7df3f60f"
+    },
+    {
+      "bytes": 2394,
+      "mode": "0o644",
+      "path": "tools/lab/sandbox_probe.py",
+      "sanitization_edits": 0,
+      "sha256": "7672eab232b99fcc5951250972830a8e3cb863f0bc108e6381c92c8540d4de36"
+    },
+    {
+      "bytes": 1539,
+      "mode": "0o644",
+      "path": "tools/lab/seal_package.py",
+      "sanitization_edits": 0,
+      "sha256": "baaeb09c0455cb09813868343082af37e1f112fb41c2511ca0117d35c877e6b0"
+    },
+    {
+      "bytes": 13011,
+      "mode": "0o644",
+      "path": "tools/lab/validate.py",
+      "sanitization_edits": 0,
+      "sha256": "8fb300bda272a36adae69fc1e1df3472f45486778ba185606e069784517bd8e0"
+    },
+    {
+      "bytes": 2957,
+      "mode": "0o644",
+      "path": "tools/lab/vm_isolation.py",
+      "sanitization_edits": 0,
+      "sha256": "1c3dde0ba21457cca62e0601d5119863791f13219eb46ca4722f904ab309c527"
+    },
+    {
+      "bytes": 7764,
+      "mode": "0o644",
+      "path": "tools/lab/vmctl.py",
+      "sanitization_edits": 0,
+      "sha256": "3c1e6da7f09cc8c5d35620cb6938d7f48e20cec9ed986d76d26cfe8e6c9abfd8"
+    },
+    {
+      "bytes": 12309,
+      "mode": "0o644",
+      "path": "tools/lab/windows_account_isolation.py",
+      "sanitization_edits": 0,
+      "sha256": "ce227c3ef7b7c78ac6d8b4c446fb380101b91616f9cbcde1b5ae9842dd054c10"
+    },
+    {
+      "bytes": 6645,
+      "mode": "0o644",
+      "path": "tools/lab/windows_account_proxy.ps1",
+      "sanitization_edits": 0,
+      "sha256": "ba3e577acd11b95e3dd3110a5169f62c325b51fcaed05b498ab58aa7af8f3e43"
+    },
+    {
+      "bytes": 5551,
+      "mode": "0o644",
+      "path": "tools/lab/windows_cross_vm_preflight.py",
+      "sanitization_edits": 0,
+      "sha256": "10d190225468111da0e2c9abfa9b29cdeaaa766ed4d810a7afcef57be81396d3"
+    },
+    {
+      "bytes": 6309,
+      "mode": "0o644",
+      "path": "tools/lab/windows_disk_readonly.py",
+      "sanitization_edits": 0,
+      "sha256": "6bcbaaef60cab024f7ea1a215d46acb265084e5b7bb6d48f735a0449e700e211"
+    },
+    {
+      "bytes": 22230,
+      "mode": "0o644",
+      "path": "tools/lab/windows_efficiency_smoke.py",
+      "sanitization_edits": 0,
+      "sha256": "6ea7ffb4b1e492d42cb0bebdc8d46adfb2fb7609f93a4d786df23e6e697c78b6"
+    },
+    {
+      "bytes": 7260,
+      "mode": "0o644",
+      "path": "tools/lab/windows_egress_setup.py",
+      "sanitization_edits": 0,
+      "sha256": "2e8775590c7b72e9d85778c8e3e0e7fe3b389a8d67df6e01732d0a6babd4d839"
+    },
+    {
+      "bytes": 2558,
+      "mode": "0o644",
+      "path": "tools/lab/windows_elevated_sandbox_setup.ps1",
+      "sanitization_edits": 0,
+      "sha256": "ac25d843b3d17a9cb8ec410efb5bfac53af5d743e87eba268beec92f5ff0d08b"
+    },
+    {
+      "bytes": 6276,
+      "mode": "0o644",
+      "path": "tools/lab/windows_guest_control.py",
+      "sanitization_edits": 0,
+      "sha256": "a6d3e79f28ba3ee0ed06c843930946464d0bb6a910e739adbafe597d89759c7a"
+    },
+    {
+      "bytes": 4521,
+      "mode": "0o644",
+      "path": "tools/lab/windows_guest_preflight.ps1",
+      "sanitization_edits": 0,
+      "sha256": "0af45aab02da4ea11a5fb3c35c1ca3afe19221aef6113ff75bd4defca661439a"
+    },
+    {
+      "bytes": 4059,
+      "mode": "0o644",
+      "path": "tools/lab/windows_hook_review_handoff.ps1",
+      "sanitization_edits": 0,
+      "sha256": "3d8fe3ce4ee10c0c473f4ef1e130e88d490db2fc803a165555c20382aa5dc944"
+    },
+    {
+      "bytes": 4912,
+      "mode": "0o644",
+      "path": "tools/lab/windows_interactive_preflight.py",
+      "sanitization_edits": 0,
+      "sha256": "7131918e2a730574a0a16a0eff9c33dcfa44ea9c65109aeeebab9f9ee6d40fdc"
+    },
+    {
+      "bytes": 19136,
+      "mode": "0o644",
+      "path": "tools/lab/windows_native_binding.py",
+      "sanitization_edits": 0,
+      "sha256": "eb976e3946a6fa92e01fe34807e6bc7ce31b40169e254d0208375bb1b652cc4c"
+    },
+    {
+      "bytes": 16929,
+      "mode": "0o644",
+      "path": "tools/lab/windows_native_canary.py",
+      "sanitization_edits": 0,
+      "sha256": "aeb86f6bd7f5f7e6a7053f85fc232ee02f074e06f97591930a70e305f38cb0be"
+    },
+    {
+      "bytes": 13088,
+      "mode": "0o644",
+      "path": "tools/lab/windows_native_compat_stage.py",
+      "sanitization_edits": 0,
+      "sha256": "0dfb21507b97cfc8b7dd49a055db89f37d088532a63022d0aa664cfc5de0350e"
+    },
+    {
+      "bytes": 7317,
+      "mode": "0o644",
+      "path": "tools/lab/windows_native_hook_stage.py",
+      "sanitization_edits": 0,
+      "sha256": "070dc2c0f7ad069a99027b4d63a450683c4cf0c98399d60c25d0bec4988e23e7"
+    },
+    {
+      "bytes": 7271,
+      "mode": "0o644",
+      "path": "tools/lab/windows_native_preflight.py",
+      "sanitization_edits": 0,
+      "sha256": "1f3e6af72eb8c4b001c39d2785db55357943f2322d6eb88ba6808353beafd511"
+    },
+    {
+      "bytes": 8504,
+      "mode": "0o644",
+      "path": "tools/lab/windows_sandbox_preflight.py",
+      "sanitization_edits": 0,
+      "sha256": "eb83a0baa38b9920860a7f494340149e0c97837ba6bc3509b164df4ffc070418"
+    },
+    {
+      "bytes": 4494,
+      "mode": "0o644",
+      "path": "tools/lab/windows_setup_tools.ps1",
+      "sanitization_edits": 0,
+      "sha256": "d9c007838ccc1afbf2c18801ad7a6b4f7c81542c18c95bbf4dfa176c5868c210"
+    },
+    {
+      "bytes": 9845,
+      "mode": "0o644",
+      "path": "tools/lab/windows_vm_stage.py",
+      "sanitization_edits": 0,
+      "sha256": "c088a0394890fd3661a86c0f0a8e6e716ad3b6c51b5728c032b12663af6420f9"
     }
   ],
   "generated_file_count": 101,
@@ -8867,11 +9623,11 @@
       "sha256": "a10ba3597e03114f8c2220caf4a28bcffd61c8393611068def00b08ff0cf9798"
     },
     {
-      "bytes": 113,
+      "bytes": 132,
       "mode": "0o644",
       "path": ".gitignore",
       "sanitization_edits": 0,
-      "sha256": "63d0ef2b6b748fa625812ea9f35f70dd23bb17233d6ba1e25c543149e6e6d6ad"
+      "sha256": "30a7814ba19164dcec96d04e729523fa93603372300be13d4e7ed3e975b2fbf3"
     },
     {
       "bytes": 16137,
@@ -8895,11 +9651,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 45097,
+      "bytes": 46418,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "70e55eac18628847d5e76907e6604108376493c976778df1267ad8ef45e0d28e"
+      "sha256": "a22d528c57604fcb1626f735452acb1f788708a8e0b7d542cad3ae2f3e025199"
     },
     {
       "bytes": 775,
@@ -9273,11 +10029,11 @@
       "sha256": "eff98088fe823c01627c345f0d125f8b52bc91d0212c2e5a0e9c3daf905f0aa0"
     },
     {
-      "bytes": 5216,
+      "bytes": 6080,
       "mode": "0o644",
       "path": "docs/README.md",
       "sanitization_edits": 0,
-      "sha256": "289938f895bab51201f34adeab99bafa14097d0d6d2edbccf8283800dca051b5"
+      "sha256": "13c8b81d2612cd1dc99ba31bab918d12eaedddc301079dfd719534877421c5e9"
     },
     {
       "bytes": 10154,
@@ -9518,7 +10274,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:c1661d402f86bc0dad8d0c9c6af7d13144de7060dc430730109280458524996c",
+  "projection_digest": "sha256:33a3af0fcf99e26808900148fe7ae55c1684f6dbe015113460eb2ae0302cfd8e",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

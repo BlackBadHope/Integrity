@@ -1,0 +1,20 @@
+{
+  "task": "T1",
+  "type": "refactor-with-decided-format",
+  "s1_only_facts": [
+    "CSV with semicolon delimiter",
+    "LF terminator including final line",
+    "header id;name;enabled",
+    "yes/no booleans",
+    "JSON was rejected for importer compatibility"
+  ],
+  "s1_symbols_for_rework": [
+    "normalize_record"
+  ],
+  "success": "all hidden unittest cases pass after S2",
+  "cancelled_decision_marker": null,
+  "copy_exclusions": [
+    "hidden_tests",
+    "_private"
+  ]
+}

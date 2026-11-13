@@ -1,0 +1,19 @@
+{
+  "task": "T4",
+  "type": "cancelled-decision-regression",
+  "s1_only_facts": [
+    "policy A newest timestamp was cancelled",
+    "policy B first observation wins",
+    "ids are case sensitive",
+    "suppressed first observation stays suppressed across batches"
+  ],
+  "s1_symbols_for_rework": [
+    "select_alerts"
+  ],
+  "success": "all hidden unittest cases pass after S2",
+  "cancelled_decision_marker": "POLICY_VERSION",
+  "copy_exclusions": [
+    "hidden_tests",
+    "_private"
+  ]
+}
