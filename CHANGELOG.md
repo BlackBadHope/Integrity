@@ -7,6 +7,30 @@ All notable public changes are recorded here.
 Changes on `main` after 7.0.1. Nothing here is tagged, and the distribution
 versions are unchanged unless an entry says otherwise.
 
+### The bus hub on one Linux machine, with real accounts
+
+- **`integrity-llm-bus-hub`**: a new command in `integrity-llm-bus`
+  (`integrity_llm_bus.hub`), Linux only. `install`, run as root, creates the
+  bus account, the gateway account, the socket group, the configuration
+  folder, the state folder and the socket folder, and writes the
+  configuration; it refuses names and folders that exist, and a keys file
+  with anything but `key_sha256`. If a step fails, it removes what it made.
+  `doctor` only reads: accounts, owners and modes, configuration, keys, the
+  journal chain and the installed files against the wheel record.
+  `uninstall` lists what it would remove; with `--yes` it removes it, and
+  refuses while a process of the bus account runs. The wheel stays; remove it
+  with pip.
+- It starts nothing and installs no systemd unit, no SSH gateway and no
+  journal seal. `install` and `doctor` print the command that starts the
+  daemon as the bus account.
+- A new CI job, `bus hub (ubuntu, real accounts)`, runs it on Ubuntu with
+  sudo inside the runner (`.github/scripts/bus_hub_accounts_check.py`): the
+  bus wheel alone, the daemon as the bus account, nine requests over the
+  socket from the gateway account and from a second account of the socket
+  group, a connect from an account outside the group, the journal chain,
+  `uninstall` refused while the daemon runs, then `uninstall --yes`,
+  `doctor` reporting `not-installed`, and pip uninstall.
+
 ### A core instance on one Linux account
 
 - **`guardian-core-instance`**: a new command in `integrity-guardian`

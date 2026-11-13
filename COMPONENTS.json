@@ -308,7 +308,8 @@
       ],
       "distribution": "integrity-llm-bus",
       "entry_points": {
-        "integrity-llm-bus": "integrity_llm_bus.launcher:main"
+        "integrity-llm-bus": "integrity_llm_bus.launcher:main",
+        "integrity-llm-bus-hub": "integrity_llm_bus.hub:main"
       },
       "import_roots": [
         "integrity_llm_bus"

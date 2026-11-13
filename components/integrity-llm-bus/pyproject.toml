@@ -17,6 +17,7 @@ dev = ["pytest>=8.2,<10"]
 
 [project.scripts]
 integrity-llm-bus = "integrity_llm_bus.launcher:main"
+integrity-llm-bus-hub = "integrity_llm_bus.hub:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/integrity_llm_bus"]
