@@ -39,10 +39,14 @@ versions are unchanged unless an entry says otherwise.
   MCP server the client starts; `doctor` checks the instance read-only;
   `uninstall` removes it. Windows and Linux.
 - The server joins three existing stores - Seed catalog, Turn Memory, work
-  claims - and offers eleven tools, among them `integrity_work_claim`,
-  `integrity_work_release`, `integrity_work_claims` and
-  `integrity_turn_receipt_by_event`, which finds the signed turn and its
-  closing receipt from one event.
+  claims - and offers eleven tools, among them `lm_work_claim`,
+  `lm_work_release`, `lm_work_claims` and `lm_turn_receipt_by_event`, which
+  finds the signed turn and its closing receipt from one event.
+- The tool names start with `lm_` and differ from the tool names of the core.
+  A Native lifecycle hook recognises the core's tools by name; a test checks
+  that no name of this server is one of them.
+- The Codex block from `init` carries `default_tools_approval_mode =
+  "approve"`: without it a non-interactive `codex exec` refuses the tools.
 - Events carry `declared_agent`, `declared_client` and `declared_machine`.
   These are declared by the writer and not verified.
 - This is not the core write path: no Action Log, no custody ledger, no
