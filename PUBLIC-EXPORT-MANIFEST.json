@@ -1,5 +1,5 @@
 {
-  "file_count": 1381,
+  "file_count": 1384,
   "files": [
     {
       "bytes": 3435,
@@ -6183,6 +6183,20 @@
       "sha256": "aaa52a169dcd238d06553288565a255d5de9964844924c6eabf5ca3d23da0728"
     },
     {
+      "bytes": 3236,
+      "mode": "0o644",
+      "path": "examples/scripted-scenes/README.md",
+      "sanitization_edits": 0,
+      "sha256": "f9e0be081c39daf13fcfc4844fea6bff1e7a8cb92e8e05cef1b596e73ad355b4"
+    },
+    {
+      "bytes": 17395,
+      "mode": "0o644",
+      "path": "examples/scripted-scenes/run.py",
+      "sanitization_edits": 0,
+      "sha256": "0345571d54ef931470b1ef88a3c50f457bd8b1ffc79036b69d78b879d4d284c0"
+    },
+    {
       "bytes": 1157,
       "mode": "0o644",
       "path": "examples/two-seat/README.md",
@@ -8906,6 +8920,13 @@
       "sha256": "d2da519cb268e1f42e51f32bc6c17bacd4d938134f7db97b62c4785e67e6c4da"
     },
     {
+      "bytes": 2541,
+      "mode": "0o644",
+      "path": "tests/test_example_scripted_scenes.py",
+      "sanitization_edits": 0,
+      "sha256": "299f8101a738c9c7575b6f0deae5ee20729f4226fb4512486755d9d99b776078"
+    },
+    {
       "bytes": 4525,
       "mode": "0o644",
       "path": "tests/test_facade_identity.py",
@@ -9756,11 +9777,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 51739,
+      "bytes": 51960,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "f2bca8b18f4426dd97cf0416f1f0e02f805f02bed521f82d5b6aae30a88e42f5"
+      "sha256": "16caa0d31280e3cce91daf1ce5a04836cc9e67b2dc30d063ffaf1f6b817be224"
     },
     {
       "bytes": 775,
@@ -9798,11 +9819,11 @@
       "sha256": "c773a85da94e9edf0b2b10e60fd43b00fe4f90e345ec0d958e6c5b4d0d405e8e"
     },
     {
-      "bytes": 27197,
+      "bytes": 27367,
       "mode": "0o644",
       "path": "README.md",
       "sanitization_edits": 0,
-      "sha256": "8908978e72268950fda0b6f6f6cd3285b4c7f96aab85803b0c13c11cbdf39b30"
+      "sha256": "0f47a5392c359a046e4bdc4d4caeead0993ddd74434c21cf0be2c6148223f9c6"
     },
     {
       "bytes": 13444,
@@ -10134,11 +10155,11 @@
       "sha256": "e03cd2506f026c9e618ee2035b2676fb52369982e79e9df6eba0d3f5c1df5465"
     },
     {
-      "bytes": 6505,
+      "bytes": 6734,
       "mode": "0o644",
       "path": "docs/README.md",
       "sanitization_edits": 0,
-      "sha256": "09935ecc457f7b8f3d2542ccc587c2ec1f93015edea71471181976d7bc6c0b92"
+      "sha256": "5743af190d4699d77fa561f02881e2003426027d83dba13d53091f0f85fb5e63"
     },
     {
       "bytes": 11164,
@@ -10379,7 +10400,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:a50037990e4519b20494ee4fd2b442e61ce19ed93971725eee80d64b8d85f711",
+  "projection_digest": "sha256:fc145feabeb5f310344f26171c81d607e9db9aa1a5714987a50339d549bf6f4e",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

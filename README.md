@@ -236,7 +236,10 @@ This is install stage 1, one machine. It is not the core write path; the
 ### Without an agent client
 
 Two smaller exercises need no client. `guardian version --all` and
-`guardian platform-profile` report what is installed.
+`guardian platform-profile` report what is installed. A third,
+[`examples/scripted-scenes`](examples/scripted-scenes/README.md), is a script
+that plays two agents and an owner to show the one-use owner grant and the
+doctor.
 
 **Canonical form.** In an empty directory outside the checkout, ask Guardian
 for the canonical form and the domain-separated digest of an unordered JSON
