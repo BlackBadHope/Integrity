@@ -185,7 +185,9 @@ of an installed deployment:
   `autoreg.py ensure` does by design after 250 ms. The test now repeats such a
   process until its identity is registered and still requires one entry for
   each identity; a new test holds the lock and checks that the command reports
-  `registry busy` and writes nothing.
+  `registry busy` and writes nothing. A process is repeated only when it
+  exited with code 2 and that error; any other failure fails the test. The
+  repeat itself has not been seen to run: no process gave up in later runs.
 
 The component README lists what was run and what was not; the hub's socket
 handler, the systemd sandbox and multi-host operation are not verified.

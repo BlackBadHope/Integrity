@@ -119,7 +119,7 @@ class AutoregTest(unittest.TestCase):
                     again = subprocess.run(cmd + ["--identity", identity], capture_output=True, timeout=30, check=False)
                     if again.returncode == 0:
                         break
-                    self.assertEqual(json.loads(again.stderr), {"error": "registry busy"})
+                    self.assertEqual((again.returncode, json.loads(again.stderr)), (2, {"error": "registry busy"}))
                 self.assertEqual(again.returncode, 0, again.stderr)
         agents = ar.load(self.state)
         self.assertEqual(sorted(e["thread"] for e in agents.values()), sorted([A, B]))
