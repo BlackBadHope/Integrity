@@ -146,6 +146,24 @@ states what is verified.
   only on the owner's approval of exactly that decision; 29 cases now cover
   it, including `rebuild`.
 
+### A demo at the top of the README
+
+- **`demo/run.py`** runs four scenes on one machine with synthetic data, no
+  network and no account: an agent records a decision and closes its turn with
+  a signed receipt; a second agent in a new process recalls the decision with
+  its origin; an action backed only by memory is refused, a one-use owner grant
+  passes once and its repeat is refused; a turn left open shows up in
+  `integrity-doctor` as a signed gap. No model runs: the script plays both
+  agents, and the stores, receipts and checks are this repository's code.
+- The README opens with an animated picture of that run, in light and dark
+  variants, drawn by the same script (`--svg`). `tests/test_demo.py` runs the
+  scenes in CI and fails when the committed pictures differ from the run.
+- The README section "The demo, step by step" names the code behind each
+  scene and what the demo does not show: Seed events are not signed (the
+  signature is on the turn close receipt), scene 2 is a recall and not the
+  admission context of a hooked client, and scene 4 reads the turn store
+  through a one-tool stand-in server.
+
 ### Documentation
 
 - **The documentation set was reworked for the current functionality.** The

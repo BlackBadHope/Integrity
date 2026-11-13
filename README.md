@@ -6,6 +6,19 @@
 </p>
 
 <p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/demo-dark.svg">
+    <img src="docs/assets/demo-light.svg" alt="Four scenes recorded from demo/run.py. One: an agent records a decision and closes its turn with a signed receipt. Two: a second agent in a new session recalls the decision with its origin. Three: acting on memory is refused, a one-use owner grant passes once, a repeat is refused. Four: a turn left open shows up in integrity-doctor as 1 of 2 turns closed." width="100%">
+  </picture>
+</p>
+
+<p align="center"><sub>
+  Recorded from <a href="demo/run.py"><code>demo/run.py</code></a>: one machine, synthetic data, no network, no account.
+  Repeat it yourself after the <a href="#quick-start">install</a>: <code>python demo/run.py</code> ·
+  <a href="#the-demo-step-by-step">what each scene runs</a>
+</sub></p>
+
+<p align="center">
   <a href="https://github.com/BlackBadHope/Integrity/releases/tag/v7.0.1"><img src="docs/assets/badge-release.svg" alt="Stable release v7.0.1"></a>
   <a href="LICENSE"><img src="docs/assets/badge-license.svg" alt="License: BSL 1.1"></a>
   <img src="docs/assets/badge-python.svg" alt="Python 3.11 and 3.12">
@@ -49,6 +62,52 @@ alike:
 | 1. Observed | 2. Authorized | 3. Changed | 4. Verified |
 | --- | --- | --- | --- |
 | What was seen? | Who allowed what? | What actually changed? | Can someone else check it? |
+
+## The demo, step by step
+
+The picture at the top is the output of [`demo/run.py`](demo/run.py). After the
+[quick start](#quick-start) install, run it from the clone:
+
+```bash
+python demo/run.py
+```
+
+It needs no network, no account and no model. It writes to a temporary
+directory and removes it.
+
+```mermaid
+flowchart LR
+  record["1 Record<br/>an event in Seed,<br/>a signed close receipt"]
+  recall["2 Recall<br/>another agent reads it,<br/>with its origin"]
+  grant["3 Grant<br/>memory is refused,<br/>one owner grant passes once"]
+  close["4 Close<br/>a signed receipt, or a gap<br/>that the doctor reports"]
+  record --> recall --> grant --> close
+```
+
+| Scene | What happens | The code that runs |
+| --- | --- | --- |
+| 1 Record | Agent A appends a decision and closes its turn. The close receipt names the event and is signed. | `SeedCatalog`, `TurnMemoryStore.close_turn`, `verify_turn_terminal_receipt` |
+| 2 Recall | Agent B starts a new process and asks the memory server. It gets the event, who wrote it and when, and a recall receipt. | [`examples/local-memory/memory_server.py`](examples/local-memory/memory_server.py), `integrity_seed_recall` |
+| 3 Grant | Agent B presents an intent it signed itself and is refused. The owner signs a one-use grant; it passes once; the repeat is refused. | `IntentCustody.reserve`, `IntentCustody.consume`, `verify_consumption_receipt` |
+| 4 Close | Agent B stops without a close. The gap is recorded and signed, and `integrity-doctor` reports 1 of 2 turns closed. | `TurnMemoryStore.observe_gap`, `integrity_client_memory.doctor.probe` |
+
+What the demo is not:
+
+- No model runs. The two agents are played by the script. The memory, the
+  receipts and the checks are the code of this repository.
+- Seed events are not signed, here or anywhere else. In scene 1 the signature
+  is on the turn close receipt that names the event.
+- Scene 2 is a recall through the read-only memory server. The context that a
+  hooked client receives at the start of a turn needs the memory core and is
+  not shown.
+- In scene 4 the doctor reads the turn store through a stand-in server with
+  one tool (`--serve-coverage` in the script). The full memory server serves
+  turn coverage only with a signed write plane.
+- The keys are derived from a public string. They protect nothing.
+
+`tests/test_demo.py` runs the four scenes in CI on Linux and Windows and fails
+when the pictures differ from the run. To redraw them:
+`python demo/run.py --svg docs/assets`.
 
 ## How it works
 
