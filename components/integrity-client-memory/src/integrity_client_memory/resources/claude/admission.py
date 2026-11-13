@@ -1937,6 +1937,119 @@ def deny_gate(message: str) -> None:
     raise SystemExit(2)
 
 
+# Optional advisory check of a closing keywords line in event summaries. It is off
+# unless the owner configuration sets values.event_summary_keywords_line, e.g.
+#   {"label": "Keywords:", "min_items": 5, "max_items": 8,
+#    "script": "cyrillic", "min_script_share": 0.5}
+# "script" (optional) is "cyrillic" or "latin"; min_script_share is the share of items that
+# must contain a letter of that script. The event is never refused because of this line:
+# the model gets a warning and keywords-line-health.json (its own file, never
+# hook-health.json) counts the results.
+KEYWORDS_POLICY_VALUE = "event_summary_keywords_line"
+KEYWORDS_HEALTH_FILE = "keywords-line-health.json"
+KEYWORDS_SCRIPTS = {"cyrillic": re.compile(r"[Ѐ-ӿ]"), "latin": re.compile(r"[A-Za-z]")}
+
+
+def keyword_line_policy(values: Any = None) -> dict[str, Any] | None:
+    """The validated keywords-line policy, or None (disabled, unconfigured or invalid)."""
+    if values is None:
+        try:
+            values = _integrity_require_config().get("values", {})
+        except Exception:  # noqa: BLE001 - an unconfigured client has the check off
+            return None
+    policy = values.get(KEYWORDS_POLICY_VALUE) if isinstance(values, dict) else None
+    if not isinstance(policy, dict):
+        return None
+    label = policy.get("label")
+    if not isinstance(label, str) or not label.strip() or len(label) > 64 or any(c in label for c in "\r\n\x00"):
+        return None
+    low, high = policy.get("min_items", 5), policy.get("max_items", 8)
+    if any(isinstance(x, bool) or not isinstance(x, int) for x in (low, high)) or not 1 <= low <= high <= 32:
+        return None
+    script = policy.get("script")
+    if script is not None and script not in KEYWORDS_SCRIPTS:
+        return None
+    share = policy.get("min_script_share", 0.5)
+    if isinstance(share, bool) or not isinstance(share, (int, float)) or not 0 <= share <= 1:
+        return None
+    return {"label": label.strip(), "min_items": low, "max_items": high, "script": script,
+            "min_script_share": float(share)}
+
+
+def keyword_line_problem(summary: Any, policy: dict[str, Any]) -> str | None:
+    """None when the last non-empty line is "<label> a; b; ..." and matches the policy."""
+    if not isinstance(summary, str):
+        return "summary is not text"
+    lines = [line.strip() for line in summary.splitlines() if line.strip()]
+    if not lines:
+        return "summary is empty"
+    label = policy["label"]
+    if not lines[-1].startswith(label):
+        return f"the last non-empty line of summary does not start with {label!r}"
+    items = [item.strip() for item in re.split(r"[;,]", lines[-1][len(label):]) if item.strip()]
+    low, high = policy["min_items"], policy["max_items"]
+    if not low <= len(items) <= high:
+        return f"the keywords line has {len(items)} items, expected {low}-{high}"
+    script = policy["script"]
+    if script is not None:
+        matching = sum(1 for item in items if KEYWORDS_SCRIPTS[script].search(item))
+        if matching < policy["min_script_share"] * len(items):
+            return (f"only {matching} of {len(items)} keywords contain {script} letters, expected at least "
+                    f"{policy['min_script_share']:.0%}")
+    return None
+
+
+def record_keyword_line(problem: str | None, path: Path | None = None) -> None:
+    """Count keyword-line results in keywords-line-health.json; never raises."""
+    try:
+        target = path if path is not None else state_root().parent / KEYWORDS_HEALTH_FILE
+        health: dict[str, Any] = {}
+        if target.is_file() and not target.is_symlink():
+            loaded = json.loads(target.read_text(encoding="utf-8"))
+            health = loaded if isinstance(loaded, dict) else {}
+        key = "keywords_line_missing" if problem is not None else "keywords_line_ok"
+        previous = health.get(key)
+        health[key] = previous + 1 if isinstance(previous, int) and not isinstance(previous, bool) and previous >= 0 else 1
+        if problem is not None:
+            health["keywords_line_last_missing_utc"] = utc_now()
+            health["keywords_line_last_problem"] = problem[:120]
+        health.setdefault("protocol", "integrity-memory/keywords-line-health/v1")
+        temporary = target.with_name(f".keywords-health-{uuid.uuid4().hex}.tmp")
+        try:
+            descriptor = os.open(temporary, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+                stream.write(compact(health) + "\n")
+            os.replace(temporary, target)
+        finally:
+            try:
+                temporary.unlink()
+            except FileNotFoundError:
+                pass
+    except Exception:  # noqa: BLE001 - advisory, never blocks a turn
+        return
+
+
+def keyword_line_advice(summary: Any) -> None:
+    """Warn (never deny) when the configured keywords line is missing or malformed."""
+    policy = keyword_line_policy()
+    if policy is None:
+        return
+    problem = keyword_line_problem(summary, policy)
+    record_keyword_line(problem)
+    if problem is None:
+        return
+    script = ""
+    if policy["script"] is not None:
+        script = f", at least {policy['min_script_share']:.0%} of them with {policy['script']} letters"
+    output_context(
+        "PreToolUse",
+        "INTEGRITY KEYWORDS-LINE WARNING (advisory; this event is NOT refused): " + problem
+        + f". End every event summary with a separate last line {policy['label']!r} followed by"
+        f" {policy['min_items']}-{policy['max_items']} words or short phrases{script}."
+        " Do not retry this append; add the line in the next event.",
+    )
+
+
 def handle_pre_tool(payload: dict[str, Any], identity: str, state: dict[str, Any]) -> None:
     name = tool_name(payload)
     arguments = tool_input(payload)
@@ -2024,6 +2137,7 @@ def handle_pre_tool(payload: dict[str, Any], identity: str, state: dict[str, Any
             }
         )
         save_state(identity, state)
+        keyword_line_advice(tool_input(payload).get("summary"))
         return
     # Cadence tracks local progress; it must not spend the sole append attempt
     # before a terminal result exists. Admission/append/unknown-outcome guards
