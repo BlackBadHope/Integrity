@@ -146,12 +146,21 @@ from your client's configuration yourself.
   processes on one folder over real stdio.
 - CI also runs `init`, `doctor` and `uninstall` with the installed command on
   both systems.
+- Once, on 13 Nov 2026, on Windows 11: Claude Code 2.1.318 and Codex CLI
+  0.163.0 ran against this server, installed as this page says. Three
+  processes took the roles of three agents, the first and the third in
+  Claude Code and the second in Codex CLI; a second run had the second agent
+  stop early. Claude Code read its block from a file. Codex got the lines of
+  its block on the command line. The [demo](../demo/README.md) has the
+  commands, the prompts and the records.
 
 Not verified:
 
-- A run with a real agent client against this server. The blocks have the
-  format of the [read-only example](../examples/local-memory/README.md), which
-  lists what was run with each client.
+- Antigravity. Its block has the format of the
+  [read-only example](../examples/local-memory/README.md), which lists what
+  was run with each client there; it was not used with this server.
+- The Codex block read from a config file.
+- A real agent client on Linux.
 - Several agents writing at the same moment. The stores serialize writes, and
   the tests write from one process at a time.
 - macOS. Gemini CLI.

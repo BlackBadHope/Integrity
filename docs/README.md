@@ -9,8 +9,8 @@ and what was not.
 
 | Page | What it gives you |
 | --- | --- |
-| [Project README](../README.md) | What Integrity is, the pictures, a five-minute first run |
-| [The four-scene demo](../README.md#the-demo-step-by-step) | `python demo/run.py`: record, recall, a one-use grant, a missed close. One machine, synthetic data, no network |
+| [Project README](../README.md) | What Integrity is, the pictures, a first run with your own agent |
+| [The demo: three agents, one memory](../demo/README.md) | Commands and prompts for your agent client: A writes, B writes, C reads from memory what B wrote, claimed and how B's turn ended. Records of two runs with Claude Code and Codex CLI |
 | [Install and test](INSTALL.md) | Prerequisites, a source install, the checks that public CI runs |
 | [Local memory on one machine](LOCAL_MEMORY.md) | Install stage 1: a memory server with writes and task claims for your own agents on one computer; what it does not prove |
 | [Clean bootstrap](../BOOTSTRAP.md) | Optional components, wheels, an isolated local instance |
@@ -55,6 +55,7 @@ These folders are examples. They are starting points, not parts of a release.
 | --- | --- |
 | [Starter pack of owner rules](../examples/owner-rules-starter/README.md) | 20 generic behaviour rules in English and Russian that the memory server can offer to an agent before it acts |
 | [Two-session tasks that need memory](../examples/memory-carryover-tasks/README.md) | Six small coding tasks whose second session depends on what the first one decided, with reference solutions and tests |
+| [Four scripted scenes](../examples/scripted-scenes/README.md) | A script plays two agents and an owner: record, recall, a one-use owner grant, a missing close in the doctor. No agent client and no model; this is not the demo |
 | [Lab tools](../tools/lab/README.md) | Operator scripts for an isolated two-VM lab, configured from one `lab.json`. Checked statically only; not run in this form |
 
 ## Components

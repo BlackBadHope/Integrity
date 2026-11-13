@@ -1,0 +1,12 @@
+You are agent C. Use only the integrity_local_memory tools.
+You continue the work on task "demo-task". Another agent wrote the last
+result. You cannot ask that agent. From memory only, find out and report:
+1. What each agent wrote for this task, word for word, in order.
+2. Who wrote the last result: declared agent, client, machine, and when.
+   Say whether that identity is verified.
+3. What the last writer claimed, and whether the claim was released.
+4. How the last writer's turn ended: a signed receipt (list its events),
+   a recorded gap, or never closed.
+Then say in one sentence how you would continue. Change nothing.
+
+Answer in English.

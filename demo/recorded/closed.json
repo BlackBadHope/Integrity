@@ -1,0 +1,549 @@
+{
+ "agents": [
+  {
+   "answer": "client:local-9790782e08e34981bc49a008ecb0697a",
+   "calls": [
+    {
+     "arguments": {
+      "declared_agent": "agent-a",
+      "declared_client": "claude-code"
+     },
+     "is_error": false,
+     "result": {
+      "opened_at": "2026-11-13T13:53:21.998494Z",
+      "production_authority": false,
+      "registration_id": "sha256:815dceaee00f1d57c64a86e8503cc6eddc8aaf86f4439d10ef65c3604c9df2b8",
+      "replayed": false,
+      "terminal_required": true,
+      "turn_id": "turn-368917b3d9c3416ba42d34797ceb4710"
+     },
+     "tool": "lm_turn_open"
+    },
+    {
+     "arguments": {
+      "registration_id": "sha256:815dceaee00f1d57c64a86e8503cc6eddc8aaf86f4439d10ef65c3604c9df2b8",
+      "task": "demo-task"
+     },
+     "is_error": false,
+     "result": {
+      "blocked_by": [],
+      "claim_id": "claim:f9586d9c6ebe95a34c5a38d39ecc04f10dba3f9fb71387adfb6b82a4e25e5395",
+      "declared_agent": "agent-a",
+      "expires_at": "2026-11-13T14:08:23.700045Z",
+      "fence_token": 1,
+      "production_authority": false,
+      "reason": "",
+      "resources": [
+       "task:demo-task"
+      ],
+      "signed": false,
+      "status": "acquired"
+     },
+     "tool": "lm_work_claim"
+    },
+    {
+     "arguments": {
+      "kind": "task",
+      "registration_id": "sha256:815dceaee00f1d57c64a86e8503cc6eddc8aaf86f4439d10ef65c3604c9df2b8",
+      "summary": "Result: 2",
+      "task": "demo-task"
+     },
+     "is_error": false,
+     "result": {
+      "event_id": 2,
+      "event_uid": "client:local-9790782e08e34981bc49a008ecb0697a",
+      "replayed": false,
+      "request_sha256": "2d1413065e38ef6453f2f7d0621c64574de5e834e8a436e06e07f132fb33f7a7",
+      "ts_utc": "2026-11-13T13:53:25Z"
+     },
+     "tool": "lm_append_event"
+    },
+    {
+     "arguments": {
+      "claim_id": "claim:f9586d9c6ebe95a34c5a38d39ecc04f10dba3f9fb71387adfb6b82a4e25e5395",
+      "fence_token": 1,
+      "registration_id": "sha256:815dceaee00f1d57c64a86e8503cc6eddc8aaf86f4439d10ef65c3604c9df2b8",
+      "result_event_uid": "client:local-9790782e08e34981bc49a008ecb0697a"
+     },
+     "is_error": false,
+     "result": {
+      "production_authority": false,
+      "release": {
+       "agent_id": "agent-a",
+       "at": "2026-11-13T13:53:28.306305Z",
+       "blocked_by": [],
+       "claim_id": "claim:f9586d9c6ebe95a34c5a38d39ecc04f10dba3f9fb71387adfb6b82a4e25e5395",
+       "event_digest": "sha256:890661781b831174af5f118c0b48b6d724423203b0fc7800651bfea7aaec125b",
+       "fence_token": 1,
+       "kind": "claim-released",
+       "outcome": "client:local-9790782e08e34981bc49a008ecb0697a",
+       "previous_digest": "sha256:8ee155979378558f5ab128a371aa5b1a785d5014dddbfd3ebc3216675b706c05",
+       "protocol": "integrity-guardian/work-claim/v1",
+       "resources": [
+        "task:demo-task"
+       ],
+       "status": "released"
+      },
+      "signed": false
+     },
+     "tool": "lm_work_release"
+    },
+    {
+     "arguments": {
+      "outcome": "events",
+      "registration_id": "sha256:815dceaee00f1d57c64a86e8503cc6eddc8aaf86f4439d10ef65c3604c9df2b8"
+     },
+     "is_error": false,
+     "result": {
+      "production_authority": false,
+      "receipt": {
+       "closed_at": "2026-11-13T13:53:28.987329Z",
+       "events": [
+        {
+         "event_id": 2,
+         "event_uid": "client:local-9790782e08e34981bc49a008ecb0697a",
+         "request_sha256": "2d1413065e38ef6453f2f7d0621c64574de5e834e8a436e06e07f132fb33f7a7"
+        }
+       ],
+       "identity": {
+        "machine_id": "local-machine",
+        "thread_id": "agent-a",
+        "turn_id": "turn-368917b3d9c3416ba42d34797ceb4710"
+       },
+       "namespace_fingerprint": "sha256:dacee8e9f9e616c710cb8a2ddc5dfa31a8fbf853107b359bf12b08ae38359cd5",
+       "outcome": "events",
+       "production_authority": false,
+       "prompt_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+       "protocol": "integrity-guardian/turn-memory-terminal-receipt/v1",
+       "receipt_id": "sha256:e462c6e7a63b5f49540bb63ae636f62e4672a01504dd1609073ddfc9a134c581",
+       "registration_id": "sha256:815dceaee00f1d57c64a86e8503cc6eddc8aaf86f4439d10ef65c3604c9df2b8",
+       "signature": {
+        "algorithm": "ed25519",
+        "key_id": "key:local-memory:9199de563c6b5379",
+        "value": "n1gBhwVUxOROkcYKiBiuEGEAvnNDMDL3HtPmlQAwF_jlL9ziG5VlrMetlkr2YQ4ecxVkiEb4fVbAAgjf5UCFCg"
+       }
+      },
+      "replayed": false
+     },
+     "tool": "lm_turn_close"
+    }
+   ],
+   "client": "Claude Code 2.1.318",
+   "model": "claude-sonnet-5-5",
+   "prompt": "demo/prompts/agent-a.txt",
+   "prompt_sha256": "sha256:bef1c2b4cea73ba63c4402a50afd886798bc03bfabc2b9209d575a01649dc82c",
+   "role": "A"
+  },
+  {
+   "answer": "client:local-c69f93308f2f4a04b8d40267eb90c423",
+   "calls": [
+    {
+     "arguments": {
+      "declared_agent": "agent-b",
+      "declared_client": "codex"
+     },
+     "is_error": false,
+     "result": {
+      "opened_at": "2026-11-13T13:53:52.141801Z",
+      "production_authority": false,
+      "registration_id": "sha256:84a4e2f99c9eb35c723c0d32504c00ebdcff76f16bf8d32eb9e291c6722cd5a4",
+      "replayed": false,
+      "terminal_required": true,
+      "turn_id": "turn-2fa70687983e4803a0ae690e4b5d25a5"
+     },
+     "tool": "lm_turn_open"
+    },
+    {
+     "arguments": {
+      "registration_id": "sha256:84a4e2f99c9eb35c723c0d32504c00ebdcff76f16bf8d32eb9e291c6722cd5a4",
+      "task": "demo-task"
+     },
+     "is_error": false,
+     "result": {
+      "blocked_by": [],
+      "claim_id": "claim:b609823a92572644956a3c45571a1f098e3ad7408cc4182b7096d6498d305a97",
+      "declared_agent": "agent-b",
+      "expires_at": "2026-11-13T14:08:57.474904Z",
+      "fence_token": 2,
+      "production_authority": false,
+      "reason": "",
+      "resources": [
+       "task:demo-task"
+      ],
+      "signed": false,
+      "status": "acquired"
+     },
+     "tool": "lm_work_claim"
+    },
+    {
+     "arguments": {
+      "kind": "task",
+      "registration_id": "sha256:84a4e2f99c9eb35c723c0d32504c00ebdcff76f16bf8d32eb9e291c6722cd5a4",
+      "summary": "Result: X",
+      "task": "demo-task"
+     },
+     "is_error": false,
+     "result": {
+      "event_id": 3,
+      "event_uid": "client:local-c69f93308f2f4a04b8d40267eb90c423",
+      "replayed": false,
+      "request_sha256": "c62e836a1d323cf081a240764ba88cabc539761888c82f6ffd22113324df6a4a",
+      "ts_utc": "2026-11-13T13:54:03Z"
+     },
+     "tool": "lm_append_event"
+    },
+    {
+     "arguments": {
+      "claim_id": "claim:b609823a92572644956a3c45571a1f098e3ad7408cc4182b7096d6498d305a97",
+      "fence_token": 2,
+      "registration_id": "sha256:84a4e2f99c9eb35c723c0d32504c00ebdcff76f16bf8d32eb9e291c6722cd5a4",
+      "result_event_uid": "client:local-c69f93308f2f4a04b8d40267eb90c423"
+     },
+     "is_error": false,
+     "result": {
+      "production_authority": false,
+      "release": {
+       "agent_id": "agent-b",
+       "at": "2026-11-13T13:54:10.317675Z",
+       "blocked_by": [],
+       "claim_id": "claim:b609823a92572644956a3c45571a1f098e3ad7408cc4182b7096d6498d305a97",
+       "event_digest": "sha256:5a7ba8c2a2ee4ef0f66012bf4f20bd808e714da6fa880ec20132045faa1aee92",
+       "fence_token": 2,
+       "kind": "claim-released",
+       "outcome": "client:local-c69f93308f2f4a04b8d40267eb90c423",
+       "previous_digest": "sha256:b167d4e90fb86db461d7383570025f99ea2d4fa073a4a7abb4a34c09f99dfa6c",
+       "protocol": "integrity-guardian/work-claim/v1",
+       "resources": [
+        "task:demo-task"
+       ],
+       "status": "released"
+      },
+      "signed": false
+     },
+     "tool": "lm_work_release"
+    },
+    {
+     "arguments": {
+      "outcome": "events",
+      "registration_id": "sha256:84a4e2f99c9eb35c723c0d32504c00ebdcff76f16bf8d32eb9e291c6722cd5a4"
+     },
+     "is_error": false,
+     "result": {
+      "production_authority": false,
+      "receipt": {
+       "closed_at": "2026-11-13T13:54:15.856388Z",
+       "events": [
+        {
+         "event_id": 3,
+         "event_uid": "client:local-c69f93308f2f4a04b8d40267eb90c423",
+         "request_sha256": "c62e836a1d323cf081a240764ba88cabc539761888c82f6ffd22113324df6a4a"
+        }
+       ],
+       "identity": {
+        "machine_id": "local-machine",
+        "thread_id": "agent-b",
+        "turn_id": "turn-2fa70687983e4803a0ae690e4b5d25a5"
+       },
+       "namespace_fingerprint": "sha256:dacee8e9f9e616c710cb8a2ddc5dfa31a8fbf853107b359bf12b08ae38359cd5",
+       "outcome": "events",
+       "production_authority": false,
+       "prompt_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+       "protocol": "integrity-guardian/turn-memory-terminal-receipt/v1",
+       "receipt_id": "sha256:1bbabf5cdc9be5efaee4e1bf17c384098297915cb318d22f4cfcd3c03ecd29d9",
+       "registration_id": "sha256:84a4e2f99c9eb35c723c0d32504c00ebdcff76f16bf8d32eb9e291c6722cd5a4",
+       "signature": {
+        "algorithm": "ed25519",
+        "key_id": "key:local-memory:9199de563c6b5379",
+        "value": "XEIfzoE0KlbW4qzWiibe_Uelo982WLzJJh63CuotGx7PPxPJA9YIdFbFnbzx3bK8981uOIGXu1-XmmgYuYppBg"
+       }
+      },
+      "replayed": false
+     },
+     "tool": "lm_turn_close"
+    }
+   ],
+   "client": "Codex CLI 0.163.0",
+   "model": "",
+   "prompt": "demo/prompts/agent-b.txt",
+   "prompt_sha256": "sha256:3dd8001c3f0f6ca744ceb93763097bcd8a834b17d052e38a2ca1253ed9c6daf2",
+   "role": "B"
+  },
+  {
+   "answer": "**1. What each agent wrote, in order** (task `demo-task`)\n- Event 2, `agent-a`, 2026-11-13 13:53:25Z: \"Result: 2\"\n- Event 3, `agent-b`, 2026-11-13 13:54:03Z: \"Result: X\"\n\nThe two results disagree.\n\n**2. Last writer**\n- Declared agent: `agent-b`. Declared client: `codex`. Declared machine: `local-machine`.\n- It wrote at 2026-11-13 13:54:03Z, as event `client:local-c69f93308f2f4a04b8d40267eb90c423`.\n- The identity is not verified. The memory marks these names as \"declared by the writer; not verified\". The claim log is hash-chained but not signed.\n- The turn's registration signature is valid, so the record is intact. That does not prove who the writer actually was.\n\n**3. Claim**\n- `agent-b` claimed `task:demo-task` at 13:53:57Z (fence token 2, nothing blocking it).\n- It released the claim at 13:54:10Z, with the outcome pointing at its own event 3.\n- The claim was released. `agent-a` also claimed and released earlier (fence token 1), and the claim chain verified with 4 events.\n\n**4. How the turn ended**\n- It ended with a signed receipt: turn `turn-2fa70687983e4803a0ae690e4b5d25a5`, opened 13:53:52Z and closed 13:54:15Z.\n- The receipt is ed25519-signed (key `key:local-memory:9199de563c6b5379`), its signature is valid, and its outcome is `events`.\n- It lists one event: id 3, `client:local-c69f93308f2f4a04b8d40267eb90c423`, request hash `sha256:c62e836a…6324df6a4a`.\n- There is no gap record.\n\n**How I'd continue:** I would open my own turn and claim `demo-task`. I would then record a new result that notes \"2\" (`agent-a`) and \"X\" (`agent-b`) conflict and that neither writer's identity is verified. Then I would release the claim and close the turn.\n\nI changed nothing. I only read.",
+   "calls": [
+    {
+     "arguments": {
+      "task": "demo-task"
+     },
+     "is_error": false,
+     "result": {
+      "events": [
+       {
+        "action": "client_task",
+        "actor": "agent-a",
+        "details": {
+         "_integrity_local": {
+          "declared_agent": "agent-a",
+          "declared_client": "claude-code",
+          "declared_machine": "local-machine",
+          "profile": "integrity-local-memory/v1",
+          "registration_id": "sha256:815dceaee00f1d57c64a86e8503cc6eddc8aaf86f4439d10ef65c3604c9df2b8",
+          "request_sha256": "2d1413065e38ef6453f2f7d0621c64574de5e834e8a436e06e07f132fb33f7a7"
+         },
+         "task_id": "demo-task"
+        },
+        "event_uid": "client:local-9790782e08e34981bc49a008ecb0697a",
+        "id": 2,
+        "level": "info",
+        "summary": "Result: 2",
+        "tags": [],
+        "ts_utc": "2026-11-13T13:53:25Z"
+       },
+       {
+        "action": "client_task",
+        "actor": "agent-b",
+        "details": {
+         "_integrity_local": {
+          "declared_agent": "agent-b",
+          "declared_client": "codex",
+          "declared_machine": "local-machine",
+          "profile": "integrity-local-memory/v1",
+          "registration_id": "sha256:84a4e2f99c9eb35c723c0d32504c00ebdcff76f16bf8d32eb9e291c6722cd5a4",
+          "request_sha256": "c62e836a1d323cf081a240764ba88cabc539761888c82f6ffd22113324df6a4a"
+         },
+         "task_id": "demo-task"
+        },
+        "event_uid": "client:local-c69f93308f2f4a04b8d40267eb90c423",
+        "id": 3,
+        "level": "info",
+        "summary": "Result: X",
+        "tags": [],
+        "ts_utc": "2026-11-13T13:54:03Z"
+       }
+      ],
+      "production_authority": false,
+      "returned_count": 2
+     },
+     "tool": "lm_seed_recall"
+    },
+    {
+     "arguments": {
+      "task": "demo-task"
+     },
+     "is_error": false,
+     "result": {
+      "chain_events_verified": 4,
+      "events": [
+       {
+        "agent_id": "agent-a",
+        "at": "2026-11-13T13:53:23.700045Z",
+        "blocked_by": [],
+        "claim_id": "claim:f9586d9c6ebe95a34c5a38d39ecc04f10dba3f9fb71387adfb6b82a4e25e5395",
+        "event_seq": 1,
+        "fence_token": 1,
+        "kind": "claim-acquired",
+        "previous_digest": null,
+        "protocol": "integrity-guardian/work-claim/v1",
+        "reference": {
+         "declared_client": "claude-code",
+         "declared_machine": "local-machine",
+         "registration_id": "sha256:815dceaee00f1d57c64a86e8503cc6eddc8aaf86f4439d10ef65c3604c9df2b8",
+         "turn_id": "turn-368917b3d9c3416ba42d34797ceb4710"
+        },
+        "resources": [
+         "task:demo-task"
+        ],
+        "status": "acquired"
+       },
+       {
+        "agent_id": "agent-a",
+        "at": "2026-11-13T13:53:28.306305Z",
+        "blocked_by": [],
+        "claim_id": "claim:f9586d9c6ebe95a34c5a38d39ecc04f10dba3f9fb71387adfb6b82a4e25e5395",
+        "event_seq": 2,
+        "fence_token": 1,
+        "kind": "claim-released",
+        "outcome": "client:local-9790782e08e34981bc49a008ecb0697a",
+        "previous_digest": "sha256:8ee155979378558f5ab128a371aa5b1a785d5014dddbfd3ebc3216675b706c05",
+        "protocol": "integrity-guardian/work-claim/v1",
+        "resources": [
+         "task:demo-task"
+        ],
+        "status": "released"
+       },
+       {
+        "agent_id": "agent-b",
+        "at": "2026-11-13T13:53:57.474904Z",
+        "blocked_by": [],
+        "claim_id": "claim:b609823a92572644956a3c45571a1f098e3ad7408cc4182b7096d6498d305a97",
+        "event_seq": 3,
+        "fence_token": 2,
+        "kind": "claim-acquired",
+        "previous_digest": "sha256:890661781b831174af5f118c0b48b6d724423203b0fc7800651bfea7aaec125b",
+        "protocol": "integrity-guardian/work-claim/v1",
+        "reference": {
+         "declared_client": "codex",
+         "declared_machine": "local-machine",
+         "registration_id": "sha256:84a4e2f99c9eb35c723c0d32504c00ebdcff76f16bf8d32eb9e291c6722cd5a4",
+         "turn_id": "turn-2fa70687983e4803a0ae690e4b5d25a5"
+        },
+        "resources": [
+         "task:demo-task"
+        ],
+        "status": "acquired"
+       },
+       {
+        "agent_id": "agent-b",
+        "at": "2026-11-13T13:54:10.317675Z",
+        "blocked_by": [],
+        "claim_id": "claim:b609823a92572644956a3c45571a1f098e3ad7408cc4182b7096d6498d305a97",
+        "event_seq": 4,
+        "fence_token": 2,
+        "kind": "claim-released",
+        "outcome": "client:local-c69f93308f2f4a04b8d40267eb90c423",
+        "previous_digest": "sha256:b167d4e90fb86db461d7383570025f99ea2d4fa073a4a7abb4a34c09f99dfa6c",
+        "protocol": "integrity-guardian/work-claim/v1",
+        "resources": [
+         "task:demo-task"
+        ],
+        "status": "released"
+       }
+      ],
+      "note": "agent names in claims are declared by the caller; the log is hash-chained, not signed",
+      "production_authority": false,
+      "signed": false
+     },
+     "tool": "lm_work_claims"
+    },
+    {
+     "arguments": {
+      "event_uid": "client:local-c69f93308f2f4a04b8d40267eb90c423"
+     },
+     "is_error": false,
+     "result": {
+      "author": {
+       "declared_agent": "agent-b",
+       "declared_client": "codex",
+       "declared_machine": "local-machine",
+       "note": "declared by the writer; not verified"
+      },
+      "claims": [
+       {
+        "agent_id": "agent-b",
+        "at": "2026-11-13T13:53:57.474904Z",
+        "blocked_by": [],
+        "claim_id": "claim:b609823a92572644956a3c45571a1f098e3ad7408cc4182b7096d6498d305a97",
+        "event_seq": 3,
+        "fence_token": 2,
+        "kind": "claim-acquired",
+        "previous_digest": "sha256:890661781b831174af5f118c0b48b6d724423203b0fc7800651bfea7aaec125b",
+        "protocol": "integrity-guardian/work-claim/v1",
+        "reference": {
+         "declared_client": "codex",
+         "declared_machine": "local-machine",
+         "registration_id": "sha256:84a4e2f99c9eb35c723c0d32504c00ebdcff76f16bf8d32eb9e291c6722cd5a4",
+         "turn_id": "turn-2fa70687983e4803a0ae690e4b5d25a5"
+        },
+        "resources": [
+         "task:demo-task"
+        ],
+        "status": "acquired"
+       },
+       {
+        "agent_id": "agent-b",
+        "at": "2026-11-13T13:54:10.317675Z",
+        "blocked_by": [],
+        "claim_id": "claim:b609823a92572644956a3c45571a1f098e3ad7408cc4182b7096d6498d305a97",
+        "event_seq": 4,
+        "fence_token": 2,
+        "kind": "claim-released",
+        "outcome": "client:local-c69f93308f2f4a04b8d40267eb90c423",
+        "previous_digest": "sha256:b167d4e90fb86db461d7383570025f99ea2d4fa073a4a7abb4a34c09f99dfa6c",
+        "protocol": "integrity-guardian/work-claim/v1",
+        "resources": [
+         "task:demo-task"
+        ],
+        "status": "released"
+       }
+      ],
+      "event": {
+       "action": "client_task",
+       "actor": "agent-b",
+       "details": {
+        "_integrity_local": {
+         "declared_agent": "agent-b",
+         "declared_client": "codex",
+         "declared_machine": "local-machine",
+         "profile": "integrity-local-memory/v1",
+         "registration_id": "sha256:84a4e2f99c9eb35c723c0d32504c00ebdcff76f16bf8d32eb9e291c6722cd5a4",
+         "request_sha256": "c62e836a1d323cf081a240764ba88cabc539761888c82f6ffd22113324df6a4a"
+        },
+        "task_id": "demo-task"
+       },
+       "event_uid": "client:local-c69f93308f2f4a04b8d40267eb90c423",
+       "id": 3,
+       "level": "info",
+       "summary": "Result: X",
+       "tags": [],
+       "ts_utc": "2026-11-13T13:54:03Z"
+      },
+      "outcome": "found",
+      "production_authority": false,
+      "turn": {
+       "event_listed_in_terminal_receipt": true,
+       "gap_receipt": null,
+       "identity": {
+        "machine_id": "local-machine",
+        "thread_id": "agent-b",
+        "turn_id": "turn-2fa70687983e4803a0ae690e4b5d25a5"
+       },
+       "note": "closed with a signed receipt",
+       "opened_at": "2026-11-13T13:53:52.141801Z",
+       "registration_id": "sha256:84a4e2f99c9eb35c723c0d32504c00ebdcff76f16bf8d32eb9e291c6722cd5a4",
+       "registration_signature": "valid",
+       "status": "closed",
+       "terminal_receipt": {
+        "closed_at": "2026-11-13T13:54:15.856388Z",
+        "events": [
+         {
+          "event_id": 3,
+          "event_uid": "client:local-c69f93308f2f4a04b8d40267eb90c423",
+          "request_sha256": "c62e836a1d323cf081a240764ba88cabc539761888c82f6ffd22113324df6a4a"
+         }
+        ],
+        "identity": {
+         "machine_id": "local-machine",
+         "thread_id": "agent-b",
+         "turn_id": "turn-2fa70687983e4803a0ae690e4b5d25a5"
+        },
+        "namespace_fingerprint": "sha256:dacee8e9f9e616c710cb8a2ddc5dfa31a8fbf853107b359bf12b08ae38359cd5",
+        "outcome": "events",
+        "production_authority": false,
+        "prompt_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "protocol": "integrity-guardian/turn-memory-terminal-receipt/v1",
+        "receipt_id": "sha256:1bbabf5cdc9be5efaee4e1bf17c384098297915cb318d22f4cfcd3c03ecd29d9",
+        "registration_id": "sha256:84a4e2f99c9eb35c723c0d32504c00ebdcff76f16bf8d32eb9e291c6722cd5a4",
+        "signature": {
+         "algorithm": "ed25519",
+         "key_id": "key:local-memory:9199de563c6b5379",
+         "value": "XEIfzoE0KlbW4qzWiibe_Uelo982WLzJJh63CuotGx7PPxPJA9YIdFbFnbzx3bK8981uOIGXu1-XmmgYuYppBg"
+        }
+       },
+       "terminal_signature": "valid"
+      }
+     },
+     "tool": "lm_turn_receipt_by_event"
+    }
+   ],
+   "client": "Claude Code 2.1.318",
+   "model": "claude-sonnet-5-5",
+   "prompt": "demo/prompts/agent-c.txt",
+   "prompt_sha256": "sha256:b99a44414da6d12bc5e4aa2dc9d67e64b935e4d5ff503cd5ccea385e73169b33",
+   "role": "C"
+  }
+ ],
+ "client": "Claude Code 2.1.318, Codex CLI 0.163.0",
+ "platform": "Windows 11",
+ "recorded": "2026-11-13",
+ "schema": "integrity-demo-record/v1"
+}

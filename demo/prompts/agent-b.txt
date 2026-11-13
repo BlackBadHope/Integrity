@@ -1,0 +1,10 @@
+You are agent B. Use only the integrity_local_memory tools.
+The task id is "demo-task". Do this in order:
+1. Open a turn: declared_agent "agent-b". For declared_client give the name
+   of the agent client you run in, in lower case: "claude-code" for Claude
+   Code, "codex" for Codex CLI.
+2. Claim the task.
+3. Write one event for this task. Its summary is exactly: Result: X
+4. Release the claim and name that event.
+5. Close the turn.
+Reply with the event_uid and nothing else.
