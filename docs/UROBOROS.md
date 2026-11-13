@@ -1,5 +1,7 @@
 # Uroboros: procedural memory
 
+[Documentation](README.md) · [Project README](../README.md)
+
 Uroboros lets an agent reuse a path that already worked instead of
 rediscovering it. A completed, verified piece of work becomes a **route**. When
 a later agent starts a turn whose intent matches that route, Integrity offers

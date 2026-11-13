@@ -1,5 +1,7 @@
 # Native memory with lifecycle hooks
 
+[Documentation](README.md) · [Project README](../README.md)
+
 This is the complete **client wiring** for the Native lifecycle: an exact owner
 prompt, an opaque one-use reference, model-owned admission, a signed registration,
 snapshot-bound reads, an authorized append, and a signed terminal receipt. It is

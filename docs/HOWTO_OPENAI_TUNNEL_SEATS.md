@@ -1,5 +1,7 @@
 # OpenAI tunnel seats
 
+[Documentation](README.md) · [Project README](../README.md)
+
 Each person uses their own OpenAI account and their own seat token. Integrity
 does not pool quotas or store provider API keys.
 

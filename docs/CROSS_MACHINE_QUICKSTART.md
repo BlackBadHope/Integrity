@@ -1,5 +1,7 @@
 # Two machines: Integrity core on A, client on B
 
+[Documentation](README.md) · [Project README](../README.md)
+
 This guide runs an Integrity core on Linux machine **A** and connects an MCP
 client (Codex, Claude Code, Antigravity, or the Native profiles) on machine
 **B**. The transport is an OpenSSH **forced command**:

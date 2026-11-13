@@ -1,5 +1,7 @@
 # integrity-guards
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 Hook-side guards for coding agents: they read one tool call from a hook,
 classify it, and answer with a warning or a refusal. They never run the
 command themselves.
@@ -99,12 +101,12 @@ Other harnesses: `lock-guard --exit-code` exits 2 on a refusal;
 
 ## What is verified
 
-- The unit tests in `tests/` were run on Windows with Python 3.12. They use
+- The unit tests in `tests/` run in public CI on Ubuntu and Windows with
+  Python 3.11 and 3.12. They use
   the invented examples, temporary configuration and a fake command runner;
   commands are parsed, never sent anywhere. The route CLI tests start only the
   current Python interpreter.
-- The tests are written to pass or skip on Linux, but **nothing was run on
-  Linux**.
+- Nothing beyond these unit tests was run on Linux.
 - There is **no live acceptance**: the guards were not exercised as installed
   hooks of a real agent as part of this package.
 

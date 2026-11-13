@@ -1,5 +1,7 @@
 # Linux core: release wrapper and forced-command transport
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 These files are the launch and verification scripts that run next to an
 installed Guardian Memory & Synapse package on a Linux core host. MCP clients
 reach the core over an OpenSSH forced command. The files are copied from a
@@ -152,10 +154,9 @@ scheduled full custody check are not included.
 
 ## Verified / not verified
 
-Covered by `tests/test_linux_core_transport.py`. Only the platform-independent
-tests below have been run so far (on Windows). The POSIX-only and Linux-only
-tests were written alongside them and have **not yet been run** on a POSIX
-host; treat those items as unverified until they are.
+Covered by `tests/test_linux_core_transport.py`. Public CI runs every case on
+Ubuntu; on Windows the 19 POSIX-only and Linux-only cases skip. The cases use
+temporary directories on a CI runner, and no real core host took part.
 
 - On every platform:
   - Every file is UTF-8 with LF endings.

@@ -1,5 +1,7 @@
 # integrity-memory-plane
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 Seed delta sync, signed catalog seal, archive/capacity/retention, retrieval/projection, NATS/S3/PostgreSQL and physical verification tools. SQL migrations and existing tests are retained. Operational config, credentials, containers and dataset fixtures are intentionally not shipped. Choose extras only for the tools used.
 
 ## Installation and configuration
@@ -27,7 +29,7 @@ entrypoint can have its documented service/database/network effects.
 
 Configuration environment variable: `INTEGRITY_MEMORY_PLANE_CONFIG`. Original script CLI arguments still
 apply (e.g. a native profile's upstream TOML and tools contract). The public server
-contract is Guardian 6.1.0 / memory MCP API 2.11.0. Profile revisions remain separate.
+contract is Guardian 7.0.0 / memory MCP API 2.11.0. Profile revisions remain separate.
 
 `SOURCE-MAP.json` preserves source coverage and copy hashes. Existing source tests
 are in `legacy-tests`; datasets or deployment-specific fixtures are not synthesized.

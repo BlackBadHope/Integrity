@@ -1,5 +1,7 @@
 # Integrity Adapter SDK
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 `integrity-adapter-sdk` is the separately versioned distribution boundary for
 the Integrity Adapter Execution SDK. Source candidate `2.0.0rc3` is deliberately a
 transitional facade over the exact `integrity-guardian==7.0.0` implementation.

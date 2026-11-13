@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 404" width="1280" height="404" role="img" aria-labelledby="t d" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<title id="t">Three ways to deploy</title>
+<desc id="d">One machine; a core on one machine with clients on another over SSH; and cloud agents whose signed journals are imported offline.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8C959F"/></marker><linearGradient id="hero" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6F8FA"/><stop offset="1" stop-color="#E2F5EE"/></linearGradient></defs>
+<rect x="1" y="1" width="1278" height="402" rx="16" fill="#FFFFFF" stroke="#D0D7DE"/>
+<rect x="24" y="24" width="404" height="356" rx="12" fill="#FBFCFD" stroke="#D0D7DE" stroke-dasharray="2 5"/>
+<text x="48" y="60" font-size="18" font-weight="700" text-anchor="start" fill="#1F2328">One machine</text>
+<rect x="48" y="74" width="162" height="30" rx="15" fill="#E2F5EE" stroke="#0B7A5E"/>
+<text x="129.0" y="94" font-size="12" font-weight="600" text-anchor="middle" fill="#0B7A5E">CI-tested, daily use</text>
+<rect x="48" y="124" width="356" height="64" rx="10" fill="#F6F8FA" stroke="#D0D7DE"/>
+<text x="66" y="151" font-size="15" font-weight="600" text-anchor="start" fill="#1F2328">Agents, hooks and broker</text>
+<text x="66" y="171" font-size="13" font-weight="400" text-anchor="start" fill="#59636E">Claude Code, Codex, Antigravity</text>
+<path d="M88 188L88 286" stroke="#8C959F" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<text x="104" y="242" font-size="13" font-weight="400" text-anchor="start" fill="#59636E">local MCP tools</text>
+<rect x="48" y="288" width="356" height="64" rx="10" fill="#E2F5EE" stroke="#0B7A5E"/>
+<rect x="48" y="298" width="4" height="44" rx="2" fill="#0B7A5E"/>
+<text x="66" y="315" font-size="15" font-weight="600" text-anchor="start" fill="#1F2328">Core on the same machine</text>
+<text x="66" y="335" font-size="13" font-weight="400" text-anchor="start" fill="#59636E">Guardian, Seed, Mind</text>
+<rect x="438" y="24" width="404" height="356" rx="12" fill="#FBFCFD" stroke="#D0D7DE" stroke-dasharray="2 5"/>
+<text x="462" y="60" font-size="18" font-weight="700" text-anchor="start" fill="#1F2328">Two machines</text>
+<rect x="462" y="74" width="162" height="30" rx="15" fill="#E2F5EE" stroke="#0B7A5E"/>
+<text x="543.0" y="94" font-size="12" font-weight="600" text-anchor="middle" fill="#0B7A5E">CI-tested, daily use</text>
+<rect x="462" y="124" width="356" height="64" rx="10" fill="#F6F8FA" stroke="#D0D7DE"/>
+<text x="480" y="151" font-size="15" font-weight="600" text-anchor="start" fill="#1F2328">Client machine B</text>
+<text x="480" y="171" font-size="13" font-weight="400" text-anchor="start" fill="#59636E">agents, hooks and broker</text>
+<path d="M502 188L502 286" stroke="#8C959F" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<text x="518" y="242" font-size="13" font-weight="400" text-anchor="start" fill="#59636E">OpenSSH forced command, pinned host key</text>
+<rect x="462" y="288" width="356" height="64" rx="10" fill="#E2F5EE" stroke="#0B7A5E"/>
+<rect x="462" y="298" width="4" height="44" rx="2" fill="#0B7A5E"/>
+<text x="480" y="315" font-size="15" font-weight="600" text-anchor="start" fill="#1F2328">Core on machine A</text>
+<text x="480" y="335" font-size="13" font-weight="400" text-anchor="start" fill="#59636E">Guardian, Seed, Mind</text>
+<rect x="852" y="24" width="404" height="356" rx="12" fill="#FBFCFD" stroke="#D0D7DE" stroke-dasharray="2 5"/>
+<text x="876" y="60" font-size="18" font-weight="700" text-anchor="start" fill="#1F2328">Cloud agents</text>
+<rect x="876" y="74" width="250" height="30" rx="15" fill="#FFF4D6" stroke="#9A6700"/>
+<text x="1001.0" y="94" font-size="12" font-weight="600" text-anchor="middle" fill="#9A6700">CI-tested, no live acceptance yet</text>
+<rect x="876" y="124" width="356" height="64" rx="10" fill="#F6F8FA" stroke="#D0D7DE"/>
+<text x="894" y="151" font-size="15" font-weight="600" text-anchor="start" fill="#1F2328">Agent sandbox</text>
+<text x="894" y="171" font-size="13" font-weight="400" text-anchor="start" fill="#59636E">signed turn journal, a fresh key per task</text>
+<path d="M916 188L916 286" stroke="#8C959F" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<text x="932" y="242" font-size="13" font-weight="400" text-anchor="start" fill="#59636E">committed with the work; no inbound access</text>
+<rect x="876" y="288" width="356" height="64" rx="10" fill="#E2F5EE" stroke="#0B7A5E"/>
+<rect x="876" y="298" width="4" height="44" rx="2" fill="#0B7A5E"/>
+<text x="894" y="315" font-size="15" font-weight="600" text-anchor="start" fill="#1F2328">Owner&#x27;s machine</text>
+<text x="894" y="335" font-size="13" font-weight="400" text-anchor="start" fill="#59636E">verifies offline, imports as reported evidence</text>
+</svg>

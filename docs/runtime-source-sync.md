@@ -1,5 +1,7 @@
 # Runtime source consistency
 
+[Documentation](README.md) · [Project README](../README.md)
+
 The client-memory distribution 1.8.1 carries the Linux lifecycle repair in its
 single canonical Linux resource profile. Slow Native ownership proofs execute
 outside the shared custody lock; claim expiry, one-use consumption and final

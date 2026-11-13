@@ -1,5 +1,7 @@
 # Native lifecycle hooks on Linux
 
+[Documentation](README.md) · [Project README](../README.md)
+
 This page covers the **Linux user-custody** Native profiles for Codex and Claude
 Code: hooks, one-use turn admission and Turn Memory lifecycle for a vendor CLI
 that runs as your own user.

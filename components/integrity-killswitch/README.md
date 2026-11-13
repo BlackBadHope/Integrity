@@ -1,5 +1,7 @@
 # integrity-killswitch
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 A local switch that turns agent access off per vendor, or for all agents at
 once, on one workstation.
 
@@ -82,11 +84,12 @@ the Python that `python` starts.
 
 ## What is verified
 
-- The unit tests in `tests/` were run on Windows with Python 3.12. They use
+- The unit tests in `tests/` run in public CI on Ubuntu and Windows with
+  Python 3.11 and 3.12. They use
   fake process ancestry, a fake TCP peer lookup and a stand-in ssh command;
   they never touch real processes, the network or a real bus.
-- The tests are written to pass or skip on Linux, but **nothing was run on
-  Linux**.
+- On Linux one case skips: it reads the Windows TCP owner table. Nothing
+  beyond these unit tests was run on Linux.
 - There is **no live acceptance**: the dashboard, the process-ancestry
   detection on a real agent and `sync-bus --apply` against a real bus host
   were not exercised as part of this package.

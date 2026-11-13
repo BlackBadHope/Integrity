@@ -1,5 +1,7 @@
 # Integrity hooks: scope, enforcement and "memory offline"
 
+[Documentation](README.md) · [Project README](../README.md)
+
 Integrity memory reaches a model only through client hooks. This page explains
 where the hooks apply, what they enforce, and what to do when a session says
 memory is unavailable. Run `integrity-doctor` first: it answers most of the

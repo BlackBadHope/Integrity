@@ -1,5 +1,7 @@
 # Integrity Home / Chronicle
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 `integrity-home` **0.2.0a1** is an optional local archive and memory projection
 package. The `integrity_home` namespace and compatibility implementation
 `integrity_chronicle` ship together; they are not duplicate distributions.

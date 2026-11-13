@@ -1,5 +1,7 @@
 # integrity-remote
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 Connects Integrity clients on one machine to a core on another over an OpenSSH
 forced command. There is no new listener, every device has its own key, the
 host key is pinned and releases are immutable. The step-by-step guide is
