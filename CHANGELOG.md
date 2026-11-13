@@ -77,6 +77,11 @@ versions are unchanged unless an entry says otherwise.
     file is in the configuration folder, then `uninstall --yes`, `doctor`
     reporting `not-installed`, the bus hub's `doctor` still passing, and pip
     uninstall.
+- Fixed in `integrity-llm-bus`, found by the first run of this job: on a new
+  hub the room's vendor cards (`vendor-cards`) failed, because the message
+  archive they read was made only by `migrate.py` when history was moved in.
+  The hub daemon now makes the archive at start when it is missing. A new
+  test asks for the cards on a hub without moved history.
 
 ### Timing evidence kept in every CI run
 

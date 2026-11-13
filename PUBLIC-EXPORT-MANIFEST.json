@@ -3478,7 +3478,7 @@
       "mode": "0o644",
       "path": "components/integrity-llm-bus/SOURCE-MAP.json",
       "sanitization_edits": 0,
-      "sha256": "0166477ddd9b70a1325ce4963afb6c8a98ad6cbb14ee0baeea84ea06dcbcf86a"
+      "sha256": "29763c0dfb1b6d414bdff0999c924093f1502995e8f97e78d64169c2facf272c"
     },
     {
       "bytes": 587,
@@ -3684,11 +3684,11 @@
       "sha256": "e99f186d82156f308bace867a5288fb55a9575ff4533ea637aa453f860f55398"
     },
     {
-      "bytes": 44287,
+      "bytes": 44527,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/src/integrity_llm_bus/resources/core/bus_core_daemon.py",
       "sanitization_edits": 0,
-      "sha256": "81ddf98f49fba2263fd2dab68afcc645a29ff66c13793c304ca8a1a44c7ce6f0"
+      "sha256": "1961b08d8a889916ec78c7c611b89d872d3c3ca5b59ba490fece40317f15e7e4"
     },
     {
       "bytes": 2731,
@@ -3866,11 +3866,11 @@
       "sha256": "c193ae1e2c552b725e9ec3fab0a0893f8de7c223bb385cacdcf3c65932e9f6db"
     },
     {
-      "bytes": 15194,
+      "bytes": 15793,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/tests/core/test_hub.py",
       "sanitization_edits": 0,
-      "sha256": "b3223a2b251deaa1a6d70167e1c377cad6bf5ec9259565492c3e913e0878c2cc"
+      "sha256": "e017eb7ac90f5aa9b3a091ee19582bc5c556110c4db842d2a5fdcd1db2f59c6a"
     },
     {
       "bytes": 528,
@@ -9847,11 +9847,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 60961,
+      "bytes": 61322,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "66559be6223cdd34df3a252140f83fc989705ecba7ee3d8ddc0d5afbf78a3b9f"
+      "sha256": "da95ab3b7652fc48137df60b8a8e1267f4c679af596614d551ac1a783faba2d8"
     },
     {
       "bytes": 775,
@@ -10470,7 +10470,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:7258dadf7a6f24d19520fd538bb82b9730766d2c1a6d838993144bd7c58dead4",
+  "projection_digest": "sha256:ac6d657e97dc065408c2313ec255884f59cb2596fba6e0b414dcc335d4539072",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
