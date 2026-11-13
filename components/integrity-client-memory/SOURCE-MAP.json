@@ -101,7 +101,8 @@
     "path": "src/integrity_client_memory/resources/antigravity/antigravity_hook.py",
     "source": "clients/antigravity/antigravity_hook.py",
     "source_sha256": "c20dbae8dd5c91b3de49ea16c44d7787be7dad8494298436da153ae300c37a61",
-    "sha256": "645fb640674f265679c1b71f7af8559ba9c1f221cbb1a46ba36108df4bf6fe02"
+    "sha256": "aeeee6d4b6a99e857b43825a6d9138aef8442543d72444a53a2870e9381394f5",
+    "derivation_note": "gate v2 (uncovered turn), model/prompt normalisation, stop resume and superseded registration ported by hand onto the package source; installation paths and bus registration not ported; original source_sha256 preserved"
   },
   {
     "path": "src/integrity_client_memory/resources/antigravity/antigravity_state.py",
@@ -113,7 +114,8 @@
     "path": "src/integrity_client_memory/resources/antigravity/integrity_antigravity_broker.py",
     "source": "clients/antigravity/integrity_antigravity_broker.py",
     "source_sha256": "1883e593a4512e12bc5fda9761b6b0e2c05f6a411266d0060b2bf800da2a6a57",
-    "sha256": "db1b48ed1fff36d7912da9f1cea699b8566919ffed23d43928c88535c5dee65a"
+    "sha256": "c68c25190791647cbfd70776a0455607872449019488eb72620e65b8c073d1e3",
+    "derivation_note": "worker bound, schema 'not' removal and superseded-registration gap ported by hand onto the package source; installation default paths not ported; original source_sha256 preserved"
   },
   {
     "path": "src/integrity_client_memory/resources/antigravity/integrity_antigravity_hook.py",

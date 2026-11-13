@@ -7,6 +7,7 @@ from contextlib import closing
 import hashlib
 import json
 from pathlib import Path
+import re
 import socket
 import sqlite3
 import sys
@@ -21,9 +22,22 @@ BUS_DIR=Path(_integrity_value('path_b90aa9f0d1c5'))
 MAX_INPUT=512*1024
 MAX_TRANSCRIPT=8*1024*1024
 HERE=Path(__file__).resolve().parent
+USER_REQ_RE=re.compile(r'<USER_REQUEST>\s*(.*?)\s*</USER_REQUEST>',re.DOTALL)
+# Standard tools that change state. After a failed admission or an unopened registration they
+# are denied for the rest of the turn; reads stay open. Subset of native_install.AG_GATED_TOOLS.
+STATE_CHANGING_TOOLS=frozenset({'run_command','bash','command','write_to_file','write_file','replace_file_content','multi_replace_file_content','edit_file','send_message','schedule','manage_task','invoke_subagent','define_subagent','manage_subagents'})
 
 def notice(text):return {'injectSteps':[{'ephemeralMessage':text}]}
 def deny(code):return {'decision':'deny','reason':'integrity: '+code}
+def clean_prompt(text):
+    # Antigravity wraps the owner's words in <USER_REQUEST>; admission binds the words, not the wrapper.
+    if not isinstance(text,str):return text
+    m=USER_REQ_RE.search(text)
+    return m.group(1) if m and m.group(1).strip() else text
+def effective_model(payload):
+    # Automatic model selection reports 'auto' or nothing; the vendor contract needs a gemini- name.
+    m=payload.get('modelName')
+    return m if isinstance(m,str) and m.strip() and m.strip()!='auto' else 'gemini-default'
 
 def last_owner(payload):
     conversation=store.conv_id(payload.get('conversationId'))
@@ -129,7 +143,17 @@ def admission_gate(payload,root,mode=None):
         # closed state means a new turn whose admission is still owed, not an admitted one.
         if state.get('stopped') or state.get('turn_memory_closed'):
             return deny('admission-first: new owner turn; call '+SERVER+' integrity_context_admission_current_turn with the turn_ref from the INTEGRITY READ PLANE PENDING message that follows, before any other tool')
-        if state.get('admission_attempted'):return passthrough
+        if state.get('admission_attempted'):
+            # An uncovered turn must not change state without turn memory: the admission failed
+            # (attempted, never verified) or it passed but the broker could not open the turn-memory
+            # registration. Reads stay open; state-changing tools and call_mcp_tool to any other
+            # server are denied. Calls to this Integrity server are routed by process(), never here.
+            uncovered=None
+            if not state.get('admission_verified'):uncovered='admission-failed: Integrity admission of this turn did not complete'
+            elif not state.get('registration_id'):uncovered='registration-unresolved: Integrity admission passed but the turn-memory registration could not be opened'
+            if uncovered and (tool.get('name') in STATE_CHANGING_TOOLS or tool.get('name')=='call_mcp_tool'):
+                return deny(uncovered+', so state-changing tools and non-Integrity MCP calls are blocked for this turn. Integrity tools stay available. Tell the owner and stop; the next owner turn gets a new admission')
+            return passthrough
         return deny('admission-first: call '+SERVER+" integrity_context_admission_current_turn with turn_ref='"+state['turn_ref']+"' before any other tool")
     except Exception:return passthrough
 
@@ -141,18 +165,31 @@ def process(event,payload,*,root=store.ROOT,bus_dir=BUS_DIR,gap_call=lifecycle_g
         state=store.load(root,conversation)
         if event=='SessionStart':return notice('Integrity / Antigravity: product=antigravity, vendor by modelName; current-turn admission required. Separate conversation-bound broker.')
         if event=='PreInvocation':
-            step,prompt=last_owner(payload);model=payload.get('modelName');vendor=vendor_for_model(model)
-            fingerprint=hashlib.sha256((str(step)+'\0'+prompt).encode()).hexdigest();messages=[]
+            step,raw_prompt=last_owner(payload);prompt=clean_prompt(raw_prompt);model=effective_model(payload);vendor=vendor_for_model(model)
+            fingerprint=hashlib.sha256((str(step)+'\0'+raw_prompt).encode()).hexdigest();messages=[]
             if state.get('message_fingerprint')!=fingerprint:
+                superseded=None
                 if state.get('registration_id') and not state.get('turn_memory_closed'):
                     store.atomic(root/'history'/conversation/(str(state['generation'])+'.json'),state)
+                    # An open registration without a gap receipt is left behind by the new owner
+                    # turn; the broker records a notify-stage gap for it after the next admission.
+                    if not state.get('gap_receipt_id'):superseded=state['registration_id']
                 envroot=root/'turn-envelopes'/conversation;envroot.parent.mkdir(mode=0o700,parents=True,exist_ok=True)
                 if state.get('turn_ref'):envelopes.retire(state['turn_ref'],root=envroot,preserve_claimed=True)
                 generation=int(state.get('generation',0))+1;turn_id='antigravity:'+str(step)+':'+fingerprint;machine='machine:'+socket.gethostname().lower()
                 env=envelopes.stage(prompt,machine_id=machine,thread_id=conversation,turn_id=turn_id,generation=generation,root=envroot)
                 state={'conversation_id':conversation,'generation':generation,'message_fingerprint':fingerprint,'prompt_sha256':env['prompt_sha256'],'machine_id':machine,'turn_id':turn_id,'turn_ref':env['turn_ref'],'model_name':model,'vendor':vendor,'admission_attempted':False,'admission_verified':False,'turn_memory_closed':False,'stopped':False}
+                if superseded:state['superseded_registration_id']=superseded
                 messages.append(f"INTEGRITY READ PLANE PENDING: invoke integrity_context_admission_current_turn exactly once with turn_ref='{env['turn_ref']}'; omit limit and prompt. Product=antigravity, vendor={vendor}. Broker opens own Turn Memory registration after admission; use returned registration_id, append only for a durable result, then sign integrity_turn_memory_close with events or accurate no-event. Memory grants no target authority.")
             elif state.get('model_name')!=model:messages.append('INTEGRITY: model changed during an existing owner turn; new explicit user turn required. Append remains gated.')
+            elif state.get('stopped'):
+                # A new invocation for the same owner message after Stop continues that turn. Stop
+                # retired its envelope, so a turn that never attempted admission gets a fresh one.
+                state['stopped']=False
+                if not state.get('admission_attempted'):
+                    envroot=root/'turn-envelopes'/conversation;envroot.parent.mkdir(mode=0o700,parents=True,exist_ok=True)
+                    env=envelopes.stage(prompt,machine_id=state['machine_id'],thread_id=conversation,turn_id=state['turn_id'],generation=state['generation'],root=envroot)
+                    state['turn_ref']=env['turn_ref'];state['prompt_sha256']=env['prompt_sha256']
             try:
                 rows=bus_pointers(conversation,Path(bus_dir));pointer=bus_notice(rows)
                 state['bus_pointers']=rows
@@ -165,7 +202,7 @@ def process(event,payload,*,root=store.ROOT,bus_dir=BUS_DIR,gap_call=lifecycle_g
         if event=='PreToolUse':
             name,arguments=call
             if not state or state.get('stopped'):return deny('current-owner-turn-required')
-            if payload.get('modelName')!=state['model_name']:return deny('model-change-needs-new-owner-turn')
+            if effective_model(payload)!=state['model_name']:return deny('model-change-needs-new-owner-turn')
             if name=='integrity_context_admission':return deny('hook-current-turn-ref-required')
             if name=='integrity_context_admission_current_turn':
                 # The hook owns this turn's ref: fill it when the model omitted it (seen live with Claude), never accept a different one.

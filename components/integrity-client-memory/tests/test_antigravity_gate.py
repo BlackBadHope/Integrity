@@ -97,6 +97,13 @@ def test_admitted_turn_allows_standard_tools(gated):
                                             {"turn_ref": ref}))
     assert admitted["decision"] == "allow"
     assert run(gated, "PreToolUse", tool(payload, "view_file")) == {"decision": "allow"}
+    # Attempted but not yet verified by the broker: reads pass, other servers wait (gate v2).
+    assert run(gated, "PreToolUse", mcp(payload, "other_server", "x", {}))["decision"] == "deny"
+    path = state_path(root)
+    value = json.loads(path.read_text())
+    value.update(admission_verified=True, registration_id="sha256:" + "d" * 64)
+    path.write_text(json.dumps(value), encoding="utf-8")
+    assert run(gated, "PreToolUse", tool(payload)) == {"decision": "allow"}
     assert run(gated, "PreToolUse", mcp(payload, "other_server", "x", {})) == {}
 
 
