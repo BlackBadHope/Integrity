@@ -44,6 +44,10 @@ MARKER = "instance.json"
 ENV_HOME = "INTEGRITY_CORE_HOME"
 ACTION_LOG_DISTRIBUTION = "integrity-action-log"
 ACTION_LOG_VERSION = "2.11.0"
+# The Action Log refuses a configuration file whose "guardian_version" is not
+# exactly this value.  It is the contract of that component's configuration
+# reader, not the version of this package; the marker carries __version__.
+ACTION_LOG_CONFIG_GUARDIAN_VERSION = "6.1.0"
 # The Action Log reads one own configuration value at import: the file that
 # would hold an owner-provisioned workspace id.  The launcher points it into
 # the instance and creates no such file, so the id stays "unavailable".
@@ -247,7 +251,6 @@ class Core:
         self.action_log.ensure_db()
         self.paths.database.chmod(0o600)
         self.catalog = SeedCatalog(self.paths.catalog)
-        self._cursor = self.catalog.event_cursor()[1]
         self.sync()
 
         self._http = self.action_log.BoundedThreadingHTTPServer(("127.0.0.1", 0), self.action_log.Handler)
@@ -307,17 +310,22 @@ class Core:
         )
 
     def sync(self) -> int:
-        """Import the Action Log events the catalog does not have yet."""
-        with self.action_log.open_db() as database:
-            database.row_factory = sqlite3.Row
-            top = database.execute("SELECT COALESCE(MAX(id), 0) FROM events").fetchone()[0]
-            if top <= self._cursor:
-                return 0
-            rows = database.execute("SELECT * FROM events WHERE id > ? ORDER BY id", (self._cursor,)).fetchall()
-            events = self.action_log.rows_to_events(rows)
+        """Import the Action Log events the catalog does not have yet.
+
+        The cursor is read from the catalog, under the lock, on every call.  A
+        cursor kept in this process goes stale as soon as another session of
+        the same instance imports, and this one would then read and import the
+        same events again.
+        """
         with _catalog_lock(self.paths):
+            cursor = self.catalog.event_cursor()[1]
+            with self.action_log.open_db() as database:
+                database.row_factory = sqlite3.Row
+                rows = database.execute("SELECT * FROM events WHERE id > ? ORDER BY id", (cursor,)).fetchall()
+                if not rows:
+                    return 0
+                events = self.action_log.rows_to_events(rows)
             self.catalog.import_events(events)
-        self._cursor = int(top)
         return len(events)
 
     def close(self) -> None:
@@ -342,6 +350,31 @@ def create(home: Path) -> dict[str, Any]:
     if paths.home.is_symlink() or (paths.home.exists() and (not paths.home.is_dir() or any(paths.home.iterdir()))):
         raise CoreInstanceError(f"{paths.home} exists and is not empty; nothing was changed")
     _action_log_source()
+    # The folder is absent or empty here, so everything in it after this point
+    # was written by this call.  A failure removes it: a half-made instance
+    # would make the next init refuse the folder as "not empty".
+    mode = stat.S_IMODE(paths.home.stat().st_mode) if paths.home.exists() else None
+    try:
+        return _create(paths)
+    except BaseException:
+        _discard(paths.home, mode)
+        raise
+
+
+def _discard(home: Path, mode: int | None) -> None:
+    """Undo a failed ``create``: ``mode`` is the folder's mode before it, or None if it did not exist."""
+    if mode is None:
+        shutil.rmtree(home, ignore_errors=True)
+        return
+    for item in home.iterdir():
+        if item.is_dir() and not item.is_symlink():
+            shutil.rmtree(item, ignore_errors=True)
+        else:
+            item.unlink(missing_ok=True)
+    home.chmod(mode)
+
+
+def _create(paths: Paths) -> dict[str, Any]:
     _private_folder(paths.home)
     suffix = secrets.token_hex(6)
     marker = {
@@ -359,7 +392,7 @@ def create(home: Path) -> dict[str, Any]:
         "schema": "integrity/component-config/v1",
         "component": ACTION_LOG_DISTRIBUTION,
         "configured": True,
-        "guardian_version": "6.1.0",
+        "guardian_version": ACTION_LOG_CONFIG_GUARDIAN_VERSION,
         "memory_api_version": ACTION_LOG_VERSION,
         "owner_local_catalogue": None,
         "values": {ACTION_LOG_WORKSPACE_VALUE: str(paths.action_log / "workspace-id")},

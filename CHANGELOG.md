@@ -22,8 +22,12 @@ versions are unchanged unless an entry says otherwise.
 - It needs `integrity-action-log` 2.11.0 installed and refuses another
   version. On Windows and macOS it refuses and points to the local memory
   profile.
+- A session reads the catalog cursor from the catalog, under the lock, before
+  it imports, so it does not import again what another session of the same
+  instance imported. An `init` that fails part-way removes what it wrote.
 - `tests/test_core_instance.py` runs in CI on Ubuntu: two sessions in a row,
-  two at once, and one through an OpenSSH forced command. `docs/CORE_INSTANCE.md`
+  two at once, one through an OpenSSH forced command, an import that another
+  session made first, and an `init` stopped part-way. `docs/CORE_INSTANCE.md`
   lists what is not verified: a real agent client, two separate hosts, the
   hardened release mode, an upgrade over an existing instance.
 

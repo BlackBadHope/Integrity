@@ -39,6 +39,63 @@ def _run(*args: str) -> subprocess.CompletedProcess:
     return subprocess.run([*CLI, *args], capture_output=True, text=True, timeout=180)
 
 
+def _probe(code: str, *args: str) -> subprocess.CompletedProcess:
+    """Run launcher internals in their own process: loading the Action Log changes the environment."""
+    return subprocess.run([sys.executable, "-c", code, *args], capture_output=True, text=True, timeout=180)
+
+
+# One session inserts an event; another session of the same instance imports it
+# into the catalog first.  The first session must then find nothing left to do.
+SYNC_PROBE = """
+import json, sqlite3, sys
+from integrity_guardian import core_instance
+from integrity_guardian.seed_catalog import SeedCatalog
+
+core = core_instance.Core(sys.argv[1])
+try:
+    core.action_log.insert_event({
+        "actor": "core-instance",
+        "action": "agent_change_start",
+        "summary": "written while two sessions are open",
+        "details": {"task_id": "core-instance"},
+        "tags": ["core-instance"],
+        "event_uid": "client:core-instance:test-two-sessions",
+    })
+    with core.action_log.open_db() as database:
+        database.row_factory = sqlite3.Row
+        rows = database.execute("SELECT * FROM events WHERE id > ? ORDER BY id",
+                                (core.catalog.event_cursor()[1],)).fetchall()
+        events = core.action_log.rows_to_events(rows)
+    SeedCatalog(core.paths.catalog).import_events(events)
+    print(json.dumps({"read": len(events), "synced": core.sync(), "catalog": core.catalog.event_cursor()[0]}))
+finally:
+    core.close()
+"""
+
+# create() fails after the marker, the folders, the configuration, the database
+# and the first event are written.
+FAILED_INIT_PROBE = """
+import sys
+from integrity_guardian import core_instance
+
+
+class Stopped(Exception):
+    pass
+
+
+def stopped(home):
+    raise Stopped("stopped in the middle")
+
+
+core_instance.Core = stopped
+try:
+    core_instance.create(sys.argv[1])
+except Stopped:
+    sys.exit(7)
+sys.exit(0)
+"""
+
+
 class Session(Stand):
     """The stand's lifecycle helper over the stdio of one server process."""
 
@@ -114,8 +171,13 @@ def _doctor(home: Path) -> dict:
     return report
 
 
-@pytest.fixture
-def home(tmp_path):
+def _catalog_count(home: Path) -> int:
+    from integrity_guardian.seed_catalog import SeedCatalog
+
+    return SeedCatalog(core_instance.Paths(home).catalog).event_cursor()[0]
+
+
+def _prerequisites() -> None:
     if not LINUX:
         pytest.skip("the core instance runs on Linux only")
     if importlib.util.find_spec("integrity_action_log") is None:
@@ -123,6 +185,11 @@ def home(tmp_path):
         if REQUIRED:
             pytest.fail(message)
         pytest.skip(message)
+
+
+@pytest.fixture
+def home(tmp_path):
+    _prerequisites()
     folder = tmp_path / "core"
     done = _run("init", "--home", str(folder))
     assert done.returncode == 0, done.stderr[-3000:]
@@ -195,7 +262,39 @@ def test_two_sessions_open_at_once_both_write(home):
         held.stop()
     assert mine["returncode"] == 0 and mine["append"] == ("created", "confirmed-success")
     assert set(_event_uids(home)) == {core_instance.GENESIS_EVENT_UID, other["event_uid"], mine["event_uid"]}
+    # The catalog holds each Action Log event once: three, with nothing left to import.
+    assert len(_event_uids(home)) == 3 and _catalog_count(home) == 3
+    report = _doctor(home)
+    assert report["exit"] == 0 and report["by_name"]["catalog"]["result"] == "ok", report["checks"]
+
+
+def test_a_session_does_not_import_what_another_session_imported(home):
+    done = _probe(SYNC_PROBE, str(home))
+    assert done.returncode == 0, done.stderr[-3000:]
+    # One event was new; the other session imported it, so this one imports nothing.
+    assert json.loads(done.stdout) == {"read": 1, "synced": 0, "catalog": 2}
     assert _doctor(home)["exit"] == 0
+
+
+def test_a_failed_init_leaves_nothing_behind(tmp_path):
+    _prerequisites()
+    absent = tmp_path / "absent"
+    failed = _probe(FAILED_INIT_PROBE, str(absent))
+    assert failed.returncode == 7, failed.stderr[-3000:]
+    assert not absent.exists()
+
+    empty = tmp_path / "empty"
+    empty.mkdir(mode=0o750)
+    empty.chmod(0o750)
+    failed = _probe(FAILED_INIT_PROBE, str(empty))
+    assert failed.returncode == 7, failed.stderr[-3000:]
+    assert empty.is_dir() and not any(empty.iterdir())
+    assert stat.S_IMODE(empty.stat().st_mode) == 0o750
+
+    for folder in (absent, empty):
+        again = _run("init", "--home", str(folder))
+        assert again.returncode == 0, again.stderr[-3000:]
+        assert _doctor(folder)["exit"] == 0
 
 
 def test_uninstall_is_a_dry_run_until_confirmed(home, tmp_path):

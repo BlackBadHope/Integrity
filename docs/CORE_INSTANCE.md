@@ -74,6 +74,10 @@ selects another folder; it must be empty or missing, and it must not be inside
 a clone. The folder has mode 0700; the marker, the Action Log configuration,
 the database and the key files are private to the account.
 
+If `init` fails part-way, it removes what it wrote: a folder that did not
+exist is removed, and a folder that was empty is left empty with the mode it
+had. The next `init` into the same folder starts from nothing.
+
 ## Check
 
 ```bash
@@ -126,10 +130,15 @@ lines of its clients and the release folder yourself.
   the real `serve` process and talks to it over stdio:
   - `init` makes a private instance that `doctor` accepts, and a second `init`
     into the same folder changes nothing;
+  - an `init` that is stopped after it wrote the database leaves nothing
+    behind, and the next `init` into the same folder succeeds;
   - `doctor` fails when a key file is readable by other accounts;
   - a second session reads the event that the first one wrote, after the first
     server process has ended;
-  - two sessions open at the same time both write;
+  - two sessions open at the same time both write, and the catalog then holds
+    each of the three events once;
+  - a session imports nothing when another session of the same instance has
+    already imported the new event;
   - `uninstall` is a dry run until `--yes`, and it refuses a foreign folder;
   - the instance is reached through an OpenSSH forced command: a device with
     only an SSH key runs a full turn, and a local session then reads its event.
