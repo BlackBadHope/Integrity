@@ -1,5 +1,7 @@
 # Integrity Codex Persistent supervisor 0.1.0rc3
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 **Private source/package candidate. Disabled by default. No live activation.**
 
 This is an attach-only supervisor for one externally admitted Codex app-server

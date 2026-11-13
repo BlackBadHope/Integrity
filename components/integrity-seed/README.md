@@ -1,5 +1,7 @@
 # Integrity Seed public source component
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 This is the independently packaged Codex Seed plugin, distinct from the full
 integrity-action-log distribution. Plugin metadata is 0.1.14; its bundled stdlib
 runtime is 0.1.4. Their version numbers are independent. The metadata license is

@@ -1,5 +1,7 @@
 # integrity-killswitch
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 A local switch that turns agent access off per vendor, or for all agents at
 once, on one workstation.
 

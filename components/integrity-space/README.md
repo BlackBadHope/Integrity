@@ -1,5 +1,7 @@
 # Integrity Space 0.2.0
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 Optional MCP Apps UI over explicitly configured Integrity sources. Python 3.11+
 and Guardian `>=7.0.0,<8` are required. Versions of the MCP wire/API packages
 are pinned because `mcp.server.apps`/`MCPServer` are part of the interface.

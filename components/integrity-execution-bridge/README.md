@@ -1,5 +1,7 @@
 # Integrity Execution Bridge 0.1.0rc5
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 **Private source/package candidate. Not installed or activated on any user host.**
 
 ChatGPT is the model; the machine executes concrete operations. This component

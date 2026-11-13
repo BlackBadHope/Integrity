@@ -1,5 +1,7 @@
 # Integrity Active Inquiry 0.1.0rc2
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 **A development-ready source candidate for asking the next useful question.**
 Candidate ID: `2026.09.17-active-inquiry.2`. Authority: ChangeIntent #209.
 This is optional, offline, and independently packaged. Guardian remains 5.5.1;

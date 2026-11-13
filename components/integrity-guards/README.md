@@ -1,5 +1,7 @@
 # integrity-guards
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 Hook-side guards for coding agents: they read one tool call from a hook,
 classify it, and answer with a warning or a refusal. They never run the
 command themselves.

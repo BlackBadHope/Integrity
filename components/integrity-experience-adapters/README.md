@@ -1,5 +1,7 @@
 # Integrity Experience Adapters — 0.1.0rc3
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 **September integration successor — ChangeIntent #201.** See UPDATE-RC.md (not included in public source) for fixes, journal compatibility and exact evidence boundaries. Original RC evidence is historical, not a claim about this successor.
 
 Optional, separately packaged release candidate in the canonical Integrity

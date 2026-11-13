@@ -1,5 +1,7 @@
 # A local, read-only first connection
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 This example gives Codex, Claude Code or Antigravity four real Integrity Seed
 read tools. It uses the Guardian implementation for catalog verification,
 snapshot IDs, ranked recall and exact immutable UID lookup. No account,

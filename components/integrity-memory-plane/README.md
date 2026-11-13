@@ -1,5 +1,7 @@
 # integrity-memory-plane
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 Seed delta sync, signed catalog seal, archive/capacity/retention, retrieval/projection, NATS/S3/PostgreSQL and physical verification tools. SQL migrations and existing tests are retained. Operational config, credentials, containers and dataset fixtures are intentionally not shipped. Choose extras only for the tools used.
 
 ## Installation and configuration

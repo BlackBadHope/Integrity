@@ -1,5 +1,7 @@
 # Canonical source layout and historical profiles
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 This directory is source-layout metadata, not a Python distribution or an
 installer. Guardian 6.1.0 uses one canonical implementation under
 [`src/integrity_guardian`](../../src/integrity_guardian). Integrations have their

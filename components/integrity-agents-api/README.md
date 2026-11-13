@@ -1,5 +1,7 @@
 # Integrity Agents API — 0.1.0rc2
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 **September integration successor — ChangeIntent #201.** See UPDATE-RC.md (not included in public source) for fixes, journal compatibility and exact evidence boundaries. Original RC evidence is historical, not a claim about this successor.
 
 An optional executor adapter in the canonical Integrity monorepo. Implements

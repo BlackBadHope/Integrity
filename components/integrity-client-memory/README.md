@@ -1,5 +1,7 @@
 # integrity-client-memory
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 ## Status notices without false alarms (1.11.1)
 
 `MEMORY UNREACHABLE` now needs a broker start failure, or a fresh probe, run

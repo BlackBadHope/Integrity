@@ -1,5 +1,7 @@
 # integrity-bridges
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 Separate hub and private-memory bridge profiles, delegation transports and authenticated native peer adapters. Both profiles are retained because reconciliation/ownership behavior differs. Byte-identical unix_ws_stdio has one canonical implementation. No SSH alias, command, endpoint or peer credential is preconfigured.
 
 ## Installation and configuration

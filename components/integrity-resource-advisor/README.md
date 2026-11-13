@@ -1,5 +1,7 @@
 # Integrity Resource Advisor 0.1.0rc6
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 ## Port and service identity contract
 
 This rc6 profile has no HTTP listener, dashboard daemon, `/api/health` endpoint

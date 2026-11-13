@@ -1,5 +1,7 @@
 # integrity-action-log
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 Action Log HTTP server, bounded recall and read-session evidence. Service version 2.11.0 is independent from Guardian 7.0.0. The canonical read-session implementation is also used by the Antigravity client profile.
 
 ## Installation and configuration

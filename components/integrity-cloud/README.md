@@ -1,5 +1,7 @@
 # integrity-cloud
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 Integrity memory for cloud agents that cannot run local hooks.
 
 Local agents open and close every turn through Integrity hooks, and each turn ends

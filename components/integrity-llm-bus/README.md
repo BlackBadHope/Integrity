@@ -1,5 +1,7 @@
 # integrity-llm-bus
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 SQLite message queue for LLM agents, dynamic harness registry, bounded native steering, relay/outbox,
 filesystem bridge, and (since 1.1.0) an optional hub daemon so several machines share one bus.
 No queue, agents registry, webhook, native session identifier or historical message is included.

@@ -1,5 +1,7 @@
 # Linux core: release wrapper and forced-command transport
 
+[Project README](../../README.md) · [Documentation](../../docs/README.md) · [What is verified](../../docs/STATUS.md)
+
 These files are the launch and verification scripts that run next to an
 installed Guardian Memory & Synapse package on a Linux core host. MCP clients
 reach the core over an OpenSSH forced command. The files are copied from a
