@@ -41,8 +41,19 @@ and what was not.
 | [Architecture](../ARCHITECTURE.md) | Layers, boundaries, the authorization lifecycle, what the suite verifies |
 | [What is verified](STATUS.md) | Each use case and how far it has been checked; platforms; known limitations |
 | [Uroboros](UROBOROS.md) | Procedural memory: how verified work becomes a reusable route |
+| [The arbiter role](ARBITER-ROLE.md) | A coordinating agent between the owner and the agents that do the work: what the bus enforces, and what is only a convention |
 | [Expected test skips](expected-test-skips.md) | Test counts and skips per platform, measured in CI |
 | [Roadmap](../ROADMAP.md) | What is next, and what is deliberately not claimed |
+
+## Examples
+
+These folders are examples. They are starting points, not parts of a release.
+
+| Page | What it gives you |
+| --- | --- |
+| [Starter pack of owner rules](../examples/owner-rules-starter/README.md) | 20 generic behaviour rules in English and Russian that the memory server can offer to an agent before it acts |
+| [Two-session tasks that need memory](../examples/memory-carryover-tasks/README.md) | Six small coding tasks whose second session depends on what the first one decided, with reference solutions and tests |
+| [Lab tools](../tools/lab/README.md) | Operator scripts for an isolated two-VM lab, configured from one `lab.json`. Checked statically only; not run in this form |
 
 ## Components
 

@@ -1,0 +1,85 @@
+{
+  "schema": "integrity-lab-config/example",
+  "project_id": "example-project-lab",
+  "root": "C:\\lab",
+  "phase": "PREPARED_NO_EXECUTION",
+  "pilot_execution_allowed": false,
+  "agents_enabled": false,
+  "benchmarks_enabled": false,
+  "network_enabled": false,
+  "inherit_user_runtime": false,
+  "benchmark_scope": "BOUNDED_EFFICIENCY_ONLY",
+  "managed_hooks_isolation": "NOT_RUN",
+  "adapters": {
+    "integrity_mcp": {"enabled": true, "running": false, "endpoint": null, "status": "NOT_RUN", "native_lifecycle": "NOT_RUN"},
+    "native_peer": {"enabled": true, "running": false, "endpoint": null, "status": "NOT_RUN"},
+    "vendor_bus": {"enabled": false, "endpoint": null, "status": "DISABLED"},
+    "linux_vm_backend": {"enabled": true, "running": false, "endpoint": null, "status": "NOT_RUN"}
+  },
+  "stores": {
+    "shared": "state/shared.sqlite3",
+    "session_a": "state/session_a.sqlite3",
+    "session_b": "state/session_b.sqlite3",
+    "negative_control": "state/negative_control.sqlite3",
+    "queue": "state/queue.sqlite3",
+    "results": "state/results.sqlite3"
+  },
+  "candidate_participants": [],
+  "registered_participants": [],
+  "limits": {
+    "deadline_seconds": 300,
+    "max_messages_per_episode": 12,
+    "max_model_turns": 8,
+    "stop_on_unchanged_observations": 3
+  },
+  "virtualization": {"stage": "NOT_CONFIGURED"},
+  "host": {
+    "codex_cli": "C:\\lab\\host\\codex\\codex.exe",
+    "base_python": "C:\\lab\\host\\python\\python.exe",
+    "denied_paths": ["C:\\lab-denied\\working-tree", "C:\\lab-denied\\working-bus"],
+    "denied_sentinels": {
+      "working_source": "C:\\lab-denied\\working-tree\\sentinel.txt",
+      "working_bus_database": "C:\\lab-denied\\working-bus\\bus.sqlite3"
+    },
+    "vboxmanage": "C:\\lab\\host\\VirtualBox\\VBoxManage.exe",
+    "guest_additions_iso": "C:\\lab\\host\\VirtualBox\\VBoxGuestAdditions.iso",
+    "unattended_template": "C:\\lab\\host\\VirtualBox\\UnattendedTemplates\\win_nt6_unattended.xml"
+  },
+  "vms": {
+    "windows": {
+      "name": "lab-windows-guest",
+      "uuid": "00000000-0000-4000-8000-000000000001",
+      "hostname": "LAB-WIN-GUEST",
+      "country": "US"
+    },
+    "linux": {
+      "name": "lab-linux-guest",
+      "uuid": "00000000-0000-4000-8000-000000000002",
+      "hostname": "lab-linux-guest",
+      "egress_mac": "020000000002"
+    }
+  },
+  "network": {
+    "internal_network": "lab-internal",
+    "windows_guest_ip": "192.0.2.10",
+    "linux_guest_ip": "192.0.2.20",
+    "prefix_length": 24,
+    "proxy_port": 3128
+  },
+  "linux_guest": {
+    "home": "/var/lib/lab",
+    "instance_id": "example-instance",
+    "device_id": "example-device",
+    "genesis_id": "example-genesis",
+    "launcher_migration_preimage_sha256": null,
+    "backend_migration_preimage_sha256": null
+  },
+  "egress_network": {
+    "nat_address": "198.51.100.15",
+    "nat_gateway": "198.51.100.1",
+    "nameservers": ["198.51.100.53"],
+    "kernel_deny_networks": ["203.0.113.0/24"],
+    "probe_allowed_url": "https://chatgpt.com/",
+    "probe_private_address": "203.0.113.10"
+  }
+}

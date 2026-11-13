@@ -1,0 +1,19 @@
+{
+  "task": "T2",
+  "type": "external-mock-root-cause",
+  "s1_only_facts": [
+    "seq zero is stale and must not set baseline",
+    "12 bit modulo 4096",
+    "ignore nonincreasing seq without state mutation",
+    "invalid counter does not change baseline"
+  ],
+  "s1_symbols_for_rework": [
+    "parse_reading"
+  ],
+  "success": "all hidden unittest cases pass after S2",
+  "cancelled_decision_marker": null,
+  "copy_exclusions": [
+    "hidden_tests",
+    "_private"
+  ]
+}

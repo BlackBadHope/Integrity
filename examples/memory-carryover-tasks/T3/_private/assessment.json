@@ -1,0 +1,19 @@
+{
+  "task": "T3",
+  "type": "s1-only-customer-constraint",
+  "s1_only_facts": [
+    "exact allowed output keys",
+    "domain-only lowercase email projection",
+    "no hashes or local part",
+    "invalid tickets raise ValueError"
+  ],
+  "s1_symbols_for_rework": [
+    "validate_ticket"
+  ],
+  "success": "all hidden unittest cases pass after S2",
+  "cancelled_decision_marker": null,
+  "copy_exclusions": [
+    "hidden_tests",
+    "_private"
+  ]
+}

@@ -124,6 +124,28 @@ states what is verified.
   where any local user could read it from the process list. A clean child
   shell now reads the token file and exports the variable.
 
+### Examples and the arbiter role
+
+- **`examples/owner-rules-starter`**: 20 generic owner rules in the
+  `owner-rule/v1` format, in English and Russian, each with a reason and a
+  way to follow it. It is an example to copy and edit. A test loads the pack
+  and checks that eight requests select the expected rule.
+- **`examples/memory-carryover-tasks`**: six small two-session coding tasks
+  with reference solutions and tests. It is an example of how such a set is
+  built; it has no harness and no measurements.
+- **`tools/lab`**: operator tools for an isolated two-VM lab, published as a
+  worked example. Every value that describes one particular lab (paths, VM
+  names and UUIDs, guest addresses, build pins) is read from a `lab.json`
+  that you write from `lab.example.json`. The published form was checked
+  statically only: no VM, guest or network call was made with it.
+- **[The arbiter role](docs/ARBITER-ROLE.md)**: a page on the coordinating
+  agent of the agent mesh. It separates what `mesh_store.py` enforces from
+  what is a working convention.
+- **Tests for the owner-answer rule of the agent mesh.** The rule was already
+  in `mesh_store.py` and had no test here. A node blocked on a decision opens
+  only on the owner's approval of exactly that decision; 29 cases now cover
+  it, including `rebuild`.
+
 ### Documentation
 
 - **The documentation set was reworked for the current functionality.** The

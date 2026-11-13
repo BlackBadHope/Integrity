@@ -1,0 +1,20 @@
+{
+  "task": "T5",
+  "type": "offline-config-migration-idempotence",
+  "s1_only_facts": [
+    "missing version means v1",
+    "default port 8123 and timeout 35.0",
+    "remove old host port timeout_ms keys",
+    "deep copy opaque unknown fields",
+    "v2 deep-copy identity and strict idempotence"
+  ],
+  "s1_symbols_for_rework": [
+    "load_config"
+  ],
+  "success": "all hidden unittest cases pass after S2",
+  "cancelled_decision_marker": null,
+  "copy_exclusions": [
+    "hidden_tests",
+    "_private"
+  ]
+}
