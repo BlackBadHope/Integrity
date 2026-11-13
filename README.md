@@ -8,12 +8,12 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/demo-dark.svg">
-    <img src="docs/assets/demo-light.svg" alt="Four scenes drawn from the records of a real run with Claude Code. One: agent A claims a task, writes a result and closes its turn with a signed receipt. Two: agent B claims the same task and writes another result. Three: agent C does not ask agent B; from memory it reads what B wrote, who B says it is, what B claimed, and that the turn of B closed with a signed receipt. Four: in a second run B stops early, and C sees a claim that was never released and a turn with no closing receipt." width="100%">
+    <img src="docs/assets/demo-light.svg" alt="Four scenes drawn from the records of a real run: agents A and C in Claude Code, agent B in Codex CLI. One: agent A claims a task, writes a result and closes its turn with a signed receipt. Two: agent B claims the same task and writes another result. Three: agent C does not ask agent B; from memory it reads what B wrote, who B says it is, what B claimed, and that the turn of B closed with a signed receipt. Four: in a second run B stops early, and C sees a claim that was never released and a turn with no closing receipt." width="100%">
   </picture>
 </p>
 
 <p align="center"><sub>
-  Drawn from two recorded runs: three Claude Code processes and one <code>guardian-local-memory</code> on a Windows machine, 13 Nov 2026.
+  Drawn from two recorded runs: agents A and C in Claude Code, agent B in Codex CLI, and one <code>guardian-local-memory</code> on a Windows machine, 13 Nov 2026.
   The agent client, the account and the model are the user's own.
   <a href="demo/README.md">Repeat it with your agent</a> ·
   <a href="#the-demo-step-by-step">what each scene shows</a>
@@ -88,8 +88,8 @@ did. C gets the answer from memory:
 The agents are not played by a script. They are processes of an agent client
 that you already use, with your account and your model. Integrity adds the
 memory server; the client starts it over MCP. The picture at the top is drawn
-from the records of two such runs with Claude Code, kept in
-[`demo/recorded`](demo/recorded). [`demo/README.md`](demo/README.md) has the
+from the records of two such runs, kept in
+[`demo/recorded`](demo/recorded): A and C ran in Claude Code, B in Codex CLI. [`demo/README.md`](demo/README.md) has the
 commands and the prompts for A, B and C.
 
 ```mermaid
@@ -105,9 +105,9 @@ flowchart LR
 
 | Scene | What happens | The tools the agent calls |
 | --- | --- | --- |
-| 1 A writes | Agent A opens a turn, claims the task, writes `Result: 2`, releases the claim and closes the turn. The receipt is signed and lists the event. | `integrity_turn_memory_open`, `integrity_work_claim`, `integrity_append_event`, `integrity_work_release`, `integrity_turn_memory_close` |
+| 1 A writes | Agent A opens a turn, claims the task, writes `Result: 2`, releases the claim and closes the turn. The receipt is signed and lists the event. | `lm_turn_open`, `lm_work_claim`, `lm_append_event`, `lm_work_release`, `lm_turn_close` |
 | 2 B writes | Agent B does the same and writes `Result: X`. | the same five |
-| 3 C reads | Agent C recalls the events of the task, then asks for the turn behind B's event. It gets B's event as written, B's declared names, B's claim with its release, and B's signed receipt. | `integrity_seed_recall`, `integrity_turn_receipt_by_event`, `integrity_work_claims` |
+| 3 C reads | Agent C recalls the events of the task, then asks for the turn behind B's event. It gets B's event as written, B's declared names, B's claim with its release, and B's signed receipt. | `lm_seed_recall`, `lm_turn_receipt_by_event`, `lm_work_claims` |
 | 4 B broke off | A second run. B stops after writing: no release, no close. C sees a claim that was never released and a turn that is still open. | the same three |
 
 What the demo is not:
@@ -122,8 +122,9 @@ What the demo is not:
   hash chain.
 - In scene 4 agent B stops because its prompt tells it to. A killed process
   was not tried with a real client.
-- The records come from Claude Code on Windows. No other client was run
-  against this server; [`demo/README.md`](demo/README.md) lists what was run.
+- The records come from Claude Code and Codex CLI on Windows. Antigravity
+  was not run against this server; [`demo/README.md`](demo/README.md) lists
+  what was run.
 
 `tests/test_demo.py` runs in CI on Linux and Windows without a model. It
 replays the recorded tool calls against a new instance and fails when this
@@ -223,9 +224,11 @@ claude -p --mcp-config .mcp.json --strict-mcp-config --allowedTools mcp__integri
 ```
 
 Integrity takes no vendor key and calls no model: the client does, with your
-account. This was run with Claude Code on Windows. Codex and Antigravity get a
-block of the same format as in the read-only example below, but were not run
-against this server. To remove everything: `guardian-local-memory uninstall --yes`.
+account. This was run on Windows with Claude Code and, for agent B, with
+Codex CLI; the [demo page](demo/README.md#an-agent-in-codex-cli) has the Codex
+command. Antigravity gets a block of the same format as in the read-only
+example below, but was not run against this server. To remove everything:
+`guardian-local-memory uninstall --yes`.
 
 This is install stage 1, one machine. It is not the core write path; the
 [local memory page](docs/LOCAL_MEMORY.md) says what it does not prove.

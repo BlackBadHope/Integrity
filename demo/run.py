@@ -11,8 +11,10 @@ pictures.
     python demo/run.py --svg DIR       also write demo-light.svg and demo-dark.svg to DIR
     python demo/run.py --check DIR     fail if the pictures in DIR differ from the records
     python demo/run.py record --client NAME --out FILE A.jsonl B.jsonl C.jsonl
-                                       build a record from your own run (Claude Code,
-                                       `--output-format stream-json --verbose`)
+                                       build a record from your own run; each file is
+                                       what one client printed: Claude Code with
+                                       `--output-format stream-json --verbose`, or
+                                       Codex CLI with `exec --json`
 """
 from __future__ import annotations
 
@@ -26,8 +28,11 @@ from xml.sax.saxutils import escape
 HERE = Path(__file__).resolve().parent
 RECORDS = {"closed": HERE / "recorded" / "closed.json", "broken-off": HERE / "recorded" / "broken-off.json"}
 SCHEMA = "integrity-demo-record/v1"
-SERVER_PREFIX = "mcp__integrity_local_memory__"
+SERVER = "integrity_local_memory"
+SERVER_PREFIX = "mcp__" + SERVER + "__"
 ROLES = ("A", "B", "C")
+# How a scene shows the command of one agent; the key is the first word of the client name.
+COMMANDS = {"claude": "claude -p < {prompt}", "codex": "codex exec - < {prompt}"}
 
 
 class DemoFailure(RuntimeError):
@@ -45,17 +50,36 @@ def prompt_digest(path: Path) -> str:
     return "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def _codex_call(item: dict) -> dict:
+    """One `mcp_tool_call` item of Codex CLI `exec --json`."""
+    failed = item.get("error") is not None or item.get("status") != "completed"
+    parts = (item.get("result") or {}).get("content") or []
+    body = "".join(part.get("text", "") for part in parts if isinstance(part, dict))
+    result = {"error": str(item.get("error"))} if failed or not body else json.loads(body)
+    return {"tool": item["tool"], "arguments": item.get("arguments") or {}, "is_error": failed, "result": result}
+
+
 def read_client_output(path: Path) -> dict:
-    """Server tool calls and the final answer from one Claude Code stream-json file."""
+    """Server tool calls and the final answer from what one client printed.
+
+    Two formats are read: Claude Code `--output-format stream-json`, and Codex
+    CLI `exec --json`. Codex does not print the name of its model.
+    """
     calls: list[dict] = []
     pending: dict[str, dict] = {}
     model, answer = "", ""
     for line in path.read_text(encoding="utf-8").splitlines():
-        if not line.strip():
+        if not line.strip().startswith("{"):
             continue
         row = json.loads(line)
         kind = row.get("type")
-        if kind == "system" and row.get("subtype") == "init":
+        if kind == "item.completed":
+            item = row.get("item") or {}
+            if item.get("type") == "agent_message":
+                answer = str(item.get("text", ""))
+            elif item.get("type") == "mcp_tool_call" and item.get("server") == SERVER:
+                calls.append(_codex_call(item))
+        elif kind == "system" and row.get("subtype") == "init":
             model = str(row.get("model", ""))
         elif kind == "assistant":
             for part in row["message"]["content"]:
@@ -79,15 +103,33 @@ def read_client_output(path: Path) -> dict:
     return {"model": model, "calls": calls, "answer": answer.strip()}
 
 
-def build_record(client: str, recorded: str, platform: str, prompts: list[Path], outputs: list[Path]) -> dict:
+def build_record(clients: list[str], recorded: str, platform: str, prompts: list[Path], outputs: list[Path]) -> dict:
+    """`clients` is one name for all three agents, or one name for each of A, B and C."""
     expect(len(prompts) == len(outputs) == 3, "a record needs three prompts and three client outputs: A, B, C")
+    expect(len(clients) in (1, 3), "give one client name, or three: for A, B and C")
+    names = list(clients) * 3 if len(clients) == 1 else list(clients)
     agents = []
-    for role, prompt, output in zip(ROLES, prompts, outputs, strict=True):
+    for role, name, prompt, output in zip(ROLES, names, prompts, outputs, strict=True):
         parsed = read_client_output(output)
-        agents.append({"role": role, "prompt": prompt.resolve().relative_to(HERE.parent).as_posix(),
+        agents.append({"role": role, "client": name, "prompt": prompt.resolve().relative_to(HERE.parent).as_posix(),
                        "prompt_sha256": prompt_digest(prompt), "model": parsed["model"],
                        "calls": parsed["calls"], "answer": parsed["answer"]})
-    return {"schema": SCHEMA, "recorded": recorded, "client": client, "platform": platform, "agents": agents}
+    return {"schema": SCHEMA, "recorded": recorded, "client": ", ".join(dict.fromkeys(names)),
+            "platform": platform, "agents": agents}
+
+
+def client_of(record: dict, agent: dict) -> str:
+    return agent.get("client") or record["client"]
+
+
+def who(record: dict, agent: dict) -> str:
+    """The client and, when the client printed it, the model."""
+    return client_of(record, agent) + (", " + agent["model"] if agent.get("model") else "")
+
+
+def command(record: dict, agent: dict) -> str:
+    first = client_of(record, agent).split()[0].lower()
+    return COMMANDS.get(first, "your-agent-client < {prompt}").format(prompt=agent["prompt"])
 
 
 def load_record(path: Path) -> dict:
@@ -120,9 +162,9 @@ def clock(stamp: str) -> str:
 def facts(record: dict) -> dict:
     """What agent C learned about agent B, taken from the tool results and not from C's prose."""
     writer, reader = record["agents"][1], record["agents"][2]
-    written = _result(writer, "integrity_append_event")
-    recalled = _result(reader, "integrity_seed_recall")["events"]
-    found = _result(reader, "integrity_turn_receipt_by_event")
+    written = _result(writer, "lm_append_event")
+    recalled = _result(reader, "lm_seed_recall")["events"]
+    found = _result(reader, "lm_turn_receipt_by_event")
     expect(found["event"]["event_uid"] == written["event_uid"], "agent C looked up another event than agent B wrote")
     turn = found["turn"]
     return {
@@ -146,25 +188,25 @@ def facts(record: dict) -> dict:
 
 def writer_scene(record: dict, index: int) -> dict:
     agent = record["agents"][index]
-    opened = _result(agent, "integrity_turn_memory_open")
-    claim = _result(agent, "integrity_work_claim")
-    event = _result(agent, "integrity_append_event")
-    summary = next(call["arguments"]["summary"] for call in agent["calls"] if call["tool"] == "integrity_append_event")
-    receipt = _result(agent, "integrity_turn_memory_close")["receipt"]
+    opened = _result(agent, "lm_turn_open")
+    claim = _result(agent, "lm_work_claim")
+    event = _result(agent, "lm_append_event")
+    summary = next(call["arguments"]["summary"] for call in agent["calls"] if call["tool"] == "lm_append_event")
+    receipt = _result(agent, "lm_turn_close")["receipt"]
     expect(claim["status"] == "acquired", f"agent {agent['role']} did not get the claim")
-    expect(_called(agent, "integrity_work_release"), f"agent {agent['role']} did not release the claim")
+    expect(_called(agent, "lm_work_release"), f"agent {agent['role']} did not release the claim")
     expect([row["event_uid"] for row in receipt["events"]] == [event["event_uid"]],
            f"the receipt of agent {agent['role']} does not list its event")
     name = next(call["arguments"]["declared_agent"] for call in agent["calls"]
-                if call["tool"] == "integrity_turn_memory_open")
-    return {"title": f"agent {agent['role']} claims the task and writes ({record['client']}, {agent['model']})",
+                if call["tool"] == "lm_turn_open")
+    return {"title": f"agent {agent['role']} claims the task and writes ({who(record, agent)})",
             "lines": [
-                ("cmd", f"claude -p < {agent['prompt']}"),
-                ("out", f"integrity_turn_memory_open   turn of {name} registered, {short(opened['registration_id'])}"),
-                ("out", f"integrity_work_claim         {claim['resources'][0]}: acquired, fence {claim['fence_token']}"),
-                ("out", f"integrity_append_event       event {event['event_id']}: \"{summary}\""),
-                ("out", f"integrity_work_release       released, names event {event['event_id']}"),
-                ("ok", f"integrity_turn_memory_close  signed receipt {short(receipt['receipt_id'])} lists event "
+                ("cmd", command(record, agent)),
+                ("out", f"lm_turn_open      turn of {name} registered, {short(opened['registration_id'])}"),
+                ("out", f"lm_work_claim     {claim['resources'][0]}: acquired, fence {claim['fence_token']}"),
+                ("out", f"lm_append_event   event {event['event_id']}: \"{summary}\""),
+                ("out", f"lm_work_release   released, names event {event['event_id']}"),
+                ("ok", f"lm_turn_close     signed receipt {short(receipt['receipt_id'])} lists event "
                        f"{event['event_id']}"),
             ]}
 
@@ -174,9 +216,9 @@ def reader_scene(record: dict, title: str) -> dict:
     recalled = ", ".join(f"\"{summary}\" by {actor}" for actor, summary in known["recalled"])
     released = "claim-released" in known["claim_kinds"]
     lines = [
-        ("cmd", f"claude -p < {agent['prompt']}"),
-        ("out", f"integrity_seed_recall        {len(known['recalled'])} events: {recalled}"),
-        ("out", f"integrity_turn_receipt_by_event   event {known['event_id']}: \"{known['summary']}\""),
+        ("cmd", command(record, agent)),
+        ("out", f"lm_seed_recall             {len(known['recalled'])} events: {recalled}"),
+        ("out", f"lm_turn_receipt_by_event   event {known['event_id']}: \"{known['summary']}\""),
         ("out", "  author  " + " / ".join(known["author"]) + "   (" + known["author_note"] + ")"),
     ]
     resource = known["claim_resources"][0] if known["claim_resources"] else "?"
@@ -298,7 +340,9 @@ def main(argv: list[str] | None = None) -> int:
     arguments = list(sys.argv[1:] if argv is None else argv)
     if arguments[:1] == ["record"]:
         parser = argparse.ArgumentParser(prog="run.py record", description="Build a record from your own run.")
-        parser.add_argument("--client", required=True, help='client name and version, for example "Claude Code 2.1"')
+        parser.add_argument("--client", required=True, nargs="+", metavar="NAME",
+                            help='client name and version, for example "Claude Code 2.1"; one for all three '
+                                 'agents, or three: for A, B and C')
         parser.add_argument("--platform", default=sys.platform)
         parser.add_argument("--recorded", required=True, metavar="DATE", help="the day of the run, YYYY-MM-DD")
         parser.add_argument("--prompts", nargs=3, type=Path, metavar="FILE",

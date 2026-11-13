@@ -50,10 +50,18 @@ def test_the_published_prompts_are_the_ones_that_were_run(records, demo) -> None
 def test_c_read_what_b_wrote_claimed_and_how_b_closed(records, demo) -> None:
     known = demo.facts(records["closed"])
     assert known["recalled"] == [("agent-a", "Result: 2"), ("agent-b", "Result: X")]
-    assert known["summary"] == "Result: X" and known["author"] == ("agent-b", "claude-code", "local-machine")
+    assert known["summary"] == "Result: X" and known["author"] == ("agent-b", "codex", "local-machine")
     assert "not verified" in known["author_note"]
     assert known["claim_kinds"] == ["claim-acquired", "claim-released"] and known["release_names_event"]
     assert known["turn_status"] == "closed" and known["listed"] and not known["gap_recorded"]
+
+
+def test_the_records_are_a_run_of_two_clients(records, demo) -> None:
+    for record in records.values():
+        clients = [demo.client_of(record, agent) for agent in record["agents"]]
+        assert [name.split(" ")[0] for name in clients] == ["Claude", "Codex", "Claude"]
+        declared = [agent["calls"][0]["arguments"]["declared_client"] for agent in record["agents"][:2]]
+        assert declared == ["claude-code", "codex"]
 
 
 def test_c_saw_that_b_broke_off(records, demo) -> None:
