@@ -51,6 +51,9 @@ jobs:
           python .github/scripts/build_components.py --root . --output "$RUNNER_TEMP/integrity-dist"
           python .github/scripts/verify_wheels.py --root . --wheels "$RUNNER_TEMP/integrity-dist"
           python .github/scripts/install_components.py --wheels "$RUNNER_TEMP/integrity-dist" --venv "$RUNNER_TEMP/integrity-check" --github-path "$GITHUB_PATH"
+      - name: Install the kill switch alone, check it and remove it
+        # Its own empty environment: proves the switch needs no other Integrity package.
+        run: python .github/scripts/killswitch_standalone_check.py --wheels "$RUNNER_TEMP/integrity-dist" --work "$RUNNER_TEMP/killswitch-alone"
       - name: Verify installed public profile
         run: |
           guardian version --all

@@ -71,6 +71,12 @@ python -m pip install ./components/integrity-home
 
 Global options belong before the subcommand.
 
+### The kill switch alone
+
+`integrity-killswitch` needs nothing else from this repository, not even
+Guardian. Its [README](../components/integrity-killswitch/README.md#install-it-on-its-own)
+gives the install command, the `doctor` check and the removal.
+
 ### Other components
 
 [BOOTSTRAP.md](../BOOTSTRAP.md#install-functional-components) shows how to

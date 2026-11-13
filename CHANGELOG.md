@@ -7,6 +7,20 @@ All notable public changes are recorded here.
 Changes on `main` after 7.0.1. Nothing here is tagged, and the distribution
 versions are unchanged unless an entry says otherwise.
 
+### The kill switch installs, checks and removes on its own
+
+- `integrity-killswitch doctor`: a read-only self-check. It creates no state
+  file, writes no log line and opens no connection; it exits 1 when a check
+  fails.
+- `integrity-killswitch uninstall [--yes]`: lists, then removes, the state and
+  log files the switch wrote for this user. When the stored state blocks
+  something, removal is operator-only, like `on` and `resume`.
+- The component README now gives the install commands without the rest of
+  Integrity. CI installs the wheel alone into an empty environment on Ubuntu
+  and Windows and runs install, `doctor`, `off`, `check`, `uninstall` and
+  `pip uninstall`.
+- The version stays 0.1.0a1. No release carries the wheel yet.
+
 ### Core fixes carried over from an installed release
 
 A running core release carried fixes that had not reached this repository.

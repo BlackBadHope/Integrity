@@ -209,6 +209,60 @@ class AdminCommands(Base):
         self.assertEqual(ks.main(["status"]), 0)
 
 
+class DoctorAndUninstall(Base):
+    def report(self, **kw) -> dict:
+        return {item["check"]: item for item in ks.doctor_report(**kw)["checks"]}
+
+    def test_doctor_is_read_only_on_a_clean_machine(self) -> None:
+        self.as_actor("owner")
+        self.assertEqual(ks.main(["doctor"]), 0)
+        self.assertEqual(ks.main(["doctor", "--json"]), 0)
+        self.assertEqual(list(self.dir.iterdir()), [])  # no state file, no log line
+        checks = self.report()
+        self.assertIn("not created yet", checks["state"]["detail"])
+        self.assertEqual(checks["caller"]["result"], "ok" if os.name == "nt" else "warn")
+        self.assertIn("not configured", checks["bus sync"]["detail"])
+
+    def test_doctor_names_what_is_blocked(self) -> None:
+        self.as_actor("claude")
+        ks.cmd_set_vendor(argparse.Namespace(state=None, reason=None, sync=False, vendor="grok"), False)
+        detail = self.report()["state"]["detail"]
+        self.assertIn("vendor grok", detail)
+        self.assertNotIn("master panic", detail)
+
+    def test_doctor_fails_on_unreadable_state_and_bad_configuration(self) -> None:
+        self.as_actor("owner")
+        self.state.write_text("{not json", encoding="utf-8")
+        self.assertEqual(self.report()["state"]["result"], "fail")
+        self.assertEqual(ks.main(["doctor"]), 1)
+        self.state.unlink()
+        self.assertEqual(ks.main(["--config", str(self.dir / "missing.json"), "doctor"]), 1)
+        self.assertEqual(ks.main(["--config", str(self.dir / "missing.json"), "status"]), 2)
+
+    def test_uninstall_lists_first_and_removes_with_yes(self) -> None:
+        self.as_actor("claude")
+        self.assertEqual(ks.main(["status"]), 0)
+        ks.log_audit_event("test", {})
+        log = self.dir / "killswitch.log"
+        self.assertEqual(ks.main(["uninstall"]), 0)
+        self.assertTrue(self.state.exists() and log.exists())
+        self.assertEqual(ks.main(["uninstall", "--yes"]), 0)  # nothing is blocked, so any caller may remove it
+        self.assertEqual(list(self.dir.iterdir()), [])
+        self.assertEqual(ks.main(["uninstall", "--yes"]), 0)
+
+    def test_uninstall_cannot_lift_a_block(self) -> None:
+        self.as_actor("claude")
+        ks.cmd_panic(argparse.Namespace(state=None, reason=None, sync=False))
+        self.assertEqual(ks.main(["uninstall", "--yes"]), ks.EXIT_REFUSED)
+        self.assertTrue(self.read_state()["master_panic"])
+        self.state.write_text("{not json", encoding="utf-8")
+        self.assertEqual(ks.main(["uninstall", "--yes"]), ks.EXIT_REFUSED)
+        self.assertTrue(self.state.exists())
+        self.as_actor("owner")
+        self.assertEqual(ks.main(["uninstall", "--yes"]), 0)
+        self.assertFalse(self.state.exists())
+
+
 class BusSyncScript(Base):
     def run_sync(self, mode: str, panic: str, disabled: str) -> dict:
         res = subprocess.run([sys.executable, "-", mode, str(self.principals), panic, disabled],
