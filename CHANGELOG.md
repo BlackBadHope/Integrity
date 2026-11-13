@@ -19,7 +19,8 @@ They are now in `src/integrity_guardian`:
 - **Replay pool adoption**: an existing replay pool is adopted instead of
   rebuilt, and verified ledger row facts are reused.
 - **Seed catalog**: a read-only open that tolerates a quiescent WAL, and a
-  rewritten single-verifier lock.
+  rewritten single-verifier lock. A race test with real processes
+  (`tests/test_seed_catalog_single_verifier_race.py`) runs on Linux only.
 - **Seed event pages are byte-budgeted**, with a summary-only form for an
   oversized event. Replay retention is 3 hours. Start-up no longer runs a full
   Seed verification; a verified-namespace gate runs before the first Turn
