@@ -203,6 +203,48 @@ def test_tool_names_are_not_the_names_of_the_core() -> None:
         assert [name for name in shown if re.search(pattern, name)] == [], pattern
 
 
+def test_init_accepts_an_existing_empty_folder(tmp_path: Path, capsys) -> None:
+    """docs/LOCAL_MEMORY.md: the folder "must be empty or missing" (an Explorer or mkdir folder)."""
+    home = tmp_path / "made-by-hand"
+    home.mkdir()                                      # inherits the parent's rules on Windows
+    target = tmp_path / ".mcp.json"
+    assert lm.main(["init", "--home", str(home), "--client", "claude-code",
+                    "--write-mcp", str(target), "--json"]) == 0
+    printed = json.loads(capsys.readouterr().out)
+    assert printed["home"] == str(home.absolute()) and printed["written"] == str(target.absolute())
+    assert target.read_bytes() == printed["config"].encode("utf-8")
+    entry = json.loads(target.read_text(encoding="utf-8"))["mcpServers"]["integrity_local_memory"]
+    assert entry["args"][-1] == str(home.absolute())
+    if sys.platform == "win32":
+        from integrity_guardian._windows_files import assert_private_directory_acl
+
+        assert_private_directory_acl(home)            # protected, exact: account, SYSTEM, Administrators
+    else:
+        assert home.stat().st_mode & 0o777 == 0o700
+    assert lm.main(["doctor", "--home", str(home)]) == 0
+    # --write-mcp never overwrites, and a refusal happens before anything is created.
+    other = tmp_path / "second"
+    assert lm.main(["init", "--home", str(other), "--client", "claude-code",
+                    "--write-mcp", str(target)]) == 2
+    assert not other.exists()
+    assert lm.main(["init", "--home", str(other), "--write-mcp", str(tmp_path / "x.json")]) == 2
+    assert not other.exists()
+
+
+def test_init_refusal_is_a_message_not_a_traceback(tmp_path: Path, capsys, monkeypatch) -> None:
+    def boundary(path: Path) -> None:
+        raise lm.WindowsFileBoundaryError("private Windows directory is owned by another account")
+
+    monkeypatch.setattr(lm, "_private_folder", boundary)
+    home = tmp_path / "foreign"
+    home.mkdir()
+    assert lm.main(["init", "--home", str(home)]) == 2
+    error = capsys.readouterr().err
+    assert error.startswith("guardian-local-memory: ") and "Traceback" not in error
+    assert "owned by another account" in error and "no instance was created" in error
+    assert list(home.iterdir()) == []
+
+
 def test_command_line_and_two_server_processes(tmp_path: Path, capsys) -> None:
     home = tmp_path / "instance"
     assert lm.main(["doctor", "--home", str(home)]) == 1                 # nothing there yet

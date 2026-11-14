@@ -697,6 +697,63 @@ def create_private_directory(path: Path) -> Path:
     return target
 
 
+def _path_owner_sid(path: Path) -> str:
+    required = wintypes.DWORD()
+    _advapi32.GetFileSecurityW(
+        str(path), _OWNER_SECURITY_INFORMATION, None, 0, ctypes.byref(required)
+    )
+    if required.value == 0:
+        _raise_last_error("private Windows owner size unavailable")
+    descriptor = ctypes.create_string_buffer(required.value)
+    if not _advapi32.GetFileSecurityW(
+        str(path),
+        _OWNER_SECURITY_INFORMATION,
+        descriptor,
+        required.value,
+        ctypes.byref(required),
+    ):
+        _raise_last_error("private Windows owner unavailable")
+    owner = ctypes.c_void_p()
+    defaulted = wintypes.BOOL()
+    if not _advapi32.GetSecurityDescriptorOwner(
+        descriptor, ctypes.byref(owner), ctypes.byref(defaulted)
+    ):
+        _raise_last_error("private Windows owner unavailable")
+    return _sid_string(owner.value)
+
+
+def _directory_is_empty(path: Path) -> bool:
+    with os.scandir(path) as entries:
+        return next(entries, None) is None
+
+
+def adopt_empty_private_directory(path: Path) -> Path:
+    """Give one EXISTING, EMPTY directory of the current principal the protected exact DACL.
+
+    A folder the user made (Explorer, ``mkdir``) inherits its parent's rules.
+    The directory and its ancestors are held while the DACL is replaced, it
+    must be owned by the current principal before anything is applied, and it
+    must still be empty afterwards, so no entry keeps an inherited rule.
+    """
+
+    _require_windows()
+    target = _anchored_fixed_path(path)
+    with HeldWindowsDirectory(target):
+        if _path_owner_sid(target).casefold() != current_user_sid().casefold():
+            raise WindowsFileBoundaryError(
+                "private Windows directory is owned by another account"
+            )
+        if not _directory_is_empty(target):
+            raise WindowsFileBoundaryError("private Windows directory is not empty")
+        set_private_directory_acl(target)
+        assert_private_directory_acl(target)
+        if not _directory_is_empty(target):
+            raise WindowsFileBoundaryError(
+                "private Windows directory changed while it was made private"
+            )
+    return target
+
+
 def create_new_private_directory(path: Path) -> Path:
     """Atomically create one NEW private directory; an existing path is rejected.
 
