@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import unittest
 from pathlib import Path
@@ -20,10 +21,28 @@ HERE = Path(__file__).resolve().parents[2] / "src" / "integrity_llm_bus" / "reso
 A = "a0000005-b005-7005-8005-c00000000005"
 B = "a0000005-b006-7006-8006-c00000000006"
 C = "a0000006-b007-4007-8007-c00000000007"
+LATE_THREAD_WAIT_S = 10.0
+
+
+def join_late_threads(before: set) -> None:
+    """Wait for threads that started during the test.
+
+    ensure_bounded() returns after HOOK_TIMEOUT_S and leaves a slow ensure() running in a
+    daemon thread, which may still hold bus.sqlite3 open. Windows cannot delete an open
+    file, so the temporary folder must outlive that thread.
+    """
+    deadline = time.monotonic() + LATE_THREAD_WAIT_S
+    late = [t for t in threading.enumerate() if t not in before and t is not threading.current_thread()]
+    for t in late:
+        t.join(max(0.0, deadline - time.monotonic()))
+    alive = [t.name for t in late if t.is_alive()]
+    if alive:
+        raise AssertionError(f"threads still running {LATE_THREAD_WAIT_S:.0f} s after the test: {alive}")
 
 
 class AutoregTest(unittest.TestCase):
     def setUp(self):
+        self.threads_before = set(threading.enumerate())
         self.td = tempfile.TemporaryDirectory()
         self.state = Path(self.td.name) / "state"
         self.store = local_cli.open_store(self.state)
@@ -31,6 +50,7 @@ class AutoregTest(unittest.TestCase):
         rdb.migrate(self.state, backup=False)
 
     def tearDown(self):
+        join_late_threads(self.threads_before)
         self.td.cleanup()
 
     def test_ensure_creates_auto_entry_and_is_idempotent(self):
@@ -160,6 +180,24 @@ class AutoregTest(unittest.TestCase):
         self.assertIn("claude-a0000006", ar.load(self.state))
         self.assertNotIn("SECRET-PROMPT", self.reg.read_text(encoding="utf-8"))
 
+    def test_an_ensure_that_outlives_the_hook_timeout_is_waited_for(self):
+        # A slow runner: ensure() is still exporting, with bus.sqlite3 open, after the hook gave up.
+        real_export = rdb.export_json
+
+        def slow_export(state_dir, *a, **k):
+            con = rdb.connect(state_dir, readonly=True, timeout_ms=2000)
+            try:
+                time.sleep(2 * autoreg.HOOK_TIMEOUT_S)
+                return real_export(state_dir, *a, **k)
+            finally:
+                con.close()
+
+        with patch.object(rdb, "export_json", slow_export):
+            self.assertIsNone(autoreg.ensure_bounded("claude", C, state_dir=self.state, source="t"))
+        events = [json.loads(l)["event"] for l in (self.state / "autoreg.log").read_text().splitlines()]
+        self.assertEqual(events, ["ensure-timeout"])
+        # tearDown waits for that thread; without the wait, Windows refuses to delete bus.sqlite3.
+
     def test_fast_path_p95(self):
         autoreg.ensure("codex", A, source="t", state_dir=self.state)
         times = []
@@ -254,11 +292,13 @@ class AutoregTest(unittest.TestCase):
 
 class RegistryDbTest(unittest.TestCase):
     def setUp(self):
+        self.threads_before = set(threading.enumerate())
         self.td = tempfile.TemporaryDirectory()
         self.state = Path(self.td.name) / "state"
         local_cli.open_store(self.state)
 
     def tearDown(self):
+        join_late_threads(self.threads_before)
         self.td.cleanup()
 
     def seed_json(self):
