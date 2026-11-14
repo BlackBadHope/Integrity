@@ -34,6 +34,25 @@ def test_keys_are_accepted_only_as_sha256():
     assert hub.check_principals([])
 
 
+def test_a_key_without_a_vendor_the_daemon_accepts_is_refused_at_install():
+    # A web key written with vendor "humanx" installed, and then the daemon refused each of its requests.
+    for vendor in ("humanx", None, "Claude"):
+        entry = {"key_sha256": KEY, "vendor": vendor, "account": "a"}
+        problems = hub.check_principals({"principals": {"web-a": entry}})
+        assert any("vendor must be one of" in p for p in problems), (vendor, problems)
+    entry = {"key_sha256": KEY, "vendor": "human", "account": "a", "addresses": ["human-operator"]}
+    assert hub.check_principals({"principals": {"web-a": entry}}) == []
+
+
+def test_the_vendor_list_is_the_daemons():
+    import ast
+    import re
+    from pathlib import Path
+    source = (Path(hub.DAEMON)).read_text(encoding="utf-8")
+    line = re.search(r"^VENDORS = (\{[^}]*\})", source, re.M).group(1)
+    assert set(hub.VENDORS) == ast.literal_eval(line)
+
+
 def test_the_published_example_keys_file_is_not_installable_as_it_is():
     from pathlib import Path
     example = Path(__file__).resolve().parents[1] / "examples" / "hub" / "principals.example.json"

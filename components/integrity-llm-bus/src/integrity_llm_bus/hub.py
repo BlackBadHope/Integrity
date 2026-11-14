@@ -36,6 +36,8 @@ NAME = re.compile(r"[a-z_][a-z0-9_-]{0,31}\Z")
 PRINCIPAL = re.compile(r"[a-z0-9-]{2,32}\Z")
 HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 SECRET_FIELD = re.compile(r"(?i)token|secret|password|passwd|private")
+# The daemon refuses every request of a key whose vendor is not one of these (VENDORS in bus_core_daemon.py).
+VENDORS = ("antigravity", "bus", "claude", "codex", "grok", "human")
 PACKAGE = Path(__file__).resolve().parent
 DAEMON = PACKAGE / "resources" / "core" / "bus_core_daemon.py"
 JOURNAL = PACKAGE / "resources" / "core" / "bus_journal.py"
@@ -68,6 +70,9 @@ def check_principals(document) -> list[str]:
         key = entry.get("key_sha256")
         if key is not None and not (isinstance(key, str) and HEX64.match(key)):
             problems.append(f"principal {name}: key_sha256 must be 64 lowercase hex characters")
+        if entry.get("vendor") not in VENDORS:
+            problems.append(f"principal {name}: vendor must be one of {', '.join(VENDORS)} "
+                            "(the hub refuses every request of a key without one)")
     if not isinstance(document.get("accounts", {}), dict):
         problems.append("principals.json: 'accounts' must be an object")
     return problems

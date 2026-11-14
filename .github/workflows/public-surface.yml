@@ -143,6 +143,32 @@ jobs:
       - name: Install the hub, use it over its socket from three accounts, remove it
         run: python .github/scripts/bus_hub_accounts_check.py --wheel "$(ls "$RUNNER_TEMP"/bus-dist/integrity_llm_bus-*.whl)"
 
+  humanx-server:
+    # Install stage 3, HumanX part: the web and the read-only gateway with real accounts next to
+    # the bus hub on one Linux machine, without systemd. sudo is used inside this runner only.
+    name: humanx server (ubuntu, real accounts)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build the bus and HumanX wheels
+        run: |
+          python -m pip install "build>=1.2,<2"
+          python -m build --wheel --outdir "$RUNNER_TEMP/dist" components/integrity-llm-bus
+          python -m build --wheel --outdir "$RUNNER_TEMP/dist" components/integrity-humanx
+      - name: Install HumanX next to the bus hub, use the gateway and the web, remove both
+        run: >-
+          python .github/scripts/humanx_server_check.py
+          --bus-wheel "$(ls "$RUNNER_TEMP"/dist/integrity_llm_bus-*.whl)"
+          --humanx-wheel "$(ls "$RUNNER_TEMP"/dist/integrity_humanx-*.whl)"
+
   macos:
     # Core and client-memory on macOS. The README marks macOS as CI-tested only for
     # what this job runs; POSIX custody that needs bubblewrap is Linux-only.

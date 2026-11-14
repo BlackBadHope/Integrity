@@ -15,7 +15,8 @@ versions are unchanged unless an entry says otherwise.
   folder, the state folder and the socket folder, and writes the
   configuration. It refuses names and folders that exist. It also refuses a
   keys file in which an entry has a field whose name contains `token`,
-  `secret`, `password`, `passwd` or `private` (`key_sha256` aside), or a
+  `secret`, `password`, `passwd` or `private` in any letter case
+  (`key_sha256` aside), or a
   `key_sha256` that is not 64 lowercase hexadecimal characters; an entry
   without a key is accepted. If a step fails, it removes what it made.
   `doctor` reads accounts, owners and modes, configuration, keys, the
@@ -42,6 +43,86 @@ versions are unchanged unless an entry says otherwise.
   `uninstall` refused while the daemon runs and while a process of the
   gateway account runs, with nothing removed, then `uninstall --yes`,
   `doctor` reporting `not-installed`, and pip uninstall.
+
+### The HumanX server side on one Linux machine, with real accounts
+
+- **`integrity-humanx-server`**: a new command in `integrity-humanx`
+  (`integrity_humanx.server`), Linux only. `install`, run as root after the
+  bus hub, creates the web account, the read-only gateway account and the
+  gateway socket group. It adds the web account to the bus socket group and
+  the bus SSH gateway account to the gateway socket group. It writes the
+  configuration folder, the state folder and the socket folder. The web's bus
+  key is copied from the owner's file into a file only the web account can
+  read, and is never printed. The owner's file must be a regular file (opened
+  without following a symbolic link), not readable or writable by group or
+  others, and owned by root or by the user who runs `install`. Every file is
+  written to a temporary name with its final owner and mode, then renamed.
+- It refuses accounts, groups and folders that exist under the names it would
+  create, and a bus group or bus gateway account that does not exist. The web
+  listens on 127.0.0.1 unless `--bind` says otherwise; `0.0.0.0` and `::`
+  need `--allow-any-address`.
+- The web answers only to a `Host` header naming its bind address,
+  `127.0.0.1`, `localhost`, `[::1]` or a name given with `--web-host`, with
+  its port or without; any other `Host` gets 421. A page whose name was
+  pointed at the web's address (DNS rebinding) cannot reach it this way.
+- Before each step `install` writes the step to its record: what it created,
+  and the bus group and bus gateway account that were there before. If a step
+  fails, it removes what the record lists. An install killed half way leaves
+  a record that `doctor` reports as `partial`.
+- `install` configures the web and the gateway's reads of an Integrity
+  snapshot. SQL, switch reads, the storm reader, the snapshot job and the
+  ring map are listed as not configured; the ring and storm screens stay off.
+  `doctor` only reads: accounts and group membership (including the bus
+  gateway account in the gateway socket group), the web's address, owners
+  and modes, the values install wrote, the web key file's owner and mode, and
+  the installed files against the wheel record. `uninstall` lists what it
+  would remove; with `--yes` it removes what the record lists as created,
+  newest first, and nothing else. It takes the bus gateway account out of the
+  gateway socket group before it deletes the group. It refuses, before
+  removing anything, while a process of the web account or of the gateway
+  account runs, or while the configuration folder holds a file install did
+  not write; without a record it removes nothing.
+- It starts nothing and installs no systemd unit or firewall rule, and it does
+  not write the bus room file. `install` and `doctor` print the commands that
+  start the web and the gateway as their accounts.
+- A new CI job, `humanx server (ubuntu, real accounts)`, runs it on Ubuntu with
+  sudo inside the runner (`.github/scripts/humanx_server_check.py`):
+  - the bus and HumanX wheels alone, the hub with the room enabled;
+  - refused installs that create nothing: an existing account named like the
+    web account (left alone by `uninstall --yes`), a key file given as a
+    symbolic link, a key file with mode 644, `--bind 0.0.0.0`;
+  - installs killed at the membership step and while writing the key file:
+    `doctor` reports `partial`, `uninstall --yes` removes them, and the bus
+    gateway account keeps its groups;
+  - `install`, a refused second install and `doctor`;
+  - the gateway as its account: the bus gateway account reads a synthetic
+    snapshot; a vendor outside the room, the web account, another account of
+    the socket group and `DROP TABLE` (by the gateway's policy, before any
+    database client starts) are refused; accounts
+    outside the group cannot connect; the gateway log holds request hashes
+    and no request text;
+  - the web on 127.0.0.1: the page, a refusal from 127.0.0.2 (outside the
+    allow list), a refusal without the `X-HumanX` header, 421 for a page and
+    a send with a `Host` header not in the web's list, the page with
+    `Host: localhost:<port>`, the state API;
+  - a question sent from the page reaches the room vendor over the bus from
+    the operator address, and the vendor's answer shows under it;
+  - `uninstall` refused while the web and the gateway run and while an owner
+    file is in the configuration folder, then `uninstall --yes`, `doctor`
+    reporting `not-installed`, the bus gateway account with the groups it had
+    before install, the bus hub's `doctor` still passing, and pip uninstall.
+- Fixed in `integrity-llm-bus`, found by the first run of this job: on a new
+  hub the room's vendor cards (`vendor-cards`) failed, because the message
+  archive they read was made only by `migrate.py` when history was moved in.
+  The hub daemon now makes the archive at start when it is missing. A new
+  test asks for the cards on a hub without moved history.
+- Fixed in `integrity-llm-bus`, found by the second run of this job: the hub
+  daemon refuses every request of a key whose vendor is not one of
+  `antigravity`, `bus`, `claude`, `codex`, `grok`, `human`, but the hub's
+  `install` accepted such a principal. The job's web key used vendor
+  `humanx`, so the web's vendor cards came back empty. `install` now refuses
+  such a principal; a test reads the vendor list from the daemon so the two
+  cannot drift apart. The job's web key now uses vendor `human`.
 
 ### Timing evidence kept in every CI run
 

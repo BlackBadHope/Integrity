@@ -23,7 +23,7 @@ class FakeConn:
 
 
 def request(method, path, ip="192.0.2.40", body=b"", headers=None):
-    h = {"Host": "web.example.invalid", "Content-Length": str(len(body))}
+    h = {"Host": "127.0.0.1", "Content-Length": str(len(body))}
     h.update(headers or {})
     raw = ("%s %s HTTP/1.1\r\n" % (method, path) + "".join("%s: %s\r\n" % kv for kv in h.items()) + "\r\n").encode() + body
     conn = FakeConn(raw)
@@ -64,6 +64,18 @@ def test_page_only_for_allowed_addresses(bus, hx):
     assert "__HX_ROOM_PREFIX__" not in text and ".replace('room-%s-','Арбитр ')" % hx.OPERATOR in text
     assert request("GET", "/", ip="198.51.100.99")[0] == 403
     assert request("GET", "/nope")[0] == 404
+
+
+def test_only_listed_host_names_are_answered(bus, monkeypatch):
+    port = W.CONF["port"]
+    for host in ("127.0.0.1", "localhost", "LOCALHOST", "[::1]", f"127.0.0.1:{port}", f"localhost:{port}"):
+        assert request("GET", "/", headers={"Host": host})[0] == 200, host
+    for host in ("rebound.example", "127.0.0.1.rebound.example", "localhost:1", "", "127.0.0.2"):
+        assert request("GET", "/", headers={"Host": host})[0] == 421, host
+    body = json.dumps({"body": "x", "page": W.PAGE_BUILD}).encode()
+    assert request("POST", "/api/send", body=body, headers={"Host": "rebound.example", "X-HumanX": "1"})[0] == 421
+    monkeypatch.setattr(W, "HOSTS", W.HOSTS | {"room.example"})
+    assert request("GET", "/", headers={"Host": "room.example"})[0] == 200
 
 
 def test_post_needs_csrf_header(bus):
