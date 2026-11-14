@@ -18,8 +18,14 @@ versions are unchanged unless an entry says otherwise.
   `secret`, `password`, `passwd` or `private` (`key_sha256` aside), or a
   `key_sha256` that is not 64 lowercase hexadecimal characters; an entry
   without a key is accepted. If a step fails, it removes what it made.
-  `doctor` only reads: accounts, owners and modes, configuration, keys, the
-  journal chain and the installed files against the wheel record.
+  `doctor` reads accounts, owners and modes, configuration, keys, the
+  journal chain and the installed files against the wheel record. It also
+  sends the daemon one request without a key over its socket and waits up
+  to 3 seconds: the daemon must refuse it with `no key`. The request reads
+  and changes nothing in the bus; the daemon writes one `denied` line to its
+  journal, as for any refused request, so the README says to run `doctor`
+  by hand, not from a timer or a loop. With no socket, no listener, no
+  answer in time or another answer, the `daemon` check fails and says which.
   `uninstall` lists what it would remove; with `--yes` it removes it, and
   refuses, before removing anything, while a process of the bus account or
   of the gateway account runs. The wheel stays; remove it with pip.
@@ -28,7 +34,9 @@ versions are unchanged unless an entry says otherwise.
   daemon as the bus account.
 - A new CI job, `bus hub (ubuntu, real accounts)`, runs it on Ubuntu with
   sudo inside the runner (`.github/scripts/bus_hub_accounts_check.py`): the
-  bus wheel alone, the daemon as the bus account, nine requests over the
+  bus wheel alone, `doctor` failing on the daemon check alone before the
+  daemon starts and after it stops, and passing while it runs, the daemon
+  as the bus account, nine requests over the
   socket from the gateway account and from a second account of the socket
   group, a connect from an account outside the group, the journal chain,
   `uninstall` refused while the daemon runs and while a process of the

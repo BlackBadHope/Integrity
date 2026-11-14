@@ -3,8 +3,9 @@
 
   install    creates the bus account, the gateway account and the socket group, the
              configuration folder, the state folder and the socket folder (run as root)
-  doctor     only reads: accounts, owners and modes, configuration, keys, journal chain,
-             installed files against the wheel record
+  doctor     reads accounts, owners and modes, configuration, keys, journal chain,
+             installed files against the wheel record; sends the daemon one request
+             without a key, which it must refuse (its journal records the refusal)
   uninstall  says what it would remove; with --yes removes what install created
 
 It starts no service. The hub daemon is started with the command that install and doctor
@@ -20,9 +21,11 @@ import os
 from pathlib import Path
 import re
 import shutil
+import socket
 import stat
 import subprocess
 import sys
+import time
 
 from .configuration import COMPONENT, SCHEMA, ConfigurationError, read_config
 
@@ -263,6 +266,49 @@ def _installed_files() -> list[str]:
     return changed
 
 
+DAEMON_TIMEOUT = 3.0
+DAEMON_PROBE = b'{"v": 1, "op": "status"}\n'
+
+
+def daemon_problem(sock: Path, timeout: float = DAEMON_TIMEOUT) -> str | None:
+    """Send the daemon one request without a key; None when it refuses it with 'no key'.
+
+    The request carries no key, so it reads and changes nothing in the bus; the daemon writes
+    one 'denied' line to its journal, as for any refused request.
+    """
+    if not os.path.lexists(sock):
+        return f"the daemon does not run: {sock} is missing"
+    deadline = time.monotonic() + timeout
+    client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    answer = b""
+    try:
+        client.settimeout(timeout)
+        client.connect(str(sock))
+        client.sendall(DAEMON_PROBE)
+        while not answer.endswith(b"\n") and len(answer) < 65536:
+            left = deadline - time.monotonic()
+            if left <= 0:
+                raise socket.timeout
+            client.settimeout(left)
+            chunk = client.recv(4096)
+            if not chunk:
+                break
+            answer += chunk
+    except socket.timeout:
+        return f"the daemon does not answer within {timeout:g} s"
+    except OSError as exc:
+        return f"the daemon does not answer: {type(exc).__name__}"
+    finally:
+        client.close()
+    try:
+        document = json.loads(answer.decode("utf-8"))
+    except ValueError:
+        return "the daemon's answer is not JSON"
+    if not isinstance(document, dict) or document.get("ok") is not False or document.get("error") != "no key":
+        return "the daemon did not refuse a request without a key with 'no key'"
+    return None
+
+
 def doctor(args) -> tuple[dict, int]:
     etc = Path(args.etc)
     record = read_record(etc)
@@ -336,6 +382,10 @@ def doctor(args) -> tuple[dict, int]:
             add("socket", _mode_check(sock, bus.pw_uid, group.gr_gid, 0o660, stat.S_ISSOCK))
     else:
         add("socket folder", f"{runtime} is missing (it does not survive a reboot; install created it)", warning=True)
+    problem = daemon_problem(runtime / "core.sock")
+    add("daemon", f"{problem}; start it with the command under 'start'" if problem else None)
+    if problem is None:
+        checks[-1]["detail"] = "answers: refused a request without a key with 'no key'"
 
     try:
         spec = importlib.util.spec_from_file_location("integrity_llm_bus_hub_journal", JOURNAL)
