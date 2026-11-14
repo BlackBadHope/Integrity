@@ -5,12 +5,20 @@ context, complete request, namespace, targets and expiry. Mutation is available
 only through the admitted model-owned facade. Existing registrations and normal
 terminal receipts are never modified. Unknown action outcomes remain explicit.
 """
-import datetime as dt,hashlib,json,os,re,stat,tempfile
+import datetime as dt
+import hashlib
+import json
+import os
+import re
+import stat
+import tempfile
+
 try:
     import fcntl
 except ImportError:
     fcntl = None
 from pathlib import Path
+
 from .canonical import canonical_bytes
 from .signing import verify_trusted_signature
 
@@ -22,7 +30,7 @@ def need(ok,code):
 def digest(value):return hashlib.sha256(canonical_bytes(value)).hexdigest()
 def now():return dt.datetime.now(dt.UTC)
 def utc(value):
-    x=dt.datetime.fromisoformat(value.replace('Z','+00:00'));need(x.tzinfo is not None,'curator_time_naive');return x
+    x=dt.datetime.fromisoformat(value);need(x.tzinfo is not None,'curator_time_naive');return x
 def normalize_request(args):
     need(isinstance(args,dict) and set(args)=={'grant_id','curator_registration_id','context_admission_id','decisions'},'curator_request_shape')
     for k in ['grant_id','curator_registration_id','context_admission_id']:
@@ -155,7 +163,7 @@ def decorate_coverage(server,result,args):
         if store is not None:packs.extend(read_packs(store))
     decisions={d['registration_id']:{'decision':d,'curator_receipt_id':p['receipt_id'],'curator_identity':p['curator_identity']} for p in packs for d in p['targets']
       if (args.get('machine_id') is None or d['original_identity']['machine_id']==args['machine_id']) and (args.get('thread_id') is None or d['original_identity']['thread_id']==args['thread_id'])}
-    result=json.loads(json.dumps(result));sample=result.get('receipt_sample',{}).get('receipts',[])
+    result=json.loads(json.dumps(result))
     known_closed={rid for rid in decisions if has_terminal(store_for(server,rid),rid)}
     accounted={k:v for k,v in decisions.items() if k not in known_closed}
     result['curator_accounting']={'protocol':PROTOCOL,'original_records_modified':False,'accounted_count':len(accounted),

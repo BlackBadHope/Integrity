@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from typing import Any
 
-
 PROTOCOL = "integrity-context-delivery-health/v1"
 LANE_PATHS = {
     "coordination_conflicts": ("coordination", "task_conflicts"),
@@ -114,9 +113,10 @@ def evaluate_context_delivery(source_mind, presented_capsule, selection_receipt)
     if not isinstance(selection_receipt, dict):
         issues.append("selection-receipt-invalid")
     issues.extend(available_issues + selected_issues)
-    if not available_issues and not selected_issues:
-        if any(selected.get(lane, 0) > count for lane, count in available.items()):
-            issues.append("selected-exceeds-available")
+    if not available_issues and not selected_issues and any(
+        selected.get(lane, 0) > count for lane, count in available.items()
+    ):
+        issues.append("selected-exceeds-available")
 
     door_value = _mapping(capsule.get("synaptic")).get("door")
     # Expose only the known door marker needed for this predicate, not raw text.
