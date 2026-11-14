@@ -23,7 +23,8 @@ versions are unchanged unless an entry says otherwise.
   sends the daemon one request without a key over its socket and waits up
   to 3 seconds: the daemon must refuse it with `no key`. The request reads
   and changes nothing in the bus; the daemon writes one `denied` line to its
-  journal, as for any refused request. With no socket, no listener, no
+  journal, as for any refused request, so the README says to run `doctor`
+  by hand, not from a timer or a loop. With no socket, no listener, no
   answer in time or another answer, the `daemon` check fails and says which.
   `uninstall` lists what it would remove; with `--yes` it removes it, and
   refuses, before removing anything, while a process of the bus account or
