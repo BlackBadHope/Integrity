@@ -23,10 +23,11 @@ import os
 import re
 import stat
 import threading
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Mapping
+from typing import Any
 
 from .canonical import parse_json_strict
 

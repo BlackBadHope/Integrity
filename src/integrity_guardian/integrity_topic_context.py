@@ -1,6 +1,9 @@
 """Non-authoritative search hints bound to one broker-owned thread hash."""
 from __future__ import annotations
-import hashlib, json, re
+
+import hashlib
+import json
+import re
 from pathlib import Path
 
 PROTOCOL = 'integrity-topic-search-context/v1'

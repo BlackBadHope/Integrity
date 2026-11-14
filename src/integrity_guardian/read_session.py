@@ -33,7 +33,7 @@ def timestamp(value):
     if not isinstance(value, str) or len(value) > 40:
         raise ReadSessionError('reader session timestamp invalid')
     try:
-        result = dt.datetime.fromisoformat(value.replace('Z', '+00:00'))
+        result = dt.datetime.fromisoformat(value)
     except ValueError:
         raise ReadSessionError('reader session timestamp invalid') from None
     if result.tzinfo is None or result.utcoffset() != dt.timedelta(0):
@@ -67,7 +67,7 @@ def validate(value, *, prompt_sha256=None, turn_ref_digest=None, now=None):
             or turn_ref_digest is not None and value['turn_ref_digest'] != turn_ref_digest):
         raise ReadSessionError('reader session binding mismatch')
     start, end = timestamp(value['declared_at']), timestamp(value['expires_at'])
-    current = now if now is not None else dt.datetime.now(dt.timezone.utc)
+    current = now if now is not None else dt.datetime.now(dt.UTC)
     if not 0 < (end - start).total_seconds() <= MAX_TTL_SECONDS or not start <= current < end:
         raise ReadSessionError('reader session expired or outside its window')
     return json.loads(canonical(value))
@@ -75,7 +75,7 @@ def validate(value, *, prompt_sha256=None, turn_ref_digest=None, now=None):
 
 def issue(envelope, *, product, model_name=None, now=None):
     """Called only after native claim/owning-head revalidation by the broker."""
-    current = now if now is not None else dt.datetime.now(dt.timezone.utc)
+    current = now if now is not None else dt.datetime.now(dt.UTC)
     hashes = envelope['native_identity_hashes']
     end = min(timestamp(envelope['expires_utc']), current + dt.timedelta(seconds=MAX_TTL_SECONDS))
     value = {'protocol': PROTOCOL, 'identity_hashes': hashes, 'agent_product': product,

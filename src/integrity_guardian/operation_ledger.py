@@ -5,15 +5,15 @@ permit a send. A local absent record is never proof of a remote absent effect.
 """
 from __future__ import annotations
 
-from contextlib import contextmanager
 import hashlib
 import json
 import math
 import os
-from pathlib import Path
 import re
 import sqlite3
 import time
+from contextlib import contextmanager
+from pathlib import Path
 
 
 class LedgerError(RuntimeError):

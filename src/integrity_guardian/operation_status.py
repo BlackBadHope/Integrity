@@ -6,10 +6,15 @@ constraint must be verified separately before absence can permit append retry.
 from __future__ import annotations
 
 import hashlib
-import json
-from pathlib import Path
 import sqlite3
-from .operation_ledger import OperationLedger, Conflict, LedgerError, canonical_request, request_digest
+from pathlib import Path
+
+from .operation_ledger import (
+    Conflict,
+    LedgerError,
+    OperationLedger,
+    request_digest,
+)
 
 PROTOCOL = "integrity-client/operation-status/v1"
 METHOD = "integrity/operation_status"
@@ -85,7 +90,7 @@ class OperationStatusMixin:
         # original facade call. No recovery/cached reply expands its authority.
         self._recovery_before_write(name, arguments)
         registration_id = self._session_recovery_binding
-        store, registration, record, capsule = self._operation_binding(registration_id)
+        store, _registration, _record, capsule = self._operation_binding(registration_id)
         if name == "integrity_append_event":
             # Exact original context echo and normal payload validation precede
             # the global UID reservation; no foreign intent can squat an UID.
@@ -95,7 +100,7 @@ class OperationStatusMixin:
             key = "append:" + str(arguments.get("event_uid"))
         else:
             if arguments.get("registration_id") != registration_id: raise ValueError("foreign close operation")
-            from .turn_memory import normalize_event_references, NO_EVENT_REASONS
+            from .turn_memory import NO_EVENT_REASONS, normalize_event_references
             if set(arguments) - {"registration_id", "outcome", "events", "no_event_reason"}:
                 raise ValueError("unknown close operation fields")
             if arguments.get("outcome") == "events":
@@ -140,7 +145,7 @@ class OperationStatusMixin:
         registration_id, tool, original = arguments["registration_id"], arguments["tool"], arguments["arguments"]
         supplied = arguments["request_sha256"]
         if supplied != request_digest(tool, original): raise ValueError("operation original request digest mismatch")
-        store, registration, record, capsule = self._operation_binding(registration_id, allow_detached=True)
+        store, _registration, _record, capsule = self._operation_binding(registration_id, allow_detached=True)
         if arguments["control"] != capsule["controls"]: raise ValueError("operation control binding mismatch")
         if tool == "integrity_append_event":
             if original.get("context_admission_id") != capsule["controls"]["context_admission_id"]:

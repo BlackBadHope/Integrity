@@ -12,7 +12,7 @@ import re
 from typing import Any
 
 PROTOCOL = "ultima-memory-core/owner-rules-block/v1"
-WORD_RE = re.compile(r"[0-9a-zа-яё][0-9a-zа-яё._:*/-]*", re.I)
+WORD_RE = re.compile(r"[0-9a-zа-яё][0-9a-zа-яё._:*/-]*", re.IGNORECASE)
 IP_RE = re.compile(r"\b\d{1,3}(?:\.\d{1,3}){3}\b")
 
 
@@ -69,7 +69,7 @@ def select_owner_rules(index: list[dict[str, Any]], query: str, *, hosts: list[s
     words = {w.lower() for w in WORD_RE.findall(query or "")}
     stems = {_stem(w) for w in words}
     ips = IP_RE.findall(query or "")
-    lang = lang or ("ru" if re.search(r"[а-яё]", query or "", re.I) else "en")
+    lang = lang or ("ru" if re.search(r"[а-яё]", query or "", re.IGNORECASE) else "en")
     scored = []
     for r in index:
         s = _score(r, stems, words, ips, hosts or [], tools or [])
@@ -114,7 +114,8 @@ def live_rules_request(source: dict[str, Any]) -> dict[str, Any] | None:
         return None
     path = os.environ.get("INTEGRITY_OWNER_RULES_INDEX", "")
     try:
-        raw = open(path, "rb").read()
+        with open(path, "rb") as stream:
+            raw = stream.read()
         digest = hashlib.sha256(raw).hexdigest()
         if _INDEX_CACHE.get("digest") != digest:
             records = json.loads(raw.decode("utf-8")).get("owner_rules") or []
@@ -126,5 +127,5 @@ def live_rules_request(source: dict[str, Any]) -> dict[str, Any] | None:
         return {"enabled": True, "index": _INDEX_CACHE["index"], "query": query,
                 "max_rules": int(os.environ.get("INTEGRITY_OWNER_RULES_MAX", "8")),
                 "max_bytes": int(os.environ.get("INTEGRITY_OWNER_RULES_BYTES", "2048"))}
-    except Exception:
+    except Exception:  # noqa: BLE001 - opt-in rules index: any fault means "no rules", never a failed admission
         return None

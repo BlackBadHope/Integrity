@@ -27,6 +27,7 @@ from typing import Any, Self
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
+from . import deployment_profile as _deployment_profile
 from .atlas import build_atlas_projection, verify_atlas_projection
 from .atlas_synapse import (
     ATLAS_PROJECTION_EVIDENCE_ID,
@@ -35,7 +36,6 @@ from .atlas_synapse import (
     AtlasSynapsePolicy,
     atlas_projection_evidence_digest,
 )
-from . import deployment_profile as _deployment_profile
 from .canonical import canonical_bytes
 from .connectome import (
     build_connectome_manifest,
@@ -1880,7 +1880,7 @@ class PersistentMedorArchitectureService:
         if status.get("result") != "pass":
             raise MedorArchitectureError("custody full verification failed; admission blocked until repaired")
         try:
-            checked = datetime.fromisoformat(str(status.get("checked_at", "")).replace("Z", "+00:00"))
+            checked = datetime.fromisoformat(str(status.get("checked_at", "")))
         except ValueError as exc:
             raise MedorArchitectureError("custody full-verify status has no valid time; admission blocked") from exc
         if checked.tzinfo is None:
@@ -2082,7 +2082,7 @@ class PersistentMedorArchitectureService:
             try:
                 ledger = self._open_custody_ledger()
                 prepared = self._prepare_custody(ledger)
-            except Exception:
+            except Exception:  # noqa: BLE001 - preparation is optional; the locked path below re-checks
                 prepared = None
         try:
             with self._exclusive_custody():
@@ -2411,7 +2411,7 @@ class PersistentMedorArchitectureService:
             # from a committed decision exactly as its recovery does). After the consumption
             # commit, nothing is caught: errors surface with their own text.
             try:
-                with self._verified_head(ledger, state, verified_checkpoint) as (state, checkpoint):
+                with self._verified_head(ledger, state, verified_checkpoint) as (state, _checkpoint):
                     if any(e["source_id"] == source_id for e in state.events):
                         # Existing grant state (consumed, mismatched, or a decision left by an
                         # interrupted call): always decided by the old body (K5 v2, condition 2).
@@ -2433,7 +2433,7 @@ class PersistentMedorArchitectureService:
                     created_at=recorded_at,
                 )
                 self._store_checkpoint(decision_checkpoint)
-                with self._verified_head(ledger, state, decision_checkpoint) as (state, checkpoint):
+                with self._verified_head(ledger, state, decision_checkpoint) as (state, _checkpoint):
                     consumption_payload = digest_object(
                         {
                             "grant_id": grant_id,
