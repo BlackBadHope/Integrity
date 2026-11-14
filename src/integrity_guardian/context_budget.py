@@ -466,11 +466,14 @@ def build_context_capsule(
     capsule = _capsule_core(source, admission)
     if rules_request is not None and rules_request.get("enabled") is True:
         from .owner_rules import select_owner_rules
-        picked, _rules_receipt = select_owner_rules(
+        picked, rules_receipt = select_owner_rules(
             list(rules_request.get("index") or []), str(rules_request.get("query") or ""),
             hosts=list(rules_request.get("hosts") or []), tools=list(rules_request.get("tools") or []),
             max_rules=int(rules_request.get("max_rules", 8)), max_bytes=int(rules_request.get("max_bytes", 2048)))
         capsule["working_set"]["owner_rules"] = picked
+        # The selection receipt says how many rules were considered, picked and cut for
+        # bytes, so a reader can tell "no rule matched" from "rules were truncated".
+        capsule["working_set"]["owner_rules_receipt"] = rules_receipt
     auxiliary = _mapping(source.get("auxiliary_recall"))
     if auxiliary:
         capsule["retrieval_context"] = _bounded_value({
@@ -600,7 +603,7 @@ def build_context_capsule(
         "production_authority": False,
     }
     # The selection receipt has a strict schema (memory-synapse-context-selection);
-    # the owner_rules block travels only inside the capsule working_set.
+    # the owner_rules block and its owner_rules_receipt travel only inside the capsule working_set.
     receipt = {**selection_core, "receipt_id": _digest(selection_core)}
     return capsule, receipt
 
