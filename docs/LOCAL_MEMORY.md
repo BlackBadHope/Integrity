@@ -59,8 +59,14 @@ The instance folder is `%LOCALAPPDATA%\integrity-local-memory` on Windows and
 `$XDG_DATA_HOME/integrity-local-memory` (or
 `~/.local/share/integrity-local-memory`) on Linux. `--home PATH` or
 `INTEGRITY_LOCAL_MEMORY_HOME` selects another folder; it must be empty or
-missing, and it must not be inside a clone. On Windows the folder is created
-with access for your account only; on Linux with mode 0700.
+missing, and it must not be inside a clone. On Windows the folder gets access
+for your account only (an empty folder you made yourself has its inherited
+rules replaced; a folder owned by another account is refused); on Linux mode
+0700.
+
+`init --client claude-code --write-mcp .mcp.json` writes the block to a new
+file instead of printing it; an existing file is never overwritten. `--json`
+prints the home, the client and the block as one JSON object.
 
 ### Where the block goes
 

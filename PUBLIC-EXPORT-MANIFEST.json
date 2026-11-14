@@ -426,7 +426,7 @@
       "mode": "0o644",
       "path": "components/integrity-adapter-sdk/src/integrity_adapter_sdk/guardian-origin.json",
       "sanitization_edits": 2,
-      "sha256": "64b6dad993d00566b253b60e54a5ba8fc6e61633c505e55da304cbdb7c77a6ea"
+      "sha256": "c4d7c6f1d94193eff3c5e28285c64c95e46d4b5aa2d0a3d336a486ca3a8bc04c"
     },
     {
       "bytes": 632,
@@ -5833,11 +5833,11 @@
       "sha256": "e84ea9e8ec62645612d0550ee4d6c4a7af2f7b4243891225bb364bb08a20bd8b"
     },
     {
-      "bytes": 7222,
+      "bytes": 7537,
       "mode": "0o644",
       "path": "docs/LOCAL_MEMORY.md",
       "sanitization_edits": 0,
-      "sha256": "b85b793411806599eede819d23c612f85737cc93b4282420df543dc5b4a0afe4"
+      "sha256": "1e11d294a16c62af821cc7f22570a51ba17ce4cfd002bdbcc76dc0eec0deae51"
     },
     {
       "bytes": 1314,
@@ -6309,11 +6309,11 @@
       "sha256": "e5f41821cc528206b1b662b080496828aed98332cdfc4e7b1a229b7f670e3584"
     },
     {
-      "bytes": 28395,
+      "bytes": 30586,
       "mode": "0o644",
       "path": "src/integrity_guardian/_windows_files.py",
       "sanitization_edits": 0,
-      "sha256": "cff7a0d30420b53d42c081ee16d2fd29176350aa42e29844fb91a22faea500ec"
+      "sha256": "ae3679ff88f6b7fc5e6946700d8f6874f04ad2190c7e56d827f0d8cb5814218d"
     },
     {
       "bytes": 15959,
@@ -6855,11 +6855,11 @@
       "sha256": "e565623f856f242a366d1a3cc761a0d54f54690dc09db8d70088ba32bbe9a93b"
     },
     {
-      "bytes": 38233,
+      "bytes": 40200,
       "mode": "0o644",
       "path": "src/integrity_guardian/local_memory.py",
       "sanitization_edits": 0,
-      "sha256": "d97638b76c3418beb4c499f352a83ea043d29d406614086069daac696e736fc8"
+      "sha256": "3e6c4ccccb648079f04e2db678a6592f8a42cfef5646b33d6672eac9c44a17bb"
     },
     {
       "bytes": 6140,
@@ -9046,11 +9046,11 @@
       "sha256": "cf5213b135142a33e80ce394a2a9c804b9ca41643d78eb9ffa715b660d7d8bd1"
     },
     {
-      "bytes": 14144,
+      "bytes": 16394,
       "mode": "0o644",
       "path": "tests/test_local_memory.py",
       "sanitization_edits": 0,
-      "sha256": "fd62b6b80681632943fce2393091a00d9d7d971966b23692f45d6e20bca02cb7"
+      "sha256": "e779d724ac76e42ef083794e32f0ad6e5af8754a69f50535dcbd430ef645b127"
     },
     {
       "bytes": 17413,
@@ -10498,7 +10498,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:bc9933551dffe29f6c5e1524e0865415292e4bff25887f3dc443c0ac01c60779",
+  "projection_digest": "sha256:d888ef521dfb26a56e6b2505321adff81fe82f5a1b74bf741dbc177dbe410992",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

@@ -37,10 +37,12 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from jsonschema import Draft202012Validator, ValidationError
 
 from . import __version__
+from ._windows_files import WindowsFileBoundaryError
 from .canonical import canonical_bytes
 from .seed_catalog import SeedCatalog, SeedCatalogError, open_catalog_readonly
 from .signing import Ed25519Signer, public_key_fingerprint
 from .turn_memory import TurnMemoryError, TurnMemoryStore, namespace_fingerprint
+from .windows_private_state import WindowsPrivateStateError
 from .work_claims import WorkClaimError, WorkClaimRegistry, normalize_resource
 
 PROFILE = "integrity-local-memory/v1"
@@ -89,9 +91,13 @@ def _now() -> str:
 
 def _private_folder(path: Path) -> None:
     if os.name == "nt":
-        from ._windows_files import create_private_directory_tree
+        from ._windows_files import adopt_empty_private_directory, create_private_directory_tree
 
-        create_private_directory_tree(path)
+        if path.is_dir():
+            # An empty folder the user made inherits its parent's rules; replace them.
+            adopt_empty_private_directory(path)
+        else:
+            create_private_directory_tree(path)
     else:
         path.mkdir(mode=0o700, parents=True, exist_ok=True)
         path.chmod(0o700)
@@ -160,7 +166,13 @@ class LocalMemory:
         home = Path(home).absolute()
         if home.exists() and (not home.is_dir() or any(home.iterdir())):
             raise LocalMemoryError(f"{home} exists and is not an empty folder; nothing was changed")
-        _private_folder(home)
+        try:
+            _private_folder(home)
+        except WindowsFileBoundaryError as exc:
+            raise LocalMemoryError(
+                f"{home} cannot be made private for your account ({exc}); "
+                "use a missing folder or an empty folder you own; no instance was created"
+            ) from exc
         key = Ed25519PrivateKey.generate()
         fingerprint = public_key_fingerprint(key.public_key())
         instance = {
@@ -694,6 +706,10 @@ def main(argv: list[str] | None = None) -> int:
 
     item = command("init", "create the instance and print the MCP block for your agent client")
     item.add_argument("--client", choices=CLIENTS, help="print the configuration block for this client")
+    item.add_argument("--write-mcp", type=Path, metavar="PATH",
+                      help="also write the --client block to PATH, a new file (never overwritten)")
+    item.add_argument("--json", action="store_true",
+                      help="print one JSON object: home, client and the configuration block")
     item = command("config", "print the MCP block for one agent client")
     item.add_argument("--client", choices=CLIENTS, required=True)
     command("serve", "run the MCP server on stdio (your agent client starts this)")
@@ -705,10 +721,25 @@ def main(argv: list[str] | None = None) -> int:
     home = (args.home or default_home()).absolute()
     try:
         if args.cmd == "init":
+            target = args.write_mcp.absolute() if args.write_mcp else None
+            if target is not None and not args.client:
+                raise LocalMemoryError("--write-mcp needs --client; nothing was changed")
+            if target is not None and (target.exists() or not target.parent.is_dir()):
+                raise LocalMemoryError(f"{target} exists or its folder is missing; nothing was changed")
             LocalMemory.create(home).close()
+            block = client_config(args.client, home) if args.client else None
+            if target is not None:
+                with target.open("x", encoding="utf-8", newline="\n") as stream:
+                    stream.write(block)
+            if args.json:
+                print(json.dumps({"home": str(home), "client": args.client, "config": block,
+                                  "written": str(target) if target is not None else None}, indent=2))
+                return 0
             print(f"Created a local memory instance in {home}")
-            if args.client:
-                print(f"\nMCP block for {args.client}:\n\n{client_config(args.client, home)}")
+            if target is not None:
+                print(f"Wrote the MCP block for {args.client} to {target}")
+            elif args.client:
+                print(f"\nMCP block for {args.client}:\n\n{block}")
             else:
                 print("Next: guardian-local-memory config --client " + "|".join(CLIENTS))
             return 0
@@ -733,7 +764,8 @@ def main(argv: list[str] | None = None) -> int:
         memory = LocalMemory(home)
         with closing(memory):
             return serve(memory)
-    except (LocalMemoryError, SeedCatalogError, TurnMemoryError, WorkClaimError, OSError) as exc:
+    except (LocalMemoryError, SeedCatalogError, TurnMemoryError, WorkClaimError, OSError,
+            WindowsFileBoundaryError, WindowsPrivateStateError) as exc:
         print(f"guardian-local-memory: {exc}", file=sys.stderr)
         return 2
 
