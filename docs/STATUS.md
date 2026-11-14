@@ -91,8 +91,12 @@ quota, another continued from the same log. See the
 [agent bus](../components/integrity-llm-bus/README.md).
 
 Of the bus, the local queue, registry and relay are in daily use on Windows.
-The hub's socket handler, its systemd sandbox and operation across several
-hosts are **not verified** from this repository.
+The hub is Linux only; on Windows it is not supported, by design. A public CI
+job installs the hub on Ubuntu with real accounts, without systemd, and sends
+it requests over its socket from the gateway account and from other accounts
+([install stage 3](BUS_HUB_AND_HUMANX.md)). Its systemd sandbox, the SSH
+gateway and operation across several hosts are **not verified** from this
+repository.
 
 ### Cloud agents (Codex Cloud)
 
@@ -145,9 +149,12 @@ invented.
 port of a working pilot. A person writes in a small web page; a room agent of
 one vendor is woken over the bus, held read-only by hooks, and reads
 production through a read-only gateway. Its unit tests run in public CI with a
-synthetic configuration. The port changes the bus addresses and takes every
-site value from a configuration file, so the ported form has had no live run:
-no real bus, agent, switch, database or browser took part. The waker loops,
+synthetic configuration. A second CI job installs the server side on Ubuntu
+next to the bus hub, with real accounts, and sends one question from the page
+through the hub to a script that holds the room vendor's key
+([install stage 3](BUS_HUB_AND_HUMANX.md)). The port changes the bus addresses
+and takes every site value from a configuration file, so the ported form has
+had no live run: no agent, switch, database or browser took part. The waker loops,
 the supervisor, the mode where several vendors answer together and the quota
 readers have no tests. The component README lists the defects carried over
 from the pilot.
@@ -225,7 +232,8 @@ that host binding, credentials or production actions are configured.
   builds and installs them. `integrity-execution-bridge` does not run on
   Windows.
 - The HumanX operator room and the agent-bus hub have had no live run in their
-  published form.
+  published form: CI runs them with real accounts on one machine, without an
+  agent, systemd or a second host.
 - Seed events are not signed, and an incremental catalog sync does not re-read
   earlier events; see [ARCHITECTURE.md](../ARCHITECTURE.md#seed-service-and-plugin-boundaries).
 

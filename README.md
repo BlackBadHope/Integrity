@@ -180,10 +180,10 @@ Marks used on this page and in [what is verified](docs/STATUS.md):
 | **Authority separation** | Signed, one-use grants; the owner's approval is a separate step; a memory read is never a permission | CI |
 | **Mind graph** | A bounded capsule for each admitted turn, at most 8 KB, with plan items when they fit | daily use, CI |
 | **Procedural memory** | [Uroboros](docs/UROBOROS.md): verified work becomes a reusable route, offered at admission as a hint, never as authority | CI; live with Claude Code |
-| **Coordination** | Fenced work claims on one machine; an [agent bus](components/integrity-llm-bus/README.md) with a hub for a shared bus | daily use, CI; hub socket handler and multi-host use not verified |
+| **Coordination** | Fenced work claims on one machine; an [agent bus](components/integrity-llm-bus/README.md) with a hub for a shared bus ([install stage 3](docs/BUS_HUB_AND_HUMANX.md)) | daily use, CI; the hub with real accounts on one Linux machine in CI; multi-host use, systemd and the SSH gateway not verified; no hub on Windows, by design |
 | **Reach** | The core on another machine over an [OpenSSH forced command](docs/CROSS_MACHINE_QUICKSTART.md); [signed journals](docs/CLOUD_AGENTS.md) for cloud agents | daily use, CI; no live Codex Cloud acceptance |
 | **Guards and kill switch** | [Hook-side guards](components/integrity-guards/README.md) for remote changes and forgotten rules; a [per-vendor and global switch](components/integrity-killswitch/README.md) for agent access | CI; both are alpha |
-| **Human operator room** | [HumanX](components/integrity-humanx/README.md): a web page for a person; room agents of four vendors are woken over the bus, held read-only by hooks, and read production through a read-only gateway | CI; alpha port of a working pilot, no live run of the ported form |
+| **Human operator room** | [HumanX](components/integrity-humanx/README.md): a web page for a person; room agents of four vendors are woken over the bus, held read-only by hooks, and read production through a read-only gateway | CI, including the server side with real accounts next to the hub; alpha port of a working pilot, no live run with an agent |
 | **Private archive and UI** | [Home](components/integrity-home/README.md), kept apart from project memory; a read-only [lab and workbench](components/integrity-space/README.md) | CI |
 
 ## Quick start
@@ -279,6 +279,7 @@ CI runs the second one on Linux and Windows.
 | Create an isolated local instance | [Clean bootstrap](BOOTSTRAP.md) |
 | Connect Claude Code, Codex or Antigravity with lifecycle hooks | [Native onboarding](docs/native-onboarding.md), [Linux clients](docs/linux-native-clients.md) |
 | Put the core on one machine and clients on another | [A core instance on one Linux account](docs/CORE_INSTANCE.md), [Two-machine quickstart](docs/CROSS_MACHINE_QUICKSTART.md), [Linux core scripts](deploy/linux-core/README.md) |
+| Add a shared agent bus and a page for a person | [The bus hub and HumanX on one Linux machine](docs/BUS_HUB_AND_HUMANX.md) |
 | Share one core between two to five people | [Team quickstart](docs/QUICKSTART_TEAM.md) |
 | Record work from a cloud agent | [Cloud agents](docs/CLOUD_AGENTS.md) |
 | Find out why a session has no memory | [Hooks troubleshooting](docs/hooks-troubleshooting.md) |

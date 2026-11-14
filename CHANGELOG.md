@@ -7,6 +7,20 @@ All notable public changes are recorded here.
 Changes on `main` after 7.0.1. Nothing here is tagged, and the distribution
 versions are unchanged unless an entry says otherwise.
 
+### A page for install stage 3: the bus hub and HumanX
+
+- New page `docs/BUS_HUB_AND_HUMANX.md`: install stage 3, optional. It puts
+  the bus hub and the HumanX server side on one Linux machine together, with
+  the install, check and remove commands of each, the kill switch on the
+  agents' machine, what the CI jobs with real accounts run, and what they do
+  not prove.
+- The bus README, the README's capability table and `docs/STATUS.md` used to
+  say that the hub's socket handler was not verified. They now say what the
+  `bus hub (ubuntu, real accounts)` job runs, keep systemd, the SSH gateway
+  and several hosts as not verified, and say that the hub is not supported on
+  Windows, by design. The HumanX rows say that the server side runs next to
+  the hub with real accounts in CI, and still that no agent took part.
+
 ### The kill switch reads the caller's process ancestry on Linux
 
 - `integrity-killswitch` used to read the process ancestry only on Windows;
