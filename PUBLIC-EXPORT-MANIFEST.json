@@ -9753,7 +9753,7 @@
       "sha256": "c088a0394890fd3661a86c0f0a8e6e716ad3b6c51b5728c032b12663af6420f9"
     }
   ],
-  "generated_file_count": 103,
+  "generated_file_count": 106,
   "generated_files": [
     {
       "bytes": 1041,
@@ -9782,6 +9782,20 @@
       "path": ".github/pull_request_template.md",
       "sanitization_edits": 0,
       "sha256": "6b22c93da8a2518152bff798ca4d50ac247072c6b7baa20d353d5d52658f19d9"
+    },
+    {
+      "bytes": 4738,
+      "mode": "0o644",
+      "path": ".github/scripts/agent_ancestry_check.py",
+      "sanitization_edits": 0,
+      "sha256": "19039ba49dbddcbd2c024a6451d9432d2783b62faece0d4d9feee47be9382b07"
+    },
+    {
+      "bytes": 1006,
+      "mode": "0o644",
+      "path": ".github/scripts/agent_ancestry_probe.sh",
+      "sanitization_edits": 0,
+      "sha256": "3d42012a50c8a9d7d49bc047568ca36281a06fc7c6ec863a65dcd3159dd33ff0"
     },
     {
       "bytes": 28541,
@@ -9819,6 +9833,13 @@
       "sha256": "7761b5046efe8baea4bf4c4a9ffbfdfda75e869897e7d234257b33da7332c649"
     },
     {
+      "bytes": 4270,
+      "mode": "0o644",
+      "path": ".github/workflows/real-claude.yml",
+      "sanitization_edits": 0,
+      "sha256": "a8c6d545c37fe7308876331d8bd0509f4f67b39620224326c5d252c7529b53bf"
+    },
+    {
       "bytes": 132,
       "mode": "0o644",
       "path": ".gitignore",
@@ -9847,11 +9868,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 66968,
+      "bytes": 68373,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "85ad2e943e5fe4f23780b236243690a85895cf58b749f6fb116af72c42dd23cd"
+      "sha256": "092bd0bbec0ccf7c4eed541a9183295a6549b22408841c3982bfbb2a7475ead3"
     },
     {
       "bytes": 775,
@@ -10477,7 +10498,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:91b8d28018ac8c95eccc6815a428b9b3bffd6b3983ccb2e03ac2b52148316d70",
+  "projection_digest": "sha256:36b24e4aa64ac3654392a2e65f2edb8e72e264707f33972da9524dc42a66d753",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

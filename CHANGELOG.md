@@ -21,6 +21,30 @@ versions are unchanged unless an entry says otherwise.
   Windows, by design. The HumanX rows say that the server side runs next to
   the hub with real accounts in CI, and still that no agent took part.
 
+### A manual CI job runs a real Claude Code client against the kill switch
+
+- `.github/workflows/real-claude.yml` is started by hand only
+  (`workflow_dispatch`); it never runs on push, pull request or schedule. It
+  runs only on this repository and only from the protected `real-claude`
+  environment, whose one secret is the Anthropic API key. The key reaches
+  only the two Claude Code steps, through their environment.
+- Claude Code is installed at a fixed version and called with `claude -p`,
+  the Haiku model, at most 4 turns and one tool: Bash, allowed to run one
+  probe script and nothing else. The job stops after 10 minutes.
+- The probe (`.github/scripts/agent_ancestry_probe.sh`) asks the kill switch
+  how it classifies its caller, turns `claude` off, checks that `check` now
+  refuses, and checks that `on` is refused from inside the agent. The same
+  probe runs once without an agent as a control, which must not be
+  classified as `claude`.
+- A second Claude Code call then runs with `claude` off. A `PreToolUse` hook
+  asks the kill switch before each Bash call, so the probe must not run a
+  second time.
+- `.github/scripts/agent_ancestry_check.py` checks the records and reports
+  the model, the token counts and the cost estimate that Claude Code prints.
+  It never prints the model's reply.
+- This job has not run yet. Nothing in the README or `docs/STATUS.md` claims
+  its result.
+
 ### The kill switch reads the caller's process ancestry on Linux
 
 - `integrity-killswitch` used to read the process ancestry only on Windows;
