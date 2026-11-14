@@ -105,3 +105,39 @@ def test_live_path_builds_a_request_from_recall_terms(monkeypatch, tmp_path):
     request = owner_rules.live_rules_request({"auxiliary_recall": {"terms": ["deploy", 7]}})
     assert request["enabled"] is True and request["query"] == "deploy 7" and request["max_rules"] == 3
     assert [r["rule_id"] for r in request["index"]] == ["matched"]
+
+
+def _capsule_source(**extra):
+    source = {"context_text": "", "recall": {"hits": [], "terms": ["deploy"]}, "snapshot": {"event_count": 1, "event_cursor": 1}}
+    source.update(extra)
+    return source
+
+
+def test_capsule_carries_the_rules_receipt_next_to_the_rules():
+    """ISS-099: the selection receipt was computed and thrown away."""
+    from integrity_guardian.context_budget import build_context_capsule, resolve_context_budget
+
+    index = owner_rules.build_rule_index([_rule("matched", triggers={"tools": ["deploy"]}), _rule("other")])
+    request = {"enabled": True, "index": index, "query": "deploy", "tools": ["deploy"], "max_rules": 8, "max_bytes": 2048}
+    admission = {"intent_fingerprint": "f", "projection_digest": "sha256:" + "0" * 64}
+    policy = resolve_context_budget("deploy", budget={"max_context_bytes": 8192, "max_candidates": 5})
+    capsule, selection = build_context_capsule(_capsule_source(owner_rules=request), admission, policy)
+    working = capsule["working_set"]
+    assert [r["rule_id"] for r in working["owner_rules"]] == ["matched"]
+    receipt = working["owner_rules_receipt"]
+    assert receipt["protocol"] == owner_rules.PROTOCOL
+    assert receipt["rules_considered"] == 2 and receipt["rules_selected"] == 1 and receipt["rules_truncated"] == 0
+    assert receipt["bytes"] > 0
+    # the strict selection receipt schema is unchanged: the rules receipt is not copied there
+    assert "owner_rules_receipt" not in selection and "owner_rules" not in selection
+
+
+def test_capsule_without_rules_request_has_no_rules_receipt(monkeypatch):
+    from integrity_guardian.context_budget import build_context_capsule, resolve_context_budget
+
+    monkeypatch.delenv("INTEGRITY_OWNER_RULES", raising=False)
+    admission = {"intent_fingerprint": "f", "projection_digest": "sha256:" + "0" * 64}
+    policy = resolve_context_budget("deploy", budget={"max_context_bytes": 8192, "max_candidates": 5})
+    capsule, _selection = build_context_capsule(_capsule_source(), admission, policy)
+    assert "owner_rules" not in capsule["working_set"]
+    assert "owner_rules_receipt" not in capsule["working_set"]
