@@ -174,6 +174,12 @@ def test_compiled_public_hub_workbench_bootstrap_uses_existing_business_route(ru
                 sys.modules[name] = previous[name]
 
 
+# Green Windows runs take 1.8-5.8 s, nearly all of it node start-up before the first request
+# (see the marks); 13.11 one Windows run was killed by the old 20 s timer with no output.
+# 60 s still stops a real hang, and the marks show where it stopped.
+DEADLINE_S = 60
+
+
 def test_actual_js_preview_client_bootstraps_and_reads_real_asgi_seed(runtime, record_testsuite_property):
     node = shutil.which("node")
     if node is None:
@@ -197,7 +203,7 @@ def test_actual_js_preview_client_bootstraps_and_reads_real_asgi_seed(runtime, r
             process.kill()
 
         def ended(what):
-            return (f"JS preview bridge {what} (20 s timer fired: {timer_fired.is_set()}; "
+            return (f"JS preview bridge {what} ({DEADLINE_S} s timer fired: {timer_fired.is_set()}; "
                     f"marks: {'; '.join(marks)})")
 
         def send(payload):
@@ -208,7 +214,7 @@ def test_actual_js_preview_client_bootstraps_and_reads_real_asgi_seed(runtime, r
                 mark("write to node failed")
                 raise RuntimeError(ended("closed its input")) from exc
 
-        deadline = threading.Timer(20, kill)
+        deadline = threading.Timer(DEADLINE_S, kill)
         deadline.start()
         try:
             send(json.dumps({"token": token}))
