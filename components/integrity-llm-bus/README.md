@@ -96,10 +96,26 @@ Verified by public CI on Ubuntu and Windows with Python 3.11 and 3.12
   detection, change log applied to a guarded replica, migration). `fcntl` is stubbed with a no-op lock
   on Windows and no socket server is started.
 
+Verified by the public CI job `bus hub (ubuntu, real accounts)` (`.github/scripts/bus_hub_accounts_check.py`),
+on Ubuntu with sudo inside the runner, with keys generated in the job:
+
+- the bus wheel alone; `integrity-llm-bus-hub install`, a refused second install, and `doctor` failing on
+  the daemon check alone before the daemon starts and after it stops, and passing while it runs;
+- the daemon as the bus account, without systemd, and the unix-socket handler: callers told apart by
+  `SO_PEERCRED`; a send from the gateway account naming a vendor and a poll with a local key from a second
+  account of the socket group; revoked, unknown and read-only keys refused, a vendor named by an account
+  other than the gateway refused, and a connect from an account outside the socket group refused;
+- the journal chain; `uninstall` refused while the daemon or a gateway account process runs, with nothing
+  removed; then `uninstall --yes`, `doctor` reporting `not-installed`, and pip uninstall.
+
+The hub runs on Linux only; on Windows it is not supported, by design (accounts, groups and
+`SO_PEERCRED`). The [install stage 3 page](../../docs/BUS_HUB_AND_HUMANX.md) puts the hub and HumanX
+together.
+
 Not verified here:
 
-- on Linux only these unit tests ran; the unix-socket handler (`SO_PEERCRED`), the systemd sandbox,
-  `chattr` sealing, the SSH gateway and forced-command shell were not exercised;
+- the systemd sandbox, `chattr` sealing, the SSH gateway and forced-command shell were not exercised;
+  the CI job calls the socket from the gateway account directly;
 - no multi-host operation (hub plus clients over SSH, replica sync stream) is claimed;
 - the native Codex peer, Grok webhook, Claude/Codex/ChatGPT harnesses and Windows Hello signing were
   exercised only through mocks in the tests.

@@ -3467,11 +3467,11 @@
       "sha256": "a9faffe6445205b840de9ba75ac16498f48d1aaefa6c10512d44780b43eb4d98"
     },
     {
-      "bytes": 7927,
+      "bytes": 9111,
       "mode": "0o644",
       "path": "components/integrity-llm-bus/README.md",
       "sanitization_edits": 0,
-      "sha256": "77680a3b66f7a45d52e21b31872bc8e1b980a458a73b4ed552195a88ce627450"
+      "sha256": "fcb5eadeef9c27b972335988c81200c403327503b10899863deda24a81d20b34"
     },
     {
       "bytes": 12490,
@@ -9753,7 +9753,7 @@
       "sha256": "c088a0394890fd3661a86c0f0a8e6e716ad3b6c51b5728c032b12663af6420f9"
     }
   ],
-  "generated_file_count": 105,
+  "generated_file_count": 106,
   "generated_files": [
     {
       "bytes": 1041,
@@ -9868,11 +9868,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 67546,
+      "bytes": 68373,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "65862faaf5664225c56dcd85e259c028220fa3607c96f99e47c18b7b08e8f734"
+      "sha256": "092bd0bbec0ccf7c4eed541a9183295a6549b22408841c3982bfbb2a7475ead3"
     },
     {
       "bytes": 775,
@@ -9910,11 +9910,11 @@
       "sha256": "c773a85da94e9edf0b2b10e60fd43b00fe4f90e345ec0d958e6c5b4d0d405e8e"
     },
     {
-      "bytes": 27430,
+      "bytes": 27753,
       "mode": "0o644",
       "path": "README.md",
       "sanitization_edits": 0,
-      "sha256": "71f8c96694f30c47f1c0f66ae4f865a3d56af4e24d0177be164be04920a06b4a"
+      "sha256": "7f4df6842d6c522ef8246247db47129908315b093e2e1550baf140547d994018"
     },
     {
       "bytes": 13444,
@@ -10232,6 +10232,13 @@
       "sha256": "80fba0a359ecfabd9ead56e5a011fabc9cee12e3c18b9d53b320225e1fa6477d"
     },
     {
+      "bytes": 8802,
+      "mode": "0o644",
+      "path": "docs/BUS_HUB_AND_HUMANX.md",
+      "sanitization_edits": 0,
+      "sha256": "2a2df418374adf259a4ac7aadb7b319946213cf738117fd38343b02236f446b0"
+    },
+    {
       "bytes": 6290,
       "mode": "0o644",
       "path": "docs/CLOUD_AGENTS.md",
@@ -10246,18 +10253,18 @@
       "sha256": "e03cd2506f026c9e618ee2035b2676fb52369982e79e9df6eba0d3f5c1df5465"
     },
     {
-      "bytes": 6936,
+      "bytes": 7194,
       "mode": "0o644",
       "path": "docs/README.md",
       "sanitization_edits": 0,
-      "sha256": "d5ba00fcd9968cc19546d2576c8fa668c958fd2c2fa44cd9821817a76d22ddde"
+      "sha256": "1c188a26b899e0fe5c4ea10fbe1d18acb43ec03f18b823929aa226f096926f69"
     },
     {
-      "bytes": 12065,
+      "bytes": 12651,
       "mode": "0o644",
       "path": "docs/STATUS.md",
       "sanitization_edits": 0,
-      "sha256": "b4874f9ad946d6fc753d86c46185b22667f30bb4f25381e7ab5190a067c4909c"
+      "sha256": "373b8555d3b96ab9309349b60167bc5538e215c8642de30ec3228109ad8ff291"
     },
     {
       "bytes": 8620,
@@ -10491,7 +10498,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:a9ca180ceef9969364aa12341f8b4a4a4b562acffd209e3afaf28c7ec5a945dd",
+  "projection_digest": "sha256:36b24e4aa64ac3654392a2e65f2edb8e72e264707f33972da9524dc42a66d753",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
