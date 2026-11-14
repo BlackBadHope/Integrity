@@ -53,6 +53,7 @@ NOT_CONFIGURED = ["sql (my.cnf)", "switch reads (switch_nets, switch.cred)", "st
                   "ring map (ring and storm screens stay off)"]
 NAME = re.compile(r"[a-z_][a-z0-9_-]{0,31}\Z")
 VENDOR = re.compile(r"[a-z][a-z0-9-]{0,31}\Z")
+HOST_NAME = re.compile(r"[a-z0-9]([a-z0-9-]{0,62})(\.[a-z0-9]([a-z0-9-]{0,62}))*\Z")
 KEY_MAX = 4096
 DEFAULT_BIND = "127.0.0.1"
 
@@ -115,6 +116,9 @@ def check_install_args(args) -> list[str]:
             ipaddress.ip_address(address)
         except ValueError:
             problems.append(f"--allow {address!r}: use an IP address")
+    for name in getattr(args, "web_host", None) or ():
+        if not HOST_NAME.match(name):
+            problems.append(f"--web-host {name!r}: use a lowercase host name")
     if not args.vendor:
         problems.append("give at least one --vendor (bus vendor id of a room Arbiter)")
     for vendor in args.vendor or ():
@@ -179,6 +183,7 @@ def component_configuration(record: dict) -> dict:
 
 def web_configuration(record: dict) -> dict:
     return {"bind": record["bind"], "port": record["port"], "allow": list(record["allow"]),
+            "hosts": list(record.get("hosts", [])),
             "socket": record["bus_socket"], "token_file": str(Path(record["etc"]) / WEB_KEY)}
 
 
@@ -295,7 +300,7 @@ def install(args) -> dict:
         "protocol": RECORD_PROTOCOL, "complete": False, "web_user": args.web_user, "gateway_user": args.gateway_user,
         "socket_group": args.socket_group, "bus_group": args.bus_group, "bus_gateway_user": args.bus_gateway_user,
         "bus_socket": args.bus_socket, "operator_id": args.operator_id, "vendors": sorted(set(args.vendor)),
-        "bind": args.bind, "port": args.port, "allow": list(args.allow),
+        "bind": args.bind, "port": args.port, "allow": list(args.allow), "hosts": list(args.web_host or []),
         "etc": str(etc), "state": str(state), "runtime": str(runtime), "python": sys.executable,
         # What was there before install; uninstall never removes these.
         "existed": {"bus_group": args.bus_group, "bus_gateway_user": args.bus_gateway_user,
@@ -621,6 +626,9 @@ def build_parser() -> argparse.ArgumentParser:
                       help="allow --bind 0.0.0.0 or ::, which listens on every address of the machine")
     step.add_argument("--port", required=True, type=int)
     step.add_argument("--allow", action="append", help="client address the web accepts")
+    step.add_argument("--web-host", action="append",
+                      help="a Host header name the web answers to besides its bind address, 127.0.0.1, "
+                           "localhost and [::1]; any other Host gets 421")
     step = commands.add_parser("doctor", help="read-only check")
     step.add_argument("--etc", required=True)
     step = commands.add_parser("uninstall", help="remove what install created")

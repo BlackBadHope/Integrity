@@ -213,7 +213,7 @@ def main() -> int:
     digest = {name: hashlib.sha256(value.encode()).hexdigest() for name, value in keys.items()}
     room_ops = ["send", "poll", "get", "ack", "status", "room-arbiter", "room-arbiter-set", "vendor-cards", "status-batch"]
     principals = {"principals": {
-        "humanx-web": {"key_sha256": digest["web"], "vendor": "humanx", "account": "example-a",
+        "humanx-web": {"key_sha256": digest["web"], "vendor": "human", "account": "example-a",
                        "addresses": [HUMAN], "ops": room_ops, "write": True, "rate_per_min": 600},
         "room-claude": {"key_sha256": digest["vendor"], "vendor": "claude", "account": "example-b",
                         "addresses": [ROOM_VENDOR], "ops": ["send", "poll", "get", "ack", "status"], "write": True,
@@ -390,6 +390,10 @@ def main() -> int:
         ("send from an address outside the allow list", ("POST", "/api/send", {"body": "x", "page": build},
                                                          {"X-HumanX": "1"}, "127.0.0.2"), 403),
         ("send without the X-HumanX header", ("POST", "/api/send", {"body": "x", "page": build}, None, None), 403),
+        ("page with a Host header not in the list", ("GET", "/", None, {"Host": "rebound.example"}, None), 421),
+        ("send with a Host header not in the list", ("POST", "/api/send", {"body": "x", "page": build},
+                                                     {"X-HumanX": "1", "Host": "rebound.example"}, None), 421),
+        ("page with Host localhost and the web's port", ("GET", "/", None, {"Host": f"localhost:{PORT}"}, None), 200),
         ("ring screen while it is not configured", ("GET", "/rings", None, None, None), 404),
     ):
         status, _headers, _payload = http_call(*call)

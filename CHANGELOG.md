@@ -53,6 +53,10 @@ versions are unchanged unless an entry says otherwise.
   create, and a bus group or bus gateway account that does not exist. The web
   listens on 127.0.0.1 unless `--bind` says otherwise; `0.0.0.0` and `::`
   need `--allow-any-address`.
+- The web answers only to a `Host` header naming its bind address,
+  `127.0.0.1`, `localhost`, `[::1]` or a name given with `--web-host`, with
+  its port or without; any other `Host` gets 421. A page whose name was
+  pointed at the web's address (DNS rebinding) cannot reach it this way.
 - Before each step `install` writes the step to its record: what it created,
   and the bus group and bus gateway account that were there before. If a step
   fails, it removes what the record lists. An install killed half way leaves
@@ -90,7 +94,9 @@ versions are unchanged unless an entry says otherwise.
     outside the group cannot connect; the gateway log holds request hashes
     and no request text;
   - the web on 127.0.0.1: the page, a refusal from 127.0.0.2 (outside the
-    allow list), a refusal without the `X-HumanX` header, the state API;
+    allow list), a refusal without the `X-HumanX` header, 421 for a page and
+    a send with a `Host` header not in the web's list, the page with
+    `Host: localhost:<port>`, the state API;
   - a question sent from the page reaches the room vendor over the bus from
     the operator address, and the vendor's answer shows under it;
   - `uninstall` refused while the web and the gateway run and while an owner
@@ -102,6 +108,13 @@ versions are unchanged unless an entry says otherwise.
   archive they read was made only by `migrate.py` when history was moved in.
   The hub daemon now makes the archive at start when it is missing. A new
   test asks for the cards on a hub without moved history.
+- Fixed in `integrity-llm-bus`, found by the second run of this job: the hub
+  daemon refuses every request of a key whose vendor is not one of
+  `antigravity`, `bus`, `claude`, `codex`, `grok`, `human`, but the hub's
+  `install` accepted such a principal. The job's web key used vendor
+  `humanx`, so the web's vendor cards came back empty. `install` now refuses
+  such a principal; a test reads the vendor list from the daemon so the two
+  cannot drift apart. The job's web key now uses vendor `human`.
 
 ### Timing evidence kept in every CI run
 

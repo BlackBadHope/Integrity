@@ -16,6 +16,16 @@ import http.server, json, os, re, socket, socketserver, sys, threading, time, ur
 CONF = json.load(open(_integrity_value("web_config"), encoding="utf-8"))
 TOKEN = open(CONF["token_file"], encoding="utf-8").read().strip()
 ALLOW = set(CONF["allow"])
+# Host header names the web answers to (with its port or without): its bind address, loopback and the
+# names in "hosts". Any other Host gets 421, so a page whose name is pointed at this address (DNS
+# rebinding) cannot use a browser on an allowed address to reach it.
+_BIND_NAME = "[%s]" % CONF["bind"] if ":" in str(CONF["bind"]) else str(CONF["bind"])
+HOSTS = {h.lower() for h in ("127.0.0.1", "localhost", "[::1]", _BIND_NAME, *CONF.get("hosts", []))}
+
+
+def host_ok(value):
+    value = (value or "").strip().lower()
+    return any(value in (name, "%s:%s" % (name, CONF["port"])) for name in HOSTS)
 SENT_F = os.path.join(os.environ.get("STATE_DIRECTORY") or _integrity_value("web_state_dir"), "sent.jsonl")
 _lock = threading.Lock(); _pull = threading.Lock()
 _cache = {"cards": None, "cards_ts": 0}
@@ -547,6 +557,8 @@ class H(http.server.BaseHTTPRequestHandler):
     def _ok_ip(self):
         if self.client_address[0] not in ALLOW:
             self.send_error(403); return False
+        if not host_ok(self.headers.get("Host")):
+            self.send_error(421); return False
         return True
 
     def _json(self, code, doc):

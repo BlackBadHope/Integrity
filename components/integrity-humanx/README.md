@@ -60,7 +60,8 @@ Server (Linux), after the bus hub (`integrity-llm-bus-hub install`):
    `integrity-humanx --list` shows `humanx-web`, `humanx-ro-gateway` and `humanx-ro-snapshot`.
 2. Write the web's bus key to a file of your own; the hub's keys file holds only its sha256, with the
    `human-<operator_id>` address and the room operations (`send`, `poll`, `get`, `ack`, `status`,
-   `room-arbiter`, `room-arbiter-set`, `vendor-cards`, `status-batch`).
+   `room-arbiter`, `room-arbiter-set`, `vendor-cards`, `status-batch`) and `"vendor": "human"`; the hub
+   refuses every request of a key whose vendor it does not know, and its `install` refuses such an entry.
 3. As root, run `integrity-humanx-server install`. It needs new folders and new names, and it names the
    hub's socket group, SSH gateway account and socket:
 
@@ -86,6 +87,10 @@ Server (Linux), after the bus hub (`integrity-llm-bus-hub install`):
      400 and the web account as owner before any byte, then renamed.
    - The web listens on `--bind`, 127.0.0.1 by default. `0.0.0.0` or `::` are refused unless you add
      `--allow-any-address`.
+   - The web answers only to a `Host` header naming its bind address, `127.0.0.1`, `localhost`, `[::1]`
+     or a name given with `--web-host`, with its port or without; any other `Host` gets 421. A page whose
+     name was pointed at the web's address (DNS rebinding) therefore cannot reach it through a browser on
+     an allowed address.
 4. Enable the room on the hub: `<hub state>/state/room.json` with `human`, `vendors` and `arbiters`
    (see below). `install` does not write it.
 5. For SQL, switch reads, the storm reader, the snapshot job and the ring screens, add the files they need
@@ -143,8 +148,8 @@ configuration in a temporary folder and no network:
 - `room_tool` reply, send and escalate checks, size and encoding guards, ring-change check, host-read
   limits, argument-file encodings, transport errors, journal hash chain and rotation;
 - Codex MCP tool mapping and the Claude room hook decisions;
-- web handlers in-process (allow list, CSRF header, stale page, send path, state API, escaped ring page,
-  attachment types);
+- web handlers in-process (allow list, `Host` list, CSRF header, stale page, send path, state API, escaped
+  ring page, attachment types);
 - ring and storm screens with an invented ring map, including the storm page-size limit;
 - gateway caller checks, SQL and `show` whitelists, web screen rights and Integrity snapshot reads. The gateway
   is Linux-only; the tests use fake `pwd`/`grp` and a fake connection, and no socket server is started;
@@ -174,7 +179,8 @@ Ubuntu with sudo inside the runner, with keys generated in the job and a synthet
   run of the database client adds; no database server runs in the job). Accounts outside the socket group
   cannot connect. The gateway log holds request hashes and no request text;
 - the web on 127.0.0.1 as its own account: the page (the key is not in it), a refusal from 127.0.0.2, a
-  refusal without the `X-HumanX` header, the state API;
+  refusal without the `X-HumanX` header, 421 for a page and a send with a `Host` header not in its list,
+  the page with `Host: localhost:<port>`, the state API;
 - one question sent from the page through the real bus hub to the room vendor's address, read there with the
   vendor's key, and the vendor's answer shown under it on the page;
 - `uninstall` refused while the web and the gateway run, and while an owner file is in the configuration folder;
@@ -190,9 +196,6 @@ Ubuntu with sudo inside the runner, with keys generated in the job and a synthet
 - No live acceptance: no vendor agent, switch, database, SSH host or browser took part. The vendor side in CI
   is a script holding the vendor's key, not an agent.
 - The waker loops, the supervisor, Max Reasoning and the quota readers are not covered by the tests.
-- The web does not check the `Host` header. A page whose name is pointed at the web's address (DNS
-  rebinding) and opened in a browser on an allowed address can then reach it. This is read from the code
-  and not tested; keep the web on loopback or behind a proxy that checks `Host`.
 - A kill between creating the configuration folder and writing the record's first line leaves the folder
   without a record; `doctor` reports `broken` and `uninstall` removes nothing. Not tested.
 - Two machines (web on one, hub on another) were not run.
