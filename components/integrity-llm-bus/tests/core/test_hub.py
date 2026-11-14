@@ -61,7 +61,7 @@ def hub():
         "owner-k": _p("owner-k", vendor="human", role="owner-console", addresses=["owner"],
                       ops=["send", "room-arbiter-set", "room-arbiter"]),
         "human-k": _p("human-k", vendor="human", addresses=["human-op"],
-                      ops=["send", "poll", "room-arbiter", "room-arbiter-set"]),
+                      ops=["send", "poll", "room-arbiter", "room-arbiter-set", "vendor-cards"]),
         "room-k": _p("room-k", vendor="claude", addresses=["room-op-claude"], ops=["send", "poll"]),
         "seat-1": _p("seat-1", vendor="grok", addresses=["grok"], account="acct-s"),
         "seat-2": _p("seat-2", vendor="grok", addresses=["grok"], account="acct-s"),
@@ -259,6 +259,17 @@ def test_room_rules(hub):
     with pytest.raises(hub.Deny, match="room Arbiter is chosen only"):
         hub.execute("claude-k", dict(hub.principals()["claude-k"], ops=["room-arbiter-set"]),
                     "room-arbiter-set", {"vendor": "claude"})
+
+
+def test_vendor_cards_on_a_new_hub(hub):
+    # No history was moved in with migrate.py: the archive is made at start.
+    doc = call(hub, "human-k", "vendor-cards", {"days": 7})
+    cards = {card["vendor"]: card for card in doc["cards"]}
+    assert sorted(cards) == ["claude", "grok"]
+    assert cards["grok"]["selectable"] is False and cards["grok"]["ro_verified"] is False
+    sent = send(hub, "human-k", "owner")["message"]["id"]
+    with hub.STORE._connection() as db:
+        assert db.execute("SELECT count(*) FROM messages_archive WHERE id = ?", (sent,)).fetchone()[0] == 1
 
 
 def test_room_acl_in_store(hub):

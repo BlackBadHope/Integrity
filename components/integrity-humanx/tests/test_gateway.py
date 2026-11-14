@@ -46,14 +46,19 @@ def test_only_the_bus_gateway_and_room_vendors_may_call(gw, hx):
     assert all("req_sha256" in r and "query" not in json.dumps(r) for r in gw.logged)
 
 
-@pytest.mark.parametrize("sql", ["DELETE FROM users", "UPDATE users SET a=1", "SELECT 1; DROP TABLE users", "SELECT 1 -- x",
+@pytest.mark.parametrize("sql", ["DROP TABLE users", "DELETE FROM users", "UPDATE users SET a=1", "SELECT 1; DROP TABLE users", "SELECT 1 -- x",
                                  "SELECT * FROM users INTO OUTFILE '/tmp/x'", "SELECT SLEEP(5)", "SELECT 1 FOR UPDATE",
                                  "SELECT 'a\\' OR 1", "", "INSERT INTO t VALUES (1)", "CALL p()", "SELECT /* c */ 1"])
-def test_sql_refuses_anything_not_read_only(gw, sql):
+def test_sql_refuses_anything_not_read_only(gw, sql, monkeypatch):
     s, err = gw.check_sql(sql)
     assert s is None and err
+
+    def no_client(*args, **kwargs):   # the database is reached only through the client process
+        raise AssertionError("the database client was started for a refused query")
+
+    monkeypatch.setattr(gw.subprocess, "run", no_client)
     r = gw.op_sql({"query": sql})
-    assert r["ok"] is False and r["error"].startswith("Отказ шлюза")
+    assert r["ok"] is False and r["error"].startswith("Отказ шлюза") and "rows_tsv" not in r
 
 
 def test_sql_accepts_plain_reads_and_literal_marks(gw):

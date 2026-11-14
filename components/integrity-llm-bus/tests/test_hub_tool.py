@@ -34,6 +34,25 @@ def test_keys_are_accepted_only_as_sha256():
     assert hub.check_principals([])
 
 
+def test_a_key_without_a_vendor_the_daemon_accepts_is_refused_at_install():
+    # A web key written with vendor "humanx" installed, and then the daemon refused each of its requests.
+    for vendor in ("humanx", None, "Claude"):
+        entry = {"key_sha256": KEY, "vendor": vendor, "account": "a"}
+        problems = hub.check_principals({"principals": {"web-a": entry}})
+        assert any("vendor must be one of" in p for p in problems), (vendor, problems)
+    entry = {"key_sha256": KEY, "vendor": "human", "account": "a", "addresses": ["human-operator"]}
+    assert hub.check_principals({"principals": {"web-a": entry}}) == []
+
+
+def test_the_vendor_list_is_the_daemons():
+    import ast
+    import re
+    from pathlib import Path
+    source = (Path(hub.DAEMON)).read_text(encoding="utf-8")
+    line = re.search(r"^VENDORS = (\{[^}]*\})", source, re.M).group(1)
+    assert set(hub.VENDORS) == ast.literal_eval(line)
+
+
 def test_the_published_example_keys_file_is_not_installable_as_it_is():
     from pathlib import Path
     example = Path(__file__).resolve().parents[1] / "examples" / "hub" / "principals.example.json"
@@ -48,6 +67,68 @@ def test_doctor_and_uninstall_say_not_installed(tmp_path, capsys):
     missing.mkdir()
     report, code = run(capsys, "doctor", "--etc", str(missing))
     assert (report["status"], code) == ("broken", 1)
+
+
+def _unix_socket():
+    """A bound Unix socket in a short folder (a socket path holds about 100 bytes)."""
+    import os
+    import socket
+    import tempfile
+    path = os.path.join(tempfile.mkdtemp(), "core.sock")
+    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    server.bind(path)
+    return path, server
+
+
+def _fake_daemon(answer):
+    """A socket that answers one request with `answer` (bytes), or never answers when it is None."""
+    import threading
+    import time
+    path, server = _unix_socket()
+    server.listen(1)
+    seen = []
+
+    def serve():
+        connection, _ = server.accept()
+        with connection:
+            seen.append(connection.makefile("rb").readline())
+            if answer is None:
+                time.sleep(2)
+            else:
+                connection.sendall(answer)
+    threading.Thread(target=serve, daemon=True).start()
+    return path, server, seen
+
+
+def test_doctor_asks_the_daemon_one_request_without_a_key():
+    import os
+    import socket
+    from pathlib import Path
+    import pytest
+    if not hasattr(socket, "AF_UNIX") or sys.platform == "win32":
+        pytest.skip("the hub's socket is a Unix socket")
+    path, server, seen = _fake_daemon(b'{"ok": false, "error": "no key"}\n')
+    try:
+        assert hub.daemon_problem(Path(path)) is None
+        assert json.loads(seen[0]) == {"v": 1, "op": "status"}       # no key, no vendor: the bus is not read
+    finally:
+        server.close()
+    for answer, text in ((b'{"ok": true, "result": {}}\n', "did not refuse"),
+                         (b'{"ok": false, "error": "unknown vendor key"}\n', "did not refuse"),
+                         (b"not json\n", "not JSON"),
+                         (None, "does not answer within 0.5 s")):
+        path, server, _ = _fake_daemon(answer)
+        try:
+            problem = hub.daemon_problem(Path(path), timeout=0.5)
+            assert problem and text in problem, (answer, problem)
+        finally:
+            server.close()
+    # a stopped daemon: its socket file left behind, nobody listening; and no socket at all
+    path, server = _unix_socket()
+    server.close()
+    assert hub.daemon_problem(Path(path)) == "the daemon does not answer: ConnectionRefusedError"
+    os.unlink(path)
+    assert hub.daemon_problem(Path(path)) == f"the daemon does not run: {path} is missing"
 
 
 def test_a_foreign_record_is_refused(tmp_path, capsys):

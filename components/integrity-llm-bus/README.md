@@ -77,6 +77,11 @@ reports `runtime_bindings_verified: false`.
 `resources/core/bus_journal.py JOURNAL_DIR` verifies the journal chain. `bus_quota_report.py` summarises
 journal usage per key and account.
 
+`integrity-llm-bus-hub doctor --etc <configuration folder>` (Linux, as root) checks a hub made by
+`integrity-llm-bus-hub install` and sends the running daemon one request without a key, which it must
+refuse. Each run of doctor leaves one `denied` record with the reason `no key` in the request journal.
+Run it by hand, not from a timer or a loop, so these records do not hide real refusals.
+
 ## Verified / not verified
 
 Verified by public CI on Ubuntu and Windows with Python 3.11 and 3.12

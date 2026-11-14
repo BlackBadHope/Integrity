@@ -734,6 +734,10 @@ def repl_setup():
         db.execute("CREATE TABLE IF NOT EXISTS _repl_log(v INTEGER PRIMARY KEY AUTOINCREMENT, t TEXT NOT NULL, "
                    "rid INTEGER NOT NULL, op TEXT NOT NULL)")
         have = {r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        if "messages" in have and "messages_archive" not in have:
+            # A new hub has no history moved in by migrate.py; vendor-cards still reads the archive.
+            import migrate
+            db.executescript(migrate.ARCHIVE)
         for t in REPL_TABLES:
             if t not in have:
                 continue
