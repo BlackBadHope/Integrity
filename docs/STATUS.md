@@ -131,8 +131,11 @@ from claude.ai ran on the phone. Two things we learned:
 and [`integrity-killswitch`](../components/integrity-killswitch/README.md)
 come from a running deployment. Their tests run in public CI. CI also installs
 the kill switch wheel alone, without any other Integrity package, and runs its
-`doctor`, `uninstall` and `pip uninstall` on Ubuntu and Windows. The kill switch
-is cooperative: it does not terminate processes. Host tables, device registries
+`doctor`, `uninstall` and `pip uninstall` on Ubuntu and Windows. On Linux the
+kill switch reads the caller's process ancestry from `/proc`; CI tests that on
+invented `/proc` trees and on real processes the tests start, and over SSH the
+caller is never the owner. No real agent or real owner terminal took part.
+The kill switch is cooperative: it does not terminate processes. Host tables, device registries
 and routes for the guards are yours to write; the shipped examples are
 invented.
 

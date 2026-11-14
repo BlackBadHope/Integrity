@@ -7,6 +7,37 @@ All notable public changes are recorded here.
 Changes on `main` after 7.0.1. Nothing here is tagged, and the distribution
 versions are unchanged unless an entry says otherwise.
 
+### The kill switch reads the caller's process ancestry on Linux
+
+- `integrity-killswitch` used to read the process ancestry only on Windows;
+  elsewhere every caller was unknown, so `on`, `resume` and the blocked-state
+  `uninstall --yes` were always refused. On Linux it now reads `/proc` from
+  the calling process up to pid 1. Other systems, macOS included, are
+  unchanged.
+- A process is named by its executable, or by its `comm` and the first word
+  of its command line when the executable cannot be read. For `python`,
+  `node`, `bun` and `deno` only the script in the command line is searched
+  for agent markers, never the interpreter's own path.
+- The walk is refused, and the caller is unknown, when a process cannot be
+  read, when a parent started after its child (a reused pid), or when a
+  second pass finds a different parent or start time (a parent exited or was
+  replaced during the walk).
+- The owner is a chain of shells, `sudo` or `su` under a console login or a
+  desktop terminal. Over SSH, and in a `tmux` or `screen` shell, the caller
+  is unknown: the far end of an SSH session is not visible, and agents on
+  other machines use SSH too. A process started directly by `systemd` or
+  `init` is a service.
+- With an owner now detectable on Linux, `check` from an operator shell there
+  is allowed, as it already was on Windows.
+- The dashboard still identifies the requesting process only on Windows.
+- README: the Linux rules, and a plain statement that the switch is
+  cooperative and does not catch a process that renames itself (`prctl`),
+  hides behind a script path without a marker, or opens a window through a
+  running terminal server.
+- Tests: an invented `/proc` tree (the cases above, a detached shell, `cron`,
+  a walk that does not reach pid 1, command-line parsing) and, on Ubuntu, a
+  walk over real processes the tests start.
+
 ### The bus hub on one Linux machine, with real accounts
 
 - **`integrity-llm-bus-hub`**: a new command in `integrity-llm-bus`

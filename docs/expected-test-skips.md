@@ -51,6 +51,10 @@ The main reasons, from the CI reports:
   `sh` wrappers (2) and single POSIX file-mode cases.
 - Privilege probes: without Developer Mode or elevation, symlink tests skip on
   `WinError 1314`, and seat tests skip on `WinError 5`.
+- Added after the measured commit, not in the counts above: the kill switch's
+  Linux ancestry cases. 3 read the real `/proc` and always skip on Windows;
+  15 build an invented `/proc` with symbolic links and skip only where links
+  cannot be made.
 
 ## macOS
 

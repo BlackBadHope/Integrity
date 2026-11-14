@@ -32,11 +32,53 @@ writes; that only works if the bus honours its principals file.
 
 The caller is identified by its process ancestry. On Windows this uses the
 Toolhelp32 snapshot; when Git for Windows' msys `ssh` breaks the Windows
-parent chain, the msys `ps` table bridges it. **On other systems the
-ancestry is not read**: every caller is classified as unknown, so `off`,
-`panic` and `check` work, but `on` and `resume` are always refused (fail
-closed) and the dashboard cannot identify the requesting process. Restoring
-access there means editing the state file by hand.
+parent chain, the msys `ps` table bridges it.
+
+On Linux the ancestry is read from `/proc`, from the calling process up to
+pid 1:
+
+- Each process is named by its executable. When the executable cannot be
+  read (a process of another account, such as `sshd`), its `comm` and the
+  first word of its command line stand in. When those cannot be read either,
+  the whole walk is refused.
+- For an interpreter (`python`, `node`, `bun`, `deno`) only the script in its
+  command line is searched for agent markers, never the interpreter's own
+  path. An interpreter whose command line cannot be read refuses the walk. An
+  interpreter above the caller runs some other program, so it is never
+  neutral.
+- The walk is refused when a parent started after its child (its pid was
+  reused), or when a second pass finds a different parent or start time (a
+  parent exited or was replaced during the walk).
+- The owner is a chain of shells, `sudo` or `su` under a console login
+  (`login`, `agetty`) or a desktop terminal (`gnome-terminal-server`,
+  `konsole`, `xterm`, `alacritty`, `kitty`, `tilix`, `xfce4-terminal`,
+  `terminator`, `foot`, `wezterm-gui`). A shell with none of these above it
+  was detached from whatever started it and is not the owner. A process
+  started directly by `systemd` or `init` is a service. Everything else is
+  unknown, `cron` included.
+- **Over SSH the caller is unknown.** The switch cannot see who is at the far
+  end, and agents on other machines use SSH too. The same holds for a shell
+  inside `tmux` or `screen`, whose server has lost whoever started it. On
+  such a machine restore access from its console or a desktop terminal, or
+  edit the state file by hand.
+- A refused walk is unknown: `off`, `panic` and `check` work; `on` and
+  `resume` are refused. `LLM_VENDOR` can still name a known vendor.
+
+**On other systems (macOS included) the ancestry is not read**: every caller
+is classified as unknown, so `off`, `panic` and `check` work, but `on` and
+`resume` are always refused (fail closed). Restoring access there means
+editing the state file by hand.
+
+The dashboard identifies the requesting process only on Windows (it reads
+the Windows TCP owner table). On Linux and elsewhere a dashboard request is
+unknown, so the dashboard can only tighten access.
+
+Names and marker matches are only as honest as the processes. A process can
+change its `comm` (`prctl`) and its command line, can run an agent from a
+script whose path names no marker, or can ask a running terminal server
+(over D-Bus) to open a new window, whose shell then has the terminal as its
+parent. The switch does not catch any of this; it is a cooperative gate on
+both systems.
 
 ## Install it on its own
 
@@ -80,8 +122,8 @@ audit log, how the caller is classified, and whether bus sync is configured.
 It exits 0 when no check fails and 1 otherwise; `--json` prints the same
 report as JSON.
 
-On a system other than Windows the `caller` line is a warning, for the reason
-given in "What it does not do".
+On a system other than Windows and Linux the `caller` line is a warning, for
+the reason given in "What it does not do".
 
 ## Remove it
 
@@ -97,8 +139,8 @@ configuration file alone. When the stored state blocks something (a vendor
 that is off, a scope that is off, master panic, or a state file that cannot
 be read), removing it would restore access, so `uninstall --yes` follows the
 rule for `on` and `resume`: only the operator may run it. On a system other
-than Windows it is then always refused and you delete the listed files by
-hand.
+than Windows and Linux it is then always refused and you delete the listed
+files by hand.
 
 ## Configuration on a clean machine
 
@@ -117,7 +159,7 @@ are invented) and point to it with `--config PATH` or
 |---|---|
 | `state_file`, `log_file` | Where the state and the audit log live. `INTEGRITY_KILLSWITCH_STATE` / `INTEGRITY_KILLSWITCH_LOG` and `--state` win over them. The log defaults to the state file's folder. |
 | `dashboard_port` | Port for `serve` when `--port` is not given. |
-| `vendors` | Extra vendors: `{"name": {"title": "...", "markers": ["process-name-part", ...]}}`. A process whose name contains a marker counts as that vendor. Built-in names cannot be redefined. |
+| `vendors` | Extra vendors: `{"name": {"title": "...", "markers": ["process-name-part", ...]}}`. A process whose name contains a marker counts as that vendor (on Linux: its executable path or `comm`; for an interpreter, its script path). Built-in names cannot be redefined. |
 | `msys_ps` | Path to the msys `ps.exe` used to bridge ssh process chains on Windows. |
 | `bus_sync.ssh_command` | The ssh command as a list, ending with the destination. Required for `sync-bus` and `--sync`. |
 | `bus_sync.principals_path` | Absolute path of the principals file on the bus host. Required. |
@@ -149,7 +191,17 @@ the Python that `python` starts.
 - The unit tests in `tests/` run in public CI on Ubuntu and Windows with
   Python 3.11 and 3.12. They use
   fake process ancestry, a fake TCP peer lookup and a stand-in ssh command;
-  they never touch real processes, the network or a real bus.
+  they never touch the network or a real bus.
+- The Linux walk is tested on an invented `/proc` tree: a console login
+  shell and a desktop terminal (owner), an SSH login and a `tmux` shell (not
+  the owner), agent scripts under `node` and a native agent binary, an interpreter path
+  that names a vendor (not a marker), an unreadable executable (`comm` used),
+  unreadable `comm` and command line (refused), a parent that exits or is
+  replaced during the walk, a reused parent pid, a detached shell, a service,
+  `cron`, and a walk that does not reach pid 1. On Ubuntu the walk also runs
+  on real processes the tests start: a parent script under a folder named
+  after a vendor is detected, a plain parent script is not the owner. These
+  `/proc` cases need symbolic links and skip where they cannot be made.
 - Public CI also installs the built wheel alone into an empty environment on
   both systems, checks that no other Integrity package came with it, and runs
   `doctor`, `off`, `check`, `uninstall` and `pip uninstall`
@@ -157,8 +209,9 @@ the Python that `python` starts.
 - On Linux one case skips: it reads the Windows TCP owner table. Nothing
   beyond these unit tests and the install check was run on Linux.
 - There is **no live acceptance**: the dashboard, the process-ancestry
-  detection on a real agent and `sync-bus --apply` against a real bus host
-  were not exercised as part of this package.
+  detection on a real agent (on either system), an owner shell on a real
+  Linux console or desktop terminal, and `sync-bus --apply` against a real
+  bus host were not exercised as part of this package.
 
 ## License
 
