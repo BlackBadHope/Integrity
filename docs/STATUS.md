@@ -214,8 +214,10 @@ that host binding, credentials or production actions are configured.
 
 ## Known limitations
 
-- Live acceptance with a model on a fresh install is not yet published for any
-  vendor.
+- Live acceptance with a model on a fresh install is published once, for the
+  local memory profile with Claude Code on Windows
+  ([report](audits/live-acceptance-local-memory-20261114/REPORT.md)); not for
+  the core write path, Codex or Antigravity.
 - macOS is not supported yet.
 - The core runs on Linux only. `guardian-core-instance` refuses Windows and
   macOS; a machine with those systems is a client of a Linux core, or uses the

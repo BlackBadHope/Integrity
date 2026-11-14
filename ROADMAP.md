@@ -21,7 +21,7 @@ These ship today. What is missing is evidence.
 
 | Item | What is missing |
 | --- | --- |
-| Live acceptance on a fresh install | A published run with a model, for any vendor |
+| Live acceptance on a fresh install | A run with a model on the core write path, for any vendor; Codex and Antigravity on the local memory profile. The local profile with Claude Code ran once ([report](docs/audits/live-acceptance-local-memory-20261114/REPORT.md)) |
 | Codex Native on Windows, turn guard | A live Codex run of the `block` default |
 | Cloud agents | A live Codex Cloud acceptance; CI covers the journal and the import |
 | Agent bus hub | The socket handler, the systemd sandbox and operation across several hosts |
