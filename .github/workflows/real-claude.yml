@@ -1,0 +1,92 @@
+name: Real Claude Code client (manual)
+
+# Started by hand only. It calls the Anthropic API with the repository's one
+# secret, so it runs only on this repository, only from the protected
+# environment, and never on push, pull request or schedule.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: real-claude
+  cancel-in-progress: false
+
+jobs:
+  real-claude:
+    if: github.repository == 'BlackBadHope/Integrity'
+    name: real claude code (ubuntu, manual)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: real-claude
+    defaults:
+      run:
+        shell: bash
+    env:
+      CLAUDE_CODE_VERSION: "2.1.311"
+      CLAUDE_MODEL: claude-haiku-5-5
+      DISABLE_AUTOUPDATER: "1"
+      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install the kill switch and Claude Code at a fixed version
+        run: |
+          python -m venv "$RUNNER_TEMP/ks"
+          "$RUNNER_TEMP/ks/bin/python" -m pip install --quiet ./components/integrity-killswitch
+          npm install --global --no-fund --no-audit "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+          claude --version
+          mkdir -p "$RUNNER_TEMP/probe" "$RUNNER_TEMP/ks-control" "$RUNNER_TEMP/ks-agent"
+          {
+            echo "PROBE_OUT=$RUNNER_TEMP/probe"
+            echo "PROBE_KS=$RUNNER_TEMP/ks/bin/integrity-killswitch"
+          } >> "$GITHUB_ENV"
+      - name: Write a PreToolUse hook that asks the kill switch
+        run: |
+          python - <<'EOF'
+          import json, os, shlex
+          hook = shlex.quote(os.environ["PROBE_KS"]) + " check --action real_claude_tool || exit 2"
+          settings = {"hooks": {"PreToolUse": [{"matcher": "Bash",
+                                                "hooks": [{"type": "command", "command": hook}]}]}}
+          with open(os.path.join(os.environ["PROBE_OUT"], "settings.json"), "w", encoding="utf-8") as f:
+              json.dump(settings, f)
+          EOF
+      - name: Control, the probe without an agent
+        env:
+          PROBE_LABEL: control
+        run: |
+          export INTEGRITY_KILLSWITCH_STATE="$RUNNER_TEMP/ks-control/killswitch.json"
+          bash .github/scripts/agent_ancestry_probe.sh
+      - name: Real Claude Code with the switch on (it runs the probe, which turns claude off)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PROBE_LABEL: agent
+        run: |
+          export INTEGRITY_KILLSWITCH_STATE="$RUNNER_TEMP/ks-agent/killswitch.json"
+          claude -p "Use the Bash tool once to run exactly: bash .github/scripts/agent_ancestry_probe.sh  Then reply with the single word DONE." \
+            --model "$CLAUDE_MODEL" --max-turns 4 --output-format json --no-session-persistence \
+            --tools Bash --allowedTools "Bash(bash .github/scripts/agent_ancestry_probe.sh)" \
+            --disallowedTools "mcp__*" --strict-mcp-config --permission-mode dontAsk \
+            --settings "$PROBE_OUT/settings.json" > "$PROBE_OUT/switch-on.json" || echo "claude exit code $?"
+      - name: Real Claude Code with claude off (the hook must refuse the probe)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PROBE_LABEL: agent
+        run: |
+          export INTEGRITY_KILLSWITCH_STATE="$RUNNER_TEMP/ks-agent/killswitch.json"
+          claude -p "Use the Bash tool once to run exactly: bash .github/scripts/agent_ancestry_probe.sh  Then reply with the single word DONE." \
+            --model "$CLAUDE_MODEL" --max-turns 4 --output-format json --no-session-persistence \
+            --tools Bash --allowedTools "Bash(bash .github/scripts/agent_ancestry_probe.sh)" \
+            --disallowedTools "mcp__*" --strict-mcp-config --permission-mode dontAsk \
+            --settings "$PROBE_OUT/settings.json" > "$PROBE_OUT/switch-off.json" || echo "claude exit code $?"
+      - name: Check the records and report model, tokens and cost
+        run: python .github/scripts/agent_ancestry_check.py
