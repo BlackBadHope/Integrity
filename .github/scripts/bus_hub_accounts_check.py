@@ -78,6 +78,15 @@ def expect_error(answer, text, case):
         raise SystemExit(f"{case}: expected a refusal containing {text!r}, got {answer}")
 
 
+def only_the_daemon_fails(report, case):
+    """doctor without a running daemon: failed, and the daemon check is the only failed one."""
+    failed = [c for c in report["checks"] if not c["ok"]]
+    if (report["status"] != "failed" or [c["check"] for c in failed] != ["daemon"]
+            or not failed[0]["detail"].startswith("the daemon does not")):
+        raise SystemExit(f"{case}: expected only the daemon check to fail, got {report}")
+    return failed[0]["detail"].split(";")[0]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--wheel", required=True, help="the built integrity_llm_bus wheel")
@@ -120,9 +129,10 @@ def main() -> int:
                       "--principals", "/dev/null", expect=(2,))
     if "exists" not in again["error"]:
         raise SystemExit(f"a second install must refuse: {again}")
-    report, _ = hub("doctor", "--etc", str(ETC))
-    if report["status"] != "passed":
-        raise SystemExit(f"doctor after install: {report}")
+    results = {}
+    report, _ = hub("doctor", "--etc", str(ETC), expect=(1,))
+    results["doctor before the daemon starts"] = "failed on the daemon only: " + only_the_daemon_fails(
+        report, "doctor after install")
 
     sudo("useradd", "--system", "--no-create-home", "--shell", "/usr/sbin/nologin", "--groups", GROUP, MEMBER)
     sudo("useradd", "--system", "--no-create-home", "--shell", "/usr/sbin/nologin", OUTSIDER)
@@ -139,8 +149,12 @@ def main() -> int:
         time.sleep(0.2)
     else:
         raise SystemExit("the daemon did not open its socket")
+    report, _ = hub("doctor", "--etc", str(ETC))
+    named = {c["check"]: c for c in report["checks"]}
+    if report["status"] != "passed" or not named["daemon"]["ok"] or "no key" not in named["daemon"]["detail"]:
+        raise SystemExit(f"doctor while the daemon runs: {report}")
+    results["doctor while the daemon runs"] = "passed: " + named["daemon"]["detail"]
 
-    results = {}
     sent = uuid.uuid4().hex[:16]
     answer = ask(GATEWAY, {"op": "send", "vendor": "vendor-claude",
                            "args": {"to": "codex", "id": sent, "body": "hello from the gateway"}})
@@ -198,14 +212,15 @@ def main() -> int:
         sudo("pkill", "-KILL", "-u", GATEWAY, expect=(0, 1))
         holder.wait(timeout=30)
 
-    # requests that reached the hub: 9 answered above, plus the service-start record
+    # requests that reached the hub: doctor's request without a key, 9 answered above,
+    # plus the service-start record
     chain = json.loads(sudo("-u", BUS, "env", "-i", *environment, PYTHON, "-I", "-B",
                             str(Path(start["argv"][-1]).with_name("bus_journal.py")), str(STATE / "journal")).stdout)
-    if not chain.get("ok") or chain["records"] != 10:
+    if not chain.get("ok") or chain["records"] != 11:
         raise SystemExit(f"journal chain: {chain}")
-    report, _ = hub("doctor", "--etc", str(ETC))
-    if report["status"] != "passed":
-        raise SystemExit(f"doctor after the run: {report}")
+    report, _ = hub("doctor", "--etc", str(ETC), expect=(1,))
+    results["doctor after the daemon stopped"] = "failed on the daemon only: " + only_the_daemon_fails(
+        report, "doctor after the daemon stopped")
 
     for user in (MEMBER, OUTSIDER):
         sudo("userdel", user)
