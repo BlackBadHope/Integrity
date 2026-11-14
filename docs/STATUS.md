@@ -138,7 +138,13 @@ the kill switch wheel alone, without any other Integrity package, and runs its
 `doctor`, `uninstall` and `pip uninstall` on Ubuntu and Windows. On Linux the
 kill switch reads the caller's process ancestry from `/proc`; CI tests that on
 invented `/proc` trees and on real processes the tests start, and over SSH the
-caller is never the owner. No real agent or real owner terminal took part.
+caller is never the owner. *Once:* a manual CI job ran a real Claude Code
+client (Haiku) against the kill switch on Ubuntu on 14 Nov 2026 (run
+43571121203, `main` at 5d73825). Its caller was classified as `claude`, the
+switch turned it off, and a `PreToolUse` hook then refused its next tool call;
+a control without an agent was not classified as `claude`. It was one run in
+one CI runner with one model (Haiku), and an owner's hand on a real console
+was not checked. No real owner terminal took part.
 The kill switch is cooperative: it does not terminate processes. Host tables, device registries
 and routes for the guards are yours to write; the shipped examples are
 invented.

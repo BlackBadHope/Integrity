@@ -206,10 +206,17 @@ the Python that `python` starts.
   both systems, checks that no other Integrity package came with it, and runs
   `doctor`, `off`, `check`, `uninstall` and `pip uninstall`
   (`.github/scripts/killswitch_standalone_check.py`).
-- On Linux one case skips: it reads the Windows TCP owner table. Nothing
-  beyond these unit tests and the install check was run on Linux.
+- On Linux one case skips: it reads the Windows TCP owner table.
+- *Once:* the manual job `.github/workflows/real-claude.yml` ran a real
+  Claude Code client (Haiku) on Ubuntu on 14 Nov 2026 (run 43571121203,
+  `main` at 5d73825). A control without an agent was not classified as
+  `claude`. Under Claude Code the caller was classified as `claude`, `off`
+  worked, `check` then refused (exit 3) and `on` was refused from inside the
+  agent (exit 3). With `claude` off, a `PreToolUse` hook refused the next
+  probe call. It was one run in one CI runner with one model (Haiku), and an
+  owner's hand on a real console was not checked.
 - There is **no live acceptance**: the dashboard, the process-ancestry
-  detection on a real agent (on either system), an owner shell on a real
+  detection on a real agent on Windows, an owner shell on a real
   Linux console or desktop terminal, and `sync-bus --apply` against a real
   bus host were not exercised as part of this package.
 

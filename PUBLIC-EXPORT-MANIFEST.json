@@ -9868,11 +9868,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 68373,
+      "bytes": 69604,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "092bd0bbec0ccf7c4eed541a9183295a6549b22408841c3982bfbb2a7475ead3"
+      "sha256": "e0fa7cfa0a121ea2f390edf1ba3a61c94cfb822cfe40584bb80e05830d9c8d4c"
     },
     {
       "bytes": 775,
@@ -10127,11 +10127,11 @@
       "sha256": "0b83a9fecab86745165a7f7f712a12bc9880bb1ee5c4fa3841a7c43a6fcb4f67"
     },
     {
-      "bytes": 10883,
+      "bytes": 11369,
       "mode": "0o644",
       "path": "components/integrity-killswitch/README.md",
       "sanitization_edits": 0,
-      "sha256": "40fa74c0857873852522d69da3f2d0b0afc637b2755a3e9ef5ae1a35b3744e79"
+      "sha256": "4912425feab2a1491dac19b493c4fb2259f3902e1b600fefca9346388c271f82"
     },
     {
       "bytes": 580,
@@ -10232,11 +10232,11 @@
       "sha256": "80fba0a359ecfabd9ead56e5a011fabc9cee12e3c18b9d53b320225e1fa6477d"
     },
     {
-      "bytes": 8802,
+      "bytes": 8991,
       "mode": "0o644",
       "path": "docs/BUS_HUB_AND_HUMANX.md",
       "sanitization_edits": 0,
-      "sha256": "2a2df418374adf259a4ac7aadb7b319946213cf738117fd38343b02236f446b0"
+      "sha256": "ca824277b65131a4d80abc44f9968c902c976057534b6650ddf8b4bcc080f730"
     },
     {
       "bytes": 6290,
@@ -10260,11 +10260,11 @@
       "sha256": "1c188a26b899e0fe5c4ea10fbe1d18acb43ec03f18b823929aa226f096926f69"
     },
     {
-      "bytes": 12651,
+      "bytes": 13078,
       "mode": "0o644",
       "path": "docs/STATUS.md",
       "sanitization_edits": 0,
-      "sha256": "373b8555d3b96ab9309349b60167bc5538e215c8642de30ec3228109ad8ff291"
+      "sha256": "becca51247ef3917fa44c319749121e67a070285dbd3a3179a6eaeb520a6bd2e"
     },
     {
       "bytes": 8620,
@@ -10498,7 +10498,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:36b24e4aa64ac3654392a2e65f2edb8e72e264707f33972da9524dc42a66d753",
+  "projection_digest": "sha256:0c80f61f662111dde8679caaf63fd6dd1753848e2dc06128188d5b2a44806a7d",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

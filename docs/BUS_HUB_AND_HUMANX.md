@@ -175,5 +175,8 @@ The component READMEs list every case.
   run.
 - Two machines (clients reaching the hub over SSH, or the web on one machine
   and the hub on another) were not run.
-- The kill switch was not run under a real agent on Linux.
+- The kill switch ran under a real agent on Linux once: one manual CI run of
+  Claude Code with one model (Haiku), next to no hub; see
+  [What is verified](STATUS.md#guards-and-the-kill-switch). An owner's hand
+  on a real console was not checked.
 - The hub on Windows: not supported by design.
