@@ -7,6 +7,20 @@ All notable public changes are recorded here.
 Changes on `main` after 7.0.1. Nothing here is tagged, and the distribution
 versions are unchanged unless an entry says otherwise.
 
+### Bus registry tests wait for a late registration thread before cleanup
+
+- `autoreg.ensure_bounded()` returns after its 0.3 s hook timeout and leaves
+  a slow `ensure()` running in a background thread, which may still have
+  `bus.sqlite3` open. Two tests in `tests/live/test_autoreg.py` failed on
+  Windows CI with `WinError 32` when the temporary folder was removed under
+  that thread: `test_hook_main_never_fails` on `main` and
+  `test_busy_db_fails_open_within_300ms` on a pull request.
+- Both test classes now wait up to 10 s for threads started during a test
+  before removing its folder, and fail with the thread names if one is
+  still running. A new test holds the database open past the hook timeout;
+  without the wait it fails on Windows the same way. The hook timeout and the
+  bus code are unchanged.
+
 ### The manual real Claude Code job ran once and passed
 
 - `.github/workflows/real-claude.yml` was started by hand once, on 14 Nov
