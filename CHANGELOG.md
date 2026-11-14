@@ -7,6 +7,28 @@ All notable public changes are recorded here.
 Changes on `main` after 7.0.1. Nothing here is tagged, and the distribution
 versions are unchanged unless an entry says otherwise.
 
+### The manual real Claude Code job ran once and passed
+
+- `.github/workflows/real-claude.yml` was started by hand once, on 14 Nov
+  2026 (UTC), on `main` at 5d73825 (run 43571121203). Every step passed.
+- The control without an agent was not classified as `claude`. Under
+  Claude Code 2.1.311 with the Haiku model, the probe's caller was classified
+  as `claude`, the probe turned `claude` off, `check` then refused (exit 3),
+  and `on` was refused from inside the agent (exit 3). In the second call,
+  with `claude` off, the `PreToolUse` hook refused the probe, so the probe ran
+  once.
+- Model, tokens and cost, as Claude Code reported them:
+
+  | call | model | turns | input | cache write | cache read | output | cost, USD |
+  | --- | --- | --- | --- | --- | --- | --- | --- |
+  | switch on | claude-haiku-5-5 | 2 | 4 | 3666 | 7668 | 105 | 0.00058783 |
+  | switch off | claude-haiku-5-5 | 2 | 4 | 246 | 11200 | 508 | 0.00039715 |
+
+- What it does not prove: it was one run in one CI runner with one model
+  (Haiku), and an owner's hand on a real console was not checked.
+- `docs/STATUS.md` and the kill switch README now record this run. The entry
+  below that says the job has not run yet describes the job as it was merged.
+
 ### A page for install stage 3: the bus hub and HumanX
 
 - New page `docs/BUS_HUB_AND_HUMANX.md`: install stage 3, optional. It puts
