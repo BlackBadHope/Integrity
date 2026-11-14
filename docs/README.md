@@ -12,6 +12,7 @@ and what was not.
 | [Project README](../README.md) | What Integrity is, the pictures, a first run with your own agent |
 | [The demo: three agents, one memory](../demo/README.md) | Commands and prompts for your agent client: A writes, B writes, C reads from memory what B wrote, claimed and how B's turn ended. Records of two runs with Claude Code and Codex CLI |
 | [Install and test](INSTALL.md) | Prerequisites, a source install, the checks that public CI runs |
+| [Glossary](GLOSSARY.md) | Seed, Mind, admission, coverage gap, custody, Uroboros and the other words of this project, in plain terms |
 | [Local memory on one machine](LOCAL_MEMORY.md) | Install stage 1: a memory server with writes and task claims for your own agents on one computer; what it does not prove |
 | [Clean bootstrap](../BOOTSTRAP.md) | Optional components, wheels, an isolated local instance |
 | [Read-only memory walkthrough](../examples/local-memory/README.md) | A disposable catalog connected to Codex, Claude Code and Antigravity without hooks |
@@ -82,6 +83,7 @@ the current code.
 | --- | --- |
 | [Chronicle product brief](architecture/chronicle/PRODUCT-BRIEF.md) | Design only |
 | [Chronicle sorting and indexing pipeline](architecture/chronicle/SORTING-AND-INDEXING-PIPELINE.md) | Design only |
+| [Live acceptance: local memory with Claude Code, 14 Nov 2026](audits/live-acceptance-local-memory-20261114/REPORT.md) | One run on a fresh install |
 | [Installation report for 6.1.0 / 6.1.1](audits/installation-6.1.1-20261017/REPORT_RU.md) | Historical, in Russian |
 | [Runtime source consistency](runtime-source-sync.md) | Historical notes on the Linux client-memory repair chain |
 | [Release notes](../RELEASE_NOTES.md) | Tagged releases |

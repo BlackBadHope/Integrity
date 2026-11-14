@@ -55,6 +55,33 @@ it says so; [what is verified](docs/STATUS.md) has the full list.
 > <sub>A dated measurement from our own deployment. It cannot be checked from
 > this repository, and it is not updated.</sub>
 
+## In one screen
+
+**What it is.** One shared memory for your coding agents, whichever vendor
+they come from, and an honest record of who did what. Each agent's turn ends
+with a signed receipt, or stays visible as an unclosed turn.
+
+**What it gives you.** Yesterday one agent changed something and stopped.
+Today another agent picks up the task. Without asking anyone, it reads from
+memory what was changed, who says they changed it, whether the task is still
+claimed, and whether yesterday's turn closed properly. It continues instead of
+redoing or undoing the work.
+
+**Try it in about a minute** (Python 3.11+, Claude Code; [other clients](docs/LOCAL_MEMORY.md#where-the-block-goes)):
+
+```bash
+git clone https://github.com/BlackBadHope/Integrity.git && cd Integrity
+python -m venv ../integrity-venv    # then activate it, see Quick start
+python -m pip install .
+mkdir ../agent && guardian-local-memory init --client claude-code --write-mcp ../agent/.mcp.json
+```
+
+Then run the three prompts of the [demo](demo/README.md) from `../agent`:
+agents A and B write, agent C tells you from memory what B did.
+
+**Words** such as Seed, admission or coverage gap are explained in the
+[glossary](docs/GLOSSARY.md). Everything below is detail.
+
 ## Why
 
 AI agents now read logs, remember past work and change real systems. Three
@@ -424,8 +451,10 @@ run `git checkout v7.0.1` after cloning.
 
 ### Known limitations
 
-- Live acceptance with a model on a fresh install is not yet published for any
-  vendor.
+- Live acceptance with a model on a fresh install is published once, for the
+  local memory profile with Claude Code on Windows
+  ([report](docs/audits/live-acceptance-local-memory-20261114/REPORT.md)); not for the core write path, Codex or
+  Antigravity.
 - macOS is not supported yet: the informational CI job has known failures.
 - Mode B tunnels are unverified.
 - Hooks are project-scoped unless you merge them into user settings by hand.

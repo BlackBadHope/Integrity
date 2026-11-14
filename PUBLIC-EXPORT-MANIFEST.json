@@ -9753,7 +9753,7 @@
       "sha256": "c088a0394890fd3661a86c0f0a8e6e716ad3b6c51b5728c032b12663af6420f9"
     }
   ],
-  "generated_file_count": 106,
+  "generated_file_count": 108,
   "generated_files": [
     {
       "bytes": 1041,
@@ -9910,11 +9910,11 @@
       "sha256": "c773a85da94e9edf0b2b10e60fd43b00fe4f90e345ec0d958e6c5b4d0d405e8e"
     },
     {
-      "bytes": 27753,
+      "bytes": 29154,
       "mode": "0o644",
       "path": "README.md",
       "sanitization_edits": 0,
-      "sha256": "7f4df6842d6c522ef8246247db47129908315b093e2e1550baf140547d994018"
+      "sha256": "f7d848b77af0dc2eb0c49d2e38f94b288cb73303fd6496eaf01846c4d940cac3"
     },
     {
       "bytes": 13444,
@@ -9924,11 +9924,11 @@
       "sha256": "7f6b3e276b684153a94ab5c791da564c9deaf8614a39fe21996c167623444e07"
     },
     {
-      "bytes": 3332,
+      "bytes": 3513,
       "mode": "0o644",
       "path": "ROADMAP.md",
       "sanitization_edits": 0,
-      "sha256": "08312d46b930a0ac4104b9062ead060e95b013b42d54f5c585bb9860f79af1cb"
+      "sha256": "befce5db76a9b403d8262f479c8575335454f0a72748ae69b6b7f9c3f75db4a4"
     },
     {
       "bytes": 1104,
@@ -10246,6 +10246,13 @@
       "sha256": "ede161ea2c43d847aaffe1e375bd181d6c6ff0e6c6f7cd6c99f4d9878c785b00"
     },
     {
+      "bytes": 2910,
+      "mode": "0o644",
+      "path": "docs/GLOSSARY.md",
+      "sanitization_edits": 0,
+      "sha256": "d37146c98125a86a0a47cccdd8cd926bcfa21136bd9dcc14ffd896c3c71210d4"
+    },
+    {
       "bytes": 6077,
       "mode": "0o644",
       "path": "docs/INSTALL.md",
@@ -10253,18 +10260,18 @@
       "sha256": "e03cd2506f026c9e618ee2035b2676fb52369982e79e9df6eba0d3f5c1df5465"
     },
     {
-      "bytes": 7194,
+      "bytes": 7482,
       "mode": "0o644",
       "path": "docs/README.md",
       "sanitization_edits": 0,
-      "sha256": "1c188a26b899e0fe5c4ea10fbe1d18acb43ec03f18b823929aa226f096926f69"
+      "sha256": "b85c5b6b89e1162625f8506f0860322cda393ea51aed4ed7d3e90fe627304fcb"
     },
     {
-      "bytes": 13078,
+      "bytes": 13240,
       "mode": "0o644",
       "path": "docs/STATUS.md",
       "sanitization_edits": 0,
-      "sha256": "becca51247ef3917fa44c319749121e67a070285dbd3a3179a6eaeb520a6bd2e"
+      "sha256": "f9f392b56d7022e3d50fde33f5cc29b85029b523adef97b3f73c46722dbcb8b6"
     },
     {
       "bytes": 8620,
@@ -10421,6 +10428,13 @@
       "sha256": "357c939ae645c8d9d726760a9cdd732eba1aba6d029b8dbdaf3101df08e1c5dd"
     },
     {
+      "bytes": 3247,
+      "mode": "0o644",
+      "path": "docs/audits/live-acceptance-local-memory-20261114/REPORT.md",
+      "sanitization_edits": 0,
+      "sha256": "d895bc7f451d979ef343411f9cf855f3d2e2cf713188415e432b2823361b5736"
+    },
+    {
       "bytes": 9054,
       "mode": "0o644",
       "path": "docs/linux-native-clients.md",
@@ -10498,7 +10512,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:d8fbcb87684f39bdb427d47e1a24230d95c06b41947afd0548fac31c6da9d693",
+  "projection_digest": "sha256:e7bcab18f63a307539263a9ee9709d32eb0c3b91e29482d4247761e99db399e4",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
