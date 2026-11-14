@@ -20,21 +20,22 @@ the hardened layout of ``deploy/linux-core``.
 from __future__ import annotations
 
 import argparse
-from contextlib import contextmanager
-from dataclasses import dataclass
-from datetime import UTC, datetime
 import importlib.metadata
 import importlib.util
 import json
 import os
-from pathlib import Path
 import secrets
 import shutil
 import sqlite3
 import stat
 import sys
 import threading
-from typing import Any, Iterator
+from collections.abc import Iterator
+from contextlib import contextmanager
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
 
 from . import __version__
 

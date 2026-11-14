@@ -15,7 +15,6 @@ import re
 from collections.abc import Callable, Mapping, Sequence
 from typing import Any
 
-
 PROTOCOL = "integrity-guardian/mind-auxiliary-retrieval/v1"
 POLICY = "bounded-topic-prompt-terms-v1"
 MAX_TERMS = 16
@@ -26,12 +25,7 @@ MAX_SEGMENT_UTF8_BYTES = 4096
 
 # Local to this auxiliary lane.  Do not reuse or modify RECALL_STOP_WORDS.
 CONVERSATIONAL_STOP_TERMS = frozenset(
-    "a an and are as at be by can could for from i in is it of on or please "
-    "that the this to was were with would you your thanks thank okay ok yes "
-    "also again here just now same these those "
-    "а без бы был была были в вот вы да для ещё это и из как мне меня мы на "
-    "надо наш не ну он она они от по пожалуйста при сейчас спасибо так там "
-    "тоже ты уже что чтобы я ещё отправил отправляю держи тебе выполнить промта".split()
+    ["a", "an", "and", "are", "as", "at", "be", "by", "can", "could", "for", "from", "i", "in", "is", "it", "of", "on", "or", "please", "that", "the", "this", "to", "was", "were", "with", "would", "you", "your", "thanks", "thank", "okay", "ok", "yes", "also", "again", "here", "just", "now", "same", "these", "those", "а", "без", "бы", "был", "была", "были", "в", "вот", "вы", "да", "для", "ещё", "это", "и", "из", "как", "мне", "меня", "мы", "на", "надо", "наш", "не", "ну", "он", "она", "они", "от", "по", "пожалуйста", "при", "сейчас", "спасибо", "так", "там", "тоже", "ты", "уже", "что", "чтобы", "я", "ещё", "отправил", "отправляю", "держи", "тебе", "выполнить", "промта"]
 )
 
 _UUID = r"[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}"

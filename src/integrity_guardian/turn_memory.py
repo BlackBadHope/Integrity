@@ -13,15 +13,16 @@ import json
 import os
 import re
 import sqlite3
-from functools import cache
 from collections.abc import Iterable, Mapping
 from copy import deepcopy
+from functools import cache
 from pathlib import Path
 from typing import Any
 
+from jsonschema import Draft202012Validator
+
 from .canonical import canonical_bytes
 from .schemas import FORMAT_CHECKER, validate
-from jsonschema import Draft202012Validator
 from .signing import (
     Ed25519Signer,
     TrustedKey,

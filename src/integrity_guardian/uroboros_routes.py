@@ -381,7 +381,7 @@ def _score(route: dict[str, Any], terms: Sequence[str]) -> tuple[float, list[str
 
 def _age_days(ts: str, now: dt.datetime) -> float:
     try:
-        stamp = dt.datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        stamp = dt.datetime.fromisoformat(ts)
     except ValueError:
         return 365.0
     if stamp.tzinfo is None:

@@ -1,5 +1,6 @@
 """Bounded, manifest-bound historical append and independent canonical readback."""
 from __future__ import annotations
+
 import hashlib
 import json
 import re

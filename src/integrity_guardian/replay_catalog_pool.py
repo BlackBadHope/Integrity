@@ -7,6 +7,7 @@ Expired logical replays are collected by the facade's existing TTL policy; a
 pool member is then removed only once no alias or journal references it.
 """
 from __future__ import annotations
+
 import hashlib
 import json
 import os
@@ -140,7 +141,7 @@ class FdStore:
 
     def exists(self, name):
         try:
-            fd, details = self._open(name)
+            fd, _details = self._open(name)
         except FileNotFoundError:
             return False
         os.close(fd)
@@ -154,7 +155,7 @@ class FdStore:
             raise PoolError('catalog-pool-small-name-invalid')
         if absent and self.exists(name):
             raise PoolError('catalog-pool-journal-already-present')
-        temporary = '.%s.json.%s.%s.tmp' % (replay['id'], os.getpid(), time.monotonic_ns())
+        temporary = f".{replay['id']}.json.{os.getpid()}.{time.monotonic_ns()}.tmp"
         fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, 'O_NOFOLLOW', 0), 0o600, dir_fd=self.root)
         try:
             offset = 0
@@ -202,7 +203,7 @@ class FdStore:
     def copy_catalog(self, pool_name, name, binding, expected):
         self.verify(pool_name, binding)
         self._expected_leaf(name, expected)
-        temporary = '.%s.catalog.sqlite3.%s.%s.tmp' % (NAME.fullmatch(name)['id'], os.getpid(), time.monotonic_ns())
+        temporary = f".{NAME.fullmatch(name)['id']}.catalog.sqlite3.{os.getpid()}.{time.monotonic_ns()}.tmp"
         source, before = self._open(pool_name)
         target = None
         digest, copied = hashlib.sha256(), 0

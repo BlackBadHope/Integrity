@@ -12,8 +12,8 @@ import re
 import sqlite3
 import stat
 import time
-from copy import deepcopy
 from contextlib import contextmanager
+from copy import deepcopy
 from pathlib import Path
 
 from . import deployment_profile as _deployment_profile
@@ -71,7 +71,7 @@ def replay_json_digest(value):
 
 def _epoch(value):
     import datetime
-    parsed = datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    parsed = datetime.datetime.fromisoformat(value)
     if parsed.tzinfo is None:
         raise SessionRecoveryError("recovery expiry must be aware")
     return int(parsed.timestamp())
@@ -479,7 +479,7 @@ class SessionRecoveryMixin:
             self._session_recovery_binding = registration_id
             return {**result, "session_recovery": {"available": True, "protocol": RECOVERY_PROTOCOL,
                 "registration_id": registration_id, "expires_at": capsule["expires_at"], "canonical_writes": 0}}
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - recovery is optional; reported as unavailable, registration unchanged
             self._session_recovery_binding = None
             return {**result, "session_recovery": {"available": False, "protocol": RECOVERY_PROTOCOL,
                 "reason": "derived-binding-unavailable", "error_type": type(exc).__name__,
@@ -555,12 +555,12 @@ class SessionRecoveryMixin:
         controls = _controls({k:v for k,v in arguments.items() if k != "registration_id"})
         capsule, _ = self._recovery_capsule(arguments["registration_id"])
         if capsule["controls"] != controls: raise SessionRecoveryError("same-session exact controls mismatch")
-        if self._session_snapshot is not None or self._context_admission_id is not None:
-            # Repeated lost reply can be observed, but never replace a context.
-            if (self._session_recovery_binding != arguments["registration_id"]
-                    or self._context_admission_id != controls["context_admission_id"]
-                    or replay_json_digest(self._session_snapshot) != capsule["snapshot_digest"]):
-                raise SessionRecoveryError("same-session cannot replace another active context")
+        # Repeated lost reply can be observed, but never replace a context.
+        if ((self._session_snapshot is not None or self._context_admission_id is not None)
+                and (self._session_recovery_binding != arguments["registration_id"]
+                     or self._context_admission_id != controls["context_admission_id"]
+                     or replay_json_digest(self._session_snapshot) != capsule["snapshot_digest"])):
+            raise SessionRecoveryError("same-session cannot replace another active context")
         with self._context_replay_lock(controls["replay_id"], timeout_seconds=0.0):
             record = self._load_context_replay(controls["replay_id"], controls["request_digest"])
             if (record is None or record.get("phase") != "committed"

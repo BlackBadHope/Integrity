@@ -8,12 +8,6 @@ authority scope through MCP arguments.
 
 from __future__ import annotations
 
-from .context_delivery import evaluate_context_delivery
-from .canonical_read_context import build_read_context, selectors as read_context_selectors
-from .mind_retrieval import derive_prompt_topic
-from dataclasses import replace as _replace_budget
-from .integrity_topic_context import validate_hint
-
 import argparse
 import atexit
 import datetime as dt
@@ -36,17 +30,22 @@ import urllib.request
 from collections.abc import Callable
 from contextlib import closing, contextmanager
 from dataclasses import dataclass
+from dataclasses import replace as _replace_budget
 from pathlib import Path
 from typing import Any
 
 from jsonschema import ValidationError
 
+from .canonical_read_context import build_read_context
+from .canonical_read_context import selectors as read_context_selectors
+from .context_delivery import evaluate_context_delivery
+from .integrity_topic_context import validate_hint
+from .mind_retrieval import derive_prompt_topic
+
 try:
     import fcntl as _fcntl
 except ImportError:  # The production Memory LTS service is Linux-only.
     _fcntl = None
-
-from .read_session import validate as validate_read_session, request_proof as read_session_proof
 
 from .action_log_reader import (
     ActionLogReaderAuthError,
@@ -57,15 +56,19 @@ from .action_log_reader import (
 )
 from .authority_scope import memory_authority_contract
 from .event_recovery import validate_recovery
-from .snapshot_capacity import snapshot_allocation
-from .project_scope import ProjectScopeError, validated_metadata
 from .historical_archive import ArchivePolicy
+from .project_scope import ProjectScopeError, validated_metadata
+from .read_session import request_proof as read_session_proof
+from .read_session import validate as validate_read_session
+from .snapshot_capacity import snapshot_allocation
 
 try:
     import syslog as _syslog
 except ImportError:  # Windows has no stdlib syslog module.
     _syslog = None
 
+from . import deployment_profile as _deployment_profile
+from . import replay_catalog_pool as _catalog_pool
 from .context_budget import (
     ContextBudgetError,
     build_context_capsule,
@@ -74,7 +77,7 @@ from .context_budget import (
 )
 from .medor_architecture import (
     CUSTODY_LEDGER_ID,
-    TENANT_ID,  # public default, kept for importers; runtime uses architecture_tenant_id()
+    TENANT_ID,  # noqa: F401 - public default, kept for importers; runtime uses architecture_tenant_id()
     MedorArchitectureError,
     MedorArchitectureKeys,
     PersistentMedorArchitectureService,
@@ -111,8 +114,6 @@ from .native_trust import (
     NativeTrustStore,
 )
 from .replay_migration import ReplayMigration, ReplayMigrationError, load_admission
-from . import deployment_profile as _deployment_profile
-from . import replay_catalog_pool as _catalog_pool
 from .schemas import validate
 from .seed_catalog import (
     SeedCatalogReadChangedError,
@@ -288,9 +289,7 @@ def _summary_only_event(event: dict[str, Any], full_bytes: int) -> dict[str, Any
             out[key] = value[:EVENT_SUMMARY_TEXT_LIMIT]
         elif key == "tags" and isinstance(value, list):
             out[key] = [tag for tag in value if isinstance(tag, str)][:20]
-        elif value is None or isinstance(value, (bool, int, float)):
-            out[key] = value
-        elif isinstance(value, str) and len(value) <= EVENT_SUMMARY_SCALAR_LIMIT:
+        elif value is None or isinstance(value, (bool, int, float)) or isinstance(value, str) and len(value) <= EVENT_SUMMARY_SCALAR_LIMIT:
             out[key] = value
     out["presentation"] = {"mode": "summary-only", "full_bytes": full_bytes,
                            "reason": "event-exceeds-page-byte-budget"}
@@ -1803,12 +1802,17 @@ class HomeClient:
         return value
 
 
-from .same_session_recovery import (SessionRecoveryMixin, RECOVERY_PROTOCOL,
-    RECOVERY_CAPABILITY, RECOVERY_METHOD, SessionRecoveryError,
-    max_records as _same_session_max_records)
+from .operation_status import METHOD as OPERATION_STATUS_METHOD
+from .operation_status import OperationStatusMixin
+from .same_session_recovery import (
+    RECOVERY_CAPABILITY,
+    RECOVERY_METHOD,
+    RECOVERY_PROTOCOL,
+    SessionRecoveryError,
+    SessionRecoveryMixin,
+)
+from .same_session_recovery import max_records as _same_session_max_records
 
-
-from .operation_status import OperationStatusMixin, METHOD as OPERATION_STATUS_METHOD
 
 class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
     """One stdio-only facade instance with fixed server-side dependencies."""
@@ -3213,7 +3217,7 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
         name: str,
         root_descriptor: int,
         replay_id: str,
-        frozen_catalog: "FrozenSeedCatalogSnapshot",
+        frozen_catalog: FrozenSeedCatalogSnapshot,
     ) -> dict[str, Any] | None:
         """Hash the frozen catalog once; reuse an existing pool holding the same bytes.
 
@@ -3557,10 +3561,10 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
                     or record.get("state", {}).get("logical_generation") != generation
                     or record.get("state", {}).get("frozen_catalog") is None):
                 raise McpFacadeError("retirement delivered context binding mismatch")
-            if (self._context_admission_id is not None or self._session_snapshot is not None):
-                if (self._context_admission_id != arguments["context_admission_id"]
-                        or self._session_snapshot != snapshot or self._archive_prompt_binding != binding):
-                    raise McpFacadeError("retirement cannot replace another active context")
+            if ((self._context_admission_id is not None or self._session_snapshot is not None)
+                    and (self._context_admission_id != arguments["context_admission_id"]
+                         or self._session_snapshot != snapshot or self._archive_prompt_binding != binding)):
+                raise McpFacadeError("retirement cannot replace another active context")
             with self._context_replay_maintenance_lock(**retire_lock):
                 self._context_replay_inventory(prune=False)
                 root = self._prepare_context_replay_custody()
@@ -3714,7 +3718,7 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
                     self.architecture.keys.source_signer.public_key
                 ),
             )
-        except Exception as exc:  # noqa: BLE001 - verification failure denies, never admits
+        except Exception as exc:  # verification failure denies, never admits
             raise McpFacadeError(
                 f"Seed catalog verification failed before Turn Memory use: {type(exc).__name__}"
             ) from exc
@@ -3806,7 +3810,7 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
                 limit=_integer(arguments, "limit", 100, 1, 500),
             )
         if name == 'coverage':
-            from .turn_curator import decorate_coverage, CuratorError
+            from .turn_curator import CuratorError, decorate_coverage
             try:
                 result = decorate_coverage(self, result, arguments)
             except CuratorError as error:
@@ -5054,7 +5058,7 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
         if name == 'integrity_turn_memory_reconcile':
             if self._tool_contract_profile != 'turn-curator-v1':
                 raise McpFacadeError('curator requires its authenticated negotiated profile')
-            from .turn_curator import reconcile, CuratorError
+            from .turn_curator import CuratorError, reconcile
             try:
                 return reconcile(self, arguments)
             except CuratorError as error:
@@ -5079,7 +5083,8 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
         if name == "integrity_turn_memory_coverage":
             return self._turn_memory_call("coverage", arguments)
         if name in {"integrity_archive_import", "integrity_archive_read"}:
-            from .historical_archive import ArchiveImportError, call as archive_call
+            from .historical_archive import ArchiveImportError
+            from .historical_archive import call as archive_call
             if self._tool_contract_profile not in {ARCHIVE_TOOL_CONTRACT_PROFILE, 'turn-curator-v1'}:
                 raise McpFacadeError("archive feature requires its negotiated tool profile")
             try:
@@ -6912,7 +6917,7 @@ def dispatch(server: MemorySynapseMcp, message: dict[str, Any]) -> dict[str, Any
                               "lock_kind": getattr(exc, "integrity_lock_kind", None),
                               "observed_utc": _utc_now(), "canonical_writes": 0,
                               "production_authority": False})
-            except Exception:  # noqa: BLE001 - audit failure must not change the response
+            except Exception:  # noqa: BLE001, S110 - audit failure must not change the response
                 pass
             return {"jsonrpc": "2.0", "id": request_id,
                     "error": {"code": -32000, "message": "context retirement unavailable",
@@ -6925,7 +6930,7 @@ def dispatch(server: MemorySynapseMcp, message: dict[str, Any]) -> dict[str, Any
     elif message["method"] == OPERATION_STATUS_METHOD:
         try:
             result = server._operation_status(params)
-        except (ValueError, OSError) as error:
+        except (ValueError, OSError):
             return {"jsonrpc": "2.0", "id": request_id, "error": {"code": -32602, "message": "operation status denied"}}
     elif message["method"] == RECOVERY_METHOD:
         try:

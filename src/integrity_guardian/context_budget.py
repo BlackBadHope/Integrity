@@ -15,8 +15,8 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-from .mind_capsule import capsule_is_open, render_mind_capsule
 from .context_delivery import recall_candidates
+from .mind_capsule import capsule_is_open, render_mind_capsule
 
 BRIDGE_PROTOCOL = "integrity-client-memory-mcp/v3"
 CONTEXT_CAPSULE_PROTOCOL = BRIDGE_PROTOCOL + "/context-capsule/v1"
@@ -314,7 +314,6 @@ def _candidate_sources(source: dict[str, Any]) -> dict[str, list[Any]]:
     concept = _mapping(source.get("concept_recovery"))
     epistemic = _mapping(source.get("epistemic"))
     plan = _mapping(source.get("plan"))
-    recall = _mapping(source.get("recall"))
     attention = _mapping(source.get("attention"))
     hierarchy = _mapping(source.get("hierarchy"))
     return {
@@ -465,10 +464,9 @@ def build_context_capsule(
         from .owner_rules import live_rules_request
         rules_request = live_rules_request(source)
     capsule = _capsule_core(source, admission)
-    rules_receipt = None
     if rules_request is not None and rules_request.get("enabled") is True:
         from .owner_rules import select_owner_rules
-        picked, rules_receipt = select_owner_rules(
+        picked, _rules_receipt = select_owner_rules(
             list(rules_request.get("index") or []), str(rules_request.get("query") or ""),
             hosts=list(rules_request.get("hosts") or []), tools=list(rules_request.get("tools") or []),
             max_rules=int(rules_request.get("max_rules", 8)), max_bytes=int(rules_request.get("max_bytes", 2048)))

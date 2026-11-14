@@ -1153,10 +1153,10 @@ def _handle_tenant_init(args: argparse.Namespace) -> None:
 def _handle_native_trust_bootstrap(args: argparse.Namespace) -> None:
     """Initialize native trust or migrate exact existing architecture custody."""
 
+    from . import deployment_profile
     from .ledger import LedgerStore
     from .medor_architecture import CUSTODY_LEDGER_ID, architecture_tenant_id
     from .native_trust import NativeTrustStore, load_ed25519_seed
-    from . import deployment_profile
 
     deployment_profile.activate(deployment_profile.load_profile(
         args.deployment_profile, args.expected_deployment_profile_digest,

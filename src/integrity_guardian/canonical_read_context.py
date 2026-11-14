@@ -9,15 +9,16 @@ import hashlib
 import json
 import re
 import sqlite3
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from .mind_retrieval import MAX_TOPIC_CHARS, derive_prompt_topic, derive_retrieval_terms
 
 PROTOCOL = "integrity-guardian/canonical-read-context/v1"
 MAX_EVENTS = 8
 MAX_BYTES = 8192
-_PASTE = re.compile(r"</?pasted_content\b[^>]*>", re.I)
-_IDS = re.compile(r"\b(?:событи[еяй]|events?|event_ids?)\s*(?:ID\s*)?[:#=]?\s*((?:[1-9][0-9]{0,17})(?:\s*(?:[,/]|и|and)\s*[1-9][0-9]{0,17}){0,7})(?!\w|\.\d)", re.I)
+_PASTE = re.compile(r"</?pasted_content\b[^>]*>", re.IGNORECASE)
+_IDS = re.compile(r"\b(?:событи[еяй]|events?|event_ids?)\s*(?:ID\s*)?[:#=]?\s*((?:[1-9][0-9]{0,17})(?:\s*(?:[,/]|и|and)\s*[1-9][0-9]{0,17}){0,7})(?!\w|\.\d)", re.IGNORECASE)
 _UIDS = re.compile(r"(?<![\w:])client:[A-Za-z0-9][A-Za-z0-9_.:/@+\-]{0,248}(?![A-Za-z0-9_.:/@+\-])")
 
 
@@ -102,7 +103,7 @@ def build_read_context(*, prompt: str, registry_topic: str | None,
         # missing IDs: malformed data must not crash admission or become a
         # successful empty lookup. Bool is not an event ID despite being int.
         if not isinstance(answer, dict):
-            raise ValueError("invalid canonical evidence response")
+            raise ValueError("invalid canonical evidence response")  # noqa: TRY004 - callers fail closed on ValueError
         receipt = answer.get("receipt")
         events = answer.get("events")
         if (not isinstance(receipt, dict) or not isinstance(events, list)

@@ -3,14 +3,24 @@
 The legacy physical schema is never migrated. Modern receipt creation can be
 disabled during rollback while all signed history remains readable/closable.
 """
+import json
+import os
+import sqlite3
+import uuid
+from datetime import UTC
 from hashlib import sha256
-import json,os,uuid,sqlite3
 from pathlib import Path
 from typing import Any
 
-from .signing import Ed25519Signer,TrustedKey
 from .canonical import canonical_bytes
-from .turn_memory import TurnMemoryError, TurnMemoryStore,_signed_receipt,_verify_receipt,_utc_now
+from .signing import Ed25519Signer, TrustedKey
+from .turn_memory import (
+    TurnMemoryError,
+    TurnMemoryStore,
+    _signed_receipt,
+    _utc_now,
+    _verify_receipt,
+)
 
 COVERAGE_PROTOCOL='integrity-guardian/turn-memory-coverage/v2'
 PROFILES=('legacy-v1','native-intent-v1')
@@ -67,7 +77,7 @@ class VersionedTurnMemoryService:
                     self._verify_or_bootstrap_native(native,namespace,signer,initialize_native)
                 self.stores[profile]=TurnMemoryStore(self.paths[profile],namespace=namespace,signer=signer,
                     identity_profile=profile,create=False)
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - one broken profile is recorded, the others stay usable
                 self.failures[profile]=sha256((type(exc).__name__+':'+str(exc)).encode()).hexdigest()
 
     @staticmethod
@@ -180,7 +190,7 @@ class VersionedTurnMemoryService:
         if isinstance(limit,bool) or not isinstance(limit,int) or not 1<=limit<=500:
             raise TurnMemoryError('coverage limit is invalid')
         known={key:0 for key in ('registered','terminal','events','no_event','unresolved')}
-        from datetime import datetime,timezone
+        from datetime import datetime
         stores=[];unresolved=[];complete=True;receipt_sample=[];size_limited=False
         sample_budget=262_144
         for profile in PROFILES:
@@ -199,7 +209,7 @@ class VersionedTurnMemoryService:
                 stores.append({'store_id':profile,'status':'ready','counts':observed['counts'],
                     'namespace_fingerprint':self.namespace})
                 if policy is not None:stores[-1]['creation_policy']=policy
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - reported per store as unavailable with a failure digest
                 complete=False
                 stores.append({'store_id':profile,'status':'unavailable','counts':None,
                     'namespace_fingerprint':self.namespace,
@@ -211,7 +221,7 @@ class VersionedTurnMemoryService:
         sample_ids=[entry['registration_id'] for entry in receipt_sample]
         if len(set(sample_ids)) != len(sample_ids):
             raise TurnMemoryError('ambiguous receipt profile sample')
-        receipt_sample=sorted(receipt_sample,key=lambda entry:(datetime.fromisoformat(entry['registration_receipt']['opened_at'].replace('Z','+00:00')).astimezone(timezone.utc),entry['registration_id'],entry['store_id']),reverse=True)
+        receipt_sample=sorted(receipt_sample,key=lambda entry:(datetime.fromisoformat(entry['registration_receipt']['opened_at']).astimezone(UTC),entry['registration_id'],entry['store_id']),reverse=True)
         bounded=[]
         sample_header={'protocol':'integrity-guardian/turn-memory-receipt-sample/v1',
             'receipts':[],'limit':limit,'returned_count':0,'complete':False,'has_more':False,
