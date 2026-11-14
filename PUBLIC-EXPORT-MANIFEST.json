@@ -3425,11 +3425,11 @@
       "sha256": "e4841afda63fc2d1d844d348ed70f33578c5911d3a84fb048a22497c1f396533"
     },
     {
-      "bytes": 29945,
+      "bytes": 30084,
       "mode": "0o644",
       "path": "components/integrity-killswitch/tests/test_killswitch.py",
       "sanitization_edits": 0,
-      "sha256": "66c234d992237058d1ef0460e6a1f1b71f339eb4abfaef976c8e6761212310fc"
+      "sha256": "01fd68f1a55125de8d7005eb7f3580f22992499fa136ea8043651d044f6808c9"
     },
     {
       "bytes": 2997,
@@ -10449,7 +10449,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:791170257be7e9fbc0e90f5fdde0283b7f612b9fed9a635c82ae14835215d7df",
+  "projection_digest": "sha256:bc52408141106913806bc9a79cf38f8b523f65b69ca42f946aea82435249fbc0",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

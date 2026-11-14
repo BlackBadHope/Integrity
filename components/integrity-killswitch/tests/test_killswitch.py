@@ -301,7 +301,9 @@ class LinuxRealProcesses(Base):
 
     def setUp(self) -> None:
         super().setUp()
+        # Base stands in for both readers; these tests read the real process tree.
         ks.read_linux_ancestry = self._linux
+        ks.get_process_ancestor_names = self._ancestors
 
     def run_child(self, parent_script: Path) -> dict:
         code = ("import json, os; from integrity_killswitch import killswitch as ks; "
