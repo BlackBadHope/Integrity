@@ -35,7 +35,6 @@ These ship today. What is missing is evidence.
 | Item | Today |
 | --- | --- |
 | One-command install of the Claude Code standalone hook | Wired into `.claude/settings.json` by hand |
-| A command that merges hooks into user settings | Done by hand; tested on Linux |
 | A guide for the Android setup | Tested once, not written up |
 | Turn guard on the Claude Code Native route on Windows | That route has no guard and no admission-first gate |
 

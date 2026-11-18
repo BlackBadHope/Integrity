@@ -457,7 +457,8 @@ run `git checkout v7.0.1` after cloning.
   Antigravity.
 - macOS is not supported yet: the informational CI job has known failures.
 - Mode B tunnels are unverified.
-- Hooks are project-scoped unless you merge them into user settings by hand.
+- Hooks are project-scoped until `integrity-native-merge --apply` puts them in user
+  settings. The merge is covered by fixture tests, not by a live client run.
 - The Claude Code Native route on Windows has no turn guard and no
   admission-first gate. Antigravity's `Stop` cannot block. On Linux the guard
   only advises.

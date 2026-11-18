@@ -19,6 +19,7 @@ native = ["websockets>=13,<16"]
 [project.scripts]
 integrity-client-memory = "integrity_client_memory.launcher:main"
 integrity-native-profile = "integrity_client_memory.native_install:main"
+integrity-native-merge = "integrity_client_memory.native_merge:main"
 integrity-doctor = "integrity_client_memory.doctor:main"
 
 [tool.hatch.build.targets.wheel]

@@ -37,7 +37,8 @@ through install, connection, expected hook behavior and rollback.
   hook (`resources/claude/admission.py`), wired into a project
   `.claude/settings.json` by hand. There is no one-command install for it yet.
 - **Hooks are project-scoped.** A session started in another folder runs
-  without memory. `integrity-doctor` reports this.
+  without memory. `integrity-doctor` reports this, and `integrity-native-merge`
+  moves a Codex or Claude Code Native profile into user scope.
 
 To try memory without hooks, use the read-only
 [local-memory walkthrough](../examples/local-memory/README.md). CI runs it on
@@ -223,8 +224,9 @@ that host binding, credentials or production actions are configured.
   macOS; a machine with those systems is a client of a Linux core, or uses the
   [local memory profile](LOCAL_MEMORY.md).
 - Mode B tunnels are unverified.
-- Hooks are project-scoped unless you merge them into user settings by hand.
-  That merge is tested on Linux; there is no command for it yet.
+- Hooks are project-scoped until you merge them into user settings.
+  `integrity-native-merge` does that for Codex and Claude Code Native profiles;
+  fixture tests cover it, a live client run has not.
 - The Claude Code Native route on Windows has no turn guard and no
   admission-first gate. Antigravity's `Stop` cannot block. On Linux the guard
   only advises.
