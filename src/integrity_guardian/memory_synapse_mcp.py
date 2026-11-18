@@ -232,6 +232,19 @@ CONTEXT_ADMISSION_REPLAY_RESERVATION_PROTOCOL = (
 # and its facades stay alive for days after a forced-command switch; sharing one root would
 # break them. The physical disk floor stays common (fstatvfs on the same filesystem).
 CONTEXT_ADMISSION_REPLAY_ROOT_NAME = "context-admission-replay-v3"
+CONTEXT_REPLAY_LOCK_POLL_FIRST_SECONDS = 0.001
+CONTEXT_REPLAY_LOCK_POLL_MAX_SECONDS = 0.01
+# 18.11 ISS-113 follow-up: the accounting pass reads and parses every committed record twice
+# under the maintenance lock (~2.4 ms per stand record, ~9 ms per live one). Its positive
+# verdicts are kept next to the replay root, keyed by the full stat identity (inode, size,
+# mtime_ns, ctime_ns, ...) of the record, its catalog leaf and the pool member behind it. Any
+# change of those files is a miss and the full check runs again. The cache sits in a sibling
+# directory, never inside the replay root: releases without it inventory that root strictly.
+# It only ever confirms what the full check confirmed; an unreadable cache is an empty one.
+CONTEXT_ADMISSION_REPLAY_ACCOUNTING_DIR_NAME = CONTEXT_ADMISSION_REPLAY_ROOT_NAME + "-accounting"
+CONTEXT_ADMISSION_REPLAY_ACCOUNTING_PROTOCOL = "integrity-client/context-replay-accounting-cache/v1"
+CONTEXT_ADMISSION_REPLAY_ACCOUNTING_FILE = "verdicts.json"
+MAX_CONTEXT_ADMISSION_REPLAY_ACCOUNTING_BYTES = 1_048_576
 MAX_CONTEXT_ADMISSION_REPLAY_BYTES = 32 * 1_048_576
 MAX_CONTEXT_ADMISSION_REPLAY_CATALOG_BYTES = 512 * 1_048_576
 MAX_CONTEXT_ADMISSION_REPLAY_TOTAL_BYTES = 4 * 1_024 * 1_024 * 1_024
@@ -2045,6 +2058,8 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
         self._context_admission_replay_catalog_budget = 0
         self._context_admission_replay_unavailable_reason: str | None = None
         self._context_replay_unallocated_reservation_bytes = 0
+        self._context_replay_accounting_cache_enabled = True
+        self._context_replay_accounting_stats = {"hit": 0, "miss": 0, "write": 0}
         self._closed = False
         self._replay_migrations: dict[str, ReplayMigration] = {}
 
@@ -2476,6 +2491,7 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
             deadline = time.monotonic() + timeout_seconds
             if deadline_monotonic is not None:
                 deadline = min(deadline, deadline_monotonic)
+            delay = CONTEXT_REPLAY_LOCK_POLL_FIRST_SECONDS
             while True:
                 try:
                     _fcntl.flock(descriptor, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
@@ -2490,7 +2506,10 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
                             "maintenance" if name == ".replay-maintenance.lock" else "shard"
                         )
                         raise error from exc
-                    time.sleep(0.05)
+                    # Short, growing poll: a holder keeps the lock for ~0.03 s, so a fixed
+                    # 0.05 s nap lost almost a whole step per hand-off (ISS-113 bench4).
+                    time.sleep(min(delay, max(0.0, deadline - time.monotonic())))
+                    delay = min(delay * 2, CONTEXT_REPLAY_LOCK_POLL_MAX_SECONDS)
             self._prepare_context_replay_custody()
             yield
         finally:
@@ -2926,6 +2945,10 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
             total_bytes += details.st_size
         physical_file_bytes = total_bytes
         effective_record_count = record_count
+        use_accounting_cache = (self._context_replay_accounting_cache_enabled
+                                and not self._replay_migrations)
+        cached_verdicts = self._load_context_replay_accounting() if use_accounting_cache else {}
+        verdicts: dict[str, dict[str, Any]] = {}
         for replay_hex, reservation in reservations.items():
             record_consumed = record_sizes.get(replay_hex, 0) + temporary_record_sizes.get(
                 replay_hex, 0
@@ -2945,6 +2968,22 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
                     and replay_hex in catalog_sizes
                     and not temporary_record_sizes.get(replay_hex, 0)
                     and not temporary_catalog_sizes.get(replay_hex, 0)):
+                verdict = (self._context_replay_accounting_hit(
+                    root_descriptor, replay_hex, cached_verdicts.get(replay_hex))
+                    if use_accounting_cache else None)
+                if verdict is not None:
+                    # Same files as the full check below saw; only the live
+                    # reservation comparison is evaluated again.
+                    self._context_replay_accounting_stats["hit"] += 1
+                    if catalog_sizes[replay_hex] == catalog_consumed <= catalog_budget:
+                        catalog_budget = catalog_consumed
+                        if verdict["acked"]:
+                            record_budget = record_consumed
+                        verdicts[replay_hex] = verdict
+                    total_bytes += max(0, record_budget - record_consumed)
+                    total_bytes += max(0, catalog_budget - catalog_consumed)
+                    continue
+                self._context_replay_accounting_stats["miss"] += 1
                 try:
                     record_name = replay_hex + ".json"
                     original_details = details_for(record_name)
@@ -2977,8 +3016,15 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
                             and catalog_details.st_size == catalog_consumed <= catalog_budget
                             and self._context_replay_record_identity(details_for(record_name)) == after_identity):
                         catalog_budget = catalog_consumed
-                        if record.get("delivered_response_digest") == _sha256(_tool_result(record["result"])):
+                        acked = record.get("delivered_response_digest") == _sha256(_tool_result(record["result"]))
+                        if acked:
                             record_budget = record_consumed
+                        if use_accounting_cache:
+                            entry = self._context_replay_accounting_entry(
+                                root_descriptor, replay_hex, binding, after_identity,
+                                catalog_details, acked)
+                            if entry is not None:
+                                verdicts[replay_hex] = entry
                 except (McpFacadeError, OSError, ValueError, TypeError, KeyError):
                     # An incomplete, corrupt, racing or migrated subject retains
                     # the original conservative reservation; no repair/renewal.
@@ -2987,8 +3033,216 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
             total_bytes += max(0, catalog_budget - catalog_consumed)
             if replay_hex not in record_sizes:
                 effective_record_count += 1
+        if use_accounting_cache and verdicts != cached_verdicts:
+            self._store_context_replay_accounting(verdicts)
         self._context_replay_unallocated_reservation_bytes = max(0, total_bytes - physical_file_bytes)
         return total_bytes, effective_record_count
+
+    def _context_replay_accounting_directory(self, *, create: bool) -> int | None:
+        """Private sibling of the replay root holding the accounting cache, or None."""
+
+        parent_descriptor = self._context_admission_replay_parent_fd
+        if parent_descriptor is None:
+            return None
+        name = CONTEXT_ADMISSION_REPLAY_ACCOUNTING_DIR_NAME
+        if create:
+            try:
+                os.mkdir(name, 0o700, dir_fd=parent_descriptor)
+            except FileExistsError:
+                pass
+        try:
+            descriptor = os.open(
+                name,
+                os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0),
+                dir_fd=parent_descriptor,
+            )
+        except FileNotFoundError:
+            return None
+        details = os.fstat(descriptor)
+        expected_uid = os.geteuid() if hasattr(os, "geteuid") else details.st_uid
+        if (
+            not stat.S_ISDIR(details.st_mode)
+            or details.st_uid != expected_uid
+            or stat.S_IMODE(details.st_mode) != 0o700
+        ):
+            os.close(descriptor)
+            return None
+        return descriptor
+
+    def _load_context_replay_accounting(self) -> dict[str, Any]:
+        """Cached positive accounting verdicts; anything unexpected reads as empty."""
+
+        try:
+            directory = self._context_replay_accounting_directory(create=False)
+            if directory is None:
+                return {}
+            try:
+                try:
+                    descriptor = os.open(
+                        CONTEXT_ADMISSION_REPLAY_ACCOUNTING_FILE,
+                        os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+                        dir_fd=directory,
+                    )
+                except FileNotFoundError:
+                    return {}
+                with os.fdopen(descriptor, "rb") as stream:
+                    details = os.fstat(stream.fileno())
+                    expected_uid = os.geteuid() if hasattr(os, "geteuid") else details.st_uid
+                    if (
+                        not stat.S_ISREG(details.st_mode)
+                        or details.st_uid != expected_uid
+                        or stat.S_IMODE(details.st_mode) != 0o600
+                        or details.st_nlink != 1
+                        or details.st_size > MAX_CONTEXT_ADMISSION_REPLAY_ACCOUNTING_BYTES
+                    ):
+                        return {}
+                    encoded = stream.read(MAX_CONTEXT_ADMISSION_REPLAY_ACCOUNTING_BYTES + 1)
+            finally:
+                os.close(directory)
+            document = json.loads(encoded)
+            root_identity = self._context_admission_replay_root_identity
+            if (
+                not isinstance(document, dict)
+                or document.get("protocol") != CONTEXT_ADMISSION_REPLAY_ACCOUNTING_PROTOCOL
+                or root_identity is None
+                or document.get("root") != list(root_identity)
+                or not isinstance(document.get("entries"), dict)
+            ):
+                return {}
+            return document["entries"]
+        except (OSError, ValueError, TypeError):
+            return {}
+
+    def _store_context_replay_accounting(self, verdicts: dict[str, dict[str, Any]]) -> None:
+        """Replace the cache atomically. Advisory state: no fsync, failures are ignored."""
+
+        root_identity = self._context_admission_replay_root_identity
+        if root_identity is None:
+            return
+        encoded = canonical_json(
+            {
+                "protocol": CONTEXT_ADMISSION_REPLAY_ACCOUNTING_PROTOCOL,
+                "root": list(root_identity),
+                "entries": verdicts,
+            }
+        )
+        if len(encoded) > MAX_CONTEXT_ADMISSION_REPLAY_ACCOUNTING_BYTES:
+            return
+        try:
+            directory = self._context_replay_accounting_directory(create=True)
+        except OSError:
+            return
+        if directory is None:
+            return
+        temporary = f".verdicts.{os.getpid()}.{time.monotonic_ns()}.tmp"
+        try:
+            now = time.time()
+            for name in os.listdir(directory):
+                if re.fullmatch(r"\.verdicts\.[0-9]+\.[0-9]+\.tmp", name) is None:
+                    continue
+                try:
+                    details = os.stat(name, dir_fd=directory, follow_symlinks=False)
+                    if stat.S_ISREG(details.st_mode) and now - details.st_mtime >= 60:
+                        os.unlink(name, dir_fd=directory)
+                except FileNotFoundError:
+                    pass
+            descriptor = os.open(
+                temporary,
+                os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+                0o600,
+                dir_fd=directory,
+            )
+            try:
+                offset = 0
+                while offset < len(encoded):
+                    offset += os.write(descriptor, encoded[offset:])
+            finally:
+                os.close(descriptor)
+            os.replace(
+                temporary,
+                CONTEXT_ADMISSION_REPLAY_ACCOUNTING_FILE,
+                src_dir_fd=directory,
+                dst_dir_fd=directory,
+            )
+            self._context_replay_accounting_stats["write"] += 1
+        except OSError:
+            try:
+                os.unlink(temporary, dir_fd=directory)
+            except OSError:
+                pass
+        finally:
+            os.close(directory)
+
+    def _context_replay_accounting_member(
+        self, root_descriptor: int, replay_hex: str, binding: dict[str, Any], leaf_size: int
+    ) -> list[Any] | None:
+        """[name, identity] of the pool or delta member behind an alias leaf; None for a full leaf."""
+
+        if leaf_size == binding.get("bytes"):
+            return None
+        name = _catalog_pool.resolve_name(
+            root_descriptor, replay_hex + ".catalog.sqlite3", binding,
+            self._check_context_replay_deadline,
+        )
+        if not (_catalog_pool.is_pool_name(name) or _catalog_pool.is_delta_name(name)):
+            raise McpFacadeError("accounting catalog member is not a pool member")
+        details = os.stat(name, dir_fd=root_descriptor, follow_symlinks=False)
+        return [name, list(self._context_replay_record_identity(details))]
+
+    def _context_replay_accounting_entry(
+        self,
+        root_descriptor: int,
+        replay_hex: str,
+        binding: dict[str, Any],
+        record_identity: tuple[int, ...],
+        catalog_details: os.stat_result,
+        acked: bool,
+    ) -> dict[str, Any] | None:
+        """Cache entry for a verdict the full check just confirmed, if its files held still."""
+
+        try:
+            leaf = self._context_replay_record_identity(catalog_details)
+            member = self._context_replay_accounting_member(
+                root_descriptor, replay_hex, binding, catalog_details.st_size)
+            entry = {"record": list(record_identity), "leaf": list(leaf),
+                     "member": member, "acked": acked}
+            # Anything replaced while the entry was being built is not cached.
+            if self._context_replay_accounting_hit(root_descriptor, replay_hex, entry) is None:
+                return None
+            return entry
+        except (McpFacadeError, OSError, ValueError, TypeError, KeyError):
+            return None
+
+    def _context_replay_accounting_hit(
+        self, root_descriptor: int, replay_hex: str, entry: Any
+    ) -> dict[str, Any] | None:
+        """The entry when every file it names still has the exact cached stat identity."""
+
+        if not isinstance(entry, dict) or set(entry) != {"record", "leaf", "member", "acked"}:
+            return None
+        if type(entry["acked"]) is not bool:
+            return None
+        checks = [(replay_hex + ".json", entry["record"]),
+                  (replay_hex + ".catalog.sqlite3", entry["leaf"])]
+        member = entry["member"]
+        if member is not None:
+            if (
+                not isinstance(member, list)
+                or len(member) != 2
+                or not isinstance(member[0], str)
+                or not (_catalog_pool.is_pool_name(member[0])
+                        or _catalog_pool.is_delta_name(member[0]))
+            ):
+                return None
+            checks.append((member[0], member[1]))
+        try:
+            for name, identity in checks:
+                details = os.stat(name, dir_fd=root_descriptor, follow_symlinks=False)
+                if list(self._context_replay_record_identity(details)) != identity:
+                    return None
+        except OSError:
+            return None
+        return entry
 
     @contextmanager
     def _context_replay_lock(
