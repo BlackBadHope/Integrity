@@ -28,22 +28,48 @@ def routes_dir() -> Path | None:
     return Path(value) if value else None
 
 
+def _validator():
+    """The executor's validator, so that list marks routes the executor would refuse."""
+    try:
+        from integrity_guards.uroboros_exec import validate_compiled_route
+    except Exception:  # noqa: BLE001 - list must work even if the executor cannot be imported
+        return None
+    return validate_compiled_route
+
+
+def _row(path: Path, validate) -> dict:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("route file is not a JSON object")
+    steps = [s for s in (data.get("preconditions") or []) + (data.get("steps") or []) if isinstance(s, dict)]
+    argv_text = " ".join(" ".join(str(a) for a in (s.get("argv") or [])) for s in steps)
+    safety = str(data.get("safety"))
+    if validate is not None:
+        try:
+            validate(dict(data))
+        except Exception as exc:  # noqa: BLE001 - report the route, do not crash the whole list
+            safety = "INVALID " + safety
+            print(f"warning: {path.name}: not runnable: {str(exc)[:120]}", file=sys.stderr)
+    params = data.get("params")
+    return {"id": str(data.get("route_id") or path.stem), "version": data.get("version"), "safety": safety,
+            "params": sorted(params.keys()) if isinstance(params, dict) else [],
+            "summary": str(data.get("summary") or ""), "text": argv_text}
+
+
 def load() -> list[dict]:
+    """Every route file gives one row. A file that cannot be read is BROKEN, one the executor refuses is INVALID;
+    neither hides the other routes (a route whose preconditions were prose, not steps, used to crash list)."""
     rows = []
     base = routes_dir()
     if base is None:
         return rows
+    validate = _validator()
     for path in sorted(base.glob("*.json")):
         try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
+            rows.append(_row(path, validate))
+        except Exception as exc:  # noqa: BLE001 - one broken file must not hide the other routes
+            print(f"warning: {path.name}: skipped: {type(exc).__name__}: {str(exc)[:120]}", file=sys.stderr)
             rows.append({"id": path.stem, "version": "?", "safety": "BROKEN", "params": [], "summary": "", "text": ""})
-            continue
-        steps = (data.get("preconditions") or []) + (data.get("steps") or [])
-        argv_text = " ".join(" ".join(str(a) for a in (s.get("argv") or [])) for s in steps)
-        rows.append({"id": str(data.get("route_id") or path.stem), "version": data.get("version"),
-                     "safety": str(data.get("safety")), "params": sorted((data.get("params") or {}).keys()),
-                     "summary": str(data.get("summary") or ""), "text": argv_text})
     return rows
 
 
