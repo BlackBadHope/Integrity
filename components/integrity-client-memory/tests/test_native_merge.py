@@ -92,7 +92,8 @@ def test_apply_merges_and_preserves_unrelated_entries(profile, tmp_path, capsys)
     assert merged["hooks"]["Notification"] == [{"hooks": [UNRELATED]}]
     generated = install.read_json(profile.parent / install.LAUNCH_FILES[vendor][1])["hooks"]
     assert _native_count(merged) == len(generated)
-    assert os.stat(hooks).st_mode & 0o777 == 0o640
+    if os.name == "posix":  # Windows has no POSIX permission bits to keep
+        assert os.stat(hooks).st_mode & 0o777 == 0o640
     backup = Path(report["changes"]["hooks"]["backup"])
     assert json.loads(backup.read_text(encoding="utf-8"))["model"] == "keep-me"
     if vendor == "claude":

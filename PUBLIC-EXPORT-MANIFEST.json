@@ -1955,11 +1955,11 @@
       "sha256": "d62a8bbdda7dc76fbf602335356436ca6190d200e5f3bc73413a4df408e77040"
     },
     {
-      "bytes": 10124,
+      "bytes": 10203,
       "mode": "0o644",
       "path": "components/integrity-client-memory/tests/test_native_merge.py",
       "sanitization_edits": 0,
-      "sha256": "de72d51b7da2e58f420f072586ae8d163054e7ef3cf07997a57e9527d9ba3a8b"
+      "sha256": "48b44ecb9348b05b0ad8478d794f9a6dd98ce581798ab9281afc720d31cb4d84"
     },
     {
       "bytes": 2286,
@@ -10526,7 +10526,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:4aed29e4e8f6efcfdebddf1c4b54cd8d650c07644d0a83343be68372167a5f3b",
+  "projection_digest": "sha256:8612f5acdb579b2f584be9dc5395efcb6cd2e04eda7bd5b087c61902c8270dff",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
