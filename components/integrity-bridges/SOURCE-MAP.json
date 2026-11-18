@@ -74,7 +74,7 @@
   {
     "path": "src/integrity_bridges/resources/private-memory/unified_mcp.py",
     "source": "bridges/private-memory/unified_mcp.py",
-    "source_sha256": "46fda787069e903ac91b78a1a918de56868a30894ebfa0d939ba90cc892790f4",
-    "sha256": "5b4403404c842a6fdbba841ef7db79026cea1d3aafc0da8531bab8a22a3755bd"
+    "source_sha256": "3f00bd3ae032d04ca0e60be40704af9711ff37fca17239bab8be8283e6154bb4",
+    "sha256": "c9f2b5ad28957b90d3976a36708362d85a317d128b054b18260dd1d3a8701239"
   }
 ]
