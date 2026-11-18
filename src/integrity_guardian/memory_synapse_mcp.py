@@ -791,7 +791,7 @@ class RetainedSeedCatalogSnapshot:
         descriptor: int,
         *,
         deadline_monotonic: float | None = None,
-        companion: "PrivateReplayCatalogCopy | None" = None,
+        companion: PrivateReplayCatalogCopy | None = None,
     ) -> None:
         self._descriptor: int | None = descriptor
         self._companion = companion
@@ -3596,7 +3596,7 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
         name: str,
         root_descriptor: int,
         replay_id: str,
-        frozen_catalog: "FrozenSeedCatalogSnapshot",
+        frozen_catalog: FrozenSeedCatalogSnapshot,
     ) -> dict[str, Any] | None:
         """ISS-113: store this catalog as a page delta against the newest full pool member.
 

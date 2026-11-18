@@ -138,6 +138,21 @@ class TestCli:
         assert p.returncode == 0
         assert "echo-write-route" in p.stdout and "-- 1 of 2 compiled routes" in p.stdout
 
+    def test_list_survives_broken_and_invalid_route_files(self, tmp_path):
+        routes = local_routes(tmp_path)
+        prose = {"route_id": "prose-route", "version": 1, "safety": "read", "summary": "prose preconditions",
+                 "preconditions": ["check the books by hand first"], "steps": []}
+        (routes / "prose-route.json").write_text(json.dumps(prose), encoding="utf-8")
+        (routes / "not-json.json").write_text("{", encoding="utf-8")
+        (routes / "a-list.json").write_text("[]", encoding="utf-8")
+        p = cli("list", INTEGRITY_COMPILED_ROUTES=str(routes))
+        assert p.returncode == 0, p.stderr
+        assert "echo-route v" in p.stdout and "echo-write-route v" in p.stdout
+        assert "prose-route v1 [INVALID read]" in p.stdout
+        assert "not-json v? [BROKEN]" in p.stdout and "a-list v? [BROKEN]" in p.stdout
+        assert "-- 5 of 5 compiled routes" in p.stdout
+        assert "warning: not-json.json: skipped" in p.stderr and "warning: prose-route.json: not runnable" in p.stderr
+
     def test_list_without_directory_is_empty(self, tmp_path):
         p = cli("list", INTEGRITY_GUARDS_CONFIG=str(tmp_path / "none.json"))
         assert p.returncode == 0 and "-- 0 of 0 compiled routes" in p.stdout

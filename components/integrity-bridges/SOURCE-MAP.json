@@ -33,7 +33,7 @@
     "path": "src/integrity_bridges/resources/hub/unified_mcp.py",
     "source": "bridges/hub/unified_mcp.py",
     "source_sha256": "33c18e3a3f1c021d338eda79330507171198980bb259f1b5aaa607c0fce9300a",
-    "sha256": "0c5eebe6a94ae827b0a0256ef5d31d6492a7211a7604bf0bea05e0542038263c"
+    "sha256": "0fc2b4153876e3afaee9ff7c742af4616b950a4def3dc4b4d2489dfd7d6e4782"
   },
   {
     "path": "src/integrity_bridges/resources/hub/unix_ws_stdio.py",

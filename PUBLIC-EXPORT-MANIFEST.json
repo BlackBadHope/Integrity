@@ -1,5 +1,5 @@
 {
-  "file_count": 1395,
+  "file_count": 1398,
   "files": [
     {
       "bytes": 3435,
@@ -426,7 +426,7 @@
       "mode": "0o644",
       "path": "components/integrity-adapter-sdk/src/integrity_adapter_sdk/guardian-origin.json",
       "sanitization_edits": 2,
-      "sha256": "bf6a1d8cf4a67a4e7a0ca303a991bcd4fbbb91ac6ff541b24038d3300fe9c8a5"
+      "sha256": "c56275fc855780ccf979cb704a30a52b0bceb6799aaf04e4051bd8f249d303c4"
     },
     {
       "bytes": 632,
@@ -566,7 +566,7 @@
       "mode": "0o644",
       "path": "components/integrity-bridges/SOURCE-MAP.json",
       "sanitization_edits": 0,
-      "sha256": "fc90ef46e36d74009681b57c20e137523a4dd01c36dd92b9f35b0ab5b8b8af6d"
+      "sha256": "f8f764e9379f722dbd92e98fa5f4799fd16c4447eaeb90d1a4463bd0590a06a2"
     },
     {
       "bytes": 955,
@@ -667,11 +667,11 @@
       "sha256": "a5f2c3a06b9b65a44345dd47cae6d7b82ad4fb9487c7a6d4f6090e5eacef93fd"
     },
     {
-      "bytes": 68747,
+      "bytes": 68921,
       "mode": "0o644",
       "path": "components/integrity-bridges/src/integrity_bridges/resources/hub/unified_mcp.py",
       "sanitization_edits": 0,
-      "sha256": "993aeb10b77f98dd90377097afa0e9ec6364416f38c41131439dae63ebf860f8"
+      "sha256": "0fc2b4153876e3afaee9ff7c742af4616b950a4def3dc4b4d2489dfd7d6e4782"
     },
     {
       "bytes": 1132,
@@ -742,6 +742,13 @@
       "path": "components/integrity-bridges/src/integrity_bridges/web_url.py",
       "sanitization_edits": 0,
       "sha256": "989b9f9043454fd7f79746cbe2d58ba24474ee3bf8f53c9dd1fdda4d6d8f5f75"
+    },
+    {
+      "bytes": 3581,
+      "mode": "0o644",
+      "path": "components/integrity-bridges/tests/test_codex_hub_pipe_discovery.py",
+      "sanitization_edits": 0,
+      "sha256": "2a1941f68e1f6b9c20540e9ea0c4519c665a8318eec4098c0a43804ff2767dae"
     },
     {
       "bytes": 4141,
@@ -2508,11 +2515,11 @@
       "sha256": "5a6f232ae467a27a2f1feae1e8655889cfad79d546cd2f9c0faa1e671c17e0f0"
     },
     {
-      "bytes": 3477,
+      "bytes": 4769,
       "mode": "0o644",
       "path": "components/integrity-guards/src/integrity_guards/uroboros_list.py",
       "sanitization_edits": 0,
-      "sha256": "e686b44a5c4ea3613f1ff97cfd6e535ca53f91f94bf3806c5dc2583bd478d2cf"
+      "sha256": "4e69334e9f15b0c61036dafb2d070789b5e0341e5cd61948322065484c6e5b47"
     },
     {
       "bytes": 19934,
@@ -2543,11 +2550,11 @@
       "sha256": "fc60e88be413d3567378afa1396b4ab9e1d44d9679dfc8b16e577a47923b9207"
     },
     {
-      "bytes": 6625,
+      "bytes": 7661,
       "mode": "0o644",
       "path": "components/integrity-guards/tests/test_uroboros.py",
       "sanitization_edits": 0,
-      "sha256": "96db670adc0d78e243b19484767698ee35d73114df3c92298414ece19f16e69e"
+      "sha256": "4d4e535bd1f25ccd19d5c481b8f4cae0f9b7aedbb8c68de53c9367b3b060ad80"
     },
     {
       "bytes": 11305,
@@ -6918,11 +6925,11 @@
       "sha256": "3d54655e8fc242bf550253b07b022ba5710d8393dcfc62e0e8846f2c98306439"
     },
     {
-      "bytes": 374965,
+      "bytes": 374961,
       "mode": "0o644",
       "path": "src/integrity_guardian/memory_synapse_mcp.py",
       "sanitization_edits": 0,
-      "sha256": "8129d4e0b41cbd309a1c7c26029b4ce7b3af0169d3624bd1aef67b92aacceb01"
+      "sha256": "cb01fb5301ec160d9716b3e26716bd5e7b8ff0daf85d80222c6901e065bfc3df"
     },
     {
       "bytes": 26298,
@@ -9123,11 +9130,25 @@
       "sha256": "5b55296eff3432e60f122592dfa72bec83b2e57219af62779028a057178297f4"
     },
     {
+      "bytes": 6163,
+      "mode": "0o644",
+      "path": "tests/test_replay_delta_stand.py",
+      "sanitization_edits": 0,
+      "sha256": "294c5790cea7d86dff15e625ee4b575350812aa3077a6795819a9da8682b82d5"
+    },
+    {
       "bytes": 3211,
       "mode": "0o644",
       "path": "tests/test_replay_pool_adopt.py",
       "sanitization_edits": 0,
       "sha256": "bfcb600b6445749cd569f32f7212142120d00d6d4e937a4b17aeeb19c95b4f3d"
+    },
+    {
+      "bytes": 9951,
+      "mode": "0o644",
+      "path": "tests/test_replay_pool_delta.py",
+      "sanitization_edits": 0,
+      "sha256": "9fb6ef66ec956f66f2322355933f651f5f046bf98f4a4b2d9b52cf4ab6efde0e"
     },
     {
       "bytes": 9080,
@@ -9767,7 +9788,7 @@
       "sha256": "c088a0394890fd3661a86c0f0a8e6e716ad3b6c51b5728c032b12663af6420f9"
     }
   ],
-  "generated_file_count": 110,
+  "generated_file_count": 108,
   "generated_files": [
     {
       "bytes": 1041,
@@ -10524,23 +10545,9 @@
       "path": "src/integrity_guardian/public-source-descriptor.json",
       "sanitization_edits": 0,
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
-    },
-    {
-      "bytes": 6163,
-      "mode": "0o644",
-      "path": "tests/test_replay_delta_stand.py",
-      "sanitization_edits": 0,
-      "sha256": "294c5790cea7d86dff15e625ee4b575350812aa3077a6795819a9da8682b82d5"
-    },
-    {
-      "bytes": 9951,
-      "mode": "0o644",
-      "path": "tests/test_replay_pool_delta.py",
-      "sanitization_edits": 0,
-      "sha256": "9fb6ef66ec956f66f2322355933f651f5f046bf98f4a4b2d9b52cf4ab6efde0e"
     }
   ],
-  "projection_digest": "sha256:aedad569a272f6e0a6fb0ad47e14987b81f656dc2bad13af94e882c33e128a84",
+  "projection_digest": "sha256:4b0d0d55d330c13fd1e9fb1dcb5eef1ec2083c0ee45e08dc268fec1f132520f4",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
