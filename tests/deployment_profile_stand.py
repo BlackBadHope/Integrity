@@ -33,7 +33,7 @@ try:
     opened = stand.tool(facade, "integrity_turn_memory_open", stand.args)
     appended = stand.append(facade, admission)
     closed = stand.close_turn(facade, opened, appended)
-    replay_root = stand.archroot / "context-admission-replay-v2"
+    replay_root = stand.archroot / "context-admission-replay-v3"
     names = sorted(p.name for p in replay_root.iterdir()) if replay_root.is_dir() else []
     # The custody ledger was created under the profile tenant; the public
     # identity must be refused, exactly like an unprofiled server start.

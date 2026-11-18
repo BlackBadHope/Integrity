@@ -5,6 +5,13 @@ original signed/control bindings remain unchanged. Callers hold the existing
 maintenance lock for promote/materialize/collect; reads never repair or mutate.
 Expired logical replays are collected by the facade's existing TTL policy; a
 pool member is then removed only once no alias or journal references it.
+
+ISS-113: consecutive frozen catalogs differ in a few hundred 4 KiB pages out of
+~75 000, yet every non-identical catalog used to cost a full ~300 MB member. A
+member may now be stored as a page delta against one full pool member (no
+chains). The logical binding (sha256 and size of the full catalog bytes) is
+unchanged: a delta is reconstructed into private memory and every byte is
+verified against that binding before any read uses it.
 """
 from __future__ import annotations
 
@@ -22,7 +29,15 @@ JOURNAL = 'integrity/replay-catalog-pool-journal/v1'
 NAME = re.compile(r'(?P<id>[a-f0-9]{64})\.catalog\.sqlite3\Z')
 POOL = re.compile(r'\.catalog-pool-(?P<sha>[a-f0-9]{64})\.sqlite3\Z')
 JOURNAL_NAME = re.compile(r'\.(?P<id>[a-f0-9]{64})\.catalog-pool\.json\Z')
+DELTA = re.compile(r'\.catalog-delta-(?P<sha>[a-f0-9]{64})\.bin\Z')
 SQLITE = b'SQLite format 3\x00'
+DELTA_PROTOCOL = 'integrity/replay-catalog-pool-delta/v1'
+DELTA_MAGIC = b'Integrity-delta\x00'
+DELTA_HEADER_AREA = 4096
+DELTA_RECORD_PREFIX = 8
+# A delta larger than this is not worth it: the caller writes a full member,
+# which then becomes the base for the following catalogs.
+MAX_DELTA = 64 * 1048576
 
 
 class PoolError(OSError):
@@ -45,7 +60,16 @@ def is_journal_name(name):
     return JOURNAL_NAME.fullmatch(name) is not None
 
 
-def alias_document(name, binding):
+def is_delta_name(name):
+    return DELTA.fullmatch(name) is not None
+
+
+def is_member_name(name):
+    """A shared member holding catalog bytes: a full pool file or a page delta."""
+    return is_pool_name(name) or is_delta_name(name)
+
+
+def alias_document(name, binding, *, delta=False):
     match = NAME.fullmatch(name)
     if (match is None or not isinstance(binding, dict)
             or set(binding) != {'protocol', 'name', 'sha256', 'bytes'}
@@ -56,7 +80,9 @@ def alias_document(name, binding):
             or type(binding['bytes']) is not int or not 0 < binding['bytes'] <= MAX_CATALOG):
         raise PoolError('catalog-pool-binding-invalid')
     return {'protocol': ALIAS, 'replay_id': 'sha256:' + match['id'], 'logical_name': name,
-            'binding': dict(binding), 'pool_name': '.catalog-pool-' + binding['sha256'][7:] + '.sqlite3'}
+            'binding': dict(binding),
+            'pool_name': ('.catalog-delta-' + binding['sha256'][7:] + '.bin') if delta
+            else ('.catalog-pool-' + binding['sha256'][7:] + '.sqlite3')}
 
 
 def _json(raw):
@@ -76,12 +102,14 @@ def _json(raw):
 
 
 def parse_alias(raw, name, binding, *, journal=False):
-    wanted = alias_document(name, binding)
-    if journal:
-        wanted = {'protocol': JOURNAL, 'alias': wanted, 'alias_sha256': sha(canonical(wanted))}
-    if _json(raw) != wanted:
-        raise PoolError('catalog-pool-own-binding-mismatch')
-    return wanted['alias'] if journal else wanted
+    document = _json(raw)
+    for delta in (False, True):
+        wanted = alias_document(name, binding, delta=delta)
+        if journal:
+            wanted = {'protocol': JOURNAL, 'alias': wanted, 'alias_sha256': sha(canonical(wanted))}
+        if document == wanted:
+            return wanted['alias'] if journal else wanted
+    raise PoolError('catalog-pool-own-binding-mismatch')
 
 
 def identity(info):
@@ -95,7 +123,8 @@ class FdStore:
         self.root, self.check = root, check
 
     def _open(self, name):
-        if not (NAME.fullmatch(name) or POOL.fullmatch(name) or JOURNAL_NAME.fullmatch(name)):
+        if not (NAME.fullmatch(name) or POOL.fullmatch(name) or JOURNAL_NAME.fullmatch(name)
+                or DELTA.fullmatch(name)):
             raise PoolError('catalog-pool-name-invalid')
         fd = os.open(name, os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0), dir_fd=self.root)
         try:
@@ -267,7 +296,7 @@ class FdStore:
         return max(0.0, now - details.st_mtime)
 
     def remove_pool(self, name):
-        if not is_pool_name(name):
+        if not is_member_name(name):
             raise PoolError('catalog-pool-remove-not-allowlisted')
         fd, _ = self._open(name)  # custody (owner, mode, single link) before unlink
         os.close(fd)
@@ -279,6 +308,301 @@ class FdStore:
                 os.unlink(name + suffix, dir_fd=self.root)
             except FileNotFoundError:
                 pass
+
+
+    def delta_header(self, name):
+        """Parse one delta member's header and check its exact size; payload is not read."""
+        if not DELTA.fullmatch(name):
+            raise PoolError('catalog-pool-delta-name-invalid')
+        fd, before = self._open(name)
+        try:
+            self.check()
+            raw = os.pread(fd, DELTA_HEADER_AREA, 0)
+            if identity(before) != identity(os.fstat(fd)):
+                raise PoolError('catalog-pool-read-raced')
+        finally:
+            os.close(fd)
+        return parse_delta_header(raw, name, before.st_size)
+
+    def reconstruct(self, name, binding, out_fd):
+        """Write the full catalog bytes of delta ``name`` to empty ``out_fd``; verify all of them.
+
+        The base is hashed in full against its content address, the payload is applied
+        in strictly increasing page order, and the result is read back and compared with
+        the logical binding. Any difference raises; ``out_fd`` is then garbage.
+        """
+        header = self.delta_header(name)
+        target, base = header['target'], header['base']
+        if target != {'sha256': binding['sha256'], 'bytes': binding['bytes']}:
+            raise PoolError('catalog-pool-delta-binding-mismatch')
+        page = header['page_size']
+        base_fd, base_before = self._open(base['name'])
+        try:
+            if base_before.st_size != base['bytes']:
+                raise PoolError('catalog-pool-delta-base-changed')
+            digest, offset = hashlib.sha256(), 0
+            keep = min(base['bytes'], target['bytes'])
+            while offset < base['bytes']:
+                self.check()
+                raw = os.pread(base_fd, min(1048576, base['bytes'] - offset), offset)
+                if not raw:
+                    raise PoolError('catalog-pool-delta-base-changed')
+                digest.update(raw)
+                if offset < keep:
+                    _write_all(out_fd, raw[:keep - offset], offset, self.check)
+                offset += len(raw)
+            if ('sha256:' + digest.hexdigest() != base['sha256']
+                    or identity(base_before) != identity(os.fstat(base_fd))):
+                raise PoolError('catalog-pool-delta-base-changed')
+        finally:
+            os.close(base_fd)
+        os.ftruncate(out_fd, target['bytes'])
+        delta_fd, delta_before = self._open(name)
+        try:
+            position, previous = DELTA_HEADER_AREA, -1
+            for _ in range(header['pages']):
+                self.check()
+                record = os.pread(delta_fd, DELTA_RECORD_PREFIX + page, position)
+                if len(record) != DELTA_RECORD_PREFIX + page:
+                    raise PoolError('catalog-pool-delta-truncated')
+                index = int.from_bytes(record[:DELTA_RECORD_PREFIX], 'big')
+                if index <= previous or (index + 1) * page > target['bytes']:
+                    raise PoolError('catalog-pool-delta-record-invalid')
+                _write_all(out_fd, record[DELTA_RECORD_PREFIX:], index * page, self.check)
+                previous, position = index, position + len(record)
+            if identity(delta_before) != identity(os.fstat(delta_fd)):
+                raise PoolError('catalog-pool-read-raced')
+        finally:
+            os.close(delta_fd)
+        digest, offset = hashlib.sha256(), 0
+        while offset < target['bytes']:
+            self.check()
+            raw = os.pread(out_fd, min(1048576, target['bytes'] - offset), offset)
+            if not raw:
+                raise PoolError('catalog-pool-content-changed')
+            digest.update(raw)
+            offset += len(raw)
+        if (os.fstat(out_fd).st_size != target['bytes']
+                or 'sha256:' + digest.hexdigest() != binding['sha256']):
+            raise PoolError('catalog-pool-content-changed')
+        return header
+
+
+def _write_all(fd, raw, offset, check):
+    view = memoryview(raw)
+    while view:
+        check()
+        written = os.pwrite(fd, view, offset)
+        if written <= 0:
+            raise PoolError('catalog-pool-write-stalled')
+        view, offset = view[written:], offset + written
+
+
+def _page_size(head):
+    if len(head) < 100 or not head.startswith(SQLITE):
+        return None
+    value = int.from_bytes(head[16:18], 'big')
+    value = 65536 if value == 1 else value
+    return value if 512 <= value <= 65536 and value & (value - 1) == 0 else None
+
+
+def _digest_ref(value, *, named=False):
+    keys = {'name', 'sha256', 'bytes'} if named else {'sha256', 'bytes'}
+    return (isinstance(value, dict) and set(value) == keys
+            and isinstance(value['sha256'], str)
+            and re.fullmatch(r'sha256:[a-f0-9]{64}', value['sha256']) is not None
+            and type(value['bytes']) is int and 0 < value['bytes'] <= MAX_CATALOG)
+
+
+def parse_delta_header(raw, name, size):
+    """Exact delta header: own content address, full base member, page geometry, size."""
+    if len(raw) != DELTA_HEADER_AREA or not raw.startswith(DELTA_MAGIC):
+        raise PoolError('catalog-pool-delta-header-invalid')
+    start = len(DELTA_MAGIC) + 4
+    length = int.from_bytes(raw[len(DELTA_MAGIC):start], 'big')
+    if not 0 < length <= DELTA_HEADER_AREA - start or raw[start + length:].strip(b'\0'):
+        raise PoolError('catalog-pool-delta-header-invalid')
+    header = _json(raw[start:start + length])
+    if (not isinstance(header, dict)
+            or set(header) != {'protocol', 'target', 'base', 'page_size', 'pages'}
+            or header['protocol'] != DELTA_PROTOCOL
+            or not _digest_ref(header['target']) or not _digest_ref(header['base'], named=True)):
+        raise PoolError('catalog-pool-delta-header-invalid')
+    target, base, page, pages = header['target'], header['base'], header['page_size'], header['pages']
+    if (name != '.catalog-delta-' + target['sha256'][7:] + '.bin'
+            or base['name'] != '.catalog-pool-' + base['sha256'][7:] + '.sqlite3'
+            or type(page) is not int or not 512 <= page <= 65536 or page & (page - 1)
+            or target['bytes'] % page or base['bytes'] % page
+            or type(pages) is not int or not 0 <= pages <= target['bytes'] // page):
+        raise PoolError('catalog-pool-delta-header-invalid')
+    expected = DELTA_HEADER_AREA + pages * (DELTA_RECORD_PREFIX + page)
+    if size != expected or expected > DELTA_HEADER_AREA + MAX_DELTA:
+        raise PoolError('catalog-pool-delta-size-mismatch')
+    return header
+
+
+def write_delta_store(store, base_name, source_fd, source_size, out_fd, *, limit=MAX_DELTA):
+    """Write the page delta of ``source_fd`` against full member ``base_name`` to empty ``out_fd``.
+
+    Returns {'sha256', 'bytes', 'delta_bytes', 'pages'} for the full source bytes, or
+    None when the pair does not qualify (not SQLite, other page geometry, or a delta
+    over ``limit``); the caller then discards ``out_fd`` and writes a full member. The
+    base is hashed in full while it is compared, so a delta never names bytes it did
+    not read. The caller still verifies the source identity around this call.
+    """
+    match = POOL.fullmatch(base_name)
+    if match is None:
+        raise PoolError('catalog-pool-delta-base-invalid')
+    base_fd, base_before = store._open(base_name)
+    try:
+        page = _page_size(os.pread(source_fd, 100, 0))
+        base_size = base_before.st_size
+        if (page is None or page != _page_size(os.pread(base_fd, 100, 0))
+                or source_size % page or base_size % page
+                or not 0 < source_size <= MAX_CATALOG or not 0 < base_size <= MAX_CATALOG):
+            return None
+        target_digest, base_digest = hashlib.sha256(), hashlib.sha256()
+        pages = written = offset = 0
+        step = page * 256
+        while offset < max(source_size, base_size):
+            store.check()
+            want_source = max(0, min(step, source_size - offset))
+            want_base = max(0, min(step, base_size - offset))
+            current = os.pread(source_fd, want_source, offset) if want_source else b''
+            previous = os.pread(base_fd, want_base, offset) if want_base else b''
+            if len(current) != want_source or len(previous) != want_base:
+                raise PoolError('catalog-pool-delta-source-raced')
+            target_digest.update(current)
+            base_digest.update(previous)
+            for start in range(0, len(current), page):
+                chunk = current[start:start + page]
+                if previous[start:start + page] != chunk:
+                    record = ((offset + start) // page).to_bytes(DELTA_RECORD_PREFIX, 'big') + chunk
+                    if written + len(record) > limit:
+                        return None
+                    _write_all(out_fd, record, DELTA_HEADER_AREA + written, store.check)
+                    written += len(record)
+                    pages += 1
+            offset += step
+        if (base_digest.hexdigest() != match['sha']
+                or identity(base_before) != identity(os.fstat(base_fd))):
+            raise PoolError('catalog-pool-delta-base-changed')
+    finally:
+        os.close(base_fd)
+    target = {'sha256': 'sha256:' + target_digest.hexdigest(), 'bytes': source_size}
+    raw = canonical({'protocol': DELTA_PROTOCOL, 'target': target,
+                     'base': {'name': base_name, 'sha256': 'sha256:' + match['sha'], 'bytes': base_size},
+                     'page_size': page, 'pages': pages})
+    area = DELTA_MAGIC + len(raw).to_bytes(4, 'big') + raw
+    if len(area) > DELTA_HEADER_AREA:
+        raise PoolError('catalog-pool-delta-header-invalid')
+    _write_all(out_fd, area + b'\0' * (DELTA_HEADER_AREA - len(area)), 0, store.check)
+    os.ftruncate(out_fd, DELTA_HEADER_AREA + written)
+    return {**target, 'delta_bytes': DELTA_HEADER_AREA + written, 'pages': pages}
+
+
+def newest_base_store(store):
+    """Newest full pool member, the base for the next delta; None when there is none."""
+    best = None
+    for name in store.list_names():
+        if not is_pool_name(name):
+            continue
+        try:
+            fd, details = store._open(name)
+        except FileNotFoundError:
+            continue
+        os.close(fd)
+        if best is None or (details.st_mtime_ns, name) > best[0]:
+            best = ((details.st_mtime_ns, name), name)
+    return None if best is None else best[1]
+
+
+def adopt_delta_store(store, name, binding, temporary):
+    """Bind ``name`` to a page delta member; caller holds the maintenance lock.
+
+    ``temporary`` names the caller's fsynced delta file in the same directory, used
+    only when the content-addressed member is absent. The end state equals
+    ``adopt_existing_pool_store`` (own journal plus alias), written only after the
+    member parses, names this exact binding and its base is present. Returns False,
+    leaving no new reference, whenever that precondition does not hold; the caller
+    then takes the full-copy path.
+    """
+    alias = alias_document(name, binding, delta=True)
+    journal_name = '.' + NAME.fullmatch(name)['id'] + '.catalog-pool.json'
+    member = alias['pool_name']
+    if store.exists(name) or store.exists(journal_name):
+        return False
+    if not store.exists(member):
+        if temporary is None:
+            return False
+        store.move(temporary, member)
+    header = store.delta_header(member)
+    if (header['target'] != {'sha256': binding['sha256'], 'bytes': binding['bytes']}
+            or not store.exists(header['base']['name'])):
+        return False
+    raw_alias = canonical(alias)
+    store.atomic_small(journal_name, canonical({'protocol': JOURNAL, 'alias': alias,
+                                                'alias_sha256': sha(raw_alias)}), absent=True)
+    store.atomic_small(name, raw_alias)
+    return True
+
+
+def write_delta(root, base_name, source_fd, source_size, out_fd, check, *, limit=MAX_DELTA):
+    return write_delta_store(_store(root, check), base_name, source_fd, source_size, out_fd, limit=limit)
+
+
+def newest_base(root, check):
+    return newest_base_store(_store(root, check))
+
+
+def adopt_delta(root, name, binding, temporary, check):
+    return adopt_delta_store(_store(root, check), name, binding, temporary)
+
+
+def reconstruct(root, member, binding, out_fd, check):
+    return _store(root, check).reconstruct(member, binding, out_fd)
+
+
+def purge_delta_layout_store(store):
+    """Explicit drained maintenance before a release without delta support runs here.
+
+    Removes every logical replay whose alias or journal resolves to a delta member
+    (record, reservation, alias leaf, journal), then every delta member. Those
+    replays lose session recovery, exactly as when no reservation could be made;
+    canonical Seed and full pool members are untouched. Caller owns writer drain.
+    """
+    names = sorted(store.list_names())
+    doomed = set()
+    for name in names:
+        leaf, journal = NAME.fullmatch(name), JOURNAL_NAME.fullmatch(name)
+        if leaf is None and journal is None:
+            continue
+        raw, _ = store.prefix(name)
+        if leaf is not None and raw.startswith(SQLITE):
+            continue
+        if is_delta_name(_reference(raw, name, journal=journal is not None)):
+            doomed.add((leaf or journal)['id'])
+    removed = []
+    for replay_hex in sorted(doomed):
+        for related in (replay_hex + '.json', replay_hex + '.reservation.json',
+                        replay_hex + '.catalog.sqlite3', '.' + replay_hex + '.catalog-pool.json'):
+            store.check()
+            try:
+                os.unlink(related, dir_fd=store.root)
+                removed.append(related)
+            except FileNotFoundError:
+                pass
+    for name in names:
+        if is_delta_name(name):
+            store.remove_pool(name)
+            removed.append(name)
+    os.fsync(store.root)
+    return {'status': 'DELTA_LAYOUT_PURGED', 'replays': len(doomed), 'removed': removed,
+            'canonical_writes': 0}
+
+
+def purge_delta_layout(root, check):
+    return purge_delta_layout_store(_store(root, check))
 
 
 def _store(root, check):
@@ -299,7 +623,8 @@ def _reference(raw, name, *, journal):
         alias, logical = document, name
     if not isinstance(alias, dict) or alias.get('protocol') != ALIAS or alias.get('logical_name') != logical:
         raise PoolError('catalog-pool-reference-unparsed')
-    if alias != alias_document(logical, alias.get('binding')):
+    if alias != alias_document(logical, alias.get('binding'),
+                               delta=is_delta_name(str(alias.get('pool_name', '')))):
         raise PoolError('catalog-pool-reference-unparsed')
     return alias['pool_name']
 
@@ -318,6 +643,14 @@ def referenced_pools(store, names):
         elif JOURNAL_NAME.fullmatch(name):
             raw, _ = store.prefix(name)
             references.add(_reference(raw, name, journal=True))
+    # Every present delta pins its base, referenced or not: a delta is never left
+    # pointing at collected bytes. An unparsable delta raises like an alias would.
+    for name in names:
+        if is_delta_name(name):
+            try:
+                references.add(store.delta_header(name)['base']['name'])
+            except FileNotFoundError:
+                continue
     return references
 
 
@@ -332,7 +665,7 @@ def collect_unreferenced_store(store, *, now, grace):
     references = referenced_pools(store, names)
     removed = []
     for name in names:
-        if is_pool_name(name) and name not in references and store.age(name, now) >= grace:
+        if is_member_name(name) and name not in references and store.age(name, now) >= grace:
             store.remove_pool(name)
             removed.append(name)
     if removed:
@@ -371,6 +704,11 @@ def logical_size(root, name, binding, actual_size, check):
         return actual_size
     # The original opening path still validates full bytes/SHA before replay.
     # Accounting requires at least an exact own alias and a custody/size-checked pool.
+    if is_delta_name(resolved):
+        header = store.delta_header(resolved)
+        if header['target'] != {'sha256': binding['sha256'], 'bytes': binding['bytes']}:
+            raise PoolError('catalog-pool-accounting-size-mismatch')
+        return binding['bytes']
     _, size = store.prefix(resolved)
     if size != binding['bytes']:
         raise PoolError('catalog-pool-accounting-size-mismatch')
@@ -473,6 +811,10 @@ def materialize_store(store, catalogs, other_charged_bytes, *, limit=4 * 1024 **
     An unlisted pool/journal, unknown postimage or over-budget projection refuses
     the entire operation. The caller owns GO, all-writer drain and outer journal.
     """
+    if any(is_delta_name(name) for name in store.list_names()):
+        # Delta-backed replays are derived and short-lived; purge_delta_layout_store
+        # retires them first instead of expanding each into a full catalog here.
+        raise PoolError('catalog-pool-delta-layout-purge-first')
     projection = rollback_projection(catalogs, other_charged_bytes, limit=limit)
     groups, journals, allowed_pool, allowed_journal = {}, {}, set(), set()
     provided_names = {row['name'] for row in catalogs}

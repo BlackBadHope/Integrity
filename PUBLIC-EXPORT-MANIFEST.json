@@ -426,7 +426,7 @@
       "mode": "0o644",
       "path": "components/integrity-adapter-sdk/src/integrity_adapter_sdk/guardian-origin.json",
       "sanitization_edits": 2,
-      "sha256": "f852db736f6ae84e620896507a2a2e06266d314258432c8e2105d1951e5a2b6f"
+      "sha256": "2ef13ebca5257cbc75f505725407cf48af5187763f61d66e697da66e1a89afe2"
     },
     {
       "bytes": 632,
@@ -6918,11 +6918,11 @@
       "sha256": "3d54655e8fc242bf550253b07b022ba5710d8393dcfc62e0e8846f2c98306439"
     },
     {
-      "bytes": 353848,
+      "bytes": 362889,
       "mode": "0o644",
       "path": "src/integrity_guardian/memory_synapse_mcp.py",
       "sanitization_edits": 0,
-      "sha256": "393ed189c93d0b410f9c3f455239e27f894e91e43539e8cb0234591833048311"
+      "sha256": "3874621703b73fccdb32e5c278fd536e84efecc1c6d2de5c860ec39b904ea0ae"
     },
     {
       "bytes": 26298,
@@ -7128,11 +7128,11 @@
       "sha256": "f692956391bc73ab67cc5d748c3b833feab3909c33a5922e13927f539f9cb92f"
     },
     {
-      "bytes": 21890,
+      "bytes": 38202,
       "mode": "0o644",
       "path": "src/integrity_guardian/replay_catalog_pool.py",
       "sanitization_edits": 0,
-      "sha256": "a0af6730c5a6c7640220d01e3d576dc4f6672b00d78442f2e20baef289a0da46"
+      "sha256": "b975fed8e2d9fca8597cbb52e913114bccc86f92fb3c79b210aee77e73e0507c"
     },
     {
       "bytes": 22656,
@@ -8805,7 +8805,7 @@
       "mode": "0o644",
       "path": "tests/deployment_profile_stand.py",
       "sanitization_edits": 0,
-      "sha256": "a5d858b9b027cc4bab33587dde164b467431b463005bdcece69967de4afb7507"
+      "sha256": "ba915939e099c74a04e8c8a79e1e4b4a04b4620db2a9bc3abfad980069ff156d"
     },
     {
       "bytes": 4105,
@@ -9760,7 +9760,7 @@
       "sha256": "c088a0394890fd3661a86c0f0a8e6e716ad3b6c51b5728c032b12663af6420f9"
     }
   ],
-  "generated_file_count": 108,
+  "generated_file_count": 110,
   "generated_files": [
     {
       "bytes": 1041,
@@ -10517,9 +10517,23 @@
       "path": "src/integrity_guardian/public-source-descriptor.json",
       "sanitization_edits": 0,
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
+    },
+    {
+      "bytes": 6163,
+      "mode": "0o644",
+      "path": "tests/test_replay_delta_stand.py",
+      "sanitization_edits": 0,
+      "sha256": "294c5790cea7d86dff15e625ee4b575350812aa3077a6795819a9da8682b82d5"
+    },
+    {
+      "bytes": 9951,
+      "mode": "0o644",
+      "path": "tests/test_replay_pool_delta.py",
+      "sanitization_edits": 0,
+      "sha256": "9fb6ef66ec956f66f2322355933f651f5f046bf98f4a4b2d9b52cf4ab6efde0e"
     }
   ],
-  "projection_digest": "sha256:991d306ae4bc8f912c4accb48ff0a31a7da9f0fca7eba596ad5fd2051c1ebcbf",
+  "projection_digest": "sha256:ce03321d23f65cf9a54a4f91daa2b8c5e12770778b0180613b338834931d8388",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

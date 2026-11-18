@@ -227,6 +227,11 @@ CONTEXT_REATTACH_RETIRE_LOCK_TIMEOUT_SECONDS = 5.0
 CONTEXT_ADMISSION_REPLAY_RESERVATION_PROTOCOL = (
     "integrity-client/context-admission-replay-reservation/v1"
 )
+# 18.11 ISS-113: delta-pool releases own a separate replay root. The release before them
+# (inventory without .catalog-delta-*.bin) raises on unknown entries in its ACK/retire paths,
+# and its facades stay alive for days after a forced-command switch; sharing one root would
+# break them. The physical disk floor stays common (fstatvfs on the same filesystem).
+CONTEXT_ADMISSION_REPLAY_ROOT_NAME = "context-admission-replay-v3"
 MAX_CONTEXT_ADMISSION_REPLAY_BYTES = 32 * 1_048_576
 MAX_CONTEXT_ADMISSION_REPLAY_CATALOG_BYTES = 512 * 1_048_576
 MAX_CONTEXT_ADMISSION_REPLAY_TOTAL_BYTES = 4 * 1_024 * 1_024 * 1_024
@@ -773,8 +778,10 @@ class RetainedSeedCatalogSnapshot:
         descriptor: int,
         *,
         deadline_monotonic: float | None = None,
+        companion: "PrivateReplayCatalogCopy | None" = None,
     ) -> None:
         self._descriptor: int | None = descriptor
+        self._companion = companion
         self.path = Path(f"/proc/self/fd/{descriptor}")
         try:
             self.connection: sqlite3.Connection | None = sqlite3.connect(
@@ -827,7 +834,14 @@ class RetainedSeedCatalogSnapshot:
                 connection.close()
             os.close(descriptor)
             self._descriptor = None
+            self._close_companion()
             raise
+
+    def _close_companion(self) -> None:
+        companion = self._companion
+        self._companion = None
+        if companion is not None:
+            companion.close()
 
     def close(self) -> None:
         connection = getattr(self, "connection", None)
@@ -838,6 +852,66 @@ class RetainedSeedCatalogSnapshot:
         self._descriptor = None
         if descriptor is not None:
             os.close(descriptor)
+        self._close_companion()
+
+
+class PrivateReplayCatalogCopy:
+    """ISS-113: the named private file a delta-backed replay catalog is rebuilt into.
+
+    SQLite resolves ``/proc/self/fd/N`` through readlink, so an unnamed
+    (O_TMPFILE or unlinked) file cannot be opened. The copy therefore keeps a
+    name inside an owner-locked ``.seed-session-`` directory of the private
+    snapshot root for as long as the retained catalog is open: ``close``
+    removes it, and ``sweep_orphaned_seed_snapshots`` removes it after a crash.
+    """
+
+    def __init__(self, root: Path | None) -> None:
+        if root is None or not root.is_absolute() or root.is_symlink():
+            raise McpFacadeError("context admission replay catalog is unavailable")
+        details = root.lstat()
+        if (
+            not stat.S_ISDIR(details.st_mode)
+            or details.st_uid != os.geteuid()
+            or stat.S_IMODE(details.st_mode) & 0o077
+        ):
+            raise McpFacadeError("context admission replay catalog is unavailable")
+        self._temporary: tempfile.TemporaryDirectory[str] | None = tempfile.TemporaryDirectory(
+            prefix=SEED_SNAPSHOT_SESSION_PREFIX, dir=root
+        )
+        self._owner_lock: int | None = None
+        self.descriptor: int | None = None
+        try:
+            directory = Path(self._temporary.name)
+            self._owner_lock = _lock_seed_snapshot_owner(directory)
+            self.descriptor = os.open(
+                directory / "catalog.sqlite3",
+                os.O_RDWR | os.O_CREAT | os.O_EXCL
+                | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0),
+                0o600,
+            )
+        except Exception:
+            self.close()
+            raise
+
+    def release_descriptor(self) -> int:
+        descriptor = self.descriptor
+        if descriptor is None:
+            raise McpFacadeError("context admission replay catalog is unavailable")
+        self.descriptor = None
+        return descriptor
+
+    def close(self) -> None:
+        descriptor, self.descriptor = self.descriptor, None
+        if descriptor is not None:
+            os.close(descriptor)
+        lock, self._owner_lock = self._owner_lock, None
+        temporary, self._temporary = self._temporary, None
+        try:
+            if temporary is not None:
+                temporary.cleanup()
+        finally:
+            if lock is not None:
+                os.close(lock)
 
 
 def canonical_json(value: object) -> bytes:
@@ -1956,7 +2030,7 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
         self._broker_tool_surface_authenticated = False
         architecture_root = getattr(architecture, "root", None)
         self._context_admission_replay_root = (
-            Path(architecture_root) / "context-admission-replay-v2"
+            Path(architecture_root) / CONTEXT_ADMISSION_REPLAY_ROOT_NAME
             if isinstance(architecture_root, (str, os.PathLike))
             else None
         )
@@ -2649,7 +2723,7 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
             reservation_match = reservation_pattern.fullmatch(name)
             temporary_match = temporary_pattern.fullmatch(name)
             is_lock = name == ".replay-maintenance.lock" or lock_pattern.fullmatch(name)
-            is_pool = _catalog_pool.is_pool_name(name)
+            is_pool = _catalog_pool.is_member_name(name)
             is_pool_journal = _catalog_pool.is_journal_name(name)
             companion_match = companion_pattern.fullmatch(name)
             if not (
@@ -3146,6 +3220,8 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
         self,
         replay_id: str,
         binding: dict[str, Any],
+        *,
+        companions: list[PrivateReplayCatalogCopy] | None = None,
     ) -> int:
         expected_name = replay_id.split(":", 1)[1] + ".catalog.sqlite3"
         migration = self._replay_migration(replay_id)
@@ -3168,6 +3244,10 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
             )
         except (_catalog_pool.PoolError, OSError) as exc:
             raise McpFacadeError("context admission replay catalog is unavailable") from exc
+        if _catalog_pool.is_delta_name(catalog_read_name):
+            return self._open_delta_context_replay_catalog(
+                root_descriptor, catalog_read_name, binding, companions
+            )
         try:
             descriptor = os.open(
                 catalog_read_name,
@@ -3208,6 +3288,123 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
         except Exception:
             os.close(descriptor)
             raise
+
+    def _open_delta_context_replay_catalog(
+        self,
+        root_descriptor: int,
+        member: str,
+        binding: dict[str, Any],
+        companions: list[PrivateReplayCatalogCopy] | None,
+    ) -> int:
+        """ISS-113: rebuild a delta member privately; same byte-exact contract as a full leaf.
+
+        With ``companions`` the named private copy is handed to the caller and
+        stays until the retained catalog closes; without it (a verification
+        open) the name is removed at once and only the descriptor is returned.
+        """
+        copy = PrivateReplayCatalogCopy(self._snapshot_root)
+        try:
+            descriptor = copy.descriptor
+            assert descriptor is not None
+            _catalog_pool.reconstruct(
+                root_descriptor, member, binding, descriptor,
+                self._check_context_replay_deadline,
+            )
+            details = os.fstat(descriptor)
+            if (
+                not stat.S_ISREG(details.st_mode)
+                or details.st_uid != os.geteuid()
+                or stat.S_IMODE(details.st_mode) != 0o600
+                or details.st_size != binding["bytes"]
+            ):
+                raise McpFacadeError("context admission replay catalog custody is invalid")
+            os.lseek(descriptor, 0, os.SEEK_SET)
+            descriptor = copy.release_descriptor()
+        except _catalog_pool.PoolError as exc:
+            copy.close()
+            if "content-changed" in str(exc) or "base-changed" in str(exc):
+                raise McpFacadeError("context admission replay catalog digest changed") from exc
+            raise McpFacadeError("context admission replay catalog is unavailable") from exc
+        except Exception:
+            copy.close()
+            raise
+        if companions is None:
+            copy.close()
+        else:
+            companions.append(copy)
+        return descriptor
+
+    def _delta_pooled_context_replay_catalog(
+        self,
+        source_descriptor: int,
+        details: os.stat_result,
+        source_identity: Any,
+        name: str,
+        root_descriptor: int,
+        replay_id: str,
+        frozen_catalog: "FrozenSeedCatalogSnapshot",
+    ) -> dict[str, Any] | None:
+        """ISS-113: store this catalog as a page delta against the newest full pool member.
+
+        Consecutive catalogs share all but ~0.1-2 % of their pages, so this replaces
+        a ~300 MB member by a few MB. The binding is the sha256 of the full frozen
+        bytes, exactly as for a copy, and the member is rebuilt and fully verified
+        before this returns. None (nothing referenced) sends the caller to the
+        original full-copy path, whose member becomes the next base.
+        """
+        base = _catalog_pool.newest_base(root_descriptor, self._check_context_replay_deadline)
+        if base is None:
+            return None
+        temporary = f".{name}.{os.getpid()}.{time.monotonic_ns()}.tmp"
+        descriptor = os.open(
+            temporary,
+            os.O_RDWR | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+            0o600,
+            dir_fd=root_descriptor,
+        )
+        try:
+            try:
+                written = _catalog_pool.write_delta(
+                    root_descriptor, base, source_descriptor, details.st_size, descriptor,
+                    self._check_context_replay_deadline,
+                )
+            except FileNotFoundError:
+                written = None  # the base was collected meanwhile
+            if written is None:
+                return None
+            if self._context_replay_record_identity(os.fstat(source_descriptor)) != source_identity:
+                raise McpFacadeError("frozen Seed replay catalog changed while copying")
+            os.fsync(descriptor)
+            os.close(descriptor)
+            descriptor = None
+            binding = {
+                "protocol": "integrity-client/context-admission-frozen-catalog/v1",
+                "name": name,
+                "sha256": written["sha256"],
+                "bytes": written["bytes"],
+            }
+            with self._context_replay_maintenance_lock():
+                self._context_replay_inventory(prune=True)
+                self._require_context_replay_reservation(replay_id)
+                self._check_context_replay_deadline()
+                adopted = _catalog_pool.adopt_delta(
+                    root_descriptor, name, binding, temporary,
+                    self._check_context_replay_deadline,
+                )
+                os.fsync(root_descriptor)
+            if not adopted:
+                return None
+            alias_verified_bytes(frozen_catalog.path, binding["sha256"])
+            verification_descriptor = self._open_context_replay_catalog(replay_id, binding)
+            os.close(verification_descriptor)
+            return binding
+        finally:
+            if descriptor is not None:
+                os.close(descriptor)
+            try:
+                os.unlink(temporary, dir_fd=root_descriptor)
+            except FileNotFoundError:
+                pass
 
     def _adopt_pooled_context_replay_catalog(
         self,
@@ -3289,6 +3486,13 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
                 )
                 if adopted is not None:
                     return adopted
+                os.lseek(source_descriptor, 0, os.SEEK_SET)
+                delta = self._delta_pooled_context_replay_catalog(
+                    source_descriptor, details, source_identity, name, root_descriptor,
+                    replay_id, frozen_catalog,
+                )
+                if delta is not None:
+                    return delta
                 os.lseek(source_descriptor, 0, os.SEEK_SET)
             destination_descriptor = os.open(
                 temporary,
@@ -3594,10 +3798,14 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
             return
         if not re.fullmatch(r"sha256:[a-f0-9]{64}", artifact_digest):
             raise McpFacadeError("context admission replay artifact digest is invalid")
-        descriptor = self._open_context_replay_catalog(replay_id, binding)
+        companions: list[PrivateReplayCatalogCopy] = []
+        descriptor = self._open_context_replay_catalog(
+            replay_id, binding, companions=companions
+        )
         retained = RetainedSeedCatalogSnapshot(
             descriptor,
             deadline_monotonic=self._active_context_replay_deadline,
+            companion=companions[0] if companions else None,
         )
         try:
             self.lts = MemorySynapseLtsService(
@@ -3978,7 +4186,7 @@ class MemorySynapseMcp(SessionRecoveryMixin, OperationStatusMixin):
         status = self._recovery_runtime_status(runtime)
         architecture_root = getattr(runtime.architecture, "root", None)
         replay_root = (
-            Path(architecture_root) / "context-admission-replay-v2"
+            Path(architecture_root) / CONTEXT_ADMISSION_REPLAY_ROOT_NAME
             if isinstance(architecture_root, (str, os.PathLike))
             else None
         )
@@ -7391,7 +7599,7 @@ def main(argv: list[str] | None = None) -> int:
         try:
             migrations.append(load_admission(
                 Path(filename), expected_digest,
-                replay_root=args.architecture_root / "context-admission-replay-v2",
+                replay_root=args.architecture_root / CONTEXT_ADMISSION_REPLAY_ROOT_NAME,
                 target_artifact=package_lts._artifact_digest(),
             ))
         except (ReplayMigrationError, OSError, KeyError, TypeError, ValueError) as exc:
