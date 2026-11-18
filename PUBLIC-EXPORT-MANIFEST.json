@@ -2501,11 +2501,11 @@
       "sha256": "5a6f232ae467a27a2f1feae1e8655889cfad79d546cd2f9c0faa1e671c17e0f0"
     },
     {
-      "bytes": 3477,
+      "bytes": 4769,
       "mode": "0o644",
       "path": "components/integrity-guards/src/integrity_guards/uroboros_list.py",
       "sanitization_edits": 0,
-      "sha256": "e686b44a5c4ea3613f1ff97cfd6e535ca53f91f94bf3806c5dc2583bd478d2cf"
+      "sha256": "4e69334e9f15b0c61036dafb2d070789b5e0341e5cd61948322065484c6e5b47"
     },
     {
       "bytes": 19934,
@@ -2536,11 +2536,11 @@
       "sha256": "fc60e88be413d3567378afa1396b4ab9e1d44d9679dfc8b16e577a47923b9207"
     },
     {
-      "bytes": 6625,
+      "bytes": 7661,
       "mode": "0o644",
       "path": "components/integrity-guards/tests/test_uroboros.py",
       "sanitization_edits": 0,
-      "sha256": "96db670adc0d78e243b19484767698ee35d73114df3c92298414ece19f16e69e"
+      "sha256": "4d4e535bd1f25ccd19d5c481b8f4cae0f9b7aedbb8c68de53c9367b3b060ad80"
     },
     {
       "bytes": 11305,
@@ -10512,7 +10512,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:ff75625e9dedaad59a5fa9a08ea00d603221ebeaaf0d72df8ad3b6441a5f63a5",
+  "projection_digest": "sha256:2325fdf7cc677a76c4bde013d2954e36c31b7deb0e26eb7bae01e35e0a11dd9b",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
