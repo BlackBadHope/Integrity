@@ -106,9 +106,23 @@ integrity-native-profile --vendor codex --upstream-json U.json --bindings-json B
   --output NEW_DIR [--tools-json T.json] [--turn-guard block|advise|off] \
   [--admission-first block|off]
 
+integrity-native-merge --profile NEW_DIR/profile.json [--apply] [--remove] \
+  [--home DIR] [--codex-home DIR]
+
 integrity-doctor [--project DIR] [--transport FILE] [--state-root DIR] [--last N] \
   [--no-probe] [--no-coverage] [--json]
 ```
+
+`integrity-native-merge` takes a generated Codex or Claude Code profile into user scope, so
+sessions in every folder get the hooks. It verifies the profile first, then merges the hook
+definitions into `~/.claude/settings.json` or `$CODEX_HOME/hooks.json` and the one MCP entry
+into `~/.claude.json` or `$CODEX_HOME/config.toml`, keeping every unrelated entry. It is a
+dry run unless `--apply` is given; with `--apply` each changed file is copied to
+`<file>.integrity-backup-<UTC time>` first and then replaced atomically with its mode kept.
+Hooks from an earlier Native profile are replaced, not doubled; other hooks, including another
+Integrity plugin's, are kept and reported. `--remove` takes the Native hooks and MCP entry out
+again. A settings file that is not valid JSON or TOML is refused and left as it is. It exits 2
+on a refusal.
 
 `--preflight` checks only the configuration header and reports
 `runtime_bindings_verified: false`. `integrity-native-profile` prints JSON that includes
@@ -190,7 +204,8 @@ For use in real clients, see
 
 ## Limits
 
-- Hooks are project-scoped unless you merge them into user settings by hand.
+- Hooks are project-scoped until `integrity-native-merge --apply` puts them in user settings.
+  The merge is covered by fixture tests, not by a live client run.
 - The Linux user-custody guard only advises.
 - The configuration check expects `guardian_version` `6.1.0` in the file header, although
   the package requires Guardian 7.0.0 or newer. Use the value the code checks.

@@ -144,6 +144,7 @@
       "entry_points": {
         "integrity-client-memory": "integrity_client_memory.launcher:main",
         "integrity-doctor": "integrity_client_memory.doctor:main",
+        "integrity-native-merge": "integrity_client_memory.native_merge:main",
         "integrity-native-profile": "integrity_client_memory.native_install:main"
       },
       "import_roots": [

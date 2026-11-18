@@ -111,6 +111,17 @@ trust the exact hook definitions, then merge the single MCP entry and the hook
 definitions into the layer you intend to use, preserving unrelated entries. Do
 not run this profile alongside an older Integrity plugin for the same scope.
 
+For user scope, `integrity-native-merge` does the merge. It is a dry run until
+you add `--apply`, and it backs up each file it changes:
+
+```bash
+$PY -m integrity_client_memory.native_merge --profile "$OUT/profile.json"          # shows the plan
+$PY -m integrity_client_memory.native_merge --profile "$OUT/profile.json" --apply  # writes it
+```
+
+It writes `$CODEX_HOME/hooks.json` and the `[mcp_servers.integrity_native]`
+table of `$CODEX_HOME/config.toml` (default `~/.codex`).
+
 Expected first turn is the same as on Windows: `UserPromptSubmit` issues one
 opaque `turn_ref`; the model calls `integrity_context_admission_current_turn`
 once; the hook opens the signed registration; the turn ends with a terminal
@@ -150,7 +161,10 @@ cd "$OUT/claude-workspace" && claude
 
 Approve the project MCP server when Claude asks, and check `/hooks` and `/mcp`.
 Then merge the single MCP entry and the hook definitions into the settings
-scope you intend to use, preserving unrelated entries.
+scope you intend to use, preserving unrelated entries. For user scope,
+`$PY -m integrity_client_memory.native_merge --profile "$OUT/profile.json" --apply`
+writes the hooks into `~/.claude/settings.json` and the MCP entry into
+`~/.claude.json`; run it without `--apply` first to see the plan.
 
 Two Claude-specific guarantees are covered by tests:
 
@@ -166,12 +180,15 @@ Two Claude-specific guarantees are covered by tests:
 - **Codex or Claude Code upgrade:** the binary hash changes, so heads are no
   longer published and admission fails closed. Generate a new profile into a
   new directory with the new `codex_executable` or `claude_executable`, review
-  it, switch the hook/MCP entries, and keep the old directory until the new one
-  is accepted.
-- **Rollback:** restore the previous hook/MCP entries; the previous profile
-  directory is untouched by a new generation.
-- **Removal:** remove the hook and MCP entries, then delete the profile
-  directory. It holds private prompts and state; delete it like any private file.
+  it, switch the hook/MCP entries (`native_merge --apply` with the new profile
+  replaces the old Native hooks instead of adding a second set), and keep the
+  old directory until the new one is accepted.
+- **Rollback:** restore the previous hook/MCP entries: run `native_merge
+  --apply` with the previous profile, or copy back the
+  `.integrity-backup-<time>` file it left. The previous profile directory is
+  untouched by a new generation.
+- **Removal:** remove the hook and MCP entries (`native_merge --apply
+  --remove`), then delete the profile directory. It holds private prompts and state; delete it like any private file.
 
 ## Troubleshooting
 
