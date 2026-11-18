@@ -1,5 +1,5 @@
 {
-  "file_count": 1393,
+  "file_count": 1394,
   "files": [
     {
       "bytes": 3435,
@@ -566,7 +566,7 @@
       "mode": "0o644",
       "path": "components/integrity-bridges/SOURCE-MAP.json",
       "sanitization_edits": 0,
-      "sha256": "573d36f99c089f473f17221e32b26d00d2875976e2555f72937e9e1da8bcf8d3"
+      "sha256": "847fd8cc1af549c53c47ee67b17a571418e8e8687739a250406c37ebc1236cb3"
     },
     {
       "bytes": 955,
@@ -667,11 +667,11 @@
       "sha256": "a5f2c3a06b9b65a44345dd47cae6d7b82ad4fb9487c7a6d4f6090e5eacef93fd"
     },
     {
-      "bytes": 68747,
+      "bytes": 68921,
       "mode": "0o644",
       "path": "components/integrity-bridges/src/integrity_bridges/resources/hub/unified_mcp.py",
       "sanitization_edits": 0,
-      "sha256": "993aeb10b77f98dd90377097afa0e9ec6364416f38c41131439dae63ebf860f8"
+      "sha256": "0fc2b4153876e3afaee9ff7c742af4616b950a4def3dc4b4d2489dfd7d6e4782"
     },
     {
       "bytes": 1132,
@@ -742,6 +742,13 @@
       "path": "components/integrity-bridges/src/integrity_bridges/web_url.py",
       "sanitization_edits": 0,
       "sha256": "989b9f9043454fd7f79746cbe2d58ba24474ee3bf8f53c9dd1fdda4d6d8f5f75"
+    },
+    {
+      "bytes": 3581,
+      "mode": "0o644",
+      "path": "components/integrity-bridges/tests/test_codex_hub_pipe_discovery.py",
+      "sanitization_edits": 0,
+      "sha256": "2a1941f68e1f6b9c20540e9ea0c4519c665a8318eec4098c0a43804ff2767dae"
     },
     {
       "bytes": 1643,
@@ -10512,7 +10519,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:ff75625e9dedaad59a5fa9a08ea00d603221ebeaaf0d72df8ad3b6441a5f63a5",
+  "projection_digest": "sha256:151e051036d93c9b96b226607311ade127b5540305204b7336923a5dbc156891",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
