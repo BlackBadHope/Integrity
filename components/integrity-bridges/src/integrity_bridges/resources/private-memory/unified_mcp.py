@@ -334,12 +334,13 @@ def discover_codex_app_tool_pipes() -> list[str]:
         for process_id in _codex_process_ids()
     )
     candidates.extend(_enumerate_codex_app_tool_pipes())
-    pattern = re.compile(r"^\\\\\.\\pipe\\codex-browser-use-[A-Za-z0-9-]+$")
+    pattern = re.compile(r"^\\\\\.\\pipe\\codex-(?:app-tools|browser-use)-[A-Za-z0-9-]+$")
     result: list[str] = []
     for candidate in candidates:
         if isinstance(candidate, str) and pattern.fullmatch(candidate) and candidate not in result:
             result.append(candidate)
-    return result
+    # App tools have their own pipe; browser-use pipes may expose only browser RPC.
+    return sorted(result, key=lambda path: not path.startswith(r"\\.\pipe\codex-app-tools-"))
 
 
 def _enumerate_codex_app_tool_pipes() -> list[str]:
@@ -350,8 +351,9 @@ def _enumerate_codex_app_tool_pipes() -> list[str]:
         names = os.listdir("\\\\.\\pipe\\")
     except OSError:
         return []
-    pattern = re.compile(r"^codex-browser-use-[A-Za-z0-9-]+$")
-    return [f"\\\\.\\pipe\\{name}" for name in names if pattern.fullmatch(name)][:128]
+    pattern = re.compile(r"^codex-(?:app-tools|browser-use)-[A-Za-z0-9-]+$")
+    paths = [f"\\\\.\\pipe\\{name}" for name in names if pattern.fullmatch(name)]
+    return sorted(paths, key=lambda path: not path.startswith(r"\\.\pipe\codex-app-tools-"))[:128]
 
 
 class NativeAppHostRpc:
