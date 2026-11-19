@@ -70,6 +70,16 @@ over an OpenSSH forced command with a pinned host key. CI tests unknown-key
 denial, key revocation and lifecycle parity between local and SSH clients. See
 the [two-machine quickstart](CROSS_MACHINE_QUICKSTART.md).
 
+*CI.* Work claims across machines go to one
+[claims core](WORK_CLAIMS_CORE.md) over the same forced command. In strict mode
+every claim, renewal, result, release and handoff is signed by the agent's
+enrolled Ed25519 key. CI on Ubuntu runs two device keys and three agent keys
+against one core through a loopback `sshd`: a race for one task, lease expiry,
+a stale holder refused, forged signatures, replay in a new session, a revoked
+key and a key used from the wrong device. The same checks run on Ubuntu and
+Windows over local sessions. Two physical hosts and a real agent client were
+not run.
+
 The server side of that transport is in
 [`deploy/linux-core`](../deploy/linux-core/README.md). Its README lists what
 was run; the scripts carry placeholders that you fill for your own host.
@@ -178,10 +188,12 @@ deployment-specific.
 The suite verifies the protocol core, the Ledger, one-use ChangeIntent custody,
 index-backed Seed queries and fenced blast-radius claims between processes **on
 one machine**. An end-to-end test enrolls two machines and rejects a stale
-fence (`tests/e2e/test_two_machine_mesh.py`).
+fence (`tests/e2e/test_two_machine_mesh.py`). Signed work claims at one claims
+core are verified over local sessions and over OpenSSH forced commands on a
+loopback stand (`tests/test_claims_core.py`, `tests/test_networked_claims_ssh.py`).
 
-Not claimed: general coordination across machines, authenticated agent
-identity for claims, and production operation.
+Not claimed: replication or consensus between claims cores, verified identity
+outside a strict claims core, two physical hosts, and production operation.
 [ARCHITECTURE.md](../ARCHITECTURE.md#what-the-public-suite-verifies) lists each
 property with the test that covers it.
 

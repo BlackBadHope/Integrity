@@ -221,9 +221,24 @@ release / handoff / expiry -> earliest compatible waiter is promoted
 writer: assert_fence(claim, fence) before every write
 ```
 
-Every transition goes into a hash-chained log that all agents can read.
-Agent identities are asserted by the caller and not authenticated by this
-module.
+Every transition goes into a hash-chained log that all agents can read. In
+`declared` mode (the local profile, and the default) agent ids are asserted by
+the caller, and each event says `"requested_by": {"mode": "declared"}`.
+
+`claims_core` serves one registry to sessions on stdio, locally or through an
+`integrity-remote` forced command, so agents on several machines share one
+authoritative claim database. In `strict` mode `work_claim_identity.SignedClaimGate`
+runs every operation:
+
+```text
+signed request (core_id, agent_id, key_id, operation, arguments, nonce, window)
+  -> core binding, enrolled key, signature, key status, agent id, device, window
+  -> one transaction: store (key_id, nonce) once, recheck key status, run the
+     operation under the enrolled agent id, log the request digest and device
+```
+
+A refused operation still uses up its nonce. The design note is
+[docs/architecture/work-claims-identity.md](docs/architecture/work-claims-identity.md).
 
 ## What the public suite verifies
 
@@ -236,8 +251,10 @@ module.
 | Exact Seed queries use indexes | Verified | `tests/test_seed_catalog_query.py` |
 | Snapshot/context delivery, ranked recall integrity, separate legacy/native lifecycle | Synthetic contract coverage | `tests/test_memory_delivery_contract.py` |
 | Overlapping claims: one writer, queue, fencing, handoff | Verified locally | `tests/test_work_claims.py` |
-| Coordination across machines, network backend, consensus | **Not provided** | Local SQLite scope only |
-| Authenticated agent identity for claims | **Not provided** | Caller-asserted |
+| Signed agent identity for claims: forgery, replay, revocation, device binding | Verified in CI | `tests/test_claims_core.py` |
+| One claims core for clients on other machines over a forced command | Verified in CI, loopback stand | `tests/test_networked_claims_ssh.py` |
+| Replication, failover or consensus between cores | **Not provided** | One authoritative core |
+| Verified identity in the local profile or a declared core | **Not provided** | Caller-asserted, labelled `declared` |
 | Production deployment and operational acceptance | **Not claimed** | See `guardian capabilities` |
 
 Release gates additionally check component versions, internal dependency
@@ -256,9 +273,12 @@ it is not a generic 6.1 migration. Updating a package does not rewrite old
 signed evidence, restore an archived session or activate a deployment. The
 current SDK's byte-origin binding targets the canonical 6.1.0 source separately.
 
-`guardian capabilities` keeps `multi_agent_coordination_proven` and
-`blast_radius_coverage_proven` false: local primitives are not a proven
-distributed system.
+`guardian capabilities` sets a separate flag, `networked_claims_core_ci_proven`,
+with the scope of the CI stand (one claims core, signed requests, forced
+commands on loopback). The general `multi_agent_coordination_proven` stays
+false, and so do `work_claim_consensus_proven` and
+`blast_radius_coverage_proven`: a loopback stand is not two hosts, and one core
+is not a replicated system.
 
 ## Protocol notes
 

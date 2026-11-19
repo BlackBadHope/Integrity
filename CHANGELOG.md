@@ -7,6 +7,45 @@ All notable public changes are recorded here.
 Changes on `main` after 7.0.1. Nothing here is tagged, and the distribution
 versions are unchanged unless an entry says otherwise.
 
+### Work claims across machines, signed by the agent's own key
+
+- New `guardian-claims-core`: one claim database served one session per
+  process on stdio, so agents on several machines share it through an
+  `integrity-remote` forced command (`server-json` feeds `integrity-remote
+  core init`). All sessions write the same SQLite database under
+  `BEGIN IMMEDIATE`: claims stay atomic, leases expire on the core's clock and
+  fencing tokens grow across every client.
+- New `work_claim_identity`: each agent holds an Ed25519 key that the core
+  operator enrolls (`enroll`, `keys`, `revoke`), optionally bound to
+  `integrity-remote` device ids. Every request is signed and bound to one
+  core, a nonce and a validity window of at most 300 s. The core refuses
+  forged, replayed, expired, revoked, wrong-agent and wrong-device requests;
+  a replay is refused in any session for as long as the database exists.
+  A declared core refuses an unsigned request for an agent id that has an
+  enrolled key (`enrolled-agent-must-sign`).
+- New `guardian-claims` client (`keygen`, `claim`, `poll`, `renew`, `record`,
+  `release`, `handoff`, `cancel`, `status`, `events`) and
+  `claims_client.ClaimsClient`.
+- `WorkClaimRegistry` takes `identity_mode`. `strict` is opt-in, stored in the
+  database and cannot be reopened as `declared`; in strict mode every
+  operation needs a verified request. Every claim event now records
+  `requested_by`: `{"mode": "declared"}` for names the caller asserted, or the
+  agent, key id, request digest and device of the verified request.
+  `record_result` is a fenced write for a holder's result. The local memory
+  profile stays declared.
+- `guardian capabilities`: new `networked_claims_core_ci_proven` (true) with
+  `networked_claims_core_ci_scope`
+  `ci-single-authoritative-claims-core-signed-requests-forced-command-loopback`;
+  new `work_claim_identity`, `work_claim_backend` and
+  `work_claim_consensus_proven` (false). `multi_agent_coordination_proven`
+  stays false.
+- Tests: `tests/test_claims_core.py` (Ubuntu and Windows, real `serve`
+  processes) and `tests/test_networked_claims_ssh.py` (Ubuntu, a loopback
+  `sshd` with forced commands, required in the `Cross-machine SSH`
+  workflow). Two physical hosts and real agent clients were not run.
+- Docs: [work claims across machines](docs/WORK_CLAIMS_CORE.md) and a
+  [design note](docs/architecture/work-claims-identity.md).
+
 ### Bus registry tests wait for a late registration thread before cleanup
 
 - `autoreg.ensure_bounded()` returns after its 0.3 s hook timeout and leaves

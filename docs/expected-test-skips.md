@@ -33,7 +33,7 @@ on Windows. The cause has not been looked into.
 | 1 | killswitch: the dashboard case that reads the Windows TCP owner table. |
 
 On a machine without the OpenSSH client, `tests/test_two_machine_ssh.py` adds 6
-skips, and without PowerShell `test_scope_wrappers.py` adds 2. Linux CI fails on
+skips and `tests/test_networked_claims_ssh.py` adds 8, and without PowerShell `test_scope_wrappers.py` adds 2. Linux CI fails on
 any client-memory skip outside the reviewed list
 (`.github/scripts/native_skip_guard.py`). Skips in other suites are not guarded.
 
@@ -51,6 +51,9 @@ The main reasons, from the CI reports:
   `sh` wrappers (2) and single POSIX file-mode cases.
 - Privilege probes: without Developer Mode or elevation, symlink tests skip on
   `WinError 1314`, and seat tests skip on `WinError 5`.
+- Added after the measured commit, not in the counts above: the 8 cases of
+  `tests/test_networked_claims_ssh.py`, whose forced-command core side is
+  Linux-only.
 - Added after the measured commit, not in the counts above: the kill switch's
   Linux ancestry cases. 3 read the real `/proc` and always skip on Windows;
   15 build an invented `/proc` with symbolic links and skip only where links

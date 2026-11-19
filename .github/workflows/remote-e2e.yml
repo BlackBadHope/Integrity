@@ -39,7 +39,21 @@ jobs:
           INTEGRITY_CORE_INSTANCE_REQUIRED: "1"
           PYTHONDONTWRITEBYTECODE: "1"
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
-        run: python -B -m pytest -q -p no:cacheprovider -rs tests/test_two_machine_ssh.py tests/test_core_instance.py
+        run: python -B -m pytest -q -p no:cacheprovider -rs tests/test_two_machine_ssh.py tests/test_core_instance.py tests/test_networked_claims_ssh.py tests/test_claims_core.py
+      - name: Claims core with the installed commands (strict, signed, local session)
+        run: |
+          core="$RUNNER_TEMP/claims-core"
+          guardian-claims-core init --home "$core" --identity strict
+          guardian-claims keygen --out "$RUNNER_TEMP/agent.key"
+          guardian-claims-core enroll --home "$core" --agent-id ci-agent --public-key "$RUNNER_TEMP/agent.key.pub"
+          guardian-claims claim --core-home "$core" --agent-id ci-agent --key "$RUNNER_TEMP/agent.key" --resource task:ci | tee "$RUNNER_TEMP/claim.json"
+          grep -q '"identity": "verified"' "$RUNNER_TEMP/claim.json"
+          if guardian-claims claim --core-home "$core" --agent-id ci-agent --resource task:ci-unsigned; then
+            echo "a strict core accepted an unsigned claim" >&2
+            exit 1
+          fi
+          guardian-claims-core verify --home "$core"
+          guardian-claims-core server-json --home "$core"
       - name: integrity-remote unit tests on Linux
         env:
           PYTHONDONTWRITEBYTECODE: "1"

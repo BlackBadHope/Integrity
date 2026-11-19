@@ -2,7 +2,7 @@
 
 [Documentation](README.md) · [Project README](../README.md)
 
-Twelve words this project uses everywhere, in plain terms. Each entry links to
+Thirteen words this project uses everywhere, in plain terms. Each entry links to
 the page that defines it exactly.
 
 | Word | In plain terms | Where it is defined |
@@ -14,6 +14,7 @@ the page that defines it exactly.
 | **Close receipt** | The signed record that a turn ended, listing the events it wrote, or saying it wrote none. | [LOCAL_MEMORY.md](LOCAL_MEMORY.md) |
 | **Coverage gap** | A turn that was registered but has no close receipt, for example because the agent stopped early. It stays visible as debt; it is not guessed as "nothing happened". | [One turn](../README.md#one-turn) |
 | **Work claim** and **fence token** | A claim says "I am working on this task". Each new claim of the same task gets a higher number, the fence token, so a late writer holding an old claim can be told apart. | [LOCAL_MEMORY.md](LOCAL_MEMORY.md) |
+| **Claims core** and **signed claim** | One claim database that agents on several machines share. In strict mode every claim is signed by the agent's own enrolled key, so the core knows who claims, not only who says so; a name that nothing checked is marked `declared`. | [WORK_CLAIMS_CORE.md](WORK_CLAIMS_CORE.md) |
 | **Grant** | A signed permission that can be used once, for one stated change. It is the only thing that grants authority; a memory read or a plan never does. | [ARCHITECTURE.md](../ARCHITECTURE.md#authorization-lifecycle) |
 | **Custody** | Keeping a grant or a record so that it can be used exactly once and checked afterwards: reserved, consumed against independent observations, with a receipt. A second use is detected as a replay. | [ARCHITECTURE.md](../ARCHITECTURE.md#authorization-lifecycle) |
 | **Uroboros** | Procedural memory: a verified piece of work becomes a route that a later agent is offered at admission, as a hint to check, never as permission. | [UROBOROS.md](UROBOROS.md) |

@@ -33,6 +33,7 @@ and what was not.
 | [A core instance on one Linux account](CORE_INSTANCE.md) | Install stage 2: the core write path in one private folder, without root; clients reach it over the forced command; what it does not prove |
 | [The bus hub and HumanX on one Linux machine](BUS_HUB_AND_HUMANX.md) | Install stage 3, optional: the agent-bus hub and the HumanX server side, each installed, checked and removed with one command; what CI runs with real accounts; what it does not prove |
 | [Two-machine quickstart](CROSS_MACHINE_QUICKSTART.md) | The core on machine A, clients on machine B, over an OpenSSH forced command |
+| [Work claims across machines](WORK_CLAIMS_CORE.md) | One claims core for agents on several machines; signed agent identity, strict mode, enrollment and revocation; what CI runs and what it does not prove |
 | [Linux core scripts](../deploy/linux-core/README.md) | The server side of that transport, with the placeholders you fill |
 | [Deployment identity profile](DEPLOYMENT_PROFILE.md) | A pinned JSON file with your deployment's own identity values, for state created under non-public values |
 | [Team quickstart](QUICKSTART_TEAM.md) | One core for two to five people, each with their own model account |

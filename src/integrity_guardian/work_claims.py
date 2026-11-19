@@ -1,4 +1,4 @@
-"""Local blast-radius coordination for agents that share one machine.
+"""Blast-radius coordination for agents that share one claim database.
 
 Agents declare the resources an action may touch (its blast radius) before
 they write. One SQLite database serializes every decision with
@@ -18,9 +18,18 @@ handed off cannot keep writing after a successor acquired the resources.
 Every transition is appended to a hash-chained event log that all agents can
 read, which is how a waiting agent sees the holder's release receipt.
 
-Scope: one local SQLite database. Agent identities are caller-asserted and
-not authenticated here, and nothing in this module provides cross-machine
-consensus.
+Identity modes. A registry that agents open directly is in ``declared``
+mode: agent names are asserted by the caller, and every logged event says so
+with ``"requested_by": {"mode": "declared"}``. A registry in ``strict`` mode
+refuses every operation unless it runs inside a verified request context,
+which only ``work_claim_identity.SignedClaimGate`` sets after it has checked
+an agent's Ed25519 signature, nonce and validity window. The mode is stored in
+the database; ``strict`` is opt-in and cannot be switched back to
+``declared``.
+
+Scope: one SQLite database. ``claims_core`` serves it to clients on other
+machines over stdio, for example through an ``integrity-remote`` forced
+command; nothing in this module replicates it or provides consensus.
 """
 
 from __future__ import annotations
@@ -42,6 +51,10 @@ PROTOCOL = "integrity-guardian/work-claim/v1"
 EVENT_DOMAIN = "work-claim-event-v1"
 MAX_RESOURCES = 64
 MAX_TTL_SECONDS = 86_400
+MAX_RESULT_LENGTH = 4_096
+IDENTITY_DECLARED = "declared"
+IDENTITY_STRICT = "strict"
+IDENTITY_MODES = (IDENTITY_DECLARED, IDENTITY_STRICT)
 _AGENT = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:@/-]{0,255}")
 _KIND = re.compile(r"[a-z][a-z0-9-]{0,63}")
 
@@ -56,6 +69,10 @@ class StaleFenceError(WorkClaimError):
 
 class StaleFencingTokenError(StaleFenceError):
     """Shared-core name for a stale or expired fencing token."""
+
+
+class UnsignedClaimError(WorkClaimError):
+    """Raised when a strict registry is used without a verified request."""
 
 
 def open_claims(path: Path, *, backend: str = "local", core_factory=None):
@@ -206,7 +223,13 @@ def _ttl(ttl_seconds: int) -> int:
 class WorkClaimRegistry:
     """Serialized, fenced blast-radius claims on one local SQLite database."""
 
-    def __init__(self, path: Path, *, busy_timeout_ms: int = 5_000) -> None:
+    def __init__(
+        self,
+        path: Path,
+        *,
+        busy_timeout_ms: int = 5_000,
+        identity_mode: str | None = None,
+    ) -> None:
         if (
             isinstance(busy_timeout_ms, bool)
             or not isinstance(busy_timeout_ms, int)
@@ -241,6 +264,10 @@ class WorkClaimRegistry:
                 last_fence INTEGER NOT NULL
             );
             INSERT OR IGNORE INTO work_claim_fence(singleton, last_fence) VALUES (1, 0);
+            CREATE TABLE IF NOT EXISTS work_claim_meta (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            );
             CREATE TABLE IF NOT EXISTS work_claim_events (
                 event_seq INTEGER PRIMARY KEY AUTOINCREMENT,
                 event_digest TEXT NOT NULL UNIQUE,
@@ -249,6 +276,51 @@ class WorkClaimRegistry:
             );
             """
         )
+        self._requested_by: dict[str, Any] | None = None
+        self.identity_mode = self._settle_identity_mode(identity_mode)
+
+    def _settle_identity_mode(self, requested: str | None) -> str:
+        if requested is not None and requested not in IDENTITY_MODES:
+            raise WorkClaimError("identity_mode must be 'declared' or 'strict'")
+        with self._transaction():
+            row = self._connection.execute(
+                "SELECT value FROM work_claim_meta WHERE key = 'identity_mode'"
+            ).fetchone()
+            stored = None if row is None else row["value"]
+            if stored == IDENTITY_STRICT and requested == IDENTITY_DECLARED:
+                raise WorkClaimError("a strict claim registry cannot be reopened as declared")
+            mode = requested or stored or IDENTITY_DECLARED
+            if requested is not None and requested != stored:
+                self._connection.execute(
+                    "INSERT OR REPLACE INTO work_claim_meta(key, value) "
+                    "VALUES ('identity_mode', ?)",
+                    (mode,),
+                )
+            return mode
+
+    @contextmanager
+    def verified_request(self, requested_by: Mapping[str, Any]) -> Iterator[None]:
+        """Run operations on behalf of a request whose signature was checked.
+
+        Only ``SignedClaimGate`` calls this, after verification. The mapping is
+        written into every event that the operations append.
+        """
+
+        if self._requested_by is not None:
+            raise WorkClaimError("verified request contexts do not nest")
+        if not isinstance(requested_by, Mapping) or requested_by.get("mode") != "verified":
+            raise WorkClaimError("a verified request context must have mode 'verified'")
+        self._requested_by = dict(requested_by)
+        try:
+            yield
+        finally:
+            self._requested_by = None
+
+    def _require_identity(self) -> None:
+        if self.identity_mode == IDENTITY_STRICT and self._requested_by is None:
+            raise UnsignedClaimError(
+                "this claim registry is strict: operations need a signed, verified request"
+            )
 
     def close(self) -> None:
         self._connection.close()
@@ -277,6 +349,7 @@ class WorkClaimRegistry:
         part of the hash chain; it never changes the decision.
         """
 
+        self._require_identity()
         agent = _agent(agent_id)
         ttl = _ttl(ttl_seconds)
         extra = None if reference is None else {"reference": _reference(reference)}
@@ -333,6 +406,7 @@ class WorkClaimRegistry:
     def poll(self, claim_id: str, *, now: datetime | None = None) -> ClaimDecision:
         """Report a claim's state; keeps a waiting claim alive for another TTL."""
 
+        self._require_identity()
         current = _time(now)
         with self._transaction():
             self._expire(current)
@@ -355,6 +429,7 @@ class WorkClaimRegistry:
     ) -> ClaimDecision:
         """Raise unless the caller still holds the claim under this exact fence."""
 
+        self._require_identity()
         current = _time(now)
         row = self._row(claim_id)
         if (
@@ -376,6 +451,7 @@ class WorkClaimRegistry:
         ttl_seconds: int | None = None,
         now: datetime | None = None,
     ) -> ClaimDecision:
+        self._require_identity()
         current = _time(now)
         with self._transaction():
             row = self._held(claim_id, agent_id, fence_token, current)
@@ -400,6 +476,7 @@ class WorkClaimRegistry:
     ) -> dict[str, Any]:
         """Close a held claim and publish its outcome to every agent."""
 
+        self._require_identity()
         if not isinstance(outcome, str) or not outcome.strip():
             raise WorkClaimError("release outcome is required")
         current = _time(now)
@@ -418,6 +495,7 @@ class WorkClaimRegistry:
     def cancel(self, claim_id: str, *, agent_id: str, now: datetime | None = None) -> None:
         """Withdraw a waiting claim."""
 
+        self._require_identity()
         current = _time(now)
         with self._transaction():
             row = self._row(claim_id)
@@ -439,6 +517,7 @@ class WorkClaimRegistry:
     ) -> ClaimDecision:
         """Transfer a held claim to a successor under a new fencing token."""
 
+        self._require_identity()
         successor = _agent(successor_id)
         current = _time(now)
         with self._transaction():
@@ -471,6 +550,47 @@ class WorkClaimRegistry:
                 extra={"from_claim_id": claim_id, "from_agent_id": agent_id, "note": note},
             )
             return decision
+
+    def record_result(
+        self,
+        claim_id: str,
+        *,
+        agent_id: str,
+        fence_token: int,
+        result: str,
+        now: datetime | None = None,
+    ) -> dict[str, Any]:
+        """Write a result under a held fence; a stale or expired holder is refused.
+
+        The fence check and the write run in one transaction, so a holder that
+        lost the claim to expiry or handoff cannot record anything afterwards.
+        """
+
+        self._require_identity()
+        if not isinstance(result, str) or not result.strip() or len(result) > MAX_RESULT_LENGTH:
+            raise WorkClaimError(f"result must be 1..{MAX_RESULT_LENGTH} characters")
+        current = _time(now)
+        with self._transaction():
+            self._held(claim_id, agent_id, fence_token, current)
+            return self._append_event(
+                "claim-result-recorded",
+                self._decision(self._row(claim_id)),
+                current,
+                extra={"result": result},
+            )
+
+    def append_record(
+        self, kind: str, fields: Mapping[str, Any], *, now: datetime | None = None
+    ) -> dict[str, Any]:
+        """Append a record that is not a claim transition (key enrollment, refusal)."""
+
+        if _KIND.fullmatch(kind) is None:
+            raise WorkClaimError("record kind must be a lowercase token")
+        current = _time(now)
+        with self._transaction():
+            return self._append_raw(
+                {"protocol": PROTOCOL, "kind": kind, "at": _render(current), **dict(fields)}
+            )
 
     def events(self, *, after: int = 0, limit: int = 200) -> list[dict[str, Any]]:
         """Read the shared transition log after one event sequence number."""
@@ -514,6 +634,10 @@ class WorkClaimRegistry:
 
     @contextmanager
     def _transaction(self) -> Iterator[None]:
+        if self._connection.in_transaction:
+            # The signed gate already holds the write transaction.
+            yield
+            return
         self._connection.execute("BEGIN IMMEDIATE")
         try:
             yield
@@ -637,10 +761,6 @@ class WorkClaimRegistry:
         *,
         extra: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        tip = self._connection.execute(
-            "SELECT event_digest FROM work_claim_events ORDER BY event_seq DESC LIMIT 1"
-        ).fetchone()
-        previous = None if tip is None else tip["event_digest"]
         event: dict[str, Any] = {
             "protocol": PROTOCOL,
             "kind": kind,
@@ -651,9 +771,17 @@ class WorkClaimRegistry:
             "resources": list(decision.resources),
             "fence_token": decision.fence_token,
             "blocked_by": list(decision.blocked_by),
-            "previous_digest": previous,
+            "requested_by": self._requested_by or {"mode": IDENTITY_DECLARED},
             **(extra or {}),
         }
+        return self._append_raw(event)
+
+    def _append_raw(self, event: dict[str, Any]) -> dict[str, Any]:
+        tip = self._connection.execute(
+            "SELECT event_digest FROM work_claim_events ORDER BY event_seq DESC LIMIT 1"
+        ).fetchone()
+        previous = None if tip is None else tip["event_digest"]
+        event = {**event, "previous_digest": previous}
         digest = digest_object(event, domain=EVENT_DOMAIN)
         self._connection.execute(
             """
