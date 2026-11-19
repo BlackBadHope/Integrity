@@ -46,7 +46,8 @@ It is **not** the hardened layout of
   not record which SSH device wrote an event.
 - **The server of the core, not of the local profile.** The work-claim tools
   of stage 1 (`integrity_work_claim` and the others) are not part of this
-  server.
+  server. Work claims across machines use a separate
+  [claims core](WORK_CLAIMS_CORE.md) behind its own forced command.
 - **Written for `integrity-action-log` 2.11.0.** With another version
   installed, `init` and `serve` refuse.
 - **No production authority.** Memory is evidence for an agent, never

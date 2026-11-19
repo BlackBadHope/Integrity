@@ -207,6 +207,7 @@ Marks used on this page and in [what is verified](docs/STATUS.md):
 | **Authority separation** | Signed, one-use grants; the owner's approval is a separate step; a memory read is never a permission | CI |
 | **Mind graph** | A bounded capsule for each admitted turn, at most 8 KB, with plan items when they fit | daily use, CI |
 | **Procedural memory** | [Uroboros](docs/UROBOROS.md): verified work becomes a reusable route, offered at admission as a hint, never as authority | CI; live with Claude Code |
+| **Claims across machines** | One [claims core](docs/WORK_CLAIMS_CORE.md) for agents on several machines, over the forced command; each request signed by the agent's enrolled key; strict mode refuses unsigned, forged, replayed and revoked requests | CI on a loopback stand; two physical hosts and real agent clients not verified; one core, no replication |
 | **Coordination** | Fenced work claims on one machine; an [agent bus](components/integrity-llm-bus/README.md) with a hub for a shared bus ([install stage 3](docs/BUS_HUB_AND_HUMANX.md)) | daily use, CI; the hub with real accounts on one Linux machine in CI; multi-host use, systemd and the SSH gateway not verified; no hub on Windows, by design |
 | **Reach** | The core on another machine over an [OpenSSH forced command](docs/CROSS_MACHINE_QUICKSTART.md); [signed journals](docs/CLOUD_AGENTS.md) for cloud agents | daily use, CI; no live Codex Cloud acceptance |
 | **Guards and kill switch** | [Hook-side guards](components/integrity-guards/README.md) for remote changes and forgotten rules; a [per-vendor and global switch](components/integrity-killswitch/README.md) for agent access | CI; both are alpha |
@@ -465,8 +466,10 @@ run `git checkout v7.0.1` after cloning.
   get no memory.
 - Cloud agents do not share memory live. Their signed journals are imported as
   reported evidence.
-- Coordination across machines, authenticated agent identity for work claims
-  and production operation are not claimed.
+- Work claims across machines go through one claims core and are checked in
+  CI on one Linux host only. Replication or consensus between cores, verified
+  identity outside a strict claims core, and production operation are not
+  claimed.
 
 [What is verified](docs/STATUS.md) lists each use case, how far it has been
 checked, and the measured test counts per platform.

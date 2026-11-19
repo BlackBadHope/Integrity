@@ -379,7 +379,20 @@ def integrity_capabilities(version: str) -> dict[str, Any]:
             "winops_rc7_cold_start_retest_completed": False,
             "winops_rc8_open_client_preflight_completed": True,
             "full_external_topology_proven": False,
+            # The general flag stays false: consumers read it without a scope, and
+            # nothing has run on two physical hosts or with real agent clients.
             "multi_agent_coordination_proven": False,
+            # Proven by public CI only: two agents with different Ed25519 keys reach
+            # one strict claims core through OpenSSH forced commands on a loopback
+            # stand (tests/test_networked_claims_ssh.py). Not two physical hosts, not
+            # real agent clients, not replication or consensus between cores.
+            "networked_claims_core_ci_proven": True,
+            "networked_claims_core_ci_scope": (
+                "ci-single-authoritative-claims-core-signed-requests-forced-command-loopback"
+            ),
+            "work_claim_identity": "ed25519-signed-requests-strict-opt-in-declared-default",
+            "work_claim_backend": "single-sqlite-core-over-stdio-or-integrity-remote",
+            "work_claim_consensus_proven": False,
             "successor_handoff_bindings_proven": True,
             "atomic_agent_lease_transfer_proven": True,
             "atomic_agent_lease_transfer_scope": "local-sqlite-targeted",

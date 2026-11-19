@@ -42,10 +42,12 @@ These ship today. What is missing is evidence.
 ## Next milestones
 
 1. **Cross-machine coordination.** Memory access from other machines runs
-   over an OpenSSH forced command (`integrity-remote`). Still open:
-   authenticated agent identity for work claims and a networked claim backend.
-   Claims, handoff fencing and one-use intent custody are verified on one
-   machine only.
+   over an OpenSSH forced command (`integrity-remote`). Work claims now go to
+   one [claims core](docs/WORK_CLAIMS_CORE.md) over the same transport, with
+   every request signed by the agent's enrolled key (CI on a loopback stand).
+   Still open: a run between two physical hosts, a real agent client on the
+   claims core, and network custody for one-use ChangeIntents and module-agent
+   leases, which are verified on one machine only.
 2. **Event-driven runbooks.** An infrastructure event starts an agent turn
    that follows a verified route. Known routes already reach every admitted
    turn ([Uroboros](docs/UROBOROS.md)); the triggers are not in this
@@ -59,10 +61,19 @@ These ship today. What is missing is evidence.
 
 ## Not claimed
 
-- General coordination across machines, consensus, or a network claim backend.
-- Authenticated agent identity for work claims: identities are asserted by the
-  caller.
+- Replication, failover or consensus between claims cores: there is one
+  authoritative core, and when it is down nobody can claim.
+- Verified identity outside a strict claims core: the local memory profile and
+  a declared core accept names asserted by the caller, and label them
+  `declared`.
+- Coordination between two physical hosts or with real agent clients: CI
+  reproduces two machines on one Linux host with an `sshd` on loopback.
+- Blast-radius coverage: a claim covers the resources the agent names, not the
+  writes it actually makes.
 - Production deployment or operational acceptance of any component.
 
-`guardian capabilities` keeps `multi_agent_coordination_proven` and
-`blast_radius_coverage_proven` false for the same reason.
+`guardian capabilities` sets only `networked_claims_core_ci_proven`, with the
+scope `ci-single-authoritative-claims-core-signed-requests-forced-command-loopback`.
+It keeps the general `multi_agent_coordination_proven` false, as well as
+`work_claim_consensus_proven`, `blast_radius_coverage_proven` and
+`agent_handoff_distributed_consensus_proven`.
