@@ -48,10 +48,12 @@ These ship today. What is missing is evidence.
    Still open: a run between two physical hosts, a real agent client on the
    claims core, and network custody for one-use ChangeIntents and module-agent
    leases, which are verified on one machine only.
-2. **Event-driven runbooks.** An infrastructure event starts an agent turn
-   that follows a verified route. Known routes already reach every admitted
-   turn ([Uroboros](docs/UROBOROS.md)); the triggers are not in this
-   repository.
+2. **Event-driven runbooks.** *Alpha in source, CI on Linux and Windows.*
+   Triggers and the dispatcher (`integrity-guards runbooks`, off by default)
+   start a turn that follows a compiled route; write routes become proposals
+   ([Uroboros](docs/UROBOROS.md#event-triggered-turns)). Still open: a run
+   with a real model and a real log source, and the dispatcher as an
+   installed service.
 3. **Append-only ingress for cloud agents.** Designed in
    [cloud agents](docs/CLOUD_AGENTS.md), not deployed.
 4. **Independent observer tooling.** Simpler verification and replay reports.

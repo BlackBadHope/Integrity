@@ -1,0 +1,63 @@
+{
+  "format": "integrity-runbooks/v1",
+  "enabled": false,
+  "compiled_routes": "examples/runbook-triggers/compiled-routes",
+  "limits": {"max_concurrent": 1, "max_turns_per_hour": 6, "poll_s": 2},
+  "killswitch": {"required": true},
+  "listen": {
+    "syslog_udp": "127.0.0.1:5514",
+    "webhook_http": "127.0.0.1:8891",
+    "webhook_token_env": "INTEGRITY_RUNBOOKS_WEBHOOK_TOKEN"
+  },
+  "notify": null,
+  "event_sinks": {"local_memory_home": null, "command": null, "kinds": ["turn", "proposal", "rejected"]},
+  "adapters": {
+    "claude-p": {"cwd": "/path/to/a/project/with/integrity/hooks"}
+  },
+  "triggers": [
+    {
+      "trigger_id": "example.disk-full-log",
+      "source": {"kind": "file", "path": "/var/log/example-app.log"},
+      "match": "filesystem (?P<mount>/[a-z0-9/_-]{0,60}) is (?P<percent>\\d{2,3})% full",
+      "route_id": "example.disk-usage-read",
+      "adapter": "route",
+      "dedup_key": "{{mount}}",
+      "suppress_s": 1800,
+      "max_per_hour": 2
+    },
+    {
+      "trigger_id": "example.disk-full-syslog",
+      "source": {"kind": "syslog"},
+      "match": "filesystem (?P<mount>/[a-z0-9/_-]{0,60}) is (?P<percent>\\d{2,3})% full",
+      "route_id": "example.disk-usage-read",
+      "adapter": "claude-p",
+      "terms": ["disk", "filesystem", "full"],
+      "suppress_s": 1800,
+      "max_per_hour": 1
+    },
+    {
+      "trigger_id": "example.unit-failed-journald",
+      "source": {"kind": "journald", "unit": "example-app.service"},
+      "match": "(?P<unit>[a-z][a-z0-9-]{1,40}\\.service): Failed with result",
+      "route_id": "example.service-restart",
+      "adapter": "route",
+      "suppress_s": 3600,
+      "max_per_hour": 1
+    },
+    {
+      "trigger_id": "example.monitor-webhook",
+      "source": {"kind": "webhook"},
+      "match": "^disk (?P<mount>/[a-z0-9/_-]{0,60})$",
+      "route_id": "example.disk-usage-read",
+      "adapter": "route"
+    },
+    {
+      "trigger_id": "example.hourly-root-check",
+      "source": {"kind": "timer", "every_s": 3600},
+      "route_id": "example.disk-usage-read",
+      "params": {"mount": "/"},
+      "adapter": "route",
+      "suppress_s": 600
+    }
+  ]
+}

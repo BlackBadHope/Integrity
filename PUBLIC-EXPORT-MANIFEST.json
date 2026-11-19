@@ -1,5 +1,5 @@
 {
-  "file_count": 1403,
+  "file_count": 1410,
   "files": [
     {
       "bytes": 3435,
@@ -2459,11 +2459,11 @@
       "sha256": "3fc7c9d9fd0e8d5e6c52bc4d0f00f60513e6a1017934d0e7527717fc4e52e3f3"
     },
     {
-      "bytes": 3360,
+      "bytes": 3676,
       "mode": "0o644",
       "path": "components/integrity-guards/src/integrity_guards/cli.py",
       "sanitization_edits": 0,
-      "sha256": "e7c1f875f02f0f13905d2daf177bc1ee246ba737afad09dd0963e35f46602e0b"
+      "sha256": "b797fbe063de46d9ac6cdbf9d1c323bc988ef7ff240ef4ad0e25853dbc5c653c"
     },
     {
       "bytes": 1783,
@@ -2508,6 +2508,20 @@
       "sha256": "b160364e12d107705173405a8bb4fb7822d28bd7a782904facfc0b2e30d18f12"
     },
     {
+      "bytes": 58202,
+      "mode": "0o644",
+      "path": "components/integrity-guards/src/integrity_guards/runbooks.py",
+      "sanitization_edits": 0,
+      "sha256": "d1686fbaadefeb0be991a59aa0e46611222dba5e7c659dd4d2cab7d8cac7c200"
+    },
+    {
+      "bytes": 20318,
+      "mode": "0o644",
+      "path": "components/integrity-guards/src/integrity_guards/runbooks_cli.py",
+      "sanitization_edits": 0,
+      "sha256": "748654932bae7db35c21c4f120b31642440357a43d9aa375b1994d7a55c13784"
+    },
+    {
       "bytes": 13285,
       "mode": "0o644",
       "path": "components/integrity-guards/src/integrity_guards/uroboros_exec.py",
@@ -2548,6 +2562,13 @@
       "path": "components/integrity-guards/tests/test_rule_guard.py",
       "sanitization_edits": 0,
       "sha256": "fc60e88be413d3567378afa1396b4ab9e1d44d9679dfc8b16e577a47923b9207"
+    },
+    {
+      "bytes": 32860,
+      "mode": "0o644",
+      "path": "components/integrity-guards/tests/test_runbooks.py",
+      "sanitization_edits": 0,
+      "sha256": "8911dadd23c64c978c9cb71397e20756c3fa7751932cbed6166ef95505f74468"
     },
     {
       "bytes": 7661,
@@ -6246,6 +6267,34 @@
       "sha256": "aaa52a169dcd238d06553288565a255d5de9964844924c6eabf5ca3d23da0728"
     },
     {
+      "bytes": 3311,
+      "mode": "0o644",
+      "path": "examples/runbook-triggers/README.md",
+      "sanitization_edits": 0,
+      "sha256": "7e33c289f918346490541d5e6f96d9b83d10ad8a4c95d29cec1783ee9d01d204"
+    },
+    {
+      "bytes": 561,
+      "mode": "0o644",
+      "path": "examples/runbook-triggers/compiled-routes/example.disk-usage-read.json",
+      "sanitization_edits": 0,
+      "sha256": "6e481b8f26f30facb7d91393ff5bc204a09001f0d3d3a97803e2b827a8348628"
+    },
+    {
+      "bytes": 570,
+      "mode": "0o644",
+      "path": "examples/runbook-triggers/compiled-routes/example.service-restart.json",
+      "sanitization_edits": 0,
+      "sha256": "00c377fdcc59156bc7a1eec985b8fc4665d3864dcc2ca34a4f489a4810d05d09"
+    },
+    {
+      "bytes": 2146,
+      "mode": "0o644",
+      "path": "examples/runbook-triggers/runbooks.json",
+      "sanitization_edits": 0,
+      "sha256": "ae2d2791f7808f8d19e7f2bc24b2cb5d3488d78d04469ff83a170b0deff4f2b7"
+    },
+    {
       "bytes": 3236,
       "mode": "0o644",
       "path": "examples/scripted-scenes/README.md",
@@ -9896,11 +9945,11 @@
       "sha256": "c7febfedca7cf8e16f62f00b6af65808b633dc1ba26351c7b1ada8de2946e222"
     },
     {
-      "bytes": 11538,
+      "bytes": 12354,
       "mode": "0o644",
       "path": ".github/workflows/public-surface.yml",
       "sanitization_edits": 0,
-      "sha256": "dcbebbba792ee5366df71086be7ab7c3ec8865aa7769735b65e5b9e8fc517051"
+      "sha256": "d210a48f8dc1f9ca086023f4f07eb8c4ecfebbf2074ea88ffb4b5e223b594eff"
     },
     {
       "bytes": 4270,
@@ -9938,11 +9987,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 72833,
+      "bytes": 75675,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "0fcd152916c8d13d7c80dc7184aca040007cee74b108b5042e1eb024e8ed90d3"
+      "sha256": "53b3f383eef2efd02bcc081548b0fc7dd648fa2dff2cf7b7ee7cda56dd0cdfe2"
     },
     {
       "bytes": 775,
@@ -9994,11 +10043,11 @@
       "sha256": "7f6b3e276b684153a94ab5c791da564c9deaf8614a39fe21996c167623444e07"
     },
     {
-      "bytes": 4315,
+      "bytes": 4474,
       "mode": "0o644",
       "path": "ROADMAP.md",
       "sanitization_edits": 0,
-      "sha256": "ed35318be8c887066f94bf094172ed01062f2d5cc8941770ad28866fc8c9cd85"
+      "sha256": "6e323962c0deddb1c0937faee894d42a66f8dea724c4b1c0478161698defa010"
     },
     {
       "bytes": 1104,
@@ -10022,11 +10071,11 @@
       "sha256": "56d19068142031cebcb024a2f356b4a1734c7894a2039078584ca93bede2017f"
     },
     {
-      "bytes": 7119,
+      "bytes": 12966,
       "mode": "0o644",
       "path": "components/integrity-guards/README.md",
       "sanitization_edits": 0,
-      "sha256": "e10dbde73b894c766523a0ba45cec02521cd0324a074879ba43453c5b01574aa"
+      "sha256": "50d3e186d3224a5f224811badde417462f7e74f5be5f4c7711f340e79c84839d"
     },
     {
       "bytes": 1881,
@@ -10337,18 +10386,18 @@
       "sha256": "569811a99c62f2747de44006a8b6ba3222e2ddc903c4814e9976f81786264829"
     },
     {
-      "bytes": 14065,
+      "bytes": 15253,
       "mode": "0o644",
       "path": "docs/STATUS.md",
       "sanitization_edits": 0,
-      "sha256": "2dd8d58f60511e5c67557fa781a612ca8b0b41f9abffce01b3714bf283e5369b"
+      "sha256": "501810401adc827598892002942b44d5cc1a47a0c5fd2de7e193fb98aee39d75"
     },
     {
-      "bytes": 8620,
+      "bytes": 12511,
       "mode": "0o644",
       "path": "docs/UROBOROS.md",
       "sanitization_edits": 0,
-      "sha256": "ef80410cf19103df47f8904c6aa9860174f3f39ca19a0f8319325d0588ac575d"
+      "sha256": "cc6650a1e1bfc62f15b960b6e842a833fa226350bd3787b6c9d2799bfb33dc03"
     },
     {
       "bytes": 8873,
@@ -10596,7 +10645,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:38143b678d5e3d279d67fa5f1015c5a075691263f68366e2503008c1c31c2b1e",
+  "projection_digest": "sha256:38eba624a3c0ac887265f1a57256f245e925c6c7947932757792ba9ae6aaf37f",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

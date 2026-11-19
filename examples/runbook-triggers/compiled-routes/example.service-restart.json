@@ -1,0 +1,15 @@
+{
+  "format": "uroboros-compiled-route/v1",
+  "route_id": "example.service-restart",
+  "version": 1,
+  "safety": "write",
+  "summary": "Invented example of a write route: restart the user unit {{unit}} after saving its status",
+  "params": {"unit": "[a-z][a-z0-9-]{1,40}\\.service"},
+  "backup": [
+    {"name": "status-before", "argv": ["systemctl", "--user", "status", "--no-pager", "{{unit}}"], "timeout_s": 10}
+  ],
+  "steps": [
+    {"name": "restart", "argv": ["systemctl", "--user", "restart", "{{unit}}"], "writes": true, "timeout_s": 30}
+  ],
+  "timeout_s": 60
+}
