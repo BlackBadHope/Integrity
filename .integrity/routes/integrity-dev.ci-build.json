@@ -1,0 +1,42 @@
+{
+  "format": "uroboros-compiled-route/v1",
+  "route_id": "integrity-dev.ci-build",
+  "version": 1,
+  "safety": "read",
+  "summary": "Built, verified and co-installed every public distribution in {{work}} (outside the tree), checked the kill switch alone and the installed profile ({{guardian_version}}); the tree is still clean",
+  "params": {
+    "work": "\\.\\./(?!.*\\.\\.)[A-Za-z0-9][A-Za-z0-9._-]{0,63}"
+  },
+  "preconditions": [
+    {"name": "at-repo-root", "argv": ["git", "rev-parse", "--show-prefix"], "expect": "\\A\\s*\\Z", "timeout_s": 10},
+    {"name": "clean-tree", "argv": ["git", "status", "--porcelain", "--untracked-files=all"], "expect": "\\A\\Z",
+     "timeout_s": 30},
+    {"name": "no-pythonpath", "argv": ["python", "-B", ".github/scripts/route_tools.py", "unset", "PYTHONPATH"],
+     "expect": "\\Aunset", "timeout_s": 10},
+    {"name": "work-is-new", "argv": ["python", "-B", ".github/scripts/route_tools.py", "absent", "{{work}}"],
+     "expect": "\\Aabsent", "timeout_s": 10}
+  ],
+  "steps": [
+    {"name": "build", "argv": ["python", "-B", ".github/scripts/build_components.py", "--root", ".",
+     "--output", "{{work}}/dist"], "timeout_s": 300},
+    {"name": "verify-wheels", "argv": ["python", "-B", ".github/scripts/verify_wheels.py", "--root", ".",
+     "--wheels", "{{work}}/dist"], "timeout_s": 120},
+    {"name": "co-install", "argv": ["python", "-B", ".github/scripts/install_components.py",
+     "--wheels", "{{work}}/dist", "--venv", "{{work}}/venv"], "timeout_s": 300},
+    {"name": "kill-switch-alone", "argv": ["python", "-B", ".github/scripts/killswitch_standalone_check.py",
+     "--wheels", "{{work}}/dist", "--work", "{{work}}/killswitch-alone"], "timeout_s": 180},
+    {"name": "guardian-version", "argv": ["python", "-B", ".github/scripts/route_tools.py", "py-run",
+     "--venv", "{{work}}/venv", "--exe", "guardian", "--", "version", "--all"],
+     "extract": {"guardian_version": "\"product_version\": \"([^\"]{1,60})\""}, "timeout_s": 60},
+    {"name": "guardian-capabilities", "argv": ["python", "-B", ".github/scripts/route_tools.py", "py-run",
+     "--venv", "{{work}}/venv", "--exe", "guardian", "--", "capabilities"], "timeout_s": 60},
+    {"name": "guardian-lts-contracts", "argv": ["python", "-B", ".github/scripts/route_tools.py", "py-run",
+     "--venv", "{{work}}/venv", "--exe", "guardian", "--", "lts-contracts"], "timeout_s": 60},
+    {"name": "adapter-sdk-finds-guardian", "argv": ["python", "-B", ".github/scripts/route_tools.py", "py-run",
+     "--venv", "{{work}}/venv", "--", "-c",
+     "from integrity_adapter_sdk import require_guardian; print(require_guardian())"], "timeout_s": 60},
+    {"name": "still-clean", "argv": ["git", "status", "--porcelain", "--untracked-files=all"], "expect": "\\A\\Z",
+     "timeout_s": 30}
+  ],
+  "timeout_s": 900
+}

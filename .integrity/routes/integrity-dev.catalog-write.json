@@ -1,0 +1,30 @@
+{
+  "format": "uroboros-compiled-route/v1",
+  "route_id": "integrity-dev.catalog-write",
+  "version": 1,
+  "safety": "write",
+  "summary": "Rewrite the component catalog metadata after reviewed source changes, in this working tree only, then verify it; guardian tree {{guardian_tree}}; previous blobs kept as {{catalog_blob}}, {{origin_blob}}, {{variants_blob}}",
+  "params": {},
+  "preconditions": [
+    {"name": "at-repo-root", "argv": ["git", "rev-parse", "--show-prefix"], "expect": "\\A\\s*\\Z", "timeout_s": 10},
+    {"name": "catalog-files-tracked", "argv": ["git", "ls-files", "--error-unmatch", "COMPONENTS.json",
+     "components/integrity-adapter-sdk/src/integrity_adapter_sdk/guardian-origin.json",
+     "components/integrity-installed-runtime/VARIANTS.json"], "expect": "VARIANTS\\.json", "timeout_s": 10}
+  ],
+  "backup": [
+    {"name": "keep-catalog-blobs", "argv": ["git", "hash-object", "-w", "COMPONENTS.json",
+     "components/integrity-adapter-sdk/src/integrity_adapter_sdk/guardian-origin.json",
+     "components/integrity-installed-runtime/VARIANTS.json"],
+     "extract": {"catalog_blob": "\\A([0-9a-f]{40,64})",
+                 "origin_blob": "\\A[0-9a-f]+\\s+([0-9a-f]{40,64})",
+                 "variants_blob": "\\A[0-9a-f]+\\s+[0-9a-f]+\\s+([0-9a-f]{40,64})"}, "timeout_s": 15}
+  ],
+  "steps": [
+    {"name": "write-catalog", "argv": ["python", "-B", ".github/scripts/component_catalog.py", "--root", ".", "--write"],
+     "writes": true, "timeout_s": 120},
+    {"name": "verify-catalog", "argv": ["python", "-B", ".github/scripts/component_catalog.py", "--root", "."],
+     "expect": "\"passed\": true", "extract": {"guardian_tree": "\"guardian_tree\": \"(sha256:[0-9a-f]{64})\""},
+     "timeout_s": 120}
+  ],
+  "timeout_s": 300
+}

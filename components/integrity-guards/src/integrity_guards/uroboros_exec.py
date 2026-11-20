@@ -247,7 +247,9 @@ def load_route(reference: str, routes_dir: str | None = None) -> dict[str, Any]:
     """Load a compiled route by path or by id from ``INTEGRITY_COMPILED_ROUTES``."""
 
     path = Path(reference)
-    if not path.suffix:
+    # A route id may hold dots (example.disk-usage-read), so only a .json name or a name with
+    # a folder in it is a path; anything else is an id.
+    if path.suffix.lower() != ".json" and "/" not in reference and "\\" not in reference:
         base = routes_dir or os.environ.get(ENV_ROUTES_DIR, "")
         if not base:
             raise CompiledRouteError(f"route id given but {ENV_ROUTES_DIR} is not set")

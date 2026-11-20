@@ -1,0 +1,73 @@
+{
+  "format": "integrity-runbooks/v1",
+  "enabled": false,
+  "compiled_routes": ".integrity/routes",
+  "limits": {"max_concurrent": 1, "max_turns_per_hour": 6, "poll_s": 2},
+  "killswitch": {"required": true},
+  "listen": {},
+  "notify": null,
+  "event_sinks": {"local_memory_home": null, "command": null, "kinds": ["turn", "proposal", "rejected"]},
+  "adapters": {},
+  "triggers": [
+    {
+      "trigger_id": "integrity-dev.package-request",
+      "source": {"kind": "file", "path": "../integrity-dev-requests.log"},
+      "match": "^package base=(?P<base>[A-Za-z0-9][A-Za-z0-9._/-]{0,99}) out=(?P<out>\\.\\./[A-Za-z0-9][A-Za-z0-9._-]{0,79}\\.diff)$",
+      "route_id": "integrity-dev.package-diff",
+      "adapter": "route",
+      "dedup_key": "{{out}}",
+      "max_per_hour": 2
+    },
+    {
+      "trigger_id": "integrity-dev.ci-checks-request",
+      "source": {"kind": "file", "path": "../integrity-dev-requests.log"},
+      "match": "^ci checks$",
+      "route_id": "integrity-dev.ci-checks",
+      "adapter": "route",
+      "max_per_hour": 2
+    },
+    {
+      "trigger_id": "integrity-dev.ci-build-request",
+      "source": {"kind": "file", "path": "../integrity-dev-requests.log"},
+      "match": "^ci build work=(?P<work>\\.\\./[A-Za-z0-9][A-Za-z0-9._-]{0,63})$",
+      "route_id": "integrity-dev.ci-build",
+      "adapter": "route",
+      "dedup_key": "{{work}}",
+      "max_per_hour": 1
+    },
+    {
+      "trigger_id": "integrity-dev.ci-tests-request",
+      "source": {"kind": "file", "path": "../integrity-dev-requests.log"},
+      "match": "^ci tests work=(?P<work>\\.\\./[A-Za-z0-9][A-Za-z0-9._-]{0,63})$",
+      "route_id": "integrity-dev.ci-tests",
+      "adapter": "route",
+      "dedup_key": "{{work}}",
+      "max_per_hour": 1
+    },
+    {
+      "trigger_id": "integrity-dev.manifest-refresh-request",
+      "source": {"kind": "file", "path": "../integrity-dev-requests.log"},
+      "match": "^manifest refresh$",
+      "route_id": "integrity-dev.manifest-refresh",
+      "adapter": "route",
+      "max_per_hour": 2
+    },
+    {
+      "trigger_id": "integrity-dev.manifest-add-request",
+      "source": {"kind": "file", "path": "../integrity-dev-requests.log"},
+      "match": "^manifest (?P<kind>add|add-generated) (?P<path>(?!(?i:\\.git)(?:/|\\Z))[A-Za-z0-9._][A-Za-z0-9._/-]{0,199})$",
+      "route_id": "integrity-dev.manifest-add",
+      "adapter": "route",
+      "dedup_key": "{{path}}",
+      "max_per_hour": 4
+    },
+    {
+      "trigger_id": "integrity-dev.catalog-write-request",
+      "source": {"kind": "file", "path": "../integrity-dev-requests.log"},
+      "match": "^catalog write$",
+      "route_id": "integrity-dev.catalog-write",
+      "adapter": "route",
+      "max_per_hour": 2
+    }
+  ]
+}
