@@ -227,3 +227,34 @@ def test_route_share_from_transcripts(tmp_path):
                        capture_output=True, text=True, env=env_for(cfg), timeout=30)
     (row,) = [json.loads(x) for x in p.stdout.splitlines()]
     assert (row["prod_calls"], row["via_route"]) == (2, 1)
+
+
+def _extra_routes(tmp_path, *routes):
+    cfg = setup(tmp_path)
+    for r in routes:
+        (tmp_path / "routes" / f"{r['route_id']}.json").write_text(json.dumps(r), encoding="utf-8")
+    return cfg
+
+
+def _pre(cfg, cmd, session="s1"):
+    payload = {"tool_name": "Bash", "session_id": session, "hook_event_name": "PreToolUse", "cwd": "",
+               "tool_input": {"command": cmd}}
+    out = call(cfg, payload)
+    return out["hookSpecificOutput"]["additionalContext"] if out else None
+
+
+def test_copy_of_a_route_is_ambiguous_not_the_first_alphabetically(tmp_path):
+    cfg = _extra_routes(tmp_path, dict(ROUTE, route_id="a-copy-app-status"))  # sorts before node-a-app-status
+    text = _pre(cfg, STATUS)
+    assert text and text.startswith("UROBOROS: ambiguous") and "blocks nothing" in text
+    assert "a-copy-app-status or node-a-app-status" in text and "uroboros run" not in text
+    again = _pre(cfg, STATUS)  # the 2nd repeat: still no single advice and no demand to record a duplicate
+    assert again and again.startswith("UROBOROS: ambiguous") and "REQUIRED" not in again
+    assert not (tmp_path / "state" / "candidates.jsonl").exists()
+
+
+def test_equal_hits_go_to_the_route_that_names_the_call_precisely(tmp_path):
+    other = dict(ROUTE, route_id="a-app-unit-status",  # same object, other subcommand; sorts first
+                 steps=[{"name": "state", "argv": ["ssh", "operator@192.0.2.10", "systemctl status example-app"]}])
+    text = _pre(_extra_routes(tmp_path, other), STATUS)
+    assert text and "integrity-guards uroboros run node-a-app-status" in text and "a-app-unit-status" not in text

@@ -20,8 +20,13 @@ Host names come from the ``uroboros`` section of the guards configuration (INTEG
   host_route_markers {"<canonical host>": ["<text in a route's argv that marks that host>"]}
   ignore_words       ["<login names and other words that are not part of the command shape>"]
   run_prefix         how a compiled route is run (default: integrity-guards uroboros run)
+  list_prefix        how routes are looked up by words (default: integrity-guards uroboros list)
   pin_guard          optional advisory for writes to pinned files on one host (see README)
-An unconfigured hook still fingerprints chains, with "?" as the host.
+An unconfigured hook still fingerprints chains, with "?" as the host; no route is advised for a "?" host.
+
+Equal coverage never picks a route by file order: routes that cover a call equally are ranked by how precisely their
+own steps name it (same nodes, then the call signature, then its arguments). Still equal = ambiguous: the hook names
+the candidates, advises none and does not ask for a new route (a duplicate would make the tie worse).
 
 Usage as a hook: stdin = hook JSON; stdout = {"hookSpecificOutput": {...additionalContext}} or nothing.
 Stand mode:     integrity-guards uroboros-repeat-hook replay <recorded-calls.json>
@@ -117,38 +122,127 @@ def fingerprint(cmd: str) -> tuple[str, str, list[str]] | None:
     return hashlib.sha256(shape.encode()).hexdigest()[:16], host, words
 
 
-def compiled_match(host: str, tokens: list[str]) -> str | None:
-    best, score = None, 0
-    if COMPILED is None:
-        return None
+# Tie rule: on equal hits the first route in file order never wins. Equal hits are broken by how precisely each
+# route's own steps name this call: 1) the nodes (the route reaches exactly the hosts this call reaches), 2) the call
+# signature (executables and their subcommands), 3) the arguments. Still equal = ambiguous: no single advice, the
+# hook says "A or B, look them up" (a wrong route is worse than none). LAST_AMBIGUOUS holds the tie of the last match.
+PRECISION_GLUE = {"sudo", "timeout", "env", "nice", "ionice", "echo", "printf", "cd", "head", "tail", "cut", "tr",
+                  "sed", "awk", "wc", "sort", "uniq", "true", "false", "test", "xargs", "tee", "cat", "sh", "bash",
+                  "python", "python3", "ssh", "plink", "for", "do", "done", "then", "else", "fi", "if", "while", "dev",
+                  "null", "batchmode", "connecttimeout", "identitiesonly", "stricthostkeychecking", "yes", "no"}
+_PREC_HEAD = re.compile(r"(?:^|[|;&(`'\"]|\$\()\s*(?:(?:sudo|timeout|env|nice|ionice)\s+(?:-\S+\s+|\d+\S*\s+)*)*"
+                        r"([\w./~-]+)(?:[ \t]+([a-z][\w-]{1,30}))?")
+_PREC_ARG = re.compile(r"[a-z][a-z0-9_-]{2,40}")
+_PREC_NUM = re.compile(r"\b\d{1,3}(?:\.\d{1,3}){3}\b|\b[0-9a-f]{12,}\b|\b\d+\b")
+_PREC_TRANSPORT = re.compile(r"(?<!\S)-[FiJlP]\s+\S+|(?<!\S)-o\s*\S+|[\w.-]+@(?=\S)")  # ssh options and logins
+LAST_AMBIGUOUS: list[str] = []
+PRECISE = 0.8      # a route whose steps name >= 80 % of the call's signature and arguments: the call is that route's
+WEAK_FLOOR = 0.5   # a single winner naming < 50 % of both is not advised as covering the call (shown as "maybe")
+
+
+def route_hosts(text: str) -> set[str]:
+    """The configured canonical hosts (and aliases) that a call or a route's steps name."""
+    found = {n for addr, n in HOSTS.items() if re.search(rf"(?<![\w.-]){re.escape(addr)}(?![\w-]|\.\w)", text)}
+    for name in set(HOSTS.values()) | set(ALIASES):
+        if re.search(rf"(?<![\w.-]){re.escape(name)}(?![\w-]|\.\w)", text):
+            found.add(name)
+    found |= {n for n, rx in HOST_PATTERNS.items() if rx.search(text)}
+    found |= {n for n, markers in HOST_ROUTE_MARKERS.items() if any(m in text for m in markers)}
+    return found
+
+
+def _precision_terms(body: str) -> tuple[set[str], set[str]]:
+    """(signature terms, argument words) of a call body: 'journalctl', 'systemctl show', 'example.py check'..."""
+    b = _PREC_NUM.sub(" ", _PREC_TRANSPORT.sub(" ", body).lower())  # the transport is not the call
+    sig: set[str] = set()
+    for m in _PREC_HEAD.finditer(b):
+        exe = m.group(1).rsplit("/", 1)[-1]
+        if len(exe) < 2 or exe in PRECISION_GLUE or exe.startswith("-"):
+            continue
+        sig.add(exe)
+        if m.group(2) and m.group(2) not in PRECISION_GLUE:
+            sig.add(f"{exe} {m.group(2)}")
+    nodes = {h.lower() for h in set(HOSTS.values()) | set(ALIASES)}
+    args = set(_PREC_ARG.findall(b)) - PRECISION_GLUE - IGNORE_WORDS - nodes - sig
+    return sig, args
+
+
+def _term_in(term: str, text: str) -> bool:
+    return bool(re.search(r"(?<![\w-])" + r"\s+".join(map(re.escape, term.split())) + r"(?![\w-])", text))
+
+
+def _precision(text: str, call_hosts: set[str], sig: set[str], args: set[str]) -> tuple[int, float, float]:
+    low = text.lower()
+    same_nodes = int(route_hosts(text) == call_hosts)  # the route reaches exactly the nodes this call reaches
+
+    def frac(terms: set[str]) -> float:
+        return round(sum(_term_in(t, low) for t in terms) / len(terms), 3) if terms else 0.0
+
+    return same_nodes, frac(sig), frac(args)
+
+
+def compiled_match(host: str, tokens: list[str], body: str = "") -> str | None:
+    """The one read route that covers this call, or None; on a tie None, and LAST_AMBIGUOUS lists the tie."""
+    LAST_AMBIGUOUS.clear()
+    if COMPILED is None or host == "?":
+        return None  # an unnamed node: no route can be said to reach it
     try:
-        files = list(COMPILED.glob("*.json"))
+        files = sorted(COMPILED.glob("*.json"))
     except OSError:
         return None
+    # the route covers this call when most of what the call looks at is also named by the route
+    names = [t[:-len(".service")] if t.endswith(".service") else t for t in tokens
+             if (t.startswith(("/", "show ")) or "." in t or "-" in t)
+             # config/credential sources are inputs of many checks, not the thing being checked
+             and not re.search(r"^/etc/default/|\.env$|cred|secret|\.ssh/", t)]
+    if not names:
+        return None
+    best, score, weak = [], 0, []
     for f in files:
         try:
             route = json.loads(f.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
-        if route.get("safety") != "read":
+        if not isinstance(route, dict) or route.get("safety") != "read" or not route.get("route_id"):
             continue
-        text = " ".join(" ".join(map(str, s.get("argv", []))) for s in route.get("steps", []))
+        text = " ".join(" ".join(map(str, s.get("argv", []))) for s in route.get("steps", []) if isinstance(s, dict))
         same_host = (any(addr in text for addr, n in HOSTS.items() if n == host)
                      or re.search(rf"\b{re.escape(host)}\b", text)
                      or any(marker in text for marker in HOST_ROUTE_MARKERS.get(host, [])))
         if not same_host:
             continue
-        # the route covers this call when most of what the call looks at is also named by the route
-        names = [t[:-len(".service")] if t.endswith(".service") else t for t in tokens
-                 if (t.startswith(("/", "show ")) or "." in t or "-" in t)
-                 # config/credential sources are inputs of many checks, not the thing being checked
-                 and not re.search(r"^/etc/default/|\.env$|cred|secret|\.ssh/", t)]
         hits = sum(1 for n in names if n in text)
+        if hits / len(names) < 0.5:
+            continue
         route_objects = max(1, len(nouns_of(text)))
-        # both ways: the call is mostly covered, and it touches a real part of the route (not one passing input)
-        if names and hits > score and hits / len(names) >= 0.5 and hits / route_objects >= 0.3:
-            best, score = route["route_id"], hits
-    return best
+        # both ways: the call is mostly covered, and it touches a real part of the route (not one passing input);
+        # a route the call touches only in a small part still competes when the call is that route's own call
+        # (signature and arguments both >= PRECISE, checked below)
+        if hits / route_objects >= 0.3:
+            if hits > score:
+                best, score = [], hits
+            if hits == score:
+                best.append((str(route["route_id"]), text))
+        elif hits >= 1:
+            weak.append((hits, str(route["route_id"]), text))
+    if not best and not weak:
+        return None
+    sig, args = _precision_terms(body)
+    call_hosts = route_hosts(body) | {host}
+    pool = [(score, _precision(text, call_hosts, sig, args), rid) for rid, text in best]
+    for hits, rid, text in weak:
+        if hits >= score:
+            p = _precision(text, call_hosts, sig, args)
+            if p[1] >= PRECISE and p[2] >= PRECISE:
+                pool.append((hits, p, rid))
+    if not pool:
+        return None
+    pool.sort(reverse=True)
+    top = sorted(rid for h, p, rid in pool if (h, p) == pool[0][:2])
+    if len(top) == 1 and max(pool[0][1][1:]) >= WEAK_FLOOR:
+        return top[0]
+    LAST_AMBIGUOUS.extend(top)  # a tie, or one route that names too little of this call: no single advice
+    return None
 
 
 def observe(session: str, cmd: str, now: float | None = None) -> dict | None:
@@ -170,7 +264,9 @@ def observe(session: str, cmd: str, now: float | None = None) -> dict | None:
     if entry["n"] != 2:
         return None
     write = bool(WRITE.search(remote_part(cmd)))
-    route = None if write else compiled_match(host, tokens)
+    route = None if write else compiled_match(host, tokens, remote_part(cmd))
+    if route is None and not write and LAST_AMBIGUOUS:
+        return None  # covered, but not by one route: no "record a route" demand (a duplicate would be wrong)
     advice = {"key": key, "host": host, "write": write, "route": route, "tokens": tokens[:8]}
     if route is None:
         with open(STATE / "candidates.jsonl", "a", encoding="utf-8") as handle:
@@ -180,6 +276,7 @@ def observe(session: str, cmd: str, now: float | None = None) -> dict | None:
 
 
 RUN_PREFIX = os.environ.get("UROBOROS_RUN_PREFIX") or str(_CFG.get("run_prefix") or "integrity-guards uroboros run")
+LIST_PREFIX = str(_CFG.get("list_prefix") or "integrity-guards uroboros list")
 ROUTE_RUN = re.compile(r"(?:uroboros-run\.sh|uroboros\s+run)\s+([a-z0-9][a-z0-9-]{1,60})")
 VENDOR = "claude"   # set from --vendor; one module, one catalog, per-vendor protocol adapters below
 
@@ -327,7 +424,16 @@ def _pre_tool_routes(session: str, cmd: str) -> str | None:
         return None
     key, host, tokens = fp
     write = bool(WRITE.search(remote_part(cmd)))
-    route = None if write else compiled_match(host, tokens)
+    route = None if write else compiled_match(host, tokens, remote_part(cmd))
+    ambiguous = list(LAST_AMBIGUOUS) if route is None and not write else []
+    if ambiguous:
+        log_metric(session, "raw", host, None)
+        shows = " or ".join(ambiguous[:3]) + (f" (+{len(ambiguous) - 3})" if len(ambiguous) > 3 else "")
+        what = ("several routes match this chain equally" if len(ambiguous) > 1
+                else "a route names only a small part of this chain")
+        return (f"UROBOROS: ambiguous for this {host} chain: {what}, maybe {shows}. No single route is advised; "
+                f"check {LIST_PREFIX} <id> before reusing one. Do not record a duplicate route; "
+                "this hook blocks nothing.")
     advice = observe(session, cmd)  # counts; returns only on the 2nd occurrence
     log_metric(session, "raw", host, route)
     if route:
