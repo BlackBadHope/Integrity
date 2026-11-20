@@ -77,6 +77,17 @@ jobs:
           guardian-local-memory doctor --home "$RUNNER_TEMP/local-memory-instance"
           guardian-local-memory uninstall --home "$RUNNER_TEMP/local-memory-instance" --yes
           test ! -e "$RUNNER_TEMP/local-memory-instance"
+      - name: Create, check and remove a runbook dispatcher instance
+        # The installed command, off by default; its own kill switch state in the runner's folder.
+        env:
+          INTEGRITY_KILLSWITCH_STATE: ${{ runner.temp }}/runbooks-killswitch/killswitch.json
+        run: |
+          integrity-guards runbooks init --home "$RUNNER_TEMP/runbooks-instance" --systemd-user --unit-dir "$RUNNER_TEMP/runbooks-units"
+          integrity-guards runbooks doctor --home "$RUNNER_TEMP/runbooks-instance"
+          integrity-guards runbooks validate examples/runbook-triggers/runbooks.json
+          integrity-guards runbooks uninstall --home "$RUNNER_TEMP/runbooks-instance" --yes
+          test ! -e "$RUNNER_TEMP/runbooks-instance"
+          test ! -e "$RUNNER_TEMP/runbooks-units/integrity-runbooks.service"
       - name: Create, check and remove a core instance (install stage 2)
         # The installed command; Linux only. Its sessions are driven by tests/test_core_instance.py.
         if: runner.os == 'Linux'

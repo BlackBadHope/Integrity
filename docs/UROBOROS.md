@@ -18,6 +18,7 @@ state. It is never permission to act.
 | Route record validation, secret guard, `draft`/`validate` CLI | **in source, unreleased** | `python -m integrity_guardian.uroboros_routes` |
 | Route checks (`uroboros-route-check/v1`) and repair by new version | **in source, unreleased** | `check` CLI; retrieval |
 | Example route catalogue and contribution rules | **in source** | [`examples/uroboros-routes`](../examples/uroboros-routes/README.md) |
+| Event triggers (`uroboros-event-trigger/v1`) and the runbook dispatcher, off by default | **in source, unreleased** (alpha, CI) | `integrity-guards runbooks`; [`examples/runbook-triggers`](../examples/runbook-triggers/README.md) |
 | Signed, cursor-pinned Toolzs library for external contributions | roadmap | — |
 
 ### Known routes at admission
@@ -144,11 +145,68 @@ supersedes the old one, and the failed check no longer applies.
 
 ## Event-triggered turns
 
-A turn started by an infrastructure event goes through the same admission.
-Examples are a syslog hook that opens a new agent chat, or an outage runbook
-service. That turn therefore receives the matching routes, and no separate
-dispatcher is needed. Write the event's own terms (device, symptom, service)
-into the prompt that the hook sends.
+An infrastructure event can start a turn that follows a compiled route. The
+runbook dispatcher in [`integrity-guards`](../components/integrity-guards/README.md#event-driven-runbooks)
+does this. It is off by default: nothing runs until you create an instance
+and set `"enabled": true` in its configuration.
+
+A **trigger** (`uroboros-event-trigger/v1`) names:
+
+- a source: a log file (`file`), `journald` (Linux), a `syslog` datagram on a
+  loopback UDP port, a `webhook` on a loopback HTTP port, or a `timer`;
+- a regular expression, `match`;
+- the `route_id` of a compiled route (`uroboros-compiled-route/v1`, unchanged);
+- how the route parameters come from the named groups of the match (`params`;
+  by default each parameter takes the group of the same name);
+- a dedup key with a suppression window, and an hourly limit;
+- the adapter that runs the turn: `route` (the compiled route itself, no
+  model), `claude-p` (headless `claude -p`), `codex-exec` (`codex exec`), or
+  your own argv.
+
+On every match the dispatcher, in this order:
+
+1. checks each extracted value with the **same full-match regex** as the
+   route's `params`, and rejects the event if one does not match;
+2. asks the kill switch (`integrity-killswitch`) for the adapter's vendor
+   (`service` for the `route` adapter). Without the kill switch package
+   nothing runs, unless the configuration says it is not required;
+3. applies the dedup window, the trigger's hourly limit, the global hourly
+   limit and the number of turns running at once;
+4. runs only `safety: read` routes. A `safety: write` route becomes a
+   **proposal**: an event and an optional notification with the command that
+   an operator would run with a GO. The dispatcher never passes `--apply` and
+   never sets `INTEGRITY_ROUTE_WRITE_GO`.
+
+Every decision goes to a hash-chained journal in the instance folder. A
+noisy source does not grow it line by line: `rejected`, `blocked`, `busy`,
+`suppressed` and `rate-limited` events are folded to one record per trigger,
+kind and reason in each `limits.noise_window_s` (60 s by default); the next
+record carries the folded count in `repeats_before`. Turns,
+proposals and rejections can also go to an event sink: a
+[local memory](LOCAL_MEMORY.md) instance (one signed, closed turn per
+record) or a command that reads the record as JSON. `runbooks report` sums
+turns, wall time and the model cost that the client printed.
+
+A model turn runs as an ordinary headless client in the folder you configure,
+so it goes through that client's own hooks: Integrity admission, the guards
+and the known routes at admission. Its prompt carries the route id, the
+one-call command and the trigger's terms, so admission matches the route.
+An adapter whose argv would skip the client's permissions or hooks is
+refused, in any spelling (`--flag=value`, `-c key=value`, JSON settings,
+`yolo` as a value). A command adapter cannot use the `service` switch. Every
+word of every argv element is read, including a command string given to
+`sh -c`, `cmd /c` or `pwsh -Command`; when a word is a known agent client
+(`claude`, `codex`, ... from the kill switch's vendor markers) the adapter's
+vendor must be that client's, and an argv that names clients of two vendors
+is refused, so an adapter cannot borrow another vendor's switch. This check
+is static and the best it can be from the configuration alone: a script that
+starts a model itself is not visible to it. The real barrier is the kill
+switch with its process-ancestry check in the client's own hooks. A webhook without `listen.webhook_token_env` accepts a post
+from any local process; `runbooks doctor` warns about it.
+
+What is verified: the dispatcher's tests run in public CI on Linux and
+Windows with a stub adapter and invented routes. No real model, log daemon
+or production host took part. See [What is verified](STATUS.md#event-driven-runbooks).
 
 ## Matching and ranking
 
@@ -184,4 +242,6 @@ into the prompt that the hook sends.
 - A route may be wrong, stale or written by an untrusted agent. Read its
   provenance and check current state before acting.
 - Production changes still need the target's own owner approval.
+- A trigger match is never a GO: the dispatcher turns a write route into a
+  proposal and leaves the decision to the operator.
 - No route enters a Stable Toolzs library without a security review.

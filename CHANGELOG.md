@@ -46,6 +46,49 @@ versions are unchanged unless an entry says otherwise.
 - Docs: [work claims across machines](docs/WORK_CLAIMS_CORE.md) and a
   [design note](docs/architecture/work-claims-identity.md).
 
+### Event-driven runbooks: triggers and a dispatcher, off by default
+
+- New `integrity-guards runbooks` (`runbooks.py`, `runbooks_cli.py`). A
+  trigger (`uroboros-event-trigger/v1`) watches a log file, journald (Linux),
+  a syslog datagram on a loopback UDP port, a loopback webhook or a timer for
+  a regular expression. On a match it starts a turn that follows a compiled
+  Uroboros route through an adapter: `route` (the route itself, no model),
+  `claude-p`, `codex-exec`, or an argv you declare.
+- Each value taken from the line is checked with the route's own `params`
+  regex; a value that does not match is rejected and nothing starts. The kill
+  switch is asked for the adapter's vendor on every match, and a missing kill
+  switch runs nothing unless `killswitch.required` is false. Dedup windows,
+  hourly limits and a limit on turns at once apply.
+- Only `safety: read` routes run. A write route becomes a proposal: a journal
+  record, an optional notification and the command an operator would run
+  with a GO. The dispatcher never passes `--apply` and never sets
+  `INTEGRITY_ROUTE_WRITE_GO`. Adapters that would skip the client's
+  permissions are refused in any spelling (`--flag=value`, `-c key=value`,
+  `yolo` as a value). A command adapter cannot use the `service` vendor, and
+  its vendor must match the agent client its argv starts, read from every
+  word of every element (so `sh -c "claude ..."` and `cmd /c claude` count);
+  an argv naming clients of two vendors is refused. The check is static; the
+  kill switch's process-ancestry check in the client's hooks is the barrier.
+  A refused webhook post (404, 403, 413) gets its answer instead of a reset
+  connection.
+- Decisions go to a hash-chained journal; turns, proposals and rejections can
+  also go to a local memory instance or a command. Rejected, blocked, busy,
+  suppressed and rate-limited events are folded to one record per trigger,
+  kind and reason in each noise window, so a noisy source cannot flood the
+  journal or a sink. `runbooks report` sums turns, wall time, the folded
+  events and the model cost a client printed.
+- `init` (optionally with a systemd user unit, not enabled, or the command
+  for a Windows logon task), `doctor` (read-only; it warns about a webhook
+  without a token) and `uninstall`.
+- The compiled route format and the route runner are unchanged.
+- New example `examples/runbook-triggers`. `docs/UROBOROS.md`,
+  `docs/STATUS.md` (now *CI*), `ROADMAP.md` and the guards README describe it.
+- Verified: `components/integrity-guards/tests/test_runbooks.py` in public CI
+  on Linux and Windows, with invented routes and a stub adapter, and the
+  installed `init`, `doctor` and `uninstall` in a new CI step. Not verified: a
+  run with a real model, a real syslog daemon or journald, and the
+  dispatcher as an installed service.
+
 ### Bus registry tests wait for a late registration thread before cleanup
 
 - `autoreg.ensure_bounded()` returns after its 0.3 s hook timeout and leaves

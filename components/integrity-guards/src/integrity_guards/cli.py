@@ -12,6 +12,8 @@
   integrity-guards uroboros-repeat-hook [--vendor claude|codex|antigravity|grok|bus]
   integrity-guards uroboros-repeat-hook replay <recorded-calls.json>
   integrity-guards uroboros-share [transcripts [days] | hook [day]]
+  integrity-guards runbooks init|doctor|validate|explain|serve|report|proposals|uninstall
+                                                                    event-driven runbooks (off by default)
 
 Configuration: INTEGRITY_GUARDS_CONFIG names a JSON file (see configuration.example.json).
 Nothing here installs itself; the installer only runs when asked.
@@ -63,6 +65,9 @@ def main(argv: list[str] | None = None) -> int:
     if command == "uroboros-repeat-hook":
         from integrity_guards import uroboros_repeat_hook
         return uroboros_repeat_hook.main(rest)
+    if command == "runbooks":
+        from integrity_guards import runbooks_cli
+        return runbooks_cli.main(rest)
     if command == "uroboros-share":
         from integrity_guards import uroboros_route_share
         return uroboros_route_share.main(rest)

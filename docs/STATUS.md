@@ -177,11 +177,32 @@ from the pilot.
 
 ### Event-driven runbooks
 
-*Roadmap.* The plan is for an infrastructure event, such as a syslog line, to
-start an agent turn that follows a verified runbook route. With an up-to-date
-Action Log, known routes already reach every admitted turn, including turns
-that a hook starts ([Uroboros](UROBOROS.md)). The hooks themselves are
-deployment-specific.
+*CI; alpha, off by default.* `integrity-guards runbooks` watches a log file,
+journald, a loopback syslog port, a loopback webhook or a timer. On a match it
+starts a turn that follows a compiled [Uroboros](UROBOROS.md#event-triggered-turns)
+route: the route itself without a model, or a headless `claude -p` or
+`codex exec` turn. Only `safety: read` routes run; a write route becomes a
+proposal that asks for an operator GO.
+
+`components/integrity-guards/tests/test_runbooks.py` runs in public CI on
+Ubuntu and Windows with Python 3.11 and 3.12. It checks that:
+
+- a synthetic log line runs a read route with no model, and a stub agent
+  adapter receives the route command in its prompt;
+- a write route is not executed, even with `INTEGRITY_ROUTE_WRITE_GO` set,
+  and a proposal is recorded and sent to the notify command;
+- an injected parameter (`$(...)`, `;`, `../`, an over-long value) is
+  rejected by the route's regex before any adapter starts;
+- dedup, the hourly limits and the limit on turns at once hold, also after
+  a restart;
+- master panic or a vendor turned off in the kill switch, or a missing kill
+  switch, runs nothing.
+
+CI also runs `init`, `doctor` and `uninstall` of the installed command on both
+systems. Not verified: a run with a real model (`claude -p`, `codex exec`), a
+real syslog daemon or journald, the systemd user unit and the Windows logon
+task as installed services, and any production host. Which logs and routes to
+watch is yours to configure; nothing is watched by default.
 
 ## What the public suite verifies
 
