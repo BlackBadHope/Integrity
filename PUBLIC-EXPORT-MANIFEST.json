@@ -1,5 +1,5 @@
 {
-  "file_count": 1410,
+  "file_count": 1411,
   "files": [
     {
       "bytes": 3435,
@@ -2522,11 +2522,11 @@
       "sha256": "748654932bae7db35c21c4f120b31642440357a43d9aa375b1994d7a55c13784"
     },
     {
-      "bytes": 13285,
+      "bytes": 13501,
       "mode": "0o644",
       "path": "components/integrity-guards/src/integrity_guards/uroboros_exec.py",
       "sanitization_edits": 0,
-      "sha256": "5a6f232ae467a27a2f1feae1e8655889cfad79d546cd2f9c0faa1e671c17e0f0"
+      "sha256": "030af5b3daac14fec0b5b139984822b1195bf90a679c190f43e7a64e2adb33d8"
     },
     {
       "bytes": 4769,
@@ -2571,11 +2571,11 @@
       "sha256": "8911dadd23c64c978c9cb71397e20756c3fa7751932cbed6166ef95505f74468"
     },
     {
-      "bytes": 7661,
+      "bytes": 8365,
       "mode": "0o644",
       "path": "components/integrity-guards/tests/test_uroboros.py",
       "sanitization_edits": 0,
-      "sha256": "4d4e535bd1f25ccd19d5c481b8f4cae0f9b7aedbb8c68de53c9367b3b060ad80"
+      "sha256": "8d487f7c126eb797c89402fea6f1ecbfc0ba3bf6a7f971846807cacabe642fec"
     },
     {
       "bytes": 11305,
@@ -9088,6 +9088,13 @@
       "sha256": "b5537ed894475e5ae3bb90089240041db8fb166cc6a381dd2b9e21591aec55ac"
     },
     {
+      "bytes": 14325,
+      "mode": "0o644",
+      "path": "tests/test_integrity_dev_routes.py",
+      "sanitization_edits": 0,
+      "sha256": "0d215f1f96b6da1255c9d4acede78710ff343ba8056d9561c30c5becb2dffc39"
+    },
+    {
       "bytes": 661,
       "mode": "0o644",
       "path": "tests/test_integrity_seats_plugin.py",
@@ -9872,7 +9879,7 @@
       "sha256": "c088a0394890fd3661a86c0f0a8e6e716ad3b6c51b5728c032b12663af6420f9"
     }
   ],
-  "generated_file_count": 110,
+  "generated_file_count": 119,
   "generated_files": [
     {
       "bytes": 1041,
@@ -9938,6 +9945,13 @@
       "sha256": "5f4310320585ed34f67fcba839867e20714787c02ff6ddc75c667ad78ef2ecac"
     },
     {
+      "bytes": 6928,
+      "mode": "0o644",
+      "path": ".github/scripts/route_tools.py",
+      "sanitization_edits": 0,
+      "sha256": "9adbb6868a7c622342b732901abda9383c907540c4c4864bb6cbe10c222d6166"
+    },
+    {
       "bytes": 6634,
       "mode": "0o755",
       "path": ".github/scripts/update_manifest.py",
@@ -9966,6 +9980,62 @@
       "sha256": "30a7814ba19164dcec96d04e729523fa93603372300be13d4e7ed3e975b2fbf3"
     },
     {
+      "bytes": 1761,
+      "mode": "0o644",
+      "path": ".integrity/routes/integrity-dev.catalog-write.json",
+      "sanitization_edits": 0,
+      "sha256": "d61e4f7da05b14aff38e1406abff7f2ea22d81ba805553a8170a7ae636d72f7b"
+    },
+    {
+      "bytes": 2821,
+      "mode": "0o644",
+      "path": ".integrity/routes/integrity-dev.ci-build.json",
+      "sanitization_edits": 0,
+      "sha256": "2590b8c4f8ca06064d3af0f6a337f3371b8a295927e26389aa299267a303562c"
+    },
+    {
+      "bytes": 2193,
+      "mode": "0o644",
+      "path": ".integrity/routes/integrity-dev.ci-checks.json",
+      "sanitization_edits": 0,
+      "sha256": "370bf6788365c73e9d38b199d7651c7760a175eaf3fb10ccc9d63bdaecf97aca"
+    },
+    {
+      "bytes": 2166,
+      "mode": "0o644",
+      "path": ".integrity/routes/integrity-dev.ci-tests.json",
+      "sanitization_edits": 0,
+      "sha256": "6dd34a7ba65bcb8fe78709163ddfd84571de1dcf74658efcecbb1a44ff9113b0"
+    },
+    {
+      "bytes": 1679,
+      "mode": "0o644",
+      "path": ".integrity/routes/integrity-dev.manifest-add.json",
+      "sanitization_edits": 0,
+      "sha256": "91ef138cb1372554ade262d0058494233483375404dfd381ea3adcf9c78b558f"
+    },
+    {
+      "bytes": 1162,
+      "mode": "0o644",
+      "path": ".integrity/routes/integrity-dev.manifest-refresh.json",
+      "sanitization_edits": 0,
+      "sha256": "e97ca15edb2e3c18ae0587c5b8d79e0307eb450b60a42c6eab9d17c9db07c167"
+    },
+    {
+      "bytes": 1620,
+      "mode": "0o644",
+      "path": ".integrity/routes/integrity-dev.package-diff.json",
+      "sanitization_edits": 0,
+      "sha256": "6d30ef64448846bc05a790be3370109e751c3bfdd82fa7ec4543e3a18a108977"
+    },
+    {
+      "bytes": 2732,
+      "mode": "0o644",
+      "path": ".integrity/runbooks.json",
+      "sanitization_edits": 0,
+      "sha256": "f7f03c0296106d6d973538d0a7fa16a171dbbe8aa1f0de1b7c84c772eb01dbd2"
+    },
+    {
       "bytes": 17484,
       "mode": "0o644",
       "path": "ARCHITECTURE.md",
@@ -9987,11 +10057,11 @@
       "sha256": "ef0d133a89b7c045a5eeaede55bc2a1b3052a32f7a1f1a7a391600c0684eaec0"
     },
     {
-      "bytes": 75675,
+      "bytes": 77441,
       "mode": "0o644",
       "path": "CHANGELOG.md",
       "sanitization_edits": 0,
-      "sha256": "53b3f383eef2efd02bcc081548b0fc7dd648fa2dff2cf7b7ee7cda56dd0cdfe2"
+      "sha256": "789c69a3c0e10c6021a2fbdec3a4316769e3bd8c9d1f1f4ffe400ceaec55b670"
     },
     {
       "bytes": 775,
@@ -10393,11 +10463,11 @@
       "sha256": "501810401adc827598892002942b44d5cc1a47a0c5fd2de7e193fb98aee39d75"
     },
     {
-      "bytes": 12511,
+      "bytes": 17916,
       "mode": "0o644",
       "path": "docs/UROBOROS.md",
       "sanitization_edits": 0,
-      "sha256": "cc6650a1e1bfc62f15b960b6e842a833fa226350bd3787b6c9d2799bfb33dc03"
+      "sha256": "c70fd4c3c25db8c7b354ffd83f79b5041eadd7dcbffebf2c4a73eaa6bcdf6cfa"
     },
     {
       "bytes": 8873,
@@ -10645,7 +10715,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:38eba624a3c0ac887265f1a57256f245e925c6c7947932757792ba9ae6aaf37f",
+  "projection_digest": "sha256:cc98f8dcaa184631861294b86a5fe5c109e8297a2c88705af826dc9dfc19ebf7",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

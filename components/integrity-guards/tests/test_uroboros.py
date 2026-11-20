@@ -91,6 +91,15 @@ class TestRunner:
             ux.load_route("echo-route")
         assert ux.load_route("echo-route", routes_dir=str(ROUTES))["route_id"] == "echo-route"
 
+    def test_a_route_id_with_dots_is_an_id_not_a_path(self, tmp_path):
+        # runbooks explain prints `uroboros run <route_id>`; ids like example.disk-usage-read
+        # have a dot, which once made load_route open "example.disk-usage-read" as a file.
+        data = json.loads((ROUTES / "echo-route.json").read_text(encoding="utf-8"))
+        data["route_id"] = "example.echo-route"
+        (tmp_path / "example.echo-route.json").write_text(json.dumps(data), encoding="utf-8")
+        assert ux.load_route("example.echo-route", routes_dir=str(tmp_path))["route_id"] == "example.echo-route"
+        assert ux.load_route(str(tmp_path / "example.echo-route.json"))["route_id"] == "example.echo-route"
+
 
 def local_routes(tmp_path):
     """The example routes with `python` replaced by this interpreter, so the CLI test runs real processes."""

@@ -1,0 +1,30 @@
+{
+  "format": "uroboros-compiled-route/v1",
+  "route_id": "integrity-dev.package-diff",
+  "version": 1,
+  "safety": "read",
+  "summary": "Review package {{base}}..{{head}}: plain git diff --binary in {{out}}, {{files}} files, {{bytes}} bytes, sha256 {{sha256}}; it applies to {{base}}",
+  "params": {
+    "base": "(?!-)(?!.*\\.\\.)[A-Za-z0-9][A-Za-z0-9._/-]{0,99}",
+    "out": "\\.\\./(?!.*\\.\\.)[A-Za-z0-9][A-Za-z0-9._-]{0,79}\\.diff"
+  },
+  "preconditions": [
+    {"name": "at-repo-root", "argv": ["git", "rev-parse", "--show-prefix"], "expect": "\\A\\s*\\Z", "timeout_s": 10},
+    {"name": "base-is-a-commit", "argv": ["git", "rev-parse", "--verify", "--quiet", "{{base}}^{commit}"],
+     "expect": "\\A[0-9a-f]{40,64}", "timeout_s": 10},
+    {"name": "out-is-new", "argv": ["python", "-B", ".github/scripts/route_tools.py", "absent", "{{out}}"],
+     "expect": "\\Aabsent", "timeout_s": 10}
+  ],
+  "steps": [
+    {"name": "head", "argv": ["git", "rev-parse", "HEAD"], "extract": {"head": "\\A([0-9a-f]{40,64})"},
+     "timeout_s": 10},
+    {"name": "write-diff", "argv": ["git", "diff", "--binary", "--output={{out}}", "{{base}}..HEAD"], "timeout_s": 60},
+    {"name": "hash-diff", "argv": ["python", "-B", ".github/scripts/route_tools.py", "sha256", "{{out}}"],
+     "extract": {"sha256": "sha256 ([0-9a-f]{64})", "bytes": "bytes (\\d+)", "files": "files ([1-9]\\d*)"},
+     "timeout_s": 30},
+    {"name": "applies-to-base",
+     "argv": ["python", "-B", ".github/scripts/route_tools.py", "apply-check", "--base", "{{base}}", "{{out}}"],
+     "expect": "apply-check ok", "timeout_s": 60}
+  ],
+  "timeout_s": 240
+}

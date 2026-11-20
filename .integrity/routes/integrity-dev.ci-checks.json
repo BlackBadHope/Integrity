@@ -1,0 +1,35 @@
+{
+  "format": "uroboros-compiled-route/v1",
+  "route_id": "integrity-dev.ci-checks",
+  "version": 1,
+  "safety": "read",
+  "summary": "Public-surface checks of the CI job passed in this clean clone: manifest and privacy boundary, catalog (guardian tree {{guardian_tree}}), canonical sources, export hygiene ({{hygiene_passed}} passed), ruff on src; the tree is still clean",
+  "params": {},
+  "preconditions": [
+    {"name": "at-repo-root", "argv": ["git", "rev-parse", "--show-prefix"], "expect": "\\A\\s*\\Z", "timeout_s": 10},
+    {"name": "clean-tree", "argv": ["git", "status", "--porcelain", "--untracked-files=all"], "expect": "\\A\\Z",
+     "timeout_s": 30},
+    {"name": "no-build-leftovers", "argv": ["git", "status", "--porcelain", "--ignored", "--untracked-files=all"],
+     "expect": "\\A\\Z", "timeout_s": 30},
+    {"name": "ruff-pinned", "argv": ["python", "-m", "ruff", "--version"], "expect": "\\Aruff 0\\.16\\.3\\b",
+     "timeout_s": 20}
+  ],
+  "steps": [
+    {"name": "manifest-and-privacy", "argv": ["python", "-B", ".github/scripts/public_surface_check.py", "--root", "."],
+     "timeout_s": 120},
+    {"name": "catalog", "argv": ["python", "-B", ".github/scripts/component_catalog.py", "--root", "."],
+     "expect": "\"passed\": true", "extract": {"guardian_tree": "\"guardian_tree\": \"(sha256:[0-9a-f]{64})\""},
+     "timeout_s": 120},
+    {"name": "canonical-sources", "argv": ["python", "-B", "components/integrity-installed-runtime/verify_sources.py"],
+     "timeout_s": 60},
+    {"name": "seed-public-surface", "argv": ["python", "-B", "components/integrity-seed/verify_public_surface.py"],
+     "timeout_s": 60},
+    {"name": "export-hygiene", "argv": ["python", "-B", ".github/scripts/route_tools.py", "py-run", "--",
+     "-B", "-m", "pytest", "-p", "no:cacheprovider", "tests/hygiene/test_public_export_hygiene.py"],
+     "extract": {"hygiene_passed": "(\\d+) passed"}, "timeout_s": 180},
+    {"name": "ruff-src", "argv": ["python", "-m", "ruff", "check", "--no-cache", "src"], "timeout_s": 60},
+    {"name": "still-clean", "argv": ["git", "status", "--porcelain", "--untracked-files=all"], "expect": "\\A\\Z",
+     "timeout_s": 30}
+  ],
+  "timeout_s": 600
+}

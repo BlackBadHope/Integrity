@@ -46,6 +46,36 @@ versions are unchanged unless an entry says otherwise.
 - Docs: [work claims across machines](docs/WORK_CLAIMS_CORE.md) and a
   [design note](docs/architecture/work-claims-identity.md).
 
+### Integrity builds its review packages with its own routes
+
+- New `.integrity/routes/`: seven compiled routes for the project's own
+  development steps. `integrity-dev.manifest-refresh`, `manifest-add` and
+  `catalog-write` are write routes that change only the working tree and keep
+  the old files in git's object store first. `integrity-dev.ci-checks`,
+  `ci-build` and `ci-tests` mirror the public-surface CI job on a clean clone,
+  and `integrity-dev.package-diff` writes a plain `git diff --binary`, its
+  sha256 and a `git apply --check` on the base. No route pushes, opens a pull
+  request or merges.
+- `ci-checks` refuses ignored build leftovers before the public-surface check,
+  which counts every file on disk.
+- `ci-build` and `ci-tests` refuse a set `PYTHONPATH` (new `route_tools.py
+  unset`): a source tree on it, with a build's `*.egg-info`, made pip skip the
+  wheels of that tree.
+- `manifest-add` refuses a path under `.git/` (route parameter and request
+  trigger) and a path git ignores (new `route_tools.py not-ignored`), so
+  `.git/config` or build output cannot be named in the manifest.
+- New `.integrity/runbooks.json` (off) with one request trigger per route, so
+  `runbooks explain` shows each as a turn or a proposal, and
+  `.github/scripts/route_tools.py` for the shell jobs a shell-free route
+  cannot do.
+- `tests/test_integrity_dev_routes.py` validates every route, checks that no
+  route names a publishing step, an absolute path or a host, and runs
+  `package-diff` on a fresh clone.
+- Fix: `integrity-guards uroboros run <route_id>` treated an id with a dot
+  (`example.disk-usage-read`) as a file name, so the command that
+  `runbooks explain` prints did not run. Only a `.json` name or a name with a
+  folder is a path now.
+
 ### Event-driven runbooks: triggers and a dispatcher, off by default
 
 - New `integrity-guards runbooks` (`runbooks.py`, `runbooks_cli.py`). A

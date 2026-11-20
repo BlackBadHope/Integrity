@@ -1,0 +1,32 @@
+{
+  "format": "uroboros-compiled-route/v1",
+  "route_id": "integrity-dev.manifest-add",
+  "version": 1,
+  "safety": "write",
+  "summary": "Name one new file in PUBLIC-EXPORT-MANIFEST.json ({{kind}} {{path}}) and refresh the rest, in this working tree only; the manifest's previous blob is kept as {{manifest_blob}}",
+  "params": {
+    "kind": "add|add-generated",
+    "path": "(?!(?i:\\.git)(?:/|\\Z))(?!.*\\.\\.)[A-Za-z0-9._][A-Za-z0-9._/-]{0,199}"
+  },
+  "preconditions": [
+    {"name": "at-repo-root", "argv": ["git", "rev-parse", "--show-prefix"], "expect": "\\A\\s*\\Z", "timeout_s": 10},
+    {"name": "manifest-tracked", "argv": ["git", "ls-files", "--error-unmatch", "PUBLIC-EXPORT-MANIFEST.json"],
+     "expect": "PUBLIC-EXPORT-MANIFEST\\.json", "timeout_s": 10},
+    {"name": "not-ignored", "argv": ["python", "-B", ".github/scripts/route_tools.py", "not-ignored", "{{path}}"],
+     "expect": "\\Anot-ignored", "timeout_s": 10},
+    {"name": "file-exists", "argv": ["python", "-B", "-c",
+     "import os, sys; print('file' if os.path.isfile(sys.argv[1]) else 'missing')", "{{path}}"],
+     "expect": "\\Afile", "timeout_s": 10}
+  ],
+  "backup": [
+    {"name": "keep-manifest-blob", "argv": ["git", "hash-object", "-w", "PUBLIC-EXPORT-MANIFEST.json"],
+     "extract": {"manifest_blob": "\\A([0-9a-f]{40,64})"}, "timeout_s": 15}
+  ],
+  "steps": [
+    {"name": "add-to-manifest",
+     "argv": ["python", "-B", ".github/scripts/update_manifest.py", "--root", ".", "--{{kind}}", "{{path}}"],
+     "writes": true, "timeout_s": 120},
+    {"name": "show-change", "argv": ["git", "diff", "--stat", "--", "PUBLIC-EXPORT-MANIFEST.json"], "timeout_s": 15}
+  ],
+  "timeout_s": 300
+}

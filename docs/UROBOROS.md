@@ -201,12 +201,94 @@ vendor must be that client's, and an argv that names clients of two vendors
 is refused, so an adapter cannot borrow another vendor's switch. This check
 is static and the best it can be from the configuration alone: a script that
 starts a model itself is not visible to it. The real barrier is the kill
-switch with its process-ancestry check in the client's own hooks. A webhook without `listen.webhook_token_env` accepts a post
-from any local process; `runbooks doctor` warns about it.
+switch with its process-ancestry check in the client's own hooks. A webhook
+without `listen.webhook_token_env` accepts a post from any local process;
+`runbooks doctor` warns about it.
 
 What is verified: the dispatcher's tests run in public CI on Linux and
 Windows with a stub adapter and invented routes. No real model, log daemon
 or production host took part. See [What is verified](STATUS.md#event-driven-runbooks).
+
+## Integrity uses its own routes
+
+The steps that turn a change to this repository into a review package are
+compiled routes too. They live in [`.integrity/routes/`](../.integrity/routes),
+one `<route_id>.json` per route, next to a runbook configuration
+[`.integrity/runbooks.json`](../.integrity/runbooks.json) that is off
+(`"enabled": false`) and points `compiled_routes` at that folder. Run them from
+the repository root:
+
+```bash
+export INTEGRITY_COMPILED_ROUTES=.integrity/routes
+integrity-guards uroboros run integrity-dev.ci-checks
+integrity-guards uroboros run integrity-dev.ci-build work=../ci-work
+integrity-guards uroboros run integrity-dev.ci-tests work=../ci-work
+integrity-guards uroboros run integrity-dev.package-diff base=main out=../change.diff
+```
+
+| Route | Safety | What it does |
+|---|---|---|
+| `integrity-dev.manifest-refresh` | write | `update_manifest.py --root .`: bytes, mode and sha256 of every listed file |
+| `integrity-dev.manifest-add` | write | the same with `--add` or `--add-generated` for one new file |
+| `integrity-dev.catalog-write` | write | `component_catalog.py --root . --write`, then the check without `--write` |
+| `integrity-dev.ci-checks` | read | the public-surface job's checks: manifest and privacy boundary, catalog, canonical sources, export hygiene, `ruff` 0.16.3 on `src` |
+| `integrity-dev.ci-build` | read: does not change the working tree; writes only into a new folder outside it | build, verify and co-install every distribution in `work` (outside the tree), the kill switch alone, the installed `guardian` profile |
+| `integrity-dev.ci-tests` | read | the root and component suites against that installation, and `runbooks validate` of this configuration |
+| `integrity-dev.package-diff` | read: does not change the working tree; writes only into a new file outside it | a plain `git diff --binary base..HEAD` in `out` (outside the tree), its sha256, size and file count, and `git apply --check` of it on `base` in a temporary index |
+
+The rules they keep:
+
+- No route pushes, opens a pull request or merges; those words are not in any
+  argv. Publishing stays a person's step.
+- The write routes change only the working tree. Without `--apply` they print
+  their plan; with it they need `INTEGRITY_ROUTE_WRITE_GO` to name the route,
+  and they first store the old file in git's object store (`git hash-object -w`),
+  printing its blob id for a restore with `git cat-file -p`.
+- The read routes run in a clean clone: a precondition requires
+  `git status --porcelain --untracked-files=all` to be empty, and the last
+  step requires it again, so a check that leaves a file behind fails.
+- `ci-checks` also refuses ignored files (`git status --ignored`): the
+  public-surface check counts every file on disk, so the `*.egg-info` and
+  `build/` of an earlier build fail it. Run it first on a fresh clone; the
+  route never cleans the tree itself.
+- `ci-build` and `ci-tests` refuse to start when `PYTHONPATH` is set: with it
+  pointing at a source tree, the `*.egg-info` a build leaves there makes pip
+  skip those wheels, and the tests would then check the source instead of the
+  installed package.
+- Parameters are full-match regular expressions: `work` and `out` are one
+  name under `../`, `base` cannot start with `-`, and no value may hold `..`.
+  The `manifest-add` path cannot start with `.git/` (in any letter case) and
+  a precondition refuses a path git ignores (`route_tools.py not-ignored`), so
+  build output and git's own files never enter the public manifest.
+  Every path in a route is relative to the repository; no route names a host.
+- A compiled route runs argv lists without a shell, so
+  [`.github/scripts/route_tools.py`](../.github/scripts/route_tools.py) does
+  the few shell jobs they need: check that a path is absent or not ignored, run python or a
+  console script of the `work` virtual environment with the CI test
+  environment and an expanded glob, hash a diff, and check that it applies.
+
+`runbooks explain` shows what a request line would do; a read route is a
+`turn`, a write route a `proposal`:
+
+```bash
+integrity-guards runbooks explain integrity-dev.package-request \
+  --line "package base=main out=../change.diff" --file .integrity/runbooks.json
+integrity-guards runbooks explain integrity-dev.manifest-add-request \
+  --line "manifest add tests/test_example.py" --file .integrity/runbooks.json
+```
+
+The mirror is not the whole CI: the bus hub, HumanX and core-instance jobs
+need Linux accounts or `sudo`, the UI models need Node, and the macOS job
+needs macOS, so they stay in CI only. On the machine where it was timed the
+build step took about 212 s of its 300 s limit.
+
+What is verified, on the [STATUS](STATUS.md) scale:
+
+| Part | Status |
+|---|---|
+| Every route validates, is named by its id, has no publishing word, absolute path or host; parameters refuse escapes; write routes only plan without `--apply`; `runbooks validate` and `explain` see every route; `package-diff` runs on a fresh clone and its sha256 matches | **CI** (`tests/test_integrity_dev_routes.py` in the root suite) |
+| `ci-checks`, `ci-build`, `ci-tests` end to end on a clean clone; `manifest-add` and `catalog-write` applied to build the change that added them | **once** (one Windows workstation) |
+| The dispatcher serving `.integrity/runbooks.json` | **not verified**: it is off, and nobody ran `runbooks serve` with it |
 
 ## Matching and ranking
 
