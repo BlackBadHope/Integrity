@@ -400,7 +400,7 @@ versions, dependencies, import namespaces and entry points.
 | Distribution | Version | Purpose |
 | --- | --- | --- |
 | [`integrity-adapter-sdk`](components/integrity-adapter-sdk/README.md) | 2.0.0rc3 | Guardian-bound adapter facade |
-| [`integrity-execution-bridge`](components/integrity-execution-bridge/README.md) | 0.1.0rc5 | MCP bridge that lets a remote model edit files and run exact commands in one workspace through a Codex app-server; POSIX only, no tests |
+| [`integrity-execution-bridge`](components/integrity-execution-bridge/README.md) | 0.1.0rc5 | MCP bridge that lets a remote model edit files and run exact commands in one workspace through a Codex app-server; POSIX-only execution; offline boundary tests, no live SDK/Codex acceptance |
 | [`integrity-agents-api`](components/integrity-agents-api/README.md) | 0.1.0rc2 | Client for the OpenAI Agents API (beta) in which every request passes the Adapter SDK gate; no tests |
 | [`integrity-codex-persistent`](components/integrity-codex-persistent/README.md) | 0.1.0rc3 | Supervisor for one admitted Codex app-server turn: deadline, token budget, owner controls; no tests |
 | [`integrity-claude-code`](components/integrity-claude-code/README.md) | 0.1.0rc3 | One governed headless Claude Code run on Windows; only its stream protocol is tested |

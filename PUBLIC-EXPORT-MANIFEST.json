@@ -1,5 +1,5 @@
 {
-  "file_count": 1411,
+  "file_count": 1412,
   "files": [
     {
       "bytes": 3435,
@@ -2228,11 +2228,11 @@
       "sha256": "fa7a8cdcc5fb5671d3ead0045b5acef283956eb8c8a1623559f36be9a1c8ad91"
     },
     {
-      "bytes": 6032,
+      "bytes": 6201,
       "mode": "0o644",
       "path": "components/integrity-execution-bridge/README.md",
       "sanitization_edits": 0,
-      "sha256": "2517d7c519120bb8b2ed7bf92e194be730454914bab7e1023969717ba037fd2a"
+      "sha256": "adb584174e863168826fe1337526b00aa19a9baac59179b56146354ddc7cff1f"
     },
     {
       "bytes": 7442,
@@ -2317,6 +2317,13 @@
       "path": "components/integrity-execution-bridge/src/integrity_execution_bridge/workspace.py",
       "sanitization_edits": 0,
       "sha256": "61aaf93544a12a3242ebba07a3dc5403dfdb74c64b7879d5e3cad836b2be6a84"
+    },
+    {
+      "bytes": 6248,
+      "mode": "0o644",
+      "path": "components/integrity-execution-bridge/tests/test_boundary.py",
+      "sanitization_edits": 0,
+      "sha256": "0673f5affa382827fac4e45ee1b80ee4ff51c704f75600b08fcf79f0d276a3ac"
     },
     {
       "bytes": 137,
@@ -10099,11 +10106,11 @@
       "sha256": "c773a85da94e9edf0b2b10e60fd43b00fe4f90e345ec0d958e6c5b4d0d405e8e"
     },
     {
-      "bytes": 29630,
+      "bytes": 29684,
       "mode": "0o644",
       "path": "README.md",
       "sanitization_edits": 0,
-      "sha256": "5b11e3d86374ee8c47a18738b0671fadf1c3477b0fd8c96a6f5d3573ac023e74"
+      "sha256": "7986f90205e5b2f898c32aec5be1441300d184e3712b594173951996ee55a294"
     },
     {
       "bytes": 13444,
@@ -10456,11 +10463,11 @@
       "sha256": "569811a99c62f2747de44006a8b6ba3222e2ddc903c4814e9976f81786264829"
     },
     {
-      "bytes": 15253,
+      "bytes": 15367,
       "mode": "0o644",
       "path": "docs/STATUS.md",
       "sanitization_edits": 0,
-      "sha256": "501810401adc827598892002942b44d5cc1a47a0c5fd2de7e193fb98aee39d75"
+      "sha256": "77dc721317f7c67a46d7fb30938969d2c725834b59c85d3081d56d3006ebd354"
     },
     {
       "bytes": 17916,
@@ -10715,7 +10722,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:6dc2af22b994379e00861ee88a6e267e0731957a969700d5c33cb769537ca6b0",
+  "projection_digest": "sha256:0dfdd544ffbd502fdb28f766ac033389599fb22f23c61d34bb39d3071f3c8b3f",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",
