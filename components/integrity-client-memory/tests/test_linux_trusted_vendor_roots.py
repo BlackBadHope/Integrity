@@ -131,3 +131,19 @@ def test_install_trusts_the_versions_directory_by_default(tmp_path):
     versions.chmod(0o777)
     with pytest.raises(ValueError, match="trusted root rejected"):
         install.linux_native_binding("claude", {"claude_executable": str(versions / "1.0.0")})
+
+
+def test_trusted_root_rejects_ancestor_symlink_even_when_final_dir_is_real(tmp_path):
+    versions = vendor_tree(tmp_path)
+    alias = tmp_path / "alias"
+    alias.symlink_to(tmp_path / "share", target_is_directory=True)
+    aliased_root = alias / "claude" / "versions"
+    assert aliased_root.is_dir() and not aliased_root.is_symlink()
+    assert native.trusted_root(str(versions)) == str(versions)
+    with pytest.raises(native.LinuxNativeError, match="linux_native_trusted_root_custody_invalid"):
+        native.trusted_root(str(aliased_root))
+    with pytest.raises(ValueError, match="trusted root rejected"):
+        install.linux_native_binding("claude", {
+            "claude_executable": str(versions / "1.0.0"),
+            "claude_executable_roots": [str(aliased_root)],
+        })

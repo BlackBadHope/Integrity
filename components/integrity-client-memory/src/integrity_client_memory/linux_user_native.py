@@ -107,12 +107,15 @@ def trusted_root(value):
     candidate = Path(str(value))
     need(candidate.is_absolute(), "linux_native_trusted_root_not_absolute")
     try:
+        resolved = candidate.resolve(strict=True)
         info = candidate.lstat()
-    except OSError:
+    except (OSError, RuntimeError):
         raise LinuxNativeError("linux_native_trusted_root_missing") from None
-    need(stat.S_ISDIR(info.st_mode) and not stat.S_ISLNK(info.st_mode) and _custody_owner(info),
+    # /proc/<pid>/exe is canonical; aliases through symlink ancestors and
+    # noncanonical paths must be refused during root enrollment.
+    need(candidate == resolved and stat.S_ISDIR(info.st_mode) and _custody_owner(info),
          "linux_native_trusted_root_custody_invalid")
-    return str(candidate)
+    return str(resolved)
 
 
 def _under_trusted_root(image, roots):
