@@ -92,8 +92,10 @@ behind its own authenticated tunnel and shuts everything down.
 - Public CI builds this distribution as a wheel, checks the wheel contents and installs it
   together with all other distributions (`pip check`) on Ubuntu and Windows with Python 3.11
   and 3.12.
-- There are no behaviour tests: the component has no `tests/` folder, and no test elsewhere in
-  the repository imports it.
+- Offline behaviour tests check wire contracts, workspace custody, task ownership,
+  default-deny SDK admission, operation replay refusal, argv serialization,
+  output truncation and stop-ACK semantics. These are synthetic boundary tests,
+  not live SDK-permit or Codex app-server acceptance.
 
 ## What is not verified
 

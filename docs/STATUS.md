@@ -267,11 +267,12 @@ that host binding, credentials or production actions are configured.
   process that holds the hub CSRF token.
 - Cloud agents do not share memory live. Their signed journals are imported as
   reported evidence.
-- Five optional components have no behaviour tests: `integrity-active-inquiry`,
-  `integrity-agents-api`, `integrity-codex-persistent`,
-  `integrity-execution-bridge` and `integrity-experience-adapters`. CI only
-  builds and installs them. `integrity-execution-bridge` does not run on
-  Windows.
+- Four optional components have no behaviour tests: `integrity-active-inquiry`,
+  `integrity-agents-api`, `integrity-codex-persistent` and
+  `integrity-experience-adapters`. CI only builds and installs these four.
+  `integrity-execution-bridge` has offline contract, custody, SDK-denial and
+  executor-payload boundary tests; it still has no live Codex/SDK acceptance
+  and its workspace/cache are POSIX-only.
 - The HumanX operator room and the agent-bus hub have had no live run in their
   published form: CI runs them with real accounts on one machine, without an
   agent, systemd or a second host.
