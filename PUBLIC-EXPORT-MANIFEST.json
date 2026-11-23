@@ -10120,11 +10120,11 @@
       "sha256": "6e323962c0deddb1c0937faee894d42a66f8dea724c4b1c0478161698defa010"
     },
     {
-      "bytes": 1104,
+      "bytes": 1300,
       "mode": "0o644",
       "path": "SECURITY.md",
       "sanitization_edits": 0,
-      "sha256": "7753326c2fe52694b452cb7ea8bb3cc3e9009a4feedc4d0a353473ef757d64ca"
+      "sha256": "0650a270dae345ef865c995baae4475b08c4c2b2927ac32afca5782a5768e86d"
     },
     {
       "bytes": 7132,
@@ -10715,7 +10715,7 @@
       "sha256": "5fb365b1a8b0548cc84046422f0b90c429b92acc1379005235be6c251d6b70c5"
     }
   ],
-  "projection_digest": "sha256:6dc2af22b994379e00861ee88a6e267e0731957a969700d5c33cb769537ca6b0",
+  "projection_digest": "sha256:da219bbe8ad12e394de75ca1d7ef8a2ae8ee687d384d1a92bd76cfae3b4b3b8e",
   "publication_mode": "fresh-history-export-only",
   "sanitization_edit_count": 150,
   "schema": "integrity.public-export-manifest/v3",

@@ -2,7 +2,9 @@
 
 ## Supported version
 
-Security fixes currently target the latest stable `6.1.1` public release.
+Security fixes target the [latest stable public release](https://github.com/BlackBadHope/Integrity/releases/latest).
+The GitHub release tag and installed Guardian package version are separate
+identifiers; see [release notes](RELEASE_NOTES.md) for their current mapping.
 Older snapshots are unsupported.
 
 ## Report a vulnerability
